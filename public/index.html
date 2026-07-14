@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🍜 ラーメンレーダー — 直近1時間のSNSラーメン投稿マップ</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍜%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🍜</span>
+      <div>
+        <h1>ラーメンレーダー</h1>
+        <p class="tagline">SNSから直近<strong id="windowLabel">60</strong>分のラーメン投稿を集めて日本地図にピン表示</p>
+      </div>
+    </div>
+    <div class="controls">
+      <span id="demoBadge" class="badge badge-demo" hidden>DEMOデータ</span>
+      <span id="liveBadge" class="badge badge-live" hidden>● LIVE</span>
+      <div class="stat"><span id="statLocated" class="stat-num">–</span><span class="stat-label">ピン</span></div>
+      <label class="auto"><input type="checkbox" id="autoRefresh" checked /> 自動更新</label>
+      <button id="refreshBtn" class="btn" title="今すぐ更新">更新</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="mapwrap" id="mapwrap">
+      <svg id="map" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" aria-label="日本地図"></svg>
+      <div id="tooltip" class="tooltip" hidden></div>
+      <div class="legend">
+        <span><i class="dot c-high"></i>ジオタグ（高精度）</span>
+        <span><i class="dot c-medium"></i>地名一致（市区）</span>
+        <span><i class="dot c-low"></i>地名一致（都道府県）</span>
+      </div>
+      <div id="loading" class="loading">読み込み中…</div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h2>最新の投稿</h2>
+        <span id="updatedAt" class="updated">–</span>
+      </div>
+      <ul id="postList" class="post-list"></ul>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <span id="footNote">位置情報は投稿のジオタグ・本文の地名から推定した参考値です。</span>
+  </footer>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
