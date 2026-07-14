@@ -1,5 +1,6 @@
 node_modules/
 package-lock.json
+_site/
 npm-debug.log*
 .DS_Store
 *.log
