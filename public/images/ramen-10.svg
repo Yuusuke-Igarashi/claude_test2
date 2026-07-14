@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs><radialGradient id="g" cx="50%" cy="40%" r="70%">
+    <stop offset="0%" stop-color="#c08a4a"/><stop offset="100%" stop-color="#c08a4a" stop-opacity="0.75"/>
+  </radialGradient></defs>
+  <rect width="400" height="300" fill="#1c1c22"/>
+  <ellipse cx="200" cy="165" rx="150" ry="95" fill="#943126"/>
+  <ellipse cx="200" cy="150" rx="132" ry="80" fill="url(#g)"/>
+  <ellipse cx="200" cy="150" rx="132" ry="80" fill="none" stroke="#00000022" stroke-width="6"/>
+  <!-- 麺 -->
+  <g stroke="#f5e6b8" stroke-width="4" fill="none" opacity="0.9">
+    <path d="M150 150 q20 -18 45 -6 q25 12 55 -4"/>
+    <path d="M140 165 q30 -12 60 -2 q28 10 62 -8"/>
+    <path d="M160 135 q22 -14 48 -4 q22 10 44 0"/>
+  </g>
+  <!-- チャーシュー -->
+  <ellipse cx="160" cy="140" rx="26" ry="17" fill="#b5793f" stroke="#8a5a2b" stroke-width="3"/>
+  <ellipse cx="160" cy="140" rx="10" ry="6" fill="#d9a86a"/>
+  <!-- 味玉 -->
+  <ellipse cx="240" cy="132" rx="17" ry="14" fill="#f7e7b0"/>
+  <ellipse cx="240" cy="134" rx="8" ry="7" fill="#e8a83a"/>
+  
+  
+  <!-- ねぎ -->
+  <g fill="#3fae5a"><rect x="185" y="118" width="6" height="6" rx="1"/><rect x="200" y="128" width="6" height="6" rx="1"/><rect x="215" y="122" width="6" height="6" rx="1"/></g>
+  <!-- 湯気 -->
+  <g stroke="#ffffff" stroke-width="3" fill="none" opacity="0.35" stroke-linecap="round">
+    <path d="M175 95 q-8 -14 4 -26 q10 -12 2 -26"/>
+    <path d="M225 92 q8 -14 -4 -26 q-10 -12 -2 -26"/>
+  </g>
+  <rect x="14" y="14" width="70" height="34" rx="8" fill="#000000aa"/>
+  <text x="49" y="37" font-family="sans-serif" font-size="20" fill="#fff" text-anchor="middle">熊本</text>
+</svg>

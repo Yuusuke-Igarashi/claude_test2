@@ -1,0 +1,23 @@
+{
+  "name": "ramen-radar",
+  "version": "1.0.0",
+  "description": "SNSから直近1時間のラーメン投稿画像を集め、位置を推定して日本地図にピン表示するアプリ",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ramen",
+    "sns",
+    "map",
+    "japan",
+    "geolocation"
+  ],
+  "license": "MIT"
+}
