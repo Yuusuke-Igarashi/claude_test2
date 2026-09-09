@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tokyo 2024-08-21 Flood Candidates</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<style>
+:root{
+  color-scheme: light;
+  --surface:#fcfcfb; --page:#f9f9f7;
+  --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --series-1:#2a78d6;   /* baseline */
+  --series-2:#eb6834;   /* event    */
+  --road-gray:#b4b2ab; --road-black:#1a1a19; --road-red:#d03b3b;
+  --font:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+}
+html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);background:var(--page);font-size:13px}
+#map{position:absolute;inset:0}
+.panel{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.10);padding:10px 12px;z-index:5}
+#topbar{top:10px;left:10px;right:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+#topbar h1{font-size:14px;font-weight:600;margin:0 6px 0 0;white-space:nowrap}
+#timeLabel{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.2em}
+#slider{flex:1;min-width:200px;accent-color:var(--ink)}
+button{font:inherit;padding:4px 10px;border:1px solid var(--axis);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{background:#f0efec}
+.stat{color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stat b{color:var(--ink);font-weight:600}
+.legend{display:flex;gap:12px;align-items:center;color:var(--ink2);white-space:nowrap}
+.legend span::before{content:"";display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px;background:var(--c)}
+#chartPanel{bottom:24px;left:10px;width:440px;display:none}
+#chartPanel.pinned{border-color:var(--ink)}
+#chartPanel header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+#chartPanel header .title{font-weight:600;font-size:14px}
+#chartPanel header .sub{color:var(--muted)}
+#chartPanel .status{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;color:#fff;margin-left:6px;vertical-align:middle}
+.readout{display:grid;grid-template-columns:auto 1fr 1fr;gap:2px 12px;color:var(--ink2);font-variant-numeric:tabular-nums;margin:4px 0 6px}
+.readout .h{color:var(--muted);font-size:11px}
+.readout .v{color:var(--ink);text-align:right}
+.chart{display:block;width:100%;height:150px}
+.chart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
+.chart .ttl{fill:var(--ink2);font-size:12px;font-weight:600}
+.chart .grid{stroke:var(--grid);stroke-width:1}
+.chart .axis{stroke:var(--axis);stroke-width:1}
+.chart .l1{stroke:var(--series-1);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chart .l2{stroke:var(--series-2);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chart .now{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
+.chart .err{fill:var(--road-red);opacity:.12}
+.chart .cross{stroke:var(--muted);stroke-width:1}
+.chart .dot{stroke:var(--surface);stroke-width:2}
+.chart .tip{fill:var(--ink);font-size:11px}
+.chart .tipbg{fill:var(--surface);stroke:var(--border)}
+.clegend{display:flex;gap:14px;color:var(--ink2);margin-top:2px}
+.clegend span::before{content:"";display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px;background:var(--c)}
+.hint{color:var(--muted);font-size:11px;margin-top:6px}
+#loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
+#loader .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:520px;max-width:90vw}
+#loader h2{margin:0 0 8px;font-size:15px}
+#loader ul{margin:6px 0;padding-left:18px;color:var(--ink2)}
+#loader .err{color:var(--road-red)}
+#progress{color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
+#filePick{display:none;margin-top:10px}
+.maplibregl-ctrl-attrib{font-size:10px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="topbar" class="panel">
+  <h1>Tokyo 2024-08-21 Flood Candidates</h1>
+  <button id="playBtn" title="Space">▶ 再生</button>
+  <span id="timeLabel">--:--</span>
+  <input id="slider" type="range" min="0" max="0" value="0" step="1">
+  <span class="stat">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本</span>
+  <span class="legend">
+    <span style="--c:var(--road-gray)">対象外</span>
+    <span style="--c:var(--road-black)">対象</span>
+    <span style="--c:var(--road-red)">異常</span>
+  </span>
+</div>
+
+<div id="chartPanel" class="panel">
+  <header>
+    <span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
+    <span class="sub" id="cpSub"></span>
+  </header>
+  <div class="readout">
+    <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
+    <span>速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
+    <span>台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
+  </div>
+  <svg id="chartSpeed" class="chart"></svg>
+  <svg id="chartCount" class="chart"></svg>
+  <div class="clegend">
+    <span style="--c:var(--series-1)">平時 (baseline)</span>
+    <span style="--c:var(--series-2)">イベント時 (event)</span>
+    <span style="--c:var(--road-red);opacity:.6">異常判定区間</span>
+  </div>
+  <div class="hint" id="cpHint">クリックで固定 / もう一度クリックで解除</div>
+</div>
+
+<div id="loader">
+  <div class="box">
+    <h2>データ読み込み中</h2>
+    <ul id="fileList"></ul>
+    <div id="progress"></div>
+    <div id="filePick">
+      <p class="err">自動読み込みに失敗しました。file:// で開いている場合は、下のボタンから output フォルダ内の 6 ファイルをまとめて選択してください。<br>
+      または <code>python -m http.server</code> で output フォルダを配信し、http:// 経由で開いてください。</p>
+      <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv">
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Config
+// ============================================================
+const CONFIG = {
+  files: {
+    network:        "tokyo_20240821_network.geojson",
+    baseline_speed: "baseline_speed.csv",
+    event_speed:    "event_speed.csv",
+    baseline_count: "baseline_count.csv",
+    event_count:    "event_count.csv",
+    error:          "error.csv",
+    is_target:      "is_target.csv"   // optional; if absent, computed from thresholds below
+  },
+  // Same thresholds as the notebook (is_target = count >= MIN_BASE_COUNT AND speed >= MIN_BASE_SPEED)
+  MIN_BASE_COUNT: 5,
+  MIN_BASE_SPEED: 15.0,
+  // Basemap: GSI pale (地理院タイル). Alternative: OpenStreetMap.
+  basemap: {
+    tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>',
+    maxzoom: 18
+  },
+  // basemap: { tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors", maxzoom: 19 },
+  playIntervalMs: 600,
+  lineWidth: { gray: 1.0, black: 1.6, red: 3.0 }
+};
+
+// ============================================================
+// State
+// ============================================================
+const S = {
+  times: [],            // ["12:00", ...]
+  ids: [],              // link ids (string) in CSV row order
+  idx: new Map(),       // id -> row index
+  T: 0,                 // number of time steps
+  bs: null, es: null, bc: null, ec: null,   // Float32Array[N*T]
+  err: null,            // Uint8Array[N*T]
+  tgt: null,            // Uint8Array[N*T]
+  cls: null,            // Uint8Array[N*T]  0 gray / 1 black / 2 red
+  cur: null,            // Uint8Array[N] current class applied to map
+  fids: null,           // Int32Array[N] feature id (numeric) or -1 if not in network
+  hasData: null,        // Uint8Array[N] any finite baseline value
+  countsTarget: [], countsError: [],
+  t: 0,
+  hoverId: null, pinnedId: null,
+  playing: false, timer: null
+};
+let map = null;
+
+// ============================================================
+// Loading
+// ============================================================
+const $ = (id) => document.getElementById(id);
+function setProgress(msg){ $("progress").textContent = msg; }
+function fileRow(name, state){
+  let li = document.querySelector(`#fileList li[data-name="${name}"]`);
+  if(!li){ li = document.createElement("li"); li.dataset.name = name; $("fileList").appendChild(li); }
+  li.textContent = `${name}: ${state}`;
+}
+
+async function fetchText(name, optional=false){
+  fileRow(name, "取得中");
+  try{
+    const r = await fetch(name, {cache:"no-store"});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const txt = await r.text();
+    fileRow(name, `OK (${(txt.length/1048576).toFixed(1)} MB)`);
+    return txt;
+  }catch(e){
+    fileRow(name, optional ? "なし (閾値から計算)" : `失敗: ${e.message}`);
+    if(optional) return null;
+    throw e;
+  }
+}
+
+async function loadViaFetch(){
+  const f = CONFIG.files;
+  const [network, bs, es, bc, ec, err] = await Promise.all([
+    fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
+    fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error)
+  ]);
+  const tgt = await fetchText(f.is_target, true);
+  return {network, bs, es, bc, ec, err, tgt};
+}
+
+function loadViaFiles(fileList){
+  const want = CONFIG.files;
+  const byName = {};
+  for(const fl of fileList) byName[fl.name] = fl;
+  const read = (key, optional=false) => new Promise((res, rej) => {
+    const name = want[key];
+    const fl = byName[name];
+    if(!fl){ fileRow(name, optional ? "なし (閾値から計算)" : "未選択"); return optional ? res(null) : rej(new Error(`${name} が選択されていません`)); }
+    const rd = new FileReader();
+    rd.onload = () => { fileRow(name, `OK (${(rd.result.length/1048576).toFixed(1)} MB)`); res(rd.result); };
+    rd.onerror = () => rej(rd.error);
+    rd.readAsText(fl);
+  });
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error"), read("is_target", true)])
+    .then(([network, bs, es, bc, ec, err, tgt]) => ({network, bs, es, bc, ec, err, tgt}));
+}
+
+// Parse a link x time matrix CSV. First column = id, header = times.
+function parseMatrix(text, {first=false, uint8=false}={}){
+  const lines = text.split(/\r?\n/);
+  const header = lines[0].split(",");
+  const times = header.slice(1).map(s => s.trim());
+  const T = times.length;
+  if(first){
+    S.times = times; S.T = T;
+  }else{
+    if(T !== S.T) throw new Error(`時刻列数が一致しません (${T} vs ${S.T})`);
+    for(let i=0;i<T;i++) if(times[i] !== S.times[i]) throw new Error(`時刻ヘッダが一致しません: ${times[i]} vs ${S.times[i]}`);
+  }
+  const rows = [];
+  for(let i=1;i<lines.length;i++){ if(lines[i].length) rows.push(lines[i]); }
+  const N = rows.length;
+  if(first){
+    S.ids = new Array(N);
+    S.idx = new Map();
+  }else if(N !== S.ids.length){
+    throw new Error(`行数が一致しません (${N} vs ${S.ids.length})`);
+  }
+  const out = uint8 ? new Uint8Array(N*T) : new Float32Array(N*T);
+  if(!uint8) out.fill(NaN);
+  for(let r=0;r<N;r++){
+    const cells = rows[r].split(",");
+    const id = cells[0].trim();
+    if(first){ S.ids[r] = id; S.idx.set(id, r); }
+    else if(S.ids[r] !== id) throw new Error(`行 ${r} の id が一致しません (${id} vs ${S.ids[r]})`);
+    const base = r*T;
+    for(let c=0;c<T;c++){
+      const v = cells[c+1];
+      if(v === undefined || v === "" ) continue;
+      if(uint8){ out[base+c] = (v === "1" || v === "True" || v === "true") ? 1 : (parseFloat(v) > 0 ? 1 : 0); }
+      else { const x = parseFloat(v); if(!Number.isNaN(x)) out[base+c] = x; }
+    }
+  }
+  return out;
+}
+
+function buildDerived(){
+  const N = S.ids.length, T = S.T;
+  if(!S.tgt){
+    S.tgt = new Uint8Array(N*T);
+    for(let i=0;i<N*T;i++){
+      S.tgt[i] = (S.bc[i] >= CONFIG.MIN_BASE_COUNT && S.bs[i] >= CONFIG.MIN_BASE_SPEED) ? 1 : 0;
+    }
+  }
+  S.cls = new Uint8Array(N*T);
+  S.hasData = new Uint8Array(N);
+  S.countsTarget = new Array(T).fill(0);
+  S.countsError = new Array(T).fill(0);
+  for(let r=0;r<N;r++){
+    const base = r*T; let any = 0;
+    for(let c=0;c<T;c++){
+      const i = base+c;
+      if(!Number.isNaN(S.bs[i]) || !Number.isNaN(S.bc[i])) any = 1;
+      let k = 0;
+      if(S.err[i]) k = 2; else if(S.tgt[i]) k = 1;
+      S.cls[i] = k;
+      if(k >= 1) S.countsTarget[c]++;
+      if(k === 2) S.countsError[c]++;
+    }
+    S.hasData[r] = any;
+  }
+  S.cur = new Uint8Array(N); // all gray initially
+}
+
+async function boot(loaderFn){
+  const raw = await loaderFn();
+  setProgress("CSV を解析中 …");
+  await tick();
+  S.bs = parseMatrix(raw.bs, {first:true});
+  S.es = parseMatrix(raw.es);
+  S.bc = parseMatrix(raw.bc);
+  S.ec = parseMatrix(raw.ec);
+  S.err = parseMatrix(raw.err, {uint8:true});
+  S.tgt = raw.tgt ? parseMatrix(raw.tgt, {uint8:true}) : null;
+  setProgress("判定クラスを計算中 …");
+  await tick();
+  buildDerived();
+  setProgress("ネットワークを構築中 …");
+  await tick();
+  const gj = JSON.parse(raw.network);
+  const N = S.ids.length;
+  S.fids = new Int32Array(N).fill(-1);
+  let fid = 0, unmatched = 0;
+  for(const ft of gj.features){
+    const id = String(ft.properties.id);
+    ft.id = fid;
+    const r = S.idx.get(id);
+    if(r === undefined){ unmatched++; ft.properties._row = -1; }
+    else { S.fids[r] = fid; ft.properties._row = r; }
+    fid++;
+  }
+  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ / CSV 未対応リンク ${unmatched} 本`);
+  await tick();
+  initMap(gj);
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+
+// ============================================================
+// Map
+// ============================================================
+function bboxOf(gj){
+  let minx=Infinity,miny=Infinity,maxx=-Infinity,maxy=-Infinity;
+  const visit = (c) => { if(typeof c[0] === "number"){ if(c[0]<minx)minx=c[0]; if(c[0]>maxx)maxx=c[0]; if(c[1]<miny)miny=c[1]; if(c[1]>maxy)maxy=c[1]; } else c.forEach(visit); };
+  for(const ft of gj.features) if(ft.geometry) visit(ft.geometry.coordinates);
+  return [[minx,miny],[maxx,maxy]];
+}
+
+function initMap(gj){
+  S.gj = gj;
+  const bb = bboxOf(gj);
+  map = new maplibregl.Map({
+    container: "map",
+    style: {
+      version: 8,
+      sources: {
+        base: { type:"raster", tiles: CONFIG.basemap.tiles, tileSize:256, maxzoom: CONFIG.basemap.maxzoom, attribution: CONFIG.basemap.attribution }
+      },
+      layers: [
+        { id:"base", type:"raster", source:"base", paint:{ "raster-opacity": 0.55 } }
+      ]
+    },
+    bounds: bb,
+    fitBoundsOptions: { padding: 40 },
+    attributionControl: { compact: true }
+  });
+  map.addControl(new maplibregl.NavigationControl({showCompass:false}), "bottom-right");
+  map.addControl(new maplibregl.ScaleControl({unit:"metric"}), "bottom-right");
+
+  map.once("style.load", () => {
+    map.addSource("links", { type:"geojson", data: gj, tolerance: 0.2, buffer: 8 });
+    const cls = ["coalesce", ["feature-state", "cls"], 0];
+    const hov = ["coalesce", ["feature-state", "hover"], 0];
+    // gray / black lines
+    map.addLayer({
+      id:"links-base", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": ["match", cls, 1, cssVar("--road-black"), cssVar("--road-gray")],
+        "line-width": ["interpolate", ["linear"], ["zoom"],
+          10, ["match", cls, 1, CONFIG.lineWidth.black*0.6, CONFIG.lineWidth.gray*0.6],
+          14, ["match", cls, 1, CONFIG.lineWidth.black, CONFIG.lineWidth.gray],
+          17, ["match", cls, 1, CONFIG.lineWidth.black*2.2, CONFIG.lineWidth.gray*2.2]],
+        "line-opacity": ["case", ["==", cls, 2], 0, 1]
+      }
+    });
+    // red lines on top
+    map.addLayer({
+      id:"links-error", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": cssVar("--road-red"),
+        "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
+        "line-opacity": ["case", ["==", cls, 2], 1, 0]
+      }
+    });
+    // hover highlight
+    map.addLayer({
+      id:"links-hover", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": cssVar("--series-1"),
+        "line-width": 7, "line-opacity": ["case", ["==", hov, 1], 0.45, 0], "line-blur": 1
+      }
+    });
+    // wide invisible hit layer
+    map.addLayer({
+      id:"links-hit", type:"line", source:"links",
+      paint:{ "line-width": 10, "line-opacity": 0 }
+    });
+
+    setupControls();
+    applyTime(0, true);
+    $("loader").style.display = "none";
+
+    map.on("mousemove", "links-hit", onHover);
+    map.on("mouseleave", "links-hit", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("click", "links-hit", onClick);
+    map.on("click", (e) => {
+      const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
+      if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
+    });
+  });
+}
+
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+function setHover(fid){
+  if(S.hoverId === fid) return;
+  if(S.hoverId !== null) map.setFeatureState({source:"links", id:S.hoverId}, {hover:0});
+  S.hoverId = fid;
+  if(fid !== null) map.setFeatureState({source:"links", id:fid}, {hover:1});
+}
+
+function onHover(e){
+  const ft = e.features && e.features[0];
+  if(!ft) return;
+  map.getCanvas().style.cursor = "pointer";
+  setHover(ft.id);
+  if(S.pinnedId === null) showChart(ft);
+}
+function onClick(e){
+  const ft = e.features && e.features[0];
+  if(!ft) return;
+  if(S.pinnedId === ft.id){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
+  else { S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); }
+  showChart(ft);
+}
+function hideChart(){ $("chartPanel").style.display = "none"; }
+
+// ============================================================
+// Time
+// ============================================================
+function applyTime(t, force=false){
+  S.t = t;
+  const T = S.T, N = S.ids.length;
+  $("timeLabel").textContent = S.times[t];
+  $("slider").value = t;
+  $("stTarget").textContent = S.countsTarget[t].toLocaleString();
+  $("stError").textContent = S.countsError[t].toLocaleString();
+  for(let r=0;r<N;r++){
+    const fid = S.fids[r]; if(fid < 0) continue;
+    const k = S.cls[r*T+t];
+    if(force || k !== S.cur[r]){
+      map.setFeatureState({source:"links", id:fid}, {cls:k});
+      S.cur[r] = k;
+    }
+  }
+  if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
+}
+
+function setupControls(){
+  const sl = $("slider");
+  sl.max = S.T-1; sl.value = 0;
+  sl.addEventListener("input", () => applyTime(+sl.value));
+  $("playBtn").addEventListener("click", togglePlay);
+  document.addEventListener("keydown", (e) => {
+    if(e.target.tagName === "INPUT" && e.target.type !== "range") return;
+    if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
+    else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
+    else if(e.key === " "){ togglePlay(); e.preventDefault(); }
+  });
+}
+function togglePlay(){
+  S.playing = !S.playing;
+  $("playBtn").textContent = S.playing ? "❚❚ 停止" : "▶ 再生";
+  if(S.playing){
+    S.timer = setInterval(() => { applyTime((S.t+1) % S.T); }, CONFIG.playIntervalMs);
+  }else{ clearInterval(S.timer); S.timer = null; }
+}
+
+// ============================================================
+// Chart panel (two single-axis charts: speed, count)
+// ============================================================
+let lastFeature = null;
+const STATUS_LABEL = {0:"対象外", 1:"対象", 2:"異常"};
+const STATUS_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--road-red)"};
+
+function fmt(v, d=1){ return Number.isNaN(v) || v === undefined ? "–" : v.toFixed(d); }
+
+function showChart(ft){
+  lastFeature = ft;
+  const p = ft.properties;
+  const r = p._row;
+  const T = S.T, t = S.t;
+  $("chartPanel").style.display = "block";
+  $("cpTitle").textContent = `Link ${p.id}`;
+  $("cpSub").textContent = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? `対向: ${p.pair_id}` : "対向なし";
+  if(r < 0){
+    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0];
+    ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
+    drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, "台数 /15分");
+    return;
+  }
+  const b = r*T;
+  const k = S.cls[b+t];
+  $("cpStatus").textContent = STATUS_LABEL[k]; $("cpStatus").style.background = STATUS_COLOR[k];
+  $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(S.es[b+t]);
+  $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
+  const errMask = S.err.subarray(b, b+T);
+  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), S.es.subarray(b,b+T), errMask, "速度 km/h");
+  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, "台数 /15分");
+}
+
+function niceMax(v){
+  if(!(v > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const m = v/p;
+  const n = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10;
+  return n*p;
+}
+
+function drawChart(svg, a, b, errMask, title){
+  const W = svg.clientWidth || 416, H = svg.clientHeight || 150;
+  const M = {l:40, r:10, t:20, b:22};
+  const pw = W-M.l-M.r, ph = H-M.t-M.b;
+  const T = S.T;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const ns = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(txt !== undefined) e.textContent = txt; return e; };
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  svg.appendChild(el("text", {x:M.l, y:13, class:"ttl"}, title));
+  if(!a){ svg.appendChild(el("text", {x:M.l+pw/2, y:M.t+ph/2, "text-anchor":"middle"}, "データなし")); return; }
+
+  let mx = 0;
+  for(let i=0;i<T;i++){ if(a[i] > mx) mx = a[i]; if(b[i] > mx) mx = b[i]; }
+  const ymax = niceMax(mx*1.05);
+  const x = (i) => M.l + (T <= 1 ? 0 : i*pw/(T-1));
+  const y = (v) => M.t + ph - v/ymax*ph;
+
+  // error shading
+  if(errMask){
+    let i = 0;
+    while(i < T){
+      if(errMask[i]){ let j = i; while(j+1 < T && errMask[j+1]) j++;
+        const x0 = x(Math.max(0, i-0.5)), x1 = x(Math.min(T-1, j+0.5));
+        svg.appendChild(el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err"}));
+        i = j+1; } else i++;
+    }
+  }
+  // grid + y ticks
+  for(let g=0; g<=4; g++){
+    const v = ymax*g/4, yy = y(v);
+    svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: g===0 ? "axis" : "grid"}));
+    svg.appendChild(el("text", {x:M.l-6, y:yy+4, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
+  }
+  // x ticks: every 8th step (2 h at 15 min) so labels do not collide
+  for(let i=0;i<T;i+=8){
+    svg.appendChild(el("text", {x:x(i), y:H-6, "text-anchor":"middle"}, S.times[i]));
+  }
+  // series
+  const path = (arr) => { let d = "", pen = false;
+    for(let i=0;i<T;i++){ const v = arr[i]; if(Number.isNaN(v)){ pen = false; continue; } d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; }
+    return d; };
+  svg.appendChild(el("path", {d:path(a), class:"l1"}));
+  svg.appendChild(el("path", {d:path(b), class:"l2"}));
+  // current time marker + dots
+  const xt = x(S.t);
+  svg.appendChild(el("line", {x1:xt, x2:xt, y1:M.t, y2:M.t+ph, class:"now"}));
+  if(!Number.isNaN(a[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill:"var(--series-1)", class:"dot"}));
+  if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
+
+  // crosshair tooltip on chart hover
+  const cross = el("line", {x1:0, x2:0, y1:M.t, y2:M.t+ph, class:"cross", visibility:"hidden"});
+  const tipbg = el("rect", {x:0, y:0, width:0, height:32, rx:4, class:"tipbg", visibility:"hidden"});
+  const tip1 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
+  const tip2 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
+  svg.append(cross, tipbg, tip1, tip2);
+  svg.onmousemove = (ev) => {
+    const rect = svg.getBoundingClientRect();
+    const px = (ev.clientX-rect.left) * W/rect.width;
+    let i = Math.round((px-M.l)/(pw/(T-1))); i = Math.max(0, Math.min(T-1, i));
+    const xx = x(i);
+    cross.setAttribute("x1", xx); cross.setAttribute("x2", xx); cross.setAttribute("visibility","visible");
+    tip1.textContent = `${S.times[i]}  平時 ${fmt(a[i])}`; tip2.textContent = `イベント時 ${fmt(b[i])}`;
+    const tw = Math.max(tip1.getComputedTextLength(), tip2.getComputedTextLength()) + 12;
+    const tx = xx + 8 + tw > W ? xx - 8 - tw : xx + 8;
+    tipbg.setAttribute("x", tx); tipbg.setAttribute("y", M.t+2); tipbg.setAttribute("width", tw); tipbg.setAttribute("visibility","visible");
+    tip1.setAttribute("x", tx+6); tip1.setAttribute("y", M.t+14); tip1.setAttribute("visibility","visible");
+    tip2.setAttribute("x", tx+6); tip2.setAttribute("y", M.t+28); tip2.setAttribute("visibility","visible");
+  };
+  svg.onmouseleave = () => { [cross, tipbg, tip1, tip2].forEach(e => e.setAttribute("visibility","hidden")); };
+}
+
+// ============================================================
+// Entry
+// ============================================================
+(async function(){
+  try{
+    await boot(loadViaFetch);
+  }catch(e){
+    console.warn("fetch failed, falling back to file picker", e);
+    setProgress("");
+    $("filePick").style.display = "block";
+    $("fileInput").addEventListener("change", async (ev) => {
+      $("filePick").style.display = "none";
+      try{ await boot(() => loadViaFiles(ev.target.files)); }
+      catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
