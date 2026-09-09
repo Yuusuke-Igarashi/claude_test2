@@ -21,7 +21,8 @@ const OPTIONAL = ["error.csv", "baseline_trajectory.geojson", "event_trajectory.
 
 let server, base, browser;
 const errors = [];
-const NOISE = /gsi\.go\.jp|ERR_TUNNEL|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|404|CORS|ERR_FAILED|fetch failed|is_target/;
+// expected noise: basemap tiles offline, optional files absent (404), file:// fetch fallback (CORS or "URL scheme not supported")
+const NOISE = /gsi\.go\.jp|ERR_TUNNEL|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|404|CORS|ERR_FAILED|fetch failed|Fetch API cannot load|URL scheme "file"|is_target/;
 
 // Independent reference: count error cells per time column straight from error.csv
 function errorCountsFromCsv() {
