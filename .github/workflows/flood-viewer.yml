@@ -1,0 +1,47 @@
+name: flood-viewer tests
+
+on:
+  push:
+    paths:
+      - "flood_viewer/**"
+      - ".github/workflows/flood-viewer.yml"
+  pull_request:
+    paths:
+      - "flood_viewer/**"
+      - ".github/workflows/flood-viewer.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flood_viewer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install numpy pandas
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Generate sample data
+        run: npm run data
+      - name: Build standalone HTML
+        run: npm run build
+      - name: Run browser tests
+        run: npm test
+      - name: Upload standalone HTML and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flood-viewer
+          path: |
+            flood_viewer/dist/flood_viewer_standalone.html
+            flood_viewer/tests/shots/
+          if-no-files-found: warn

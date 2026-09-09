@@ -55,6 +55,26 @@ button:hover{background:#f0efec}
 .clegend{display:flex;gap:14px;color:var(--ink2);margin-top:2px}
 .clegend span::before{content:"";display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px;background:var(--c)}
 .hint{color:var(--muted);font-size:11px;margin-top:6px}
+#settings{top:64px;right:10px;width:400px;display:none;z-index:6}
+#settings h2{font-size:13px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+#settings h2 button{font-size:12px;padding:2px 8px}
+#settings .grp{margin:8px 0 4px;color:var(--muted);font-size:11px;letter-spacing:.02em}
+#settings .row{display:flex;align-items:center;gap:6px;margin:4px 0;color:var(--ink2);flex-wrap:wrap}
+#settings input[type=number]{width:70px;font:inherit;padding:3px 6px;border:1px solid var(--axis);border-radius:5px;text-align:right;font-variant-numeric:tabular-nums}
+#settings .note{color:var(--muted);font-size:11px;margin-top:8px;line-height:1.5}
+#settings .check{margin-top:8px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#settings .check.ok{color:#006300}
+#settings .check.ng{color:var(--road-red)}
+#settings .foot{display:flex;gap:8px;margin-top:10px}
+.seg{display:inline-flex;border:1px solid var(--axis);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:4px 12px}
+.seg button.on{background:var(--ink);color:#fff}
+.seg button:disabled{color:var(--muted);cursor:not-allowed;background:var(--surface)}
+#trajOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
+#trajStatus{flex-basis:100%;display:none;color:var(--ink2);font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:6px}
+#tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:320px}
+#tip .k{color:var(--muted)}
+.legend .pt::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--c)}
 #loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
 #loader .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:520px;max-width:90vw}
 #loader h2{margin:0 0 8px;font-size:15px}
@@ -74,11 +94,41 @@ button:hover{background:#f0efec}
   <span id="timeLabel">--:--</span>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
   <span class="stat">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本</span>
-  <span class="legend">
+  <span class="seg" title="M キーで切替">
+    <button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button>
+  </span>
+  <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
+  <span id="trajOpts" style="display:none">
+    <label><input type="checkbox" id="chkBase" checked> 平時</label><label><input type="checkbox" id="chkEvent" checked> イベント時</label>
+  </span>
+  <span class="legend" id="legendTraffic">
     <span style="--c:var(--road-gray)">対象外</span>
     <span style="--c:var(--road-black)">対象</span>
     <span style="--c:var(--road-red)">異常</span>
   </span>
+  <span class="legend" id="legendTraj" style="display:none">
+    <span style="--c:var(--series-1)">平時 軌跡</span>
+    <span class="pt" style="--c:var(--series-1)">滞留</span>
+    <span style="--c:var(--series-2)">イベント時 軌跡</span>
+    <span class="pt" style="--c:var(--series-2)">滞留</span>
+  </span>
+  <div id="trajStatus"></div>
+</div>
+<div id="tip"></div>
+
+<div id="settings" class="panel">
+  <h2>判定閾値 <button id="settingsClose">閉じる</button></h2>
+  <div class="grp">対象リンク（is_target）: 両方を満たす</div>
+  <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="1" min="0"> 台/15分</div>
+  <div class="row">平時速度 ≥ <input type="number" id="pMinSpeed" step="1" min="0"> km/h</div>
+  <div class="grp">異常（error1）: 対象リンクで、次のいずれか</div>
+  <div class="row">速度比 ≤ <input type="number" id="pSpeedRatio" step="0.05" min="0" max="2"> かつ 台数比 ≤ <input type="number" id="pCountRatio" step="0.05" min="0" max="2"></div>
+  <div class="row">または 台数比 &lt; <input type="number" id="pZeroRatio" step="0.01" min="0" max="1"> （ほぼ消失）</div>
+  <div class="grp">確定（error）</div>
+  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に異常、または同一リンクで前後 15 分も異常であることを要求する</label></div>
+  <div class="check" id="pCheck"></div>
+  <div class="foot"><button id="pDefault">既定値に戻す</button></div>
+  <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
 </div>
 
 <div id="chartPanel" class="panel">
@@ -90,6 +140,8 @@ button:hover{background:#f0efec}
     <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
     <span>速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
     <span>台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
+    <span id="roTrajL1" style="display:none">軌跡 本</span><span class="v" id="roBT" style="display:none">-</span><span class="v" id="roET" style="display:none">-</span>
+    <span id="roTrajL2" style="display:none">滞留 点</span><span class="v" id="roBD" style="display:none">-</span><span class="v" id="roED" style="display:none">-</span>
   </div>
   <svg id="chartSpeed" class="chart"></svg>
   <svg id="chartCount" class="chart"></svg>
@@ -107,8 +159,8 @@ button:hover{background:#f0efec}
     <ul id="fileList"></ul>
     <div id="progress"></div>
     <div id="filePick">
-      <p class="err">自動読み込みに失敗しました。file:// で開いている場合は、下のボタンから output フォルダ内の 6 ファイルをまとめて選択してください。<br>
-      または <code>python -m http.server</code> で output フォルダを配信し、http:// 経由で開いてください。</p>
+      <p>下のボタンから output フォルダ内のファイルをまとめて選択してください。必須は network.geojson と 4 つの CSV（baseline_speed, event_speed, baseline_count, event_count）、任意で error.csv（照合用）と軌跡・滞留の GeoJSON 4 ファイルです。<br>
+      <span style="color:var(--muted)">HTML を output フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
       <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv">
     </div>
   </div>
@@ -125,12 +177,26 @@ const CONFIG = {
     event_speed:    "event_speed.csv",
     baseline_count: "baseline_count.csv",
     event_count:    "event_count.csv",
-    error:          "error.csv",
-    is_target:      "is_target.csv"   // optional; if absent, computed from thresholds below
+    error:          "error.csv",      // optional: notebook result, used only to cross-check the in-page computation
+    // optional trajectory data (GeoJSON FeatureCollection; properties: id, time "HH:MM")
+    baseline_traj:  "baseline_trajectory.geojson",   // LineString / MultiLineString
+    event_traj:     "event_trajectory.geojson",
+    baseline_dwell: "baseline_dwell.geojson",        // MultiPoint / Point
+    event_dwell:    "event_dwell.geojson"
   },
-  // Same thresholds as the notebook (is_target = count >= MIN_BASE_COUNT AND speed >= MIN_BASE_SPEED)
+  // Trajectory mode
+  TRAJ_MIN_ZOOM: 14,        // trajectories are drawn only at this zoom or closer
+  TRAJ_WINDOW_MIN: 60,      // each trajectory covers [time - window, time]
+  // Default thresholds (same as the notebook). Editable in the ⚙ panel.
+  //   is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
+  //   error1    = count_ratio < ZERO_COUNT_RATIO_LIMIT OR (speed_ratio <= SPEED_RATIO_LIMIT AND count_ratio <= COUNT_RATIO_LIMIT)
+  //   error     = is_target AND error1 AND (pair link error1 at same time OR same link error1 at t±15min)
   MIN_BASE_COUNT: 5,
   MIN_BASE_SPEED: 15.0,
+  SPEED_RATIO_LIMIT: 0.6,
+  COUNT_RATIO_LIMIT: 0.4,
+  ZERO_COUNT_RATIO_LIMIT: 0.01,
+  REQUIRE_CORROBORATION: true,
   // Basemap: GSI pale (地理院タイル). Alternative: OpenStreetMap.
   basemap: {
     tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
@@ -151,14 +217,22 @@ const S = {
   idx: new Map(),       // id -> row index
   T: 0,                 // number of time steps
   bs: null, es: null, bc: null, ec: null,   // Float32Array[N*T]
-  err: null,            // Uint8Array[N*T]
+  err: null,            // Uint8Array[N*T]  final error (computed in page)
+  e1: null,             // Uint8Array[N*T]  valid error1 (is_target & error1)
+  errRef: null,         // Uint8Array[N*T]  error.csv from the notebook, for cross-checking (optional)
   tgt: null,            // Uint8Array[N*T]
+  pairRow: null,        // Int32Array[N] row index of the opposing link, -1 if none
+  adjPrev: null,        // Uint8Array[T] 1 if times[c-1] is exactly one interval before times[c]
+  params: null,         // current thresholds
   cls: null,            // Uint8Array[N*T]  0 gray / 1 black / 2 red
   cur: null,            // Uint8Array[N] current class applied to map
   fids: null,           // Int32Array[N] feature id (numeric) or -1 if not in network
   hasData: null,        // Uint8Array[N] any finite baseline value
   countsTarget: [], countsError: [],
   t: 0,
+  mode: "traffic",      // "traffic" | "traj"
+  traj: null,           // {bt, et, bd, ed} parsed datasets or null
+  showBase: true, showEvent: true,
   hoverId: null, pinnedId: null,
   playing: false, timer: null
 };
@@ -184,7 +258,7 @@ async function fetchText(name, optional=false){
     fileRow(name, `OK (${(txt.length/1048576).toFixed(1)} MB)`);
     return txt;
   }catch(e){
-    fileRow(name, optional ? "なし (閾値から計算)" : `失敗: ${e.message}`);
+    fileRow(name, optional ? "なし" : `失敗: ${e.message}`);
     if(optional) return null;
     throw e;
   }
@@ -194,10 +268,13 @@ async function loadViaFetch(){
   const f = CONFIG.files;
   const [network, bs, es, bc, ec, err] = await Promise.all([
     fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
-    fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error)
+    fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
   ]);
-  const tgt = await fetchText(f.is_target, true);
-  return {network, bs, es, bc, ec, err, tgt};
+  const [bt, et, bd, ed] = await Promise.all([
+    fetchText(f.baseline_traj, true), fetchText(f.event_traj, true),
+    fetchText(f.baseline_dwell, true), fetchText(f.event_dwell, true)
+  ]);
+  return {network, bs, es, bc, ec, err, bt, et, bd, ed};
 }
 
 function loadViaFiles(fileList){
@@ -207,14 +284,15 @@ function loadViaFiles(fileList){
   const read = (key, optional=false) => new Promise((res, rej) => {
     const name = want[key];
     const fl = byName[name];
-    if(!fl){ fileRow(name, optional ? "なし (閾値から計算)" : "未選択"); return optional ? res(null) : rej(new Error(`${name} が選択されていません`)); }
+    if(!fl){ fileRow(name, optional ? "なし" : "未選択"); return optional ? res(null) : rej(new Error(`${name} が選択されていません`)); }
     const rd = new FileReader();
     rd.onload = () => { fileRow(name, `OK (${(rd.result.length/1048576).toFixed(1)} MB)`); res(rd.result); };
     rd.onerror = () => rej(rd.error);
     rd.readAsText(fl);
   });
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error"), read("is_target", true)])
-    .then(([network, bs, es, bc, ec, err, tgt]) => ({network, bs, es, bc, ec, err, tgt}));
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true),
+                      read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed]) => ({network, bs, es, bc, ec, err, bt, et, bd, ed}));
 }
 
 // Parse a link x time matrix CSV. First column = id, header = times.
@@ -256,32 +334,79 @@ function parseMatrix(text, {first=false, uint8=false}={}){
   return out;
 }
 
-function buildDerived(){
-  const N = S.ids.length, T = S.T;
-  if(!S.tgt){
-    S.tgt = new Uint8Array(N*T);
-    for(let i=0;i<N*T;i++){
-      S.tgt[i] = (S.bc[i] >= CONFIG.MIN_BASE_COUNT && S.bs[i] >= CONFIG.MIN_BASE_SPEED) ? 1 : 0;
+function defaultParams(){
+  return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, speedRatio: CONFIG.SPEED_RATIO_LIMIT,
+           countRatio: CONFIG.COUNT_RATIO_LIMIT, zeroRatio: CONFIG.ZERO_COUNT_RATIO_LIMIT, corrob: CONFIG.REQUIRE_CORROBORATION };
+}
+
+// Re-derive is_target / error1 / error2 / error3 / error / colour class from the raw matrices
+// with the current thresholds. Mirrors the notebook's logic.
+function recompute(){
+  const N = S.ids.length, T = S.T, P = S.params;
+  const tgt = S.tgt = new Uint8Array(N*T);
+  const e1 = S.e1 = new Uint8Array(N*T);          // is_target & error1
+  const err = S.err = new Uint8Array(N*T);
+  for(let i=0;i<N*T;i++){
+    const bs = S.bs[i], bc = S.bc[i];
+    const t = (bc >= P.minCount && bs >= P.minSpeed) ? 1 : 0;   // NaN compares false
+    tgt[i] = t;
+    if(!t) continue;
+    const sr = bs > 0 ? S.es[i]/bs : NaN;
+    const cr = bc > 0 ? S.ec[i]/bc : NaN;
+    if(cr < P.zeroRatio || (sr <= P.speedRatio && cr <= P.countRatio)) e1[i] = 1;
+  }
+  for(let r=0;r<N;r++){
+    const base = r*T, pr = S.pairRow[r], pb = pr >= 0 ? pr*T : -1;
+    for(let c=0;c<T;c++){
+      const i = base+c;
+      if(!e1[i]) continue;
+      if(!P.corrob){ err[i] = 1; continue; }
+      const e2 = pb >= 0 && e1[pb+c];
+      const e3 = (c > 0 && S.adjPrev[c] && e1[i-1]) || (c < T-1 && S.adjPrev[c+1] && e1[i+1]);
+      if(e2 || e3) err[i] = 1;
     }
   }
   S.cls = new Uint8Array(N*T);
-  S.hasData = new Uint8Array(N);
   S.countsTarget = new Array(T).fill(0);
   S.countsError = new Array(T).fill(0);
-  for(let r=0;r<N;r++){
-    const base = r*T; let any = 0;
-    for(let c=0;c<T;c++){
-      const i = base+c;
-      if(!Number.isNaN(S.bs[i]) || !Number.isNaN(S.bc[i])) any = 1;
-      let k = 0;
-      if(S.err[i]) k = 2; else if(S.tgt[i]) k = 1;
-      S.cls[i] = k;
-      if(k >= 1) S.countsTarget[c]++;
-      if(k === 2) S.countsError[c]++;
-    }
-    S.hasData[r] = any;
+  for(let i=0;i<N*T;i++){
+    const k = err[i] ? 2 : tgt[i] ? 1 : 0;
+    S.cls[i] = k;
+    const c = i % T;
+    if(k >= 1) S.countsTarget[c]++;
+    if(k === 2) S.countsError[c]++;
   }
-  S.cur = new Uint8Array(N); // all gray initially
+  if(!S.cur) S.cur = new Uint8Array(N);
+  if(!S.hasData){
+    S.hasData = new Uint8Array(N);
+    for(let r=0;r<N;r++){ let any = 0; for(let c=0;c<T;c++){ const i=r*T+c; if(!Number.isNaN(S.bs[i]) || !Number.isNaN(S.bc[i])){ any = 1; break; } } S.hasData[r] = any; }
+  }
+}
+
+// Cross-check against the notebook's error.csv (if loaded)
+function checkAgainstRef(){
+  const el = $("pCheck");
+  if(!S.errRef){ el.textContent = "error.csv は未読み込み（照合なし）"; el.className = "check"; return; }
+  let diff = 0, refOn = 0;
+  for(let i=0;i<S.err.length;i++){ if(S.errRef[i]) refOn++; if(S.err[i] !== S.errRef[i]) diff++; }
+  const isDefault = JSON.stringify(S.params) === JSON.stringify(defaultParams());
+  el.textContent = `ノートブック error.csv との不一致: ${diff.toLocaleString()} セル（error.csv の異常 ${refOn.toLocaleString()} セル）` + (isDefault ? "" : " ※閾値が既定値と異なるため不一致は想定内");
+  el.className = "check " + (diff === 0 ? "ok" : (isDefault ? "ng" : ""));
+}
+
+function applyParams(){
+  const num = (id, fallback) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : fallback; };
+  const d = defaultParams();
+  S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), speedRatio: num("pSpeedRatio", d.speedRatio),
+               countRatio: num("pCountRatio", d.countRatio), zeroRatio: num("pZeroRatio", d.zeroRatio), corrob: $("pCorrob").checked };
+  recompute();
+  checkAgainstRef();
+  if(map) applyTime(S.t);
+}
+function fillParamInputs(){
+  const P = S.params;
+  $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pSpeedRatio").value = P.speedRatio;
+  $("pCountRatio").value = P.countRatio; $("pZeroRatio").value = P.zeroRatio; $("pCorrob").checked = P.corrob;
 }
 
 async function boot(loaderFn){
@@ -292,30 +417,81 @@ async function boot(loaderFn){
   S.es = parseMatrix(raw.es);
   S.bc = parseMatrix(raw.bc);
   S.ec = parseMatrix(raw.ec);
-  S.err = parseMatrix(raw.err, {uint8:true});
-  S.tgt = raw.tgt ? parseMatrix(raw.tgt, {uint8:true}) : null;
-  setProgress("判定クラスを計算中 …");
-  await tick();
-  buildDerived();
+  S.errRef = raw.err ? parseMatrix(raw.err, {uint8:true}) : null;
+  // time adjacency (for error3): consecutive columns exactly one interval apart
+  const mins = S.times.map(t => { const [h,m] = t.split(":").map(Number); return h*60+m; });
+  const step = S.T > 1 ? mins[1]-mins[0] : 15;
+  S.adjPrev = new Uint8Array(S.T);
+  for(let c=1;c<S.T;c++) S.adjPrev[c] = (mins[c]-mins[c-1] === step) ? 1 : 0;
   setProgress("ネットワークを構築中 …");
   await tick();
   const gj = JSON.parse(raw.network);
   const N = S.ids.length;
   S.fids = new Int32Array(N).fill(-1);
+  S.pairRow = new Int32Array(N).fill(-1);
   let fid = 0, unmatched = 0;
   for(const ft of gj.features){
     const id = String(ft.properties.id);
     ft.id = fid;
     const r = S.idx.get(id);
     if(r === undefined){ unmatched++; ft.properties._row = -1; }
-    else { S.fids[r] = fid; ft.properties._row = r; }
+    else {
+      S.fids[r] = fid; ft.properties._row = r;
+      const pid = ft.properties.pair_id;
+      if(pid !== null && pid !== undefined && pid !== ""){ const pr = S.idx.get(String(pid)); if(pr !== undefined) S.pairRow[r] = pr; }
+    }
     fid++;
   }
+  setProgress("判定クラスを計算中 …");
+  await tick();
+  S.params = defaultParams();
+  fillParamInputs();
+  recompute();
+  checkAgainstRef();
   setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ / CSV 未対応リンク ${unmatched} 本`);
   await tick();
+  if(raw.bt || raw.et || raw.bd || raw.ed){
+    setProgress("軌跡データを解析中 …"); await tick();
+    S.traj = {
+      bt: raw.bt ? parseTraj(raw.bt, "平時 軌跡") : null,
+      et: raw.et ? parseTraj(raw.et, "イベント時 軌跡") : null,
+      bd: raw.bd ? parseTraj(raw.bd, "平時 滞留") : null,
+      ed: raw.ed ? parseTraj(raw.ed, "イベント時 滞留") : null
+    };
+    const msg = Object.values(S.traj).filter(Boolean).map(d => `${d.label} ${d.feats.length}` + (d.dropped ? ` (時刻不一致等で除外 ${d.dropped})` : "")).join(" / ");
+    setProgress(msg); await tick();
+  }
   initMap(gj);
 }
 const tick = () => new Promise(r => setTimeout(r, 0));
+
+// Parse a trajectory / dwell GeoJSON. Each feature needs properties.id (link id) and
+// properties.time ("HH:MM", "HH:MM:SS" or ISO datetime; the HH:MM part is matched to the CSV header).
+function parseTraj(text, label){
+  const gj = JSON.parse(text);
+  const timeIdx = new Map(S.times.map((t,i) => [t,i]));
+  const feats = [], byTime = Array.from({length:S.T}, () => []), bb = [];
+  let dropped = 0;
+  const feature = (ft) => {
+    if(!ft || !ft.geometry || !ft.properties) return dropped++;
+    const m = String(ft.properties.time ?? "").match(/(\d{1,2}):(\d{2})/);
+    if(!m) return dropped++;
+    const tm = m[1].padStart(2,"0") + ":" + m[2];
+    const ti = timeIdx.get(tm);
+    if(ti === undefined) return dropped++;
+    let minx=Infinity,miny=Infinity,maxx=-Infinity,maxy=-Infinity;
+    const visit = (c) => { if(typeof c[0] === "number"){ if(c[0]<minx)minx=c[0]; if(c[0]>maxx)maxx=c[0]; if(c[1]<miny)miny=c[1]; if(c[1]>maxy)maxy=c[1]; } else c.forEach(visit); };
+    visit(ft.geometry.coordinates || []);
+    if(!Number.isFinite(minx)) return dropped++;   // empty geometry
+    const k = feats.length;
+    ft.id = k;
+    ft.properties.id = String(ft.properties.id);
+    ft.properties.time = tm;
+    feats.push(ft); byTime[ti].push(k); bb.push(minx,miny,maxx,maxy);
+  };
+  (gj.features || []).forEach(feature);
+  return {label, feats, byTime, bbox: Float64Array.from(bb), dropped};
+}
 
 // ============================================================
 // Map
@@ -350,31 +526,59 @@ function initMap(gj){
 
   map.once("style.load", () => {
     map.addSource("links", { type:"geojson", data: gj, tolerance: 0.2, buffer: 8 });
-    const cls = ["coalesce", ["feature-state", "cls"], 0];
+    const cls = CLS_EXPR;
     const hov = ["coalesce", ["feature-state", "hover"], 0];
-    // gray / black lines
-    map.addLayer({
-      id:"links-base", type:"line", source:"links",
-      layout:{ "line-cap":"round", "line-join":"round" },
-      paint:{
-        "line-color": ["match", cls, 1, cssVar("--road-black"), cssVar("--road-gray")],
-        "line-width": ["interpolate", ["linear"], ["zoom"],
-          10, ["match", cls, 1, CONFIG.lineWidth.black*0.6, CONFIG.lineWidth.gray*0.6],
-          14, ["match", cls, 1, CONFIG.lineWidth.black, CONFIG.lineWidth.gray],
-          17, ["match", cls, 1, CONFIG.lineWidth.black*2.2, CONFIG.lineWidth.gray*2.2]],
-        "line-opacity": ["case", ["==", cls, 2], 0, 1]
-      }
+    // gray / black lines and red lines. Two sets: normal ("") and dimmed ("-dim", used in
+    // trajectory mode); switching visibility avoids re-parsing the 77k-link source.
+    const addLinkLayers = (suffix, f, visible) => {
+      map.addLayer({
+        id:"links-base"+suffix, type:"line", source:"links",
+        layout:{ "line-cap":"round", "line-join":"round", visibility: visible ? "visible" : "none" },
+        paint:{
+          "line-color": ["match", cls, 1, cssVar("--road-black"), cssVar("--road-gray")],
+          "line-width": ["interpolate", ["linear"], ["zoom"],
+            10, ["match", cls, 1, CONFIG.lineWidth.black*0.6, CONFIG.lineWidth.gray*0.6],
+            14, ["match", cls, 1, CONFIG.lineWidth.black, CONFIG.lineWidth.gray],
+            17, ["match", cls, 1, CONFIG.lineWidth.black*2.2, CONFIG.lineWidth.gray*2.2]],
+          "line-opacity": ["case", ["==", cls, 2], 0, f]
+        }
+      });
+      map.addLayer({
+        id:"links-error"+suffix, type:"line", source:"links",
+        layout:{ "line-cap":"round", "line-join":"round", visibility: visible ? "visible" : "none" },
+        paint:{
+          "line-color": cssVar("--road-red"),
+          "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
+          "line-opacity": ["case", ["==", cls, 2], f, 0]
+        }
+      });
+    };
+    addLinkLayers("", 1, true);
+    addLinkLayers("-dim", 0.3, false);
+    // trajectory / dwell layers (filled by updateTraj)
+    const EMPTY = {type:"FeatureCollection", features:[]};
+    for(const sid of ["traj-base","traj-event","dwell-base","dwell-event"]) map.addSource(sid, {type:"geojson", data: EMPTY});
+    const lineLayer = (id, src, color, width, opacity, filter) => map.addLayer({
+      id, type:"line", source:src, layout:{"line-cap":"round","line-join":"round"},
+      paint:{"line-color":color, "line-width":width, "line-opacity":opacity}, ...(filter ? {filter} : {})
     });
-    // red lines on top
-    map.addLayer({
-      id:"links-error", type:"line", source:"links",
-      layout:{ "line-cap":"round", "line-join":"round" },
-      paint:{
-        "line-color": cssVar("--road-red"),
-        "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
-        "line-opacity": ["case", ["==", cls, 2], 1, 0]
-      }
+    lineLayer("traj-base", "traj-base", cssVar("--series-1"), 2, 0.7);
+    lineLayer("traj-event", "traj-event", cssVar("--series-2"), 2, 0.7);
+    lineLayer("traj-base-hl", "traj-base", cssVar("--series-1"), 5, 1, ["==", ["get","id"], ""]);
+    lineLayer("traj-event-hl", "traj-event", cssVar("--series-2"), 5, 1, ["==", ["get","id"], ""]);
+    const dwellLayer = (id, color) => map.addLayer({
+      id, type:"circle", source:id,
+      paint:{"circle-radius":4.5, "circle-color":color, "circle-opacity":0.9, "circle-stroke-color":cssVar("--surface"), "circle-stroke-width":2}
     });
+    dwellLayer("dwell-base", cssVar("--series-1"));
+    dwellLayer("dwell-event", cssVar("--series-2"));
+    const dwellHl = (id, src, color) => map.addLayer({
+      id, type:"circle", source:src, filter:["==", ["get","id"], ""],
+      paint:{"circle-radius":6, "circle-color":color, "circle-stroke-color":cssVar("--surface"), "circle-stroke-width":2}
+    });
+    dwellHl("dwell-base-hl", "dwell-base", cssVar("--series-1"));
+    dwellHl("dwell-event-hl", "dwell-event", cssVar("--series-2"));
+
     // hover highlight
     map.addLayer({
       id:"links-hover", type:"line", source:"links",
@@ -401,8 +605,121 @@ function initMap(gj){
       const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
+    for(const lid of TRAJ_LAYERS){
+      map.on("mousemove", lid, (e) => showTip(e, lid));
+      map.on("mouseleave", lid, hideTip);
+    }
+    map.on("moveend", updateTraj);
+    map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
+    if(!S.traj){ $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません"; }
   });
 }
+
+const CLS_EXPR = ["coalesce", ["feature-state", "cls"], 0];
+const TRAJ_LAYERS = ["traj-base","traj-event","dwell-base","dwell-event"];
+const TRAJ_KIND = {"traj-base":"平時 軌跡", "traj-event":"イベント時 軌跡", "dwell-base":"平時 滞留", "dwell-event":"イベント時 滞留"};
+
+// ============================================================
+// Mode & trajectory drawing
+// ============================================================
+function setMode(m){
+  if(m === "traj" && !S.traj) return;
+  S.mode = m;
+  const traj = m === "traj";
+  $("modeTraffic").classList.toggle("on", !traj);
+  $("modeTraj").classList.toggle("on", traj);
+  $("trajOpts").style.display = traj ? "inline" : "none";
+  $("legendTraffic").style.display = traj ? "none" : "flex";
+  $("legendTraj").style.display = traj ? "flex" : "none";
+  // dim the network in trajectory mode so trajectories stand out
+  for(const id of ["links-base","links-error"]){
+    map.setLayoutProperty(id, "visibility", traj ? "none" : "visible");
+    map.setLayoutProperty(id+"-dim", "visibility", traj ? "visible" : "none");
+  }
+  setTrajHighlight(S.hoverId);
+  updateTraj();
+}
+
+function windowLabel(t){
+  const [h, m] = S.times[t].split(":").map(Number);
+  let s = h*60 + m - CONFIG.TRAJ_WINDOW_MIN; if(s < 0) s += 1440;
+  return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}–${S.times[t]}`;
+}
+
+function trajStatus(text){
+  const el = $("trajStatus");
+  if(S.mode !== "traj"){ el.style.display = "none"; return; }
+  el.style.display = "block";
+  if(text !== undefined){ el.textContent = text; return; }
+  const z = map.getZoom();
+  if(z < CONFIG.TRAJ_MIN_ZOOM) el.textContent = `軌跡はズーム ${CONFIG.TRAJ_MIN_ZOOM} 以上で表示されます（現在 ${z.toFixed(1)}）`;
+}
+
+function updateTraj(){
+  if(!map || !map.getSource("traj-base")) return;
+  hideTip();
+  const EMPTY = {type:"FeatureCollection", features:[]};
+  const setAll = (o) => { for(const k in o) map.getSource(k).setData(o[k]); };
+  if(S.mode !== "traj" || !S.traj){
+    setAll({"traj-base":EMPTY, "traj-event":EMPTY, "dwell-base":EMPTY, "dwell-event":EMPTY});
+    trajStatus(); return;
+  }
+  if(map.getZoom() < CONFIG.TRAJ_MIN_ZOOM){
+    setAll({"traj-base":EMPTY, "traj-event":EMPTY, "dwell-base":EMPTY, "dwell-event":EMPTY});
+    trajStatus(); return;
+  }
+  const b = map.getBounds(), w = b.getWest(), e = b.getEast(), s = b.getSouth(), n = b.getNorth();
+  const pick = (ds, on) => {
+    if(!ds || !on) return EMPTY;
+    const out = [], bb = ds.bbox;
+    for(const k of ds.byTime[S.t]){
+      const o = k*4;
+      if(bb[o+2] < w || bb[o] > e || bb[o+3] < s || bb[o+1] > n) continue;
+      out.push(ds.feats[k]);
+    }
+    return {type:"FeatureCollection", features:out};
+  };
+  const bt = pick(S.traj.bt, S.showBase), et = pick(S.traj.et, S.showEvent);
+  const bd = pick(S.traj.bd, S.showBase), ed = pick(S.traj.ed, S.showEvent);
+  setAll({"traj-base":bt, "traj-event":et, "dwell-base":bd, "dwell-event":ed});
+  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: 平時 ${bt.features.length} 本・滞留 ${bd.features.length} 点 / イベント時 ${et.features.length} 本・滞留 ${ed.features.length} 点`);
+}
+
+function setTrajHighlight(fid){
+  if(!map || !map.getLayer("traj-base-hl")) return;
+  const id = (S.mode === "traj" && fid !== null && fid >= 0) ? S.gj.features[fid].properties.id : "";
+  for(const l of ["traj-base-hl","traj-event-hl","dwell-base-hl","dwell-event-hl"]) map.setFilter(l, ["==", ["get","id"], id]);
+  // while a link is hovered, fade the other trajectories so its own stand out
+  const dim = id !== "";
+  map.setPaintProperty("traj-base", "line-opacity", dim ? 0.12 : 0.7);
+  map.setPaintProperty("traj-event", "line-opacity", dim ? 0.12 : 0.7);
+  map.setPaintProperty("dwell-base", "circle-opacity", dim ? 0.15 : 0.9);
+  map.setPaintProperty("dwell-event", "circle-opacity", dim ? 0.15 : 0.9);
+  map.setPaintProperty("dwell-base", "circle-stroke-opacity", dim ? 0.15 : 1);
+  map.setPaintProperty("dwell-event", "circle-stroke-opacity", dim ? 0.15 : 1);
+}
+
+function trajCount(ds, id, t){
+  if(!ds) return null;
+  let n = 0;
+  for(const k of ds.byTime[t]) if(ds.feats[k].properties.id === id) n++;
+  return n;
+}
+
+function showTip(e, lid){
+  const ft = e.features && e.features[0]; if(!ft) return;
+  const p = ft.properties;
+  const extra = Object.keys(p).filter(k => k !== "id" && k !== "time").map(k => `<span class="k">${k}</span> ${p[k]}`).join(" · ");
+  const tip = $("tip");
+  tip.innerHTML = `<b>Link ${p.id}</b> · ${TRAJ_KIND[lid]}<br><span class="k">${windowLabel(S.t)}</span>${extra ? "<br>" + extra : ""}`;
+  tip.style.display = "block";
+  const mapRect = $("map").getBoundingClientRect();
+  let x = e.point.x + 14, y = e.point.y + 14;
+  if(x + tip.offsetWidth > mapRect.width - 8) x = e.point.x - tip.offsetWidth - 10;
+  if(y + tip.offsetHeight > mapRect.height - 8) y = e.point.y - tip.offsetHeight - 10;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip(){ $("tip").style.display = "none"; }
 
 function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
@@ -411,17 +728,37 @@ function setHover(fid){
   if(S.hoverId !== null) map.setFeatureState({source:"links", id:S.hoverId}, {hover:0});
   S.hoverId = fid;
   if(fid !== null) map.setFeatureState({source:"links", id:fid}, {hover:1});
+  setTrajHighlight(fid);
 }
 
+function placePanel(point){
+  // put the chart panel on the side away from the cursor, so it never appears under it
+  const el = $("chartPanel"), w = $("map").clientWidth;
+  const right = point.x < w/2;
+  el.style.left = right ? "auto" : "10px";
+  el.style.right = right ? "10px" : "auto";
+}
+// Opposing links are offset by only ±1 m, so several can sit under the cursor; prefer the one
+// with the highest class at the current time (error > target > other) since that is what is visible.
+function pickFeature(fts){
+  if(!fts || !fts.length) return null;
+  let best = fts[0], bk = -1;
+  for(const f of fts){
+    const r = f.properties._row;
+    const k = (r >= 0) ? S.cls[r*S.T + S.t] : -1;
+    if(k > bk){ bk = k; best = f; }
+  }
+  return best;
+}
 function onHover(e){
-  const ft = e.features && e.features[0];
+  const ft = pickFeature(e.features);
   if(!ft) return;
   map.getCanvas().style.cursor = "pointer";
   setHover(ft.id);
-  if(S.pinnedId === null) showChart(ft);
+  if(S.pinnedId === null){ placePanel(e.point); showChart(ft); }
 }
 function onClick(e){
-  const ft = e.features && e.features[0];
+  const ft = pickFeature(e.features);
   if(!ft) return;
   if(S.pinnedId === ft.id){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
   else { S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); }
@@ -448,6 +785,7 @@ function applyTime(t, force=false){
     }
   }
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
+  updateTraj();
 }
 
 function setupControls(){
@@ -455,11 +793,26 @@ function setupControls(){
   sl.max = S.T-1; sl.value = 0;
   sl.addEventListener("input", () => applyTime(+sl.value));
   $("playBtn").addEventListener("click", togglePlay);
+  $("settingsBtn").addEventListener("click", () => { const el = $("settings"); el.style.display = el.style.display === "block" ? "none" : "block"; });
+  $("settingsClose").addEventListener("click", () => { $("settings").style.display = "none"; });
+  let pTimer = null;
+  const schedule = () => { clearTimeout(pTimer); pTimer = setTimeout(applyParams, 250); };
+  for(const id of ["pMinCount","pMinSpeed","pSpeedRatio","pCountRatio","pZeroRatio"]){
+    $(id).addEventListener("input", schedule);
+    $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
+  }
+  $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
+  $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
+  $("modeTraffic").addEventListener("click", () => setMode("traffic"));
+  $("modeTraj").addEventListener("click", () => setMode("traj"));
+  $("chkBase").addEventListener("change", (e) => { S.showBase = e.target.checked; e.target.blur(); updateTraj(); });
+  $("chkEvent").addEventListener("change", (e) => { S.showEvent = e.target.checked; e.target.blur(); updateTraj(); });
   document.addEventListener("keydown", (e) => {
-    if(e.target.tagName === "INPUT" && e.target.type !== "range") return;
+    if(e.target.tagName === "INPUT" && ["text","number","search","file"].includes(e.target.type)) return;
     if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
     else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
     else if(e.key === " "){ togglePlay(); e.preventDefault(); }
+    else if(e.key === "m" || e.key === "M"){ setMode(S.mode === "traj" ? "traffic" : "traj"); }
   });
 }
 function togglePlay(){
@@ -495,9 +848,18 @@ function showChart(ft){
   }
   const b = r*T;
   const k = S.cls[b+t];
-  $("cpStatus").textContent = STATUS_LABEL[k]; $("cpStatus").style.background = STATUS_COLOR[k];
+  let label = STATUS_LABEL[k];
+  if(k === 1 && S.e1[b+t]) label = "対象（単独異常）";
+  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k];
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(S.es[b+t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
+  const showT = !!S.traj;
+  for(const k of ["roTrajL1","roBT","roET","roTrajL2","roBD","roED"]) $(k).style.display = showT ? "" : "none";
+  if(showT){
+    const c = (ds) => { const n = trajCount(ds, p.id, t); return n === null ? "–" : String(n); };
+    $("roBT").textContent = c(S.traj.bt); $("roET").textContent = c(S.traj.et);
+    $("roBD").textContent = c(S.traj.bd); $("roED").textContent = c(S.traj.ed);
+  }
   const errMask = S.err.subarray(b, b+T);
   drawChart($("chartSpeed"), S.bs.subarray(b,b+T), S.es.subarray(b,b+T), errMask, "速度 km/h");
   drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, "台数 /15分");
