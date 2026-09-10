@@ -194,12 +194,20 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   await waitSlot(page);
   await page.waitForTimeout(1500);
   assert.equal(await page.evaluate(() => S.lazy.loaded), "18:00", "only the 18:00 slot is parsed");
-  assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 4, "baseline+event traj+dwell for the slot");
+  assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 8, "4 kinds x baseline+event for the slot");
   const st = await page.textContent("#trajStatus");
-  const m = st.match(/平時 (\d+) 本・滞留 (\d+) 点 \/ イベント時 (\d+) 本・滞留 (\d+) 点/);
+  const m = st.match(/平時 徒歩軌跡 (\d+) 本・滞留 (\d+) 点・車→徒歩 (\d+) 点・方向転換 (\d+) 点 \/ イベント時 徒歩軌跡 (\d+) 本・滞留 (\d+) 点・車→徒歩 (\d+) 点・方向転換 (\d+) 点/);
   assert.ok(m, "status lists counts: " + st);
-  assert.ok(+m[1] > 0 && +m[3] > 0, "trajectories drawn at zoom 15");
-  assert.ok(+m[2] > 0 && +m[4] > 0, "dwell points drawn from the slot files");
+  assert.ok(+m[1] > 0 && +m[5] > 0, "trajectories drawn at zoom 15");
+  assert.ok(+m[2] > 0 && +m[6] > 0, "dwell points drawn from the slot files");
+  assert.ok(+m[7] > 0 && +m[8] > 0, "mode-change and turn points drawn for the flooded event window");
+  assert.match(st, /この時刻のデータ全体: 平時 徒歩軌跡 \d+/, "whole-slot diagnostics shown");
+  for (const l of ["mode-event", "turn-event", "dwell-event", "traj-event"]) assert.ok(await page.evaluate((l) => map.queryRenderedFeatures({ layers: [l] }).length, l) > 0, l + " rendered");
+  // kind toggles hide their layers
+  await page.click("#chkMode"); await page.click("#chkTurn"); await page.waitForTimeout(400);
+  assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本・滞留 \d+ 点・車→徒歩 0 点・方向転換 0 点/);
+  assert.equal(await page.evaluate(() => map.querySourceFeatures("mode-event").length), 0, "mode-change source cleared by its toggle");
+  await page.click("#chkMode"); await page.click("#chkTurn"); await page.waitForTimeout(400);
 
   // hovering a link shows no chart panel in trajectory mode
   const link = await findLink(page, 2, T_18);
@@ -255,7 +263,14 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   await page.evaluate((t) => applyTime(t), T_18); await waitSlot(page); await page.waitForTimeout(800);
 
   await page.click("#chkBase"); await page.waitForTimeout(500);
-  assert.match(await page.textContent("#trajStatus"), /平時 0 本・滞留 0 点/);
+  assert.match(await page.textContent("#trajStatus"), /平時 徒歩軌跡 0 本・滞留 0 点・車→徒歩 0 点・方向転換 0 点/);
+  await page.click("#chkBase"); await page.waitForTimeout(300);
+  // "nearest" button: from an empty corner of the grid the map flies to the nearest feature of the slot
+  await page.evaluate(() => map.jumpTo({ center: [139.70 + 2 * 0.0025, 35.65 + 2 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
+  assert.match(await page.textContent("#trajStatus"), /表示範囲内にはありません/, "diagnostic when the view holds no feature");
+  await page.click("#nearestBtn"); await page.waitForTimeout(1500);
+  assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
+  await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
   await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => S.mode), "traffic");
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared in traffic mode");
@@ -286,7 +301,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
   await page.evaluate((t) => { setMode("traj"); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page); await page.waitForTimeout(1500);
-  assert.match(await page.textContent("#trajStatus"), /イベント時 [1-9]\d* 本/, "trajectories drawn from a slot file read via FileReader");
+  assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "trajectories drawn from a slot file read via FileReader");
   await page.close();
 });
 

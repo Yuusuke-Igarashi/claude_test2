@@ -6,10 +6,11 @@ Output: per input file, in --out
   <stem>_points.csv          every input row + segment (Stay/Move), stay_id, trip_id, split_reason
   <stem>_stays.geojson       one Point per stay (centroid) with start/end/duration
   <stem>_trips.geojson       one LineString per trip (Move points; origin/destination stay ids)
+  <stem>_events.geojson      one Point per vehicle->walk change and per sharp turn
   and, for flood_viewer trajectory mode, one file per role and 15-min slot:
   viewer/<role>_<HHMM>.geojson   role = baseline (date != --event-date) or event (date == --event-date)
   viewer/index.json              roles, slots and feature counts
-  Each feature: properties.kind = "traj" | "dwell", properties.id = user id, properties.time = "HH:MM"
+  Each feature: properties.kind = "traj" | "dwell" | "modechange" | "turn", properties.id = user id, properties.time = "HH:MM"
   (end of the 1-hour window); geometry = LineString/MultiLineString of Move points in
   [time-60min, time] (traj) or MultiPoint of stay centroids overlapping the window (dwell).
   The viewer loads only the slot shown by the time slider, so the whole area can be exported.
@@ -25,6 +26,19 @@ Rules (parameters in PARAMS, overridable from the command line):
          Only dense Move points are drawn as trajectories (viewer) and trip lines; sparse points
          keep their Stay/Move/trip labels (points.csv column dense = 1/0) but are not drawn, so
          straight lines between distant sparse fixes disappear.
+  Stay merge: two consecutive stays whose gap is <= STAY_MERGE_GAP_MIN and whose centroids are
+         <= STAY_MERGE_DIST_M apart become one stay (the short excursion between them included).
+  Mode : dense Move points are labelled walk / vehicle / bike / unknown. MODE_SOURCE=auto takes the
+         OS activity type when it decides (in_vehicle, on_bicycle, on_foot/walking/running) and falls
+         back to the implied speed between consecutive points (>= VEHICLE_MIN_KMH vehicle,
+         <= WALK_MAX_KMH walk). Runs shorter than VEHICLE_MIN_POINTS / WALK_MIN_POINTS+WALK_MIN_MIN
+         become unknown; unknown runs between two runs of the same mode take that mode.
+  Mode change: a vehicle run followed (within the same trip, <= MODECHANGE_MAX_GAP_MIN) by a walk
+         run: the first walk point is flagged (people leaving a car).
+  Turn : a Move point where the incoming leg (from the last point >= TURN_LEG_*_M back) and the
+         outgoing leg (to the first point >= TURN_LEG_*_M ahead) differ by >= TURN_MIN_DEG.
+  Viewer trajectories are drawn for TRAJ_MODES (default walk) only: vehicle movement is already
+         covered by the traffic statistics.
   Trip : the Move run plus the Stay run(s) immediately before it. A new trip id is forced when
          the time gap between consecutive points exceeds TIME_GAP_MIN (unless both points belong
          to the same Stay: sparse logging while stationary does not cut a trip), or when the
@@ -72,7 +86,28 @@ PARAMS = {
     "DENSE_MAX_GAP_MIN": 5.0, # dense run: consecutive points at most this many minutes apart ...
     "DENSE_MIN_POINTS": 10,   # ... and at least this many points (0 = no density requirement)
     "DENSE_FOR_STAYS": False, # also require dense runs for Stay detection (default: stays use all points)
+    "STAY_MERGE_GAP_MIN": 10.0,  # consecutive stays closer in time than this ...
+    "STAY_MERGE_DIST_M": 100.0,  # ... and in space than this are merged (0 = never merge)
+    "MODE_SOURCE": "auto",    # "auto": OS activity type when decided, else implied speed; "speed": implied speed only; "activity": activity type only
+    "WALK_MAX_KMH": 7.0,      # implied speed at or below this -> walk candidate
+    "WALK_MIN_POINTS": 5,     # a walk run needs at least this many points ...
+    "WALK_MIN_MIN": 5.0,      # ... and this duration [minutes]
+    "VEHICLE_MIN_KMH": 20.0,  # implied speed at or above this -> vehicle candidate
+    "VEHICLE_MIN_POINTS": 3,  # a vehicle (or bike) run needs at least this many points
+    "MODECHANGE_MAX_GAP_MIN": 10.0,  # vehicle run end -> walk run start within this = "left the car"
+    "TURN_MIN_DEG": 120.0,    # direction change at or above this is a sharp turn
+    "TURN_LEG_WALK_M": 30.0,  # leg length used for the turn angle when walking ...
+    "TURN_LEG_OTHER_M": 100.0,  # ... and for every other mode
+    "TURN_MAX_LEG_MIN": 15.0, # a leg may not span more than this many minutes
+    "TRAJ_MODES": "walk",     # comma-separated modes drawn as viewer trajectories, or "all"
 }
+
+MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_BIKE, MODE_UNKNOWN = 0, 1, 2, 3, 4
+MODE_NAMES = np.array(["", "walk", "vehicle", "bike", "unknown"], dtype=object)
+MODE_OF_NAME = {v: i for i, v in enumerate(MODE_NAMES) if v}
+ACT_MODE = {"in_vehicle": MODE_VEHICLE, "on_bicycle": MODE_BIKE, "on_foot": MODE_WALK, "walking": MODE_WALK, "running": MODE_WALK}
+FLAG_NONE, FLAG_MODECHANGE, FLAG_TURN = 0, 1, 2
+FLAG_NAMES = np.array(["", "modechange", "turn"], dtype=object)
 
 EARTH_R = 6371008.8
 
@@ -253,6 +288,167 @@ def assign_trips(stay_label: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np
     return trip, reason
 
 
+def merge_stays(sl: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np.ndarray, gap_min: float, dist_m: float):
+    """Merge consecutive stays separated by <= gap_min minutes whose centroids are <= dist_m apart.
+    The points between them (a short excursion) join the merged stay. Labels are renumbered 0.."""
+    K = int(sl.max()) + 1 if len(sl) else 0
+    if K < 2 or not gap_min or not dist_m or gap_min <= 0 or dist_m <= 0:
+        return sl
+    sl = sl.copy()
+    first = np.array([np.flatnonzero(sl == k)[0] for k in range(K)])
+    last = np.array([np.flatnonzero(sl == k)[-1] for k in range(K)])
+    cur = 0
+    for k in range(1, K):
+        if t[first[k]] - t[last[cur]] <= gap_min * 60.0:
+            a, b = first[cur], last[k] + 1
+            m_cur = sl[a:last[cur] + 1] == sl[a]
+            clon, clat = lon[a:last[cur] + 1][m_cur].mean(), lat[a:last[cur] + 1][m_cur].mean()
+            m_k = sl[first[k]:b] == k
+            klon, klat = lon[first[k]:b][m_k].mean(), lat[first[k]:b][m_k].mean()
+            if haversine_m(clon, clat, klon, klat) <= dist_m:
+                sl[a:b] = sl[a]
+                last[cur] = last[k]
+                continue
+        cur = k
+    ids = np.unique(sl[sl >= 0])
+    remap = np.full(K, -1, dtype=np.int64); remap[ids] = np.arange(len(ids))
+    return np.where(sl >= 0, remap[np.maximum(sl, 0)], -1)
+
+
+# ----------------------------------------------------------------------------------------------
+# 3. Travel mode (walk / vehicle / bike / unknown) on dense Move points, vectorised over the day
+# ----------------------------------------------------------------------------------------------
+def _runs(mode, group, elig):
+    """Run-length encode `mode` within `group` over eligible points. Returns (run id per point,
+    start, end (exclusive), mode, group) per run. Non-eligible points form their own runs."""
+    n = len(mode)
+    brk = np.r_[True, (group[1:] != group[:-1]) | (mode[1:] != mode[:-1]) | (elig[1:] != elig[:-1])]
+    start = np.flatnonzero(brk); end = np.r_[start[1:], n]
+    run = np.cumsum(brk) - 1
+    return run, start, end, mode[start].copy(), group[start]
+
+
+def _fill_unknown(mode, group, elig):
+    """Unknown runs whose neighbours (same group) share one decided mode take that mode."""
+    run, start, end, rm, rg = _runs(mode, group, elig)
+    prev_m = np.r_[MODE_NONE, rm[:-1]]; next_m = np.r_[rm[1:], MODE_NONE]
+    prev_g = np.r_[-1, rg[:-1]]; next_g = np.r_[rg[1:], -1]
+    fill = (rm == MODE_UNKNOWN) & (prev_m == next_m) & np.isin(prev_m, (MODE_WALK, MODE_VEHICLE, MODE_BIKE)) & (prev_g == rg) & (next_g == rg)
+    rm[fill] = prev_m[fill]
+    return rm[run]
+
+
+def classify_modes(R, P: dict):
+    """Return (mode per point int8, implied speed km/h into each point, group id per point)."""
+    lon, lat, tsec = R["lon"], R["lat"], R["tsec"]
+    n = len(lon)
+    elig = (R["seg"] == 0) & (R["dense"] == 1)
+    group = R["dense_run"].astype(np.int64) * (int(R["trip_no"].max()) + 1 if n else 1) + R["trip_no"]
+    v = np.full(n, np.nan)
+    if n > 1:
+        same = (group[1:] == group[:-1]) & elig[1:] & elig[:-1]
+        d = haversine_m(lon[:-1], lat[:-1], lon[1:], lat[1:]); dt = tsec[1:] - tsec[:-1]
+        ok = same & (dt > 0)
+        vv = np.full(n - 1, np.nan); vv[ok] = d[ok] / dt[ok] * 3.6
+        v[1:] = vv
+    raw = np.full(n, MODE_UNKNOWN, dtype=np.int8)
+    df = R["df"]
+    src = str(P["MODE_SOURCE"]).lower()
+    if src in ("auto", "activity") and "act" in df.columns:
+        acts = df.attrs["acts"]
+        act_mode = np.array([ACT_MODE.get(str(a).lower(), 0) for a in acts], dtype=np.int8)
+        am = act_mode[df["act"].to_numpy()]
+        raw = np.where(am > 0, am, MODE_UNKNOWN).astype(np.int8)
+    if src != "activity":
+        und = raw == MODE_UNKNOWN
+        with np.errstate(invalid="ignore"):
+            raw = np.where(und & (v >= float(P["VEHICLE_MIN_KMH"])), MODE_VEHICLE, raw)
+            raw = np.where(und & (v <= float(P["WALK_MAX_KMH"])), MODE_WALK, raw).astype(np.int8)
+    raw[~elig] = MODE_NONE
+    # 1. bridge unknown gaps between equal modes, 2. drop runs that are too short, 3. bridge again
+    mode = _fill_unknown(raw, group, elig)
+    run, start, end, rm, rg = _runs(mode, group, elig)
+    size = end - start; dur = tsec[end - 1] - tsec[start]
+    short = (np.isin(rm, (MODE_VEHICLE, MODE_BIKE)) & (size < int(P["VEHICLE_MIN_POINTS"]))) | \
+            ((rm == MODE_WALK) & ((size < int(P["WALK_MIN_POINTS"])) | (dur < float(P["WALK_MIN_MIN"]) * 60.0)))
+    rm[short] = MODE_UNKNOWN
+    mode = rm[run]
+    mode = _fill_unknown(mode, group, elig)
+    mode[~elig] = MODE_NONE
+    return mode.astype(np.int8), v, group
+
+
+def detect_mode_changes(R, mode, v, P: dict):
+    """Indices of the first walk point after a vehicle run in the same trip (gap <= MODECHANGE_MAX_GAP_MIN),
+    with the vehicle run's mean implied speed and the gap in minutes."""
+    n = len(mode)
+    if n == 0:
+        return np.array([], dtype=np.int64), np.array([]), np.array([])
+    tsec = R["tsec"]
+    elig = mode != MODE_NONE
+    trip = R["ucode"].astype(np.int64) * (int(R["trip_no"].max()) + 1) + R["trip_no"]
+    run, start, end, rm, rg = _runs(mode, trip, elig)
+    nr = len(start)
+    decided = np.isin(rm, (MODE_WALK, MODE_VEHICLE, MODE_BIKE))
+    last = np.maximum.accumulate(np.where(decided, np.arange(nr), -1))
+    prev = np.r_[-1, last[:-1]]
+    cand = np.flatnonzero((rm == MODE_WALK) & (prev >= 0))
+    pv = prev[cand]
+    ok = (rm[pv] == MODE_VEHICLE) & (rg[pv] == rg[cand]) & (tsec[start[cand]] - tsec[end[pv] - 1] <= float(P["MODECHANGE_MAX_GAP_MIN"]) * 60.0)
+    cand, pv = cand[ok], pv[ok]
+    idx = start[cand]
+    vmean = np.array([np.nanmean(v[start[r] + 1:end[r]]) if end[r] - start[r] > 1 else np.nan for r in pv])
+    gap = (tsec[idx] - tsec[end[pv] - 1]) / 60.0
+    return idx, vmean, gap
+
+
+def bearing_deg(lon1, lat1, lon2, lat2):
+    lon1, lat1, lon2, lat2 = map(np.radians, (lon1, lat1, lon2, lat2))
+    y = np.sin(lon2 - lon1) * np.cos(lat2)
+    x = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1)
+    return (np.degrees(np.arctan2(y, x)) + 360.0) % 360.0
+
+
+def detect_turns(R, mode, group, P: dict, max_offset: int = 40):
+    """Indices of sharp turns and their angles. For each dense Move point the incoming leg ends at the
+    point and starts at the last earlier point >= L away (same trip & dense run, <= TURN_MAX_LEG_MIN);
+    the outgoing leg ends at the first later point >= L away. L depends on the mode. A turn found at i
+    suppresses further turns until the end of its outgoing leg."""
+    lon, lat, tsec = R["lon"], R["lat"], R["tsec"]
+    n = len(lon)
+    if n < 3:
+        return np.array([], dtype=np.int64), np.array([])
+    elig = mode != MODE_NONE
+    L = np.where(mode == MODE_WALK, float(P["TURN_LEG_WALK_M"]), float(P["TURN_LEG_OTHER_M"]))
+    tmax = float(P["TURN_MAX_LEG_MIN"]) * 60.0
+    fwd = np.zeros(n, dtype=np.int32); bwd = np.zeros(n, dtype=np.int32)
+    for d in range(1, max_offset + 1):
+        if d >= n:
+            break
+        i = np.arange(n - d); j = i + d
+        pair = elig[i] & elig[j] & (group[i] == group[j]) & (tsec[j] - tsec[i] <= tmax)
+        if not pair.any():
+            continue
+        ii, jj = i[pair], j[pair]
+        dist = haversine_m(lon[ii], lat[ii], lon[jj], lat[jj])
+        m = (fwd[ii] == 0) & (dist >= L[ii]); fwd[ii[m]] = d
+        m = (bwd[jj] == 0) & (dist >= L[jj]); bwd[jj[m]] = d
+    cand = np.flatnonzero(elig & (fwd > 0) & (bwd > 0))
+    if not len(cand):
+        return np.array([], dtype=np.int64), np.array([])
+    a = cand - bwd[cand]; b = cand + fwd[cand]
+    ang = np.abs(((bearing_deg(lon[cand], lat[cand], lon[b], lat[b]) - bearing_deg(lon[a], lat[a], lon[cand], lat[cand]) + 180.0) % 360.0) - 180.0)
+    keep = ang >= float(P["TURN_MIN_DEG"])
+    cand, ang, b = cand[keep], ang[keep], b[keep]
+    out, out_ang = [], []
+    block_until, block_grp = -1, -1
+    for i, an, bb in zip(cand, ang, b):
+        if group[i] == block_grp and i < block_until:
+            continue
+        out.append(i); out_ang.append(an); block_until = bb; block_grp = group[i]
+    return np.array(out, dtype=np.int64), np.array(out_ang)
+
+
 # ----------------------------------------------------------------------------------------------
 # I/O helpers
 # ----------------------------------------------------------------------------------------------
@@ -391,6 +587,7 @@ def process_file(path: Path, P: dict):
             if (sl >= 0).any():
                 ids = np.unique(sl[sl >= 0]); remap = {v: i for i, v in enumerate(ids)}
                 sl = np.array([remap.get(v, -1) if v >= 0 else -1 for v in sl])
+        sl = merge_stays(sl, lo, la, tt, P["STAY_MERGE_GAP_MIN"], P["STAY_MERGE_DIST_M"])
         tr, rs = assign_trips(sl, lo, la, tt, P["TIME_GAP_MIN"], P["JUMP_SPEED_KMH"], P["JUMP_MIN_DIST_M"])
         seg[a:b] = (sl >= 0)
         stay_no[a:b] = np.where(sl >= 0, sl + 1, 0)
@@ -414,9 +611,21 @@ def process_file(path: Path, P: dict):
         if (gi + 1) % 20000 == 0:
             log(f"  segmented {gi + 1:,}/{len(starts):,} users")
     log(f"  segmentation done: {len(starts):,} users, {len(stays):,} stays, {len(trips):,} trips in {time.perf_counter() - t0:.1f} s")
-    return {"date": date, "df": df, "uids": uids, "lon": lon, "lat": lat, "tsec": tsec, "ucode": ucode,
-            "seg": seg, "stay_no": stay_no, "trip_no": trip_no, "reason": reason, "stays": stays, "trips": trips, "dropped": dropped,
-            "dense": dense, "dense_run": dense_run}
+    R = {"date": date, "df": df, "uids": uids, "lon": lon, "lat": lat, "tsec": tsec, "ucode": ucode,
+         "seg": seg, "stay_no": stay_no, "trip_no": trip_no, "reason": reason, "stays": stays, "trips": trips, "dropped": dropped,
+         "dense": dense, "dense_run": dense_run}
+    t0 = time.perf_counter()
+    mode, v_kmh, group = classify_modes(R, P)
+    mc_idx, mc_v, mc_gap = detect_mode_changes(R, mode, v_kmh, P)
+    turn_idx, turn_ang = detect_turns(R, mode, group, P)
+    flag = np.zeros(n, dtype=np.int8)
+    flag[turn_idx] = FLAG_TURN
+    flag[mc_idx] = FLAG_MODECHANGE           # a point can be both; the mode change is the rarer, more specific one
+    R.update({"mode": mode, "v_kmh": v_kmh, "flag": flag,
+              "modechanges": (mc_idx, mc_v, mc_gap), "turns": (turn_idx, turn_ang)})
+    counts = {MODE_NAMES[m]: int(c) for m, c in zip(*np.unique(mode, return_counts=True)) if m}
+    log(f"  modes {counts}, vehicle->walk changes {len(mc_idx):,}, sharp turns {len(turn_idx):,} in {time.perf_counter() - t0:.1f} s")
+    return R
 
 
 def fmt_ts(sec):
@@ -490,6 +699,8 @@ def write_points_csv(R, path: Path, chunk=1_000_000):
             out["trip_no"] = R["trip_no"][sl]
             out["split_reason"] = np.array([REASON_CODES[i] for i in range(5)], dtype=object)[R["reason"][sl]]
             out["dense"] = R["dense"][sl]
+            out["mode"] = MODE_NAMES[R["mode"][sl]]
+            out["flag"] = FLAG_NAMES[R["flag"][sl]]
             out.to_csv(f, index=False, header=(a == 0))
             if n == 0:
                 break
@@ -517,20 +728,42 @@ def write_trips_geojson(R, path: Path):
         if geom is None:
             continue
         us = ushort(uids[u])
+        md = R["mode"][mv]
         w.add({"type": "Feature",
                "properties": {"userid": str(uids[u]), "trip_id": f"{us}_T{k:03d}", "split_reason": rs,
                               "start": fmt_ts(t_start), "end": fmt_ts(t_end), "n_points": int(npts), "n_move": int(nmove),
-                              "n_dense": int(ndense), "length_m": round(length, 1),
+                              "n_dense": int(ndense), "n_walk": int((md == MODE_WALK).sum()), "n_vehicle": int((md == MODE_VEHICLE).sum()),
+                              "n_bike": int((md == MODE_BIKE).sum()), "length_m": round(length, 1),
                               "origin_stay": f"{us}_S{origin:03d}" if origin else "", "dest_stay": f"{us}_S{dest:03d}" if dest else ""},
                "geometry": geom})
     return w.close()
 
 
+def write_events_geojson(R, path: Path):
+    """Vehicle->walk changes and sharp turns as Points."""
+    w = GeoJSONWriter(path); uids = R["uids"]; lon, lat, tsec = R["lon"], R["lat"], R["tsec"]
+    mc_idx, mc_v, mc_gap = R["modechanges"]; turn_idx, turn_ang = R["turns"]
+    for i, vv, g in zip(mc_idx, mc_v, mc_gap):
+        us = ushort(uids[R["ucode"][i]])
+        w.add({"type": "Feature",
+               "properties": {"kind": "modechange", "userid": str(uids[R["ucode"][i]]), "trip_id": f"{us}_T{R['trip_no'][i]:03d}",
+                              "at": fmt_ts(tsec[i]), "v_before_kmh": None if np.isnan(vv) else round(float(vv), 1), "gap_min": round(float(g), 1)},
+               "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
+    for i, an in zip(turn_idx, turn_ang):
+        us = ushort(uids[R["ucode"][i]])
+        w.add({"type": "Feature",
+               "properties": {"kind": "turn", "userid": str(uids[R["ucode"][i]]), "trip_id": f"{us}_T{R['trip_no'][i]:03d}",
+                              "at": fmt_ts(tsec[i]), "mode": MODE_NAMES[R["mode"][i]], "angle_deg": round(float(an), 1)},
+               "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
+    return w.close()
+
+
 def _split_line(idx, lon, lat, run):
-    """LineString over idx, split into a MultiLineString where the dense run id changes (gap > DENSE_MAX_GAP_MIN)."""
+    """LineString over idx, split into a MultiLineString where the dense run id changes (gap > DENSE_MAX_GAP_MIN)
+    or where points were skipped (idx not consecutive)."""
     parts, cur = [], [idx[0]]
     for i in range(1, len(idx)):
-        if run[idx[i]] != run[idx[i - 1]]:
+        if run[idx[i]] != run[idx[i - 1]] or idx[i] != idx[i - 1] + 1:
             parts.append(cur); cur = []
         cur.append(idx[i])
     parts.append(cur)
@@ -552,8 +785,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     W, SLOT = float(P["WINDOW_MIN"]), float(P["SLOT_MIN"])
     n_win = int(round(W / SLOT))
     vb = parse_bbox(P["VIEWER_BBOX"]) or parse_bbox(P["BBOX"])
-    day0 = math.floor(tsec.min() / 86400) * 86400   # local-time seconds are treated as naive; day of the data
-    day_str = pd.Timestamp(day0, unit="s")
+    day0 = float((pd.Timestamp(R["date"]) - pd.Timestamp("1970-01-01")).total_seconds())   # midnight of the file's date (naive local time)
     # users to include: those with any point inside the viewer bbox
     if vb:
         inside = (lon >= vb[0]) & (lon <= vb[2]) & (lat >= vb[1]) & (lat <= vb[3])
@@ -561,8 +793,10 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         keep = np.isin(ucode, sel_users)
     else:
         keep = np.ones(n, dtype=bool)
-    # ---- trajectories: Move points exploded into the n_win windows they belong to ----
-    mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1))
+    # ---- trajectories: dense Move points of the requested modes exploded into the n_win windows they belong to ----
+    modes = str(P["TRAJ_MODES"]).lower()
+    mode_ok = np.ones(n, dtype=bool) if modes == "all" else np.isin(R["mode"], [MODE_OF_NAME[m.strip()] for m in modes.split(",") if m.strip()])
+    mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1) & mode_ok)
     mins = (tsec[mv] - day0) / 60.0
     k0 = np.ceil(mins / SLOT).astype(np.int64)                 # first window end >= point time
     k0 = np.maximum(k0, 1)
@@ -582,7 +816,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         idx = rep[a:b]
         parts, cur = [], [idx[0]]
         for i in range(1, len(idx)):
-            if trip_no[idx[i]] != trip_no[idx[i - 1]] or drun[idx[i]] != drun[idx[i - 1]]:
+            if trip_no[idx[i]] != trip_no[idx[i - 1]] or drun[idx[i]] != drun[idx[i - 1]] or idx[i] != idx[i - 1] + 1:
                 parts.append(cur); cur = []
             cur.append(idx[i])
         parts.append(cur)
@@ -595,6 +829,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         u = int(key_u[a])
         writers.add(role, hhmm, "traj", {"type": "Feature",
                          "properties": {"id": ushort(uids[u]), "time": hhmm, "userid": str(uids[u]), "n_points": int(b - a),
+                                        "mode": ",".join(sorted(set(MODE_NAMES[R["mode"][idx]]))),
                                         "trips": ",".join(f"{ushort(uids[u])}_T{t:03d}" for t in sorted(set(int(trip_no[i]) for i in idx)))},
                          "geometry": geom})
         n_traj += 1
@@ -623,7 +858,27 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
                               "properties": {"id": ushort(uids[u]), "time": f"{mm // 60:02d}:{mm % 60:02d}", "userid": str(uids[u]), "n_points": len(pts)},
                               "geometry": {"type": "MultiPoint", "coordinates": pts}})
             n_dwell += 1
-    return n_traj, n_dwell
+    # ---- events (vehicle->walk, sharp turns): one Point per event, in every window that contains it ----
+    n_ev = 0
+    mc_idx, mc_v, mc_gap = R["modechanges"]; turn_idx, turn_ang = R["turns"]
+    for kind, idx, attrs in (("modechange", mc_idx, lambda j: {"v_before_kmh": None if np.isnan(mc_v[j]) else round(float(mc_v[j]), 1), "gap_min": round(float(mc_gap[j]), 1)}),
+                             ("turn", turn_idx, lambda j: {"mode": MODE_NAMES[R["mode"][turn_idx[j]]], "angle_deg": round(float(turn_ang[j]), 1)})):
+        if not len(idx):
+            continue
+        sel = keep[idx]
+        mins = (tsec[idx] - day0) / 60.0
+        kmin = np.maximum(np.ceil(mins / SLOT).astype(np.int64), 1)
+        kmax = np.minimum(np.ceil((mins + W) / SLOT).astype(np.int64) - 1, int(1440 / SLOT))
+        for j in np.flatnonzero(sel):
+            i = idx[j]; u = int(ucode[i]); us = ushort(uids[u])
+            for k in range(int(kmin[j]), int(kmax[j]) + 1):
+                mm = int(k * SLOT); hhmm = f"{mm // 60:02d}:{mm % 60:02d}"
+                writers.add(role, hhmm, kind, {"type": "Feature",
+                                  "properties": {"id": us, "time": hhmm, "userid": str(uids[u]), "at": fmt_ts(tsec[i])[11:16],
+                                                 "trip": f"{us}_T{R['trip_no'][i]:03d}", **attrs(j)},
+                                  "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
+                n_ev += 1
+    return n_traj, n_dwell, n_ev
 
 
 def main():
@@ -641,8 +896,12 @@ def main():
             ap.add_argument(flag, default=None, help="lon_min,lat_min,lon_max,lat_max")
         elif k == "AREA_GEOJSON":
             ap.add_argument(flag, default=None, help="GeoJSON whose extent is used as --bbox")
-        elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS"):
+        elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS", "WALK_MIN_POINTS", "VEHICLE_MIN_POINTS"):
             ap.add_argument(flag, type=int, default=v)
+        elif k == "MODE_SOURCE":
+            ap.add_argument(flag, choices=["auto", "speed", "activity"], default=v)
+        elif k == "TRAJ_MODES":
+            ap.add_argument(flag, default=v, help='comma-separated: walk,vehicle,bike,unknown or "all"')
         else:
             ap.add_argument(flag, type=float, default=v)
     args = ap.parse_args()
@@ -677,16 +936,19 @@ def run(inputs, out, event_date="2024-08-21", **params):
             write_points_csv(R, args.out / f"{stem}_points.csv")
         ns = write_stays_geojson(R, args.out / f"{stem}_stays.geojson")
         nt = write_trips_geojson(R, args.out / f"{stem}_trips.geojson")
-        n_traj = n_dwell = 0
+        ne = write_events_geojson(R, args.out / f"{stem}_events.geojson")
+        n_traj = n_dwell = n_ev = 0
         if writers is not None:
-            n_traj, n_dwell = write_viewer(R, P, role, writers)
+            n_traj, n_dwell, n_ev = write_viewer(R, P, role, writers)
         reasons = {REASON_CODES[c]: int(v) for c, v in zip(*np.unique(R["reason"], return_counts=True)) if c}
         n_dense = int(R["dense"].sum()); u_dense = len(np.unique(R["ucode"][R["dense"] == 1])) if n else 0
+        modes = {MODE_NAMES[m]: int(c) for m, c in zip(*np.unique(R["mode"], return_counts=True)) if m}
         print(f"{path.name}: date {R['date']} ({role}), users {len(np.unique(R['ucode'])):,}, points {n:,} (dropped {R['dropped']:,}), "
               f"dense points {n_dense:,} ({100 * n_dense / max(n, 1):.0f}%, {u_dense:,} users), "
               f"stay points {int((R['seg'] == 1).sum()):,}, stays {ns:,}, trips {nt:,} (with >=2 dense move points), "
-              f"viewer windows: trajectories {n_traj:,}, dwell {n_dwell:,}", flush=True)
+              f"viewer windows: trajectories {n_traj:,} ({P['TRAJ_MODES']}), dwell {n_dwell:,}, events {n_ev:,}", flush=True)
         print(f"  trip starts by reason: {reasons}", flush=True)
+        print(f"  modes of dense move points: {modes}; vehicle->walk changes {len(R['modechanges'][0]):,}, sharp turns {len(R['turns'][0]):,} (events file {ne:,})", flush=True)
         del R
     if writers is not None:
         index, merged_counts = writers.close()

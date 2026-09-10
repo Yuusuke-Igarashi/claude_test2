@@ -57,6 +57,7 @@ def densify(nodes, step_m=60):
 
 traj = {"b": [], "e": []}
 dwell = {"b": [], "e": []}
+events = {"b": [], "e": []}     # modechange (vehicle -> walk) and turn points, per-slot files only
 selected = 0
 for ft in net["features"]:
     c = ft["geometry"]["coordinates"]
@@ -92,6 +93,18 @@ for ft in net["features"]:
                 dwell[kind].append({"type": "Feature",
                                     "properties": {"id": lid, "time": tm, "n_points": len(dp)},
                                     "geometry": {"type": "MultiPoint", "coordinates": dp}})
+            # events: people leaving cars and turning back are frequent on flooded links, rare otherwise
+            at = f"{int(tm[:2]) - 1:02d}:{random.randint(0, 59):02d}"
+            if flooded or random.random() < 0.08:
+                events[kind].append({"type": "Feature",
+                                     "properties": {"id": lid, "time": tm, "kind": "modechange", "at": at,
+                                                    "v_before_kmh": round(random.uniform(15, 45), 1), "gap_min": round(random.uniform(0.5, 9), 1)},
+                                     "geometry": {"type": "Point", "coordinates": jitter(pts[len(pts) // 2], 3e-5)}})
+            if flooded or random.random() < 0.15:
+                events[kind].append({"type": "Feature",
+                                     "properties": {"id": lid, "time": tm, "kind": "turn", "at": at,
+                                                    "mode": random.choice(["walk", "vehicle"]), "angle_deg": round(random.uniform(120, 180), 1)},
+                                     "geometry": {"type": "Point", "coordinates": jitter(pts[len(pts) // 3], 3e-5)}})
 
 def save(feats, name):
     with open(OUT / name, "w") as f:
@@ -108,9 +121,9 @@ vdir = OUT / "viewer"; vdir.mkdir(exist_ok=True)
 index = {"roles": ["baseline", "event"], "slots": {}, "files": {}}
 for role, key in (("baseline", "b"), ("event", "e")):
     by_slot = {}
-    for kind, feats in (("traj", traj[key]), ("dwell", dwell[key])):
+    for kind, feats in (("traj", traj[key]), ("dwell", dwell[key]), (None, events[key])):
         for ft in feats:
-            f2 = {"type": "Feature", "properties": dict(ft["properties"], kind=kind), "geometry": ft["geometry"]}
+            f2 = {"type": "Feature", "properties": dict(ft["properties"], kind=kind or ft["properties"]["kind"]), "geometry": ft["geometry"]}
             by_slot.setdefault(ft["properties"]["time"], []).append(f2)
     for tm in sorted(by_slot):
         name = f"{role}_{tm.replace(':', '')}.geojson"
@@ -119,5 +132,5 @@ for role, key in (("baseline", "b"), ("event", "e")):
         index["slots"].setdefault(role, []).append(tm)
         index["files"][name] = len(by_slot[tm])
 json.dump(index, open(vdir / "index.json", "w"), indent=1)
-print(f"viewer/: {len(index['files'])} slot files")
+print(f"viewer/: {len(index['files'])} slot files, events baseline {len(events['b'])} / event {len(events['e'])}")
 print("links with trajectories:", selected)

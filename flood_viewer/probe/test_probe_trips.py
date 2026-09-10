@@ -8,7 +8,9 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from probe_trips import assign_trips, detect_stays, haversine_m, min_enclosing_circle  # noqa: E402
+from probe_trips import (assign_trips, detect_stays, haversine_m, min_enclosing_circle, merge_stays,  # noqa: E402
+                         classify_modes, detect_mode_changes, detect_turns, PARAMS,
+                         MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_BIKE, MODE_UNKNOWN)
 
 M_PER_DEG_LAT = 111_000.0
 
@@ -133,6 +135,84 @@ def test_dense(lon, lat, t):
     assert nd[:4] == nm[:4], "dense move points equal move points for the dense trips"
     assert nm[4] == 3 and nd[4] == 0, "the last trip's 3 move points are sparse and get no line"
     print("ok: dense runs")
+    test_merge_stays()
+    test_modes_and_events()
+
+
+def test_merge_stays():
+    lon0, lat0 = 139.7, 35.68
+    x = lambda m: lon0 + m / (M_PER_DEG_LAT * np.cos(np.radians(lat0)))
+    # stay A (0-30 min at 0 m), 5-min excursion to 200 m, stay B (35-60 min at 30 m), stay C (200 min later at 300 m)
+    lon = np.array([x(0)] * 4 + [x(200)] + [x(30)] * 4 + [x(300)] * 3)
+    lat = np.full(len(lon), lat0)
+    t = np.array([0, 600, 1200, 1800, 2100, 2400, 3000, 3300, 3600, 15600, 16200, 16800.0])
+    sl = detect_stays(lon, lat, t, 50.0, 20.0)
+    assert list(sl) == [0, 0, 0, 0, -1, 1, 1, 1, 1, 2, 2, 2], sl
+    m = merge_stays(sl, lon, lat, t, 10.0, 100.0)
+    assert list(m) == [0] * 9 + [1] * 3, m           # A + excursion + B merged; C (3 h later) separate
+    m2 = merge_stays(sl, lon, lat, t, 10.0, 20.0)     # centroids 30 m apart > 20 m: no merge
+    assert list(m2) == list(sl), m2
+    m3 = merge_stays(sl, lon, lat, t, 0, 100.0)
+    assert list(m3) == list(sl), "gap 0 disables merging"
+    print("ok: stay merge")
+
+
+def _R_from_track(lon, lat, t, act=None):
+    """Minimal R dict (one user, no stays, all dense, one trip) for the mode functions."""
+    import pandas as pd
+    n = len(t)
+    df = pd.DataFrame({"recordedat": pd.Timestamp("2024-08-14") + pd.to_timedelta(t, unit="s")})
+    if act is not None:
+        names = sorted(set(a for a in act if a))
+        df["act"] = [names.index(a) if a else -1 for a in act]
+        df.attrs["acts"] = np.array(names + [""], dtype=object)
+    return {"lon": np.asarray(lon, float), "lat": np.asarray(lat, float), "tsec": np.asarray(t, float), "ucode": np.zeros(n, np.int32),
+            "seg": np.zeros(n, np.int8), "dense": np.ones(n, np.int8), "dense_run": np.zeros(n, np.int64), "trip_no": np.ones(n, np.int32), "df": df}
+
+
+def test_modes_and_events():
+    lon0, lat0 = 139.7, 35.68
+    kx = M_PER_DEG_LAT * np.cos(np.radians(lat0))
+    xs, ys, ts = [], [], []
+    def add(x, y, dt):
+        ts.append((ts[-1] if ts else 0.0) + dt); xs.append(x); ys.append(y)
+    # drive east 30 s/point at 40 km/h (333 m per point) for 12 points, one "still" point at a signal,
+    # then walk north 1.2 km/h... use 60 s/point at 4.3 km/h (72 m) for 8 points, then a U-turn walking back
+    add(0, 0, 0)
+    for i in range(1, 13): add(333 * i, 0, 30)
+    add(333 * 12, 0, 60)                                   # stopped 1 minute (implied speed 0)
+    for i in range(1, 9): add(333 * 12, 72 * i, 60)        # walk north 576 m
+    for i in range(1, 6): add(333 * 12, 72 * 8 - 72 * i, 60)   # walk back south (180 deg turn)
+    lon = [lon0 + x / kx for x in xs]; lat = [lat0 + y / M_PER_DEG_LAT for y in ys]
+    P = dict(PARAMS)
+    R = _R_from_track(lon, lat, ts)
+    mode, v, group = classify_modes(R, P)            # speed only (no activity column)
+    assert (mode[1:13] == MODE_VEHICLE).all(), mode[:14]
+    assert mode[0] == MODE_UNKNOWN, "the first point has no implied speed and no left neighbour: unknown"
+    assert (mode[14:] == MODE_WALK).all(), mode[14:]
+    assert mode[13] in (MODE_VEHICLE, MODE_WALK, MODE_UNKNOWN)
+    idx, vm, gap = detect_mode_changes(R, mode, v, P)
+    assert list(idx) == [13], idx                     # the stop after the drive already belongs to the walk run
+    assert 39 < vm[0] < 41 and abs(gap[0] - 1.0) < 1e-9, (vm, gap)
+    ti, ang = detect_turns(R, mode, group, P)
+    assert len(ti) == 1 and ti[0] == 21 and ang[0] > 179, (ti, ang)   # the U-turn at the north end, once
+    # with the activity column the OS labels win where they decide
+    act = ["in_vehicle"] * 13 + ["still"] + ["on_foot"] * 13
+    R2 = _R_from_track(lon, lat, ts, act)
+    mode2, v2, g2 = classify_modes(R2, P)
+    assert (mode2[:13] == MODE_VEHICLE).all() and (mode2[14:] == MODE_WALK).all(), mode2
+    P3 = dict(P, MODE_SOURCE="activity")
+    mode3, _, _ = classify_modes(R2, P3)
+    assert mode3[13] == MODE_UNKNOWN and (mode3[:13] == MODE_VEHICLE).all(), "'still' between different modes stays unknown"
+    # a lone on_foot flicker inside a drive is too short for a walk run and becomes vehicle
+    act4 = ["in_vehicle"] * 6 + ["on_foot"] + ["in_vehicle"] * 6 + ["still"] + ["on_foot"] * 13
+    mode4, _, _ = classify_modes(_R_from_track(lon, lat, ts, act4), P)
+    assert (mode4[:13] == MODE_VEHICLE).all(), mode4[:13]
+    # walk-only trajectories: sparse points and stays never get a mode
+    R5 = _R_from_track(lon, lat, ts); R5["dense"][:5] = 0; R5["seg"][20] = 1
+    mode5, _, _ = classify_modes(R5, P)
+    assert (mode5[:5] == MODE_NONE).all() and mode5[20] == MODE_NONE
+    print("ok: modes, vehicle->walk change, sharp turn")
 
 
 if __name__ == "__main__":
