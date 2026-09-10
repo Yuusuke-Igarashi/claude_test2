@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from probe_trips import assign_trips, detect_stays, haversine_m  # noqa: E402
+from probe_trips import assign_trips, detect_stays, haversine_m, min_enclosing_circle  # noqa: E402
 
 M_PER_DEG_LAT = 111_000.0
 
@@ -40,9 +40,9 @@ def track():
         add(1000 + rng.uniform(-5, 5), 2000 + rng.uniform(-5, 5), 60)
     for i in range(5):                        # walk on
         add(1000 + 100 * (i + 1), 2000, 60)
-    add(1500, 2100, 2 * 3600)                 # time gap 2 h
+    add(1500, 2200, 2 * 3600)                 # time gap 2 h, 200 m further (clearly not a stay pair)
     for i in range(5):
-        add(1500, 2100 + 100 * (i + 1), 60)
+        add(1500, 2200 + 100 * (i + 1), 60)
     add(6500, 2600, 30)                       # jump: 5 km in 30 s
     for i in range(5):
         add(6500 + 100 * (i + 1), 2600, 60)
@@ -53,9 +53,36 @@ def track():
     return np.array(lon), np.array(lat), np.array(t)
 
 
+def test_mec():
+    # right triangle with legs 60/80: circumradius = hypotenuse/2 = 50
+    c = min_enclosing_circle([(0, 0), (60, 0), (0, 80)])
+    assert abs(c[2] - 50) < 1e-6, c
+    # collinear: half the span
+    c = min_enclosing_circle([(0, 0), (10, 0), (70, 0), (30, 0)])
+    assert abs(c[2] - 35) < 1e-6 and abs(c[0] - 35) < 1e-6, c
+    # acute triangle inside a cluster: 3 far points define the circle, others inside
+    rng = np.random.default_rng(1)
+    pts = [(float(x), float(y)) for x, y in rng.uniform(-30, 30, size=(200, 2))] + [(-49, 0), (49, 0), (0, 49)]
+    c = min_enclosing_circle(pts)
+    assert all(np.hypot(x - c[0], y - c[1]) <= c[2] + 1e-6 for x, y in pts)
+    assert c[2] < 50.5, c
+    # circle vs anchor: points drifting 0,40,80 m -> anchor (R=50) keeps 0,40 only; circle keeps all three (radius 40)
+    lon0, lat0 = 139.7, 35.68
+    lon = np.array([lon0 + d / (M_PER_DEG_LAT * np.cos(np.radians(lat0))) for d in (0, 40, 80, 80, 80)])
+    lat = np.full(5, lat0); t = np.array([0, 600, 1200, 1800, 2400.0])
+    assert (detect_stays(lon, lat, t, 50.0, 20.0, "circle") == 0).all(), "80 m span fits a 50 m-radius circle"
+    a = detect_stays(lon, lat, t, 50.0, 20.0, "anchor")
+    assert a[0] == -1 and (a[1:] == 0).all(), a   # anchor at 0 m fails (80 m away); anchor at 40 m covers 40..80 for 30 min
+    lon = np.array([lon0 + d / (M_PER_DEG_LAT * np.cos(np.radians(lat0))) for d in (0, 40, 80, 120, 120)])
+    c = detect_stays(lon, lat, t, 50.0, 20.0, "circle")
+    assert (c == np.array([0, 0, 0, -1, -1])).all(), c   # 0..80 fits (r=40) for 20 min; adding 120 m needs r=60
+    print("ok: minimum enclosing circle")
+
+
 def main():
+    test_mec()
     lon, lat, t = track()
-    sl = detect_stays(lon, lat, t, 100.0, 20.0)
+    sl = detect_stays(lon, lat, t, 50.0, 20.0)
     n = len(t)
     home = slice(0, 30); office = slice(50, 95); pause = slice(105, 115)
     assert (sl[home] == 0).all(), "home stay detected"
@@ -69,6 +96,8 @@ def main():
     assert sl[131] == 2 and sl[132] == 2, "two sparse points 3 h apart within 100 m form a stay"
     assert sl.max() == 2, f"exactly three stays, got {sl.max() + 1}"
 
+    # same labels with the anchor method at R = 50 on this track (clusters are tight)
+    assert (detect_stays(lon, lat, t, 50.0, 20.0, "anchor") == sl).all()
     tr, rs = assign_trips(sl, lon, lat, t, 30.0, 150.0, 500.0)
     # expected trips: [home + walk] [office + walk + pause + walk] [after gap] [after jump]
     assert (tr[0:first_office] == 0).all(), "trip 0 = home stay + first walk"

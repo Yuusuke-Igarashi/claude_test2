@@ -14,8 +14,10 @@ Output: per input file, in --out
   MultiPoint of stay centroids overlapping the window (dwell).
 
 Rules (parameters in PARAMS, overridable from the command line):
-  Stay : a run of consecutive points that all lie within STAY_RADIUS_M of the run's first point
-         and spans at least STAY_MIN_MIN minutes. Speed is not used (speed 0 alone is not a stay).
+  Stay : a run of consecutive points that can be enclosed by a circle of radius STAY_RADIUS_M
+         (minimum enclosing circle; STAY_METHOD=circle) and spans at least STAY_MIN_MIN minutes.
+         STAY_METHOD=anchor uses the cheaper rule "all points within R of the run's first point".
+         Speed is not used (speed 0 alone is not a stay).
   Move : every other point.
   Trip : the Move run plus the Stay run(s) immediately before it. A new trip id is forced when
          the time gap between consecutive points exceeds TIME_GAP_MIN (unless both points belong
@@ -38,8 +40,9 @@ import numpy as np
 import pandas as pd
 
 PARAMS = {
-    "STAY_RADIUS_M": 100.0,   # all points of a stay lie within this distance of the stay's first point
+    "STAY_RADIUS_M": 50.0,    # a stay's points all fit in a circle of this radius (minimum enclosing circle)
     "STAY_MIN_MIN": 20.0,     # minimum stay duration [minutes]
+    "STAY_METHOD": "circle",  # "circle": minimum enclosing circle radius <= R; "anchor": all within R of the first point
     "TIME_GAP_MIN": 30.0,     # a gap longer than this between consecutive points starts a new trip
     "JUMP_SPEED_KMH": 150.0,  # implied speed above this ...
     "JUMP_MIN_DIST_M": 500.0, # ... over at least this distance is an unnatural position jump
@@ -62,13 +65,89 @@ def haversine_m(lon1, lat1, lon2, lat2):
 # ----------------------------------------------------------------------------------------------
 # 1. Stay / Move segmentation
 # ----------------------------------------------------------------------------------------------
-def detect_stays(lon: np.ndarray, lat: np.ndarray, t: np.ndarray, radius_m: float, min_minutes: float):
-    """Return an int array: stay run index (0..k-1) per point, or -1 for Move.
+def _circle2(a, b):
+    cx, cy = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    return cx, cy, math.hypot(a[0] - cx, a[1] - cy)
 
-    lon/lat in degrees, t in seconds (sorted). Anchor-based stay-point detection: starting at
-    point i, extend j while dist(p_i, p_j) <= radius; if the run i..j-1 lasts >= min_minutes it is
-    a stay and scanning resumes at j, otherwise scanning resumes at i+1.
-    """
+
+def _circle3(a, b, c):
+    ax, ay = a; bx, by = b; cx, cy = c
+    d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+    if abs(d) < 1e-12:                       # collinear: the circle on the farthest pair
+        cands = [_circle2(a, b), _circle2(a, c), _circle2(b, c)]
+        return max(cands, key=lambda k: k[2])
+    ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d
+    uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d
+    return ux, uy, math.hypot(ax - ux, ay - uy)
+
+
+def _inside(c, p, eps=1e-6):
+    return math.hypot(p[0] - c[0], p[1] - c[1]) <= c[2] + eps
+
+
+def min_enclosing_circle(pts):
+    """Smallest circle (cx, cy, r) containing all 2-D points (Welzl, iterative, expected O(n))."""
+    if not pts:
+        return (0.0, 0.0, 0.0)
+    c = (pts[0][0], pts[0][1], 0.0)
+    for i in range(1, len(pts)):
+        p = pts[i]
+        if _inside(c, p):
+            continue
+        c = (p[0], p[1], 0.0)
+        for j in range(i):
+            q = pts[j]
+            if _inside(c, q):
+                continue
+            c = _circle2(p, q)
+            for k in range(j):
+                r = pts[k]
+                if not _inside(c, r):
+                    c = _circle3(p, q, r)
+    return c
+
+
+M_PER_DEG = EARTH_R * math.pi / 180.0   # metres per degree of latitude (same sphere as haversine_m)
+
+
+def _local_xy(lon, lat, lon0, lat0):
+    """Equirectangular metres relative to (lon0, lat0); exact enough for stay-sized extents."""
+    k = math.cos(math.radians(lat0))
+    return (lon - lon0) * M_PER_DEG * k, (lat - lat0) * M_PER_DEG
+
+
+def detect_stays_circle(lon: np.ndarray, lat: np.ndarray, t: np.ndarray, radius_m: float, min_minutes: float):
+    """Stay = maximal run i..j-1 whose minimum enclosing circle has radius <= radius_m, lasting
+    >= min_minutes. The circle is only recomputed when a new point falls outside the current one."""
+    n = len(lon)
+    label = np.full(n, -1, dtype=np.int64)
+    min_s = min_minutes * 60.0
+    k = 0
+    i = 0
+    while i < n:
+        x, y = _local_xy(lon[i:], lat[i:], lon[i], lat[i])
+        pts = []
+        c = (0.0, 0.0, 0.0)
+        j = i
+        while j < n:
+            p = (float(x[j - i]), float(y[j - i]))
+            if pts and _inside(c, p):
+                pts.append(p); j += 1; continue
+            pts.append(p)
+            c2 = min_enclosing_circle(pts)
+            if c2[2] > radius_m:
+                pts.pop(); break
+            c = c2; j += 1
+        # run is i..j-1
+        if t[j - 1] - t[i] >= min_s:          # a single point has zero duration and is never a stay
+            label[i:j] = k; k += 1; i = j
+        else:
+            i += 1
+    return label
+
+
+def detect_stays_anchor(lon: np.ndarray, lat: np.ndarray, t: np.ndarray, radius_m: float, min_minutes: float):
+    """Stay = run i..j-1 with all points within radius_m of point i (cheaper approximation)."""
     n = len(lon)
     label = np.full(n, -1, dtype=np.int64)
     if n == 0:
@@ -99,6 +178,14 @@ def detect_stays(lon: np.ndarray, lat: np.ndarray, t: np.ndarray, radius_m: floa
 # ----------------------------------------------------------------------------------------------
 # 2. Trip ids
 # ----------------------------------------------------------------------------------------------
+def detect_stays(lon, lat, t, radius_m, min_minutes, method="circle"):
+    if method == "anchor":
+        return detect_stays_anchor(lon, lat, t, radius_m, min_minutes)
+    if method == "circle":
+        return detect_stays_circle(lon, lat, t, radius_m, min_minutes)
+    raise ValueError(f"unknown STAY_METHOD {method!r}")
+
+
 def assign_trips(stay_label: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np.ndarray,
                  time_gap_min: float, jump_speed_kmh: float, jump_min_dist_m: float):
     """Return (trip index per point, split reason per point).
@@ -188,7 +275,7 @@ def process_file(path: Path, P: dict):
         idx = g.index.to_numpy()
         lon = g["lon"].to_numpy(float); lat = g["lat"].to_numpy(float)
         t = (g["recordedat"] - pd.Timestamp("1970-01-01")).dt.total_seconds().to_numpy(float)
-        sl = detect_stays(lon, lat, t, P["STAY_RADIUS_M"], P["STAY_MIN_MIN"])
+        sl = detect_stays(lon, lat, t, P["STAY_RADIUS_M"], P["STAY_MIN_MIN"], P["STAY_METHOD"])
         tr, rs = assign_trips(sl, lon, lat, t, P["TIME_GAP_MIN"], P["JUMP_SPEED_KMH"], P["JUMP_MIN_DIST_M"])
         ushort = uid[:12]
         stay_ids = np.where(sl >= 0, [f"{ushort}_S{k+1:03d}" for k in np.maximum(sl, 0)], "")
@@ -300,7 +387,10 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("out"))
     ap.add_argument("--event-date", default="2024-08-21", help="files of this date go to event_*.geojson, others to baseline_*")
     for k, v in PARAMS.items():
-        ap.add_argument(f"--{k.lower().replace('_', '-')}", type=float, default=v)
+        if k == "STAY_METHOD":
+            ap.add_argument("--stay-method", choices=["circle", "anchor"], default=v)
+        else:
+            ap.add_argument(f"--{k.lower().replace('_', '-')}", type=float, default=v)
     args = ap.parse_args()
     P = {k: getattr(args, k.lower()) for k in PARAMS}
     if P["MAX_ACCURACY_M"] is not None and math.isnan(P["MAX_ACCURACY_M"]):

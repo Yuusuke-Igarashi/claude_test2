@@ -65,10 +65,11 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 
 | 規則 | 既定値 | 引数 |
 |---|---|---|
-| Stay: 先頭点から半径 R 以内に連続して留まり、D 分以上 | R = 100 m, D = 20 分 | `--stay-radius-m`, `--stay-min-min` |
+| Stay: 連続する点をすべて含む半径 R の円が描け（最小包含円の半径 ≤ R）、D 分以上 | R = 50 m, D = 20 分 | `--stay-radius-m`, `--stay-min-min` |
+| Stay の判定法: `circle`（最小包含円）/ `anchor`（先頭点から R 以内、近似・高速） | circle | `--stay-method` |
 | Move: それ以外（速度 0 でも Move） | | |
 | トリップ = 直前の一連の Stay + 連続する Move | | |
-| 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ | 30 分 | `--time-gap-min` |
+| 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ（同一 Stay 内の間隔は除く） | 30 分 | `--time-gap-min` |
 | 位置ジャンプ: 連続点の見かけ速度がこれを超え、かつ距離がこれ以上 | 150 km/h, 500 m | `--jump-speed-kmh`, `--jump-min-dist-m` |
 | 精度フィルタ: accuracy がこれを超える点を除外 | なし | `--max-accuracy-m` |
 
