@@ -93,7 +93,7 @@ button:hover{background:#f0efec}
   <button id="playBtn" title="Space">▶ 再生</button>
   <span id="timeLabel">--:--</span>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
-  <span class="stat">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本</span>
+  <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本</span>
   <span class="seg" title="M キーで切替">
     <button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button>
   </span>
@@ -233,6 +233,7 @@ const S = {
   mode: "traffic",      // "traffic" | "traj"
   traj: null,           // {bt, et, bd, ed} parsed datasets or null
   showBase: true, showEvent: true,
+  trajFocus: null, trajPin: null,   // {id, kind} of the highlighted trajectory (hover / click-pinned)
   hoverId: null, pinnedId: null,
   playing: false, timer: null
 };
@@ -554,7 +555,14 @@ function initMap(gj){
       });
     };
     addLinkLayers("", 1, true);
-    addLinkLayers("-dim", 0.3, false);
+    // trajectory mode: the network is drawn as uniform light-gray context only (no traffic classes)
+    map.addLayer({
+      id:"links-context", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round", visibility:"none" },
+      paint:{ "line-color": cssVar("--road-gray"),
+              "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.6, 14, 1.0, 17, 2.2],
+              "line-opacity": 0.45 }
+    });
     // trajectory / dwell layers (filled by updateTraj)
     const EMPTY = {type:"FeatureCollection", features:[]};
     for(const sid of ["traj-base","traj-event","dwell-base","dwell-event"]) map.addSource(sid, {type:"geojson", data: EMPTY});
@@ -599,15 +607,33 @@ function initMap(gj){
     $("loader").style.display = "none";
 
     map.on("mousemove", "links-hit", onHover);
-    map.on("mouseleave", "links-hit", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("mouseleave", "links-hit", () => { if(S.mode === "traj") return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
     map.on("click", "links-hit", onClick);
     map.on("click", (e) => {
+      if(S.mode === "traj"){
+        const fts = map.queryRenderedFeatures(e.point, {layers: TRAJ_LAYERS.filter(l => map.getLayer(l))});
+        if(!fts.length){ S.trajPin = null; setTrajFocus(null); }
+        return;
+      }
       const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
     for(const lid of TRAJ_LAYERS){
-      map.on("mousemove", lid, (e) => showTip(e, lid));
-      map.on("mouseleave", lid, hideTip);
+      const kind = lid.endsWith("base") ? "base" : "event";
+      map.on("mousemove", lid, (e) => {
+        const ft = e.features && e.features[0]; if(!ft) return;
+        map.getCanvas().style.cursor = "pointer";
+        showTip(e, lid);
+        if(!S.trajPin) setTrajFocus({id: ft.properties.id, kind});
+      });
+      map.on("mouseleave", lid, () => { map.getCanvas().style.cursor = ""; hideTip(); if(!S.trajPin) setTrajFocus(null); });
+      map.on("click", lid, (e) => {
+        const ft = e.features && e.features[0]; if(!ft) return;
+        const f = {id: ft.properties.id, kind};
+        S.trajPin = (S.trajPin && S.trajPin.id === f.id && S.trajPin.kind === f.kind) ? null : f;
+        setTrajFocus(S.trajPin || f);
+        e.originalEvent.stopPropagation();
+      });
     }
     map.on("moveend", updateTraj);
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
@@ -631,12 +657,13 @@ function setMode(m){
   $("trajOpts").style.display = traj ? "inline" : "none";
   $("legendTraffic").style.display = traj ? "none" : "flex";
   $("legendTraj").style.display = traj ? "flex" : "none";
-  // dim the network in trajectory mode so trajectories stand out
-  for(const id of ["links-base","links-error"]){
-    map.setLayoutProperty(id, "visibility", traj ? "none" : "visible");
-    map.setLayoutProperty(id+"-dim", "visibility", traj ? "visible" : "none");
-  }
-  setTrajHighlight(S.hoverId);
+  // trajectory mode shows no traffic information: uniform context network, no counts, no chart panel
+  $("statTraffic").style.display = traj ? "none" : "";
+  for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traj ? "none" : "visible");
+  map.setLayoutProperty("links-context", "visibility", traj ? "visible" : "none");
+  if(traj){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null); }
+  S.trajPin = null;
+  setTrajFocus(null);
   updateTraj();
 }
 
@@ -682,15 +709,20 @@ function updateTraj(){
   const bt = pick(S.traj.bt, S.showBase), et = pick(S.traj.et, S.showEvent);
   const bd = pick(S.traj.bd, S.showBase), ed = pick(S.traj.ed, S.showEvent);
   setAll({"traj-base":bt, "traj-event":et, "dwell-base":bd, "dwell-event":ed});
-  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: 平時 ${bt.features.length} 本・滞留 ${bd.features.length} 点 / イベント時 ${et.features.length} 本・滞留 ${ed.features.length} 点`);
+  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: 平時 ${bt.features.length} 本・滞留 ${bd.features.length} 点 / イベント時 ${et.features.length} 本・滞留 ${ed.features.length} 点　｜ 軌跡・滞留点にホバーで強調、クリックで固定`);
 }
 
-function setTrajHighlight(fid){
+// Focus one trajectory (link id + baseline/event kind) together with its dwell points;
+// everything else is faded. f = {id, kind} or null.
+function setTrajFocus(f){
   if(!map || !map.getLayer("traj-base-hl")) return;
-  const id = (S.mode === "traj" && fid !== null && fid >= 0) ? S.gj.features[fid].properties.id : "";
-  for(const l of ["traj-base-hl","traj-event-hl","dwell-base-hl","dwell-event-hl"]) map.setFilter(l, ["==", ["get","id"], id]);
-  // while a link is hovered, fade the other trajectories so its own stand out
-  const dim = id !== "";
+  S.trajFocus = f;
+  const idFor = (kind) => (f && f.kind === kind) ? f.id : "";
+  map.setFilter("traj-base-hl",  ["==", ["get","id"], idFor("base")]);
+  map.setFilter("dwell-base-hl", ["==", ["get","id"], idFor("base")]);
+  map.setFilter("traj-event-hl", ["==", ["get","id"], idFor("event")]);
+  map.setFilter("dwell-event-hl",["==", ["get","id"], idFor("event")]);
+  const dim = !!f;
   map.setPaintProperty("traj-base", "line-opacity", dim ? 0.12 : 0.7);
   map.setPaintProperty("traj-event", "line-opacity", dim ? 0.12 : 0.7);
   map.setPaintProperty("dwell-base", "circle-opacity", dim ? 0.15 : 0.9);
@@ -728,7 +760,6 @@ function setHover(fid){
   if(S.hoverId !== null) map.setFeatureState({source:"links", id:S.hoverId}, {hover:0});
   S.hoverId = fid;
   if(fid !== null) map.setFeatureState({source:"links", id:fid}, {hover:1});
-  setTrajHighlight(fid);
 }
 
 function placePanel(point){
@@ -751,6 +782,7 @@ function pickFeature(fts){
   return best;
 }
 function onHover(e){
+  if(S.mode === "traj") return;   // no traffic information in trajectory mode
   const ft = pickFeature(e.features);
   if(!ft) return;
   map.getCanvas().style.cursor = "pointer";
@@ -758,6 +790,7 @@ function onHover(e){
   if(S.pinnedId === null){ placePanel(e.point); showChart(ft); }
 }
 function onClick(e){
+  if(S.mode === "traj") return;
   const ft = pickFeature(e.features);
   if(!ft) return;
   if(S.pinnedId === ft.id){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }

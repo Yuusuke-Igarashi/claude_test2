@@ -176,31 +176,73 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   await page.close();
 });
 
-test("trajectory mode: zoom gating, viewport filtering, highlight, toggles", async () => {
+test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic info", async () => {
   const page = await openViewer();
   await page.click("#modeTraj"); await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => S.mode), "traj");
   assert.match(await page.textContent("#trajStatus"), /ズーム 14 以上/);
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "nothing drawn below the zoom threshold");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts hidden");
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("links-base", "visibility")), "none", "traffic-coloured network hidden");
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("links-context", "visibility")), "visible");
   await page.evaluate((t) => { map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await page.waitForTimeout(2000);
   const st = await page.textContent("#trajStatus");
   const m = st.match(/平時 (\d+) 本・滞留 (\d+) 点 \/ イベント時 (\d+) 本・滞留 (\d+) 点/);
   assert.ok(m, "status lists counts: " + st);
   assert.ok(+m[1] > 0 && +m[3] > 0, "trajectories drawn at zoom 15");
-  assert.ok(await page.evaluate(() => map.querySourceFeatures("traj-event").length > 0));
-  const pt = await findLink(page, 2, T_18);
-  await hover(page, pt);
-  const hl = await page.evaluate(() => ({ filter: map.getFilter("traj-event-hl")[2], hl: map.queryRenderedFeatures({ layers: ["traj-event-hl"] }).length, bt: document.getElementById("roBT").textContent }));
-  assert.notEqual(hl.filter, "", "highlight filter set to hovered link id");
-  assert.ok(hl.hl >= 1, "highlighted trajectory rendered");
-  assert.equal(hl.bt, "1", "panel shows trajectory count");
-  await page.screenshot({ path: join(SHOTS, "trajectory_hover.png") });
+
+  // hovering a link shows no chart panel in trajectory mode
+  const link = await findLink(page, 2, T_18);
+  await hover(page, link);
+  assert.notEqual(await page.evaluate(() => document.getElementById("chartPanel").style.display), "block", "no time-series panel on link hover");
+
+  // hover an event trajectory: it and its dwell points are focused, everything else faded
+  const tp = await page.evaluate(() => {
+    const fts = map.queryRenderedFeatures({ layers: ["traj-event"] });
+    // pick the one whose mid-point is nearest the centre so it is not under the top bar
+    const c0 = map.getCenter(); let best = null;
+    for (const f of fts) { const cs = f.geometry.coordinates; const c = cs[Math.floor(cs.length / 2)];
+      const d = Math.hypot(c[0] - c0.lng, c[1] - c0.lat); if (!best || d < best.d) { const p = map.project(c); best = { d, id: f.properties.id, x: p.x, y: p.y }; } }
+    return best;
+  });
+  assert.ok(tp, "an event trajectory is rendered");
+  await hover(page, tp);
+  // several trajectories can overlap at one pixel; the topmost one under the cursor gets the focus
+  const focus = await page.evaluate(([x, y]) => ({
+    hovered: document.getElementById("tip").style.display, eventHl: map.getFilter("traj-event-hl")[2], baseHl: map.getFilter("traj-base-hl")[2],
+    eventDwellHl: map.getFilter("dwell-event-hl")[2], baseOpacity: map.getPaintProperty("traj-base", "line-opacity"), eventOpacity: map.getPaintProperty("traj-event", "line-opacity"),
+    hlRendered: map.queryRenderedFeatures({ layers: ["traj-event-hl"] }).length, focus: S.trajFocus,
+    underCursor: map.queryRenderedFeatures([x, y], { layers: ["traj-event", "dwell-event"] }).map((f) => f.properties.id),
+  }), [tp.x, tp.y]);
+  assert.equal(focus.hovered, "block", "tooltip shown");
+  assert.ok(focus.focus && focus.focus.kind === "event" && focus.underCursor.includes(focus.focus.id), "focused trajectory is one under the cursor");
+  tp.id = focus.focus.id;
+  assert.equal(focus.eventHl, tp.id, "hovered event trajectory highlighted");
+  assert.equal(focus.eventDwellHl, tp.id, "its dwell points highlighted");
+  assert.equal(focus.baseHl, "", "baseline of the same link is not highlighted");
+  assert.ok(focus.baseOpacity < 0.2 && focus.eventOpacity < 0.2, "other trajectories faded");
+  assert.ok(focus.hlRendered >= 1, "highlight layer renders the trajectory");
+  await page.screenshot({ path: join(SHOTS, "trajectory_focus.png") });
+
+  // click pins the focus; moving away keeps it; clicking empty map clears it
+  const box = await page.locator("#map").boundingBox();
+  await page.mouse.click(box.x + tp.x, box.y + tp.y); await page.waitForTimeout(200);
+  assert.deepEqual(await page.evaluate(() => S.trajPin), { id: tp.id, kind: "event" }, "pinned");
+  await page.mouse.move(box.x + 30, box.y + box.height - 30); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => map.getFilter("traj-event-hl")[2]), tp.id, "pin survives mouse leave");
+  await page.evaluate(() => map.jumpTo({ zoom: 12.5 })); await page.waitForTimeout(800);
+  await page.mouse.click(box.x + 30, box.y + box.height - 30); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => S.trajPin), null, "pin cleared by clicking empty map");
+  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "fade removed");
+  await page.evaluate(() => map.jumpTo({ zoom: 15.2 })); await page.waitForTimeout(1500);
+
   await page.click("#chkBase"); await page.waitForTimeout(500);
   assert.match(await page.textContent("#trajStatus"), /平時 0 本・滞留 0 点/);
   await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => S.mode), "traffic");
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared in traffic mode");
+  assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts back");
   await page.close();
 });
 
