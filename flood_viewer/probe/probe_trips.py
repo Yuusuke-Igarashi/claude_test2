@@ -796,7 +796,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     # ---- trajectories: dense Move points of the requested modes exploded into the n_win windows they belong to ----
     modes = str(P["TRAJ_MODES"]).lower()
     mode_ok = np.ones(n, dtype=bool) if modes == "all" else np.isin(R["mode"], [MODE_OF_NAME[m.strip()] for m in modes.split(",") if m.strip()])
-    mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1) & mode_ok)
+    mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1) & mode_ok & (tsec >= day0))   # rows before the file's date are not drawn
     mins = (tsec[mv] - day0) / 60.0
     k0 = np.ceil(mins / SLOT).astype(np.int64)                 # first window end >= point time
     k0 = np.maximum(k0, 1)
@@ -865,8 +865,8 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
                              ("turn", turn_idx, lambda j: {"mode": MODE_NAMES[R["mode"][turn_idx[j]]], "angle_deg": round(float(turn_ang[j]), 1)})):
         if not len(idx):
             continue
-        sel = keep[idx]
         mins = (tsec[idx] - day0) / 60.0
+        sel = keep[idx] & (mins >= 0)
         kmin = np.maximum(np.ceil(mins / SLOT).astype(np.int64), 1)
         kmax = np.minimum(np.ceil((mins + W) / SLOT).astype(np.int64) - 1, int(1440 / SLOT))
         for j in np.flatnonzero(sel):
