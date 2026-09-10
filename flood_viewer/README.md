@@ -75,13 +75,11 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ（同一 Stay 内の間隔は除く） | 5 分 | `--time-gap-min` |
 | 位置ジャンプ: 連続点の見かけ速度がこれを超え、かつ距離がこれ以上 | 150 km/h, 500 m | `--jump-speed-kmh`, `--jump-min-dist-m` |
 | 密な点列: 間隔がこれ以下で連続し、この点数以上の点列だけを軌跡・トリップの線として描く（Stay 判定には掛けない。`--dense-for-stays` で掛ける） | 5 分, 10 点 | `--dense-max-gap-min`, `--dense-min-points`（0 で無効） |
-| Stay の統合: 連続する Stay の間隔がこれ以下で、重心間距離がこれ以下なら 1 つの Stay にする（間の短い外出点も Stay に含める） | 10 分, 100 m | `--stay-merge-gap-min`, `--stay-merge-dist-m`（0 で無効） |
-| 移動モード: 密な Move 点を walk / vehicle / bike / unknown に分類。`auto` は OS の activitytype（in_vehicle, on_bicycle, on_foot/walking/running）を優先し、still/unknown/欠損は連続点の見かけ速度で判定 | auto | `--mode-source auto/speed/activity` |
-| 見かけ速度の閾値: これ以下で徒歩候補 / これ以上で車両候補。その間は不明 | 7 km/h, 20 km/h | `--walk-max-kmh`, `--vehicle-min-kmh` |
-| モード区間の最小長: 徒歩はこの点数以上かつこの分数以上、車両・自転車はこの点数以上。満たさない区間は不明になり、前後が同じモードならそのモードに吸収 | 5 点・5 分, 3 点 | `--walk-min-points`, `--walk-min-min`, `--vehicle-min-points` |
-| 車→徒歩: 同一トリップ内で車両区間の終わりからこの分数以内に徒歩区間が始まる。徒歩区間の先頭点を出力 | 10 分 | `--modechange-max-gap-min` |
-| 急な方向転換: 手前の区間（後方に距離 L 以上離れた点から）と先の区間（前方に L 以上離れた点まで）の方位差がこれ以上。L は徒歩 / それ以外で別。全モードの Move 点が対象 | 120°, 30 m / 100 m | `--turn-min-deg`, `--turn-leg-walk-m`, `--turn-leg-other-m` |
-| ビューワー軌跡に描くモード | walk | `--traj-modes walk,vehicle,bike,unknown` または `all` |
+| Stay の統合: 連続する Stay の間隔がこれ以下で、重心が Stay 半径の 2 倍以内なら 1 つの Stay にする（間の短い外出点も Stay に含める） | 10 分 | `--stay-merge-gap-min`（0 で無効） |
+| 移動モード: 密な Move 点に OS の activitytype を当てる。walk = on_foot / walking / running、vehicle = in_vehicle、other = それ以外（still, on_bicycle, unknown, 欠損）。ラベルは短く揺れるので、同じモードに挟まれたこれより短い区間はそのモードに吸収し、残った短い walk / vehicle 区間は other にする | 3 分 | `--mode-min-min` |
+| 車→徒歩: 同一トリップ内で vehicle 区間の次に walk 区間が来る。walk 区間の先頭点を出力 | | |
+| 急な方向転換: 手前の区間（後方に L 以上離れた点から）と先の区間（前方に L 以上離れた点まで）の方位差がこれ以上。全モードの密な Move 点が対象 | 120°, L = 50 m | `--turn-min-deg`, `--turn-leg-m` |
+| ビューワー軌跡: walk の点だけを描く | | |
 | 精度フィルタ: accuracy がこれを超える点を除外 | なし | `--max-accuracy-m` |
 | 範囲フィルタ: bbox 内の点だけを読み込み時に残す（GeoJSON の範囲からも指定可） | なし | `--bbox lon_min,lat_min,lon_max,lat_max` / `--area-geojson path` |
 | ビューワー用出力の範囲: この bbox 内に点を持つユーザーだけ出力 | bbox と同じ | `--viewer-bbox` |
@@ -93,13 +91,13 @@ notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08
 
 出力（`--out`）:
 
-- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / bike / unknown、Stay と疎な点は空）, flag（modechange / turn）
+- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / other、Stay と疎な点は空）, flag（modechange / turn）
 - `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
-- `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle / n_bike、起点・終点 Stay、距離）
+- `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle、起点・終点 Stay、距離）
 - `<stem>_events.geojson`: 車→徒歩の変化点（at, v_before_kmh, gap_min）と急な方向転換点（at, mode, angle_deg）の Point
 - `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date` の日付なら event、他は baseline。
   各地物は kind = traj / dwell / modechange / turn、id = userid の先頭 12 文字、time = 15 分刻みの窓終端 "HH:MM"。
-  軌跡は窓内 [time−60 分, time] の徒歩（`--traj-modes`）の密な Move 点（トリップ・点列境界で分割、複数なら MultiLineString）、
+  軌跡は窓内 [time−60 分, time] の徒歩の密な Move 点（トリップ・点列境界で分割、複数なら MultiLineString）、
   滞留は窓に重なる Stay の重心 MultiPoint、変化点・方向転換点は窓内に時刻が入る Point。
   ビューワーは表示中の時刻のファイルだけを読むので `--viewer-bbox` は不要。
   `--merged-viewer` で従来の 1 日 1 ファイル形式も併せて出力できる。

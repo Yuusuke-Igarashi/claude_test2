@@ -10,7 +10,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent))
 from probe_trips import (assign_trips, detect_stays, haversine_m, min_enclosing_circle, merge_stays,  # noqa: E402
                          classify_modes, detect_mode_changes, detect_turns, PARAMS,
-                         MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_BIKE, MODE_UNKNOWN)
+                         MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_OTHER)
 
 M_PER_DEG_LAT = 111_000.0
 
@@ -177,41 +177,40 @@ def test_modes_and_events():
     def add(x, y, dt):
         ts.append((ts[-1] if ts else 0.0) + dt); xs.append(x); ys.append(y)
     # drive east 30 s/point at 40 km/h (333 m per point) for 12 points, one "still" point at a signal,
-    # then walk north 1.2 km/h... use 60 s/point at 4.3 km/h (72 m) for 8 points, then a U-turn walking back
+    # then walk north 60 s/point at 4.3 km/h (72 m) for 8 points, then a U-turn walking back
     add(0, 0, 0)
     for i in range(1, 13): add(333 * i, 0, 30)
-    add(333 * 12, 0, 60)                                   # stopped 1 minute (implied speed 0)
+    add(333 * 12, 0, 60)                                   # stopped 1 minute
     for i in range(1, 9): add(333 * 12, 72 * i, 60)        # walk north 576 m
     for i in range(1, 6): add(333 * 12, 72 * 8 - 72 * i, 60)   # walk back south (180 deg turn)
     lon = [lon0 + x / kx for x in xs]; lat = [lat0 + y / M_PER_DEG_LAT for y in ys]
     P = dict(PARAMS)
-    R = _R_from_track(lon, lat, ts)
-    mode, v, group = classify_modes(R, P)            # speed only (no activity column)
-    assert (mode[1:13] == MODE_VEHICLE).all(), mode[:14]
-    assert mode[0] == MODE_UNKNOWN, "the first point has no implied speed and no left neighbour: unknown"
-    assert (mode[14:] == MODE_WALK).all(), mode[14:]
-    assert mode[13] in (MODE_VEHICLE, MODE_WALK, MODE_UNKNOWN)
+    act = ["in_vehicle"] * 13 + ["still"] + ["on_foot"] * 13
+    R = _R_from_track(lon, lat, ts, act)
+    mode, v, group = classify_modes(R, P)
+    assert (mode[:13] == MODE_VEHICLE).all() and (mode[14:] == MODE_WALK).all(), mode
+    assert mode[13] == MODE_OTHER, "'still' between different modes stays other"
     idx, vm, gap = detect_mode_changes(R, mode, v, P)
-    assert list(idx) == [13], idx                     # the stop after the drive already belongs to the walk run
-    assert 39 < vm[0] < 41 and abs(gap[0] - 1.0) < 1e-9, (vm, gap)
+    assert list(idx) == [14], idx                     # first walk point after the vehicle run
+    assert 39 < vm[0] < 41 and abs(gap[0] - 2.0) < 1e-9, (vm, gap)
     ti, ang = detect_turns(R, mode, group, P)
     assert len(ti) == 1 and ti[0] == 21 and ang[0] > 179, (ti, ang)   # the U-turn at the north end, once
-    # with the activity column the OS labels win where they decide
-    act = ["in_vehicle"] * 13 + ["still"] + ["on_foot"] * 13
-    R2 = _R_from_track(lon, lat, ts, act)
-    mode2, v2, g2 = classify_modes(R2, P)
+    # label flicker: a lone on_foot point inside a drive (< MODE_MIN_MIN) becomes vehicle, and a lone
+    # in_vehicle point inside the walk becomes walk; no spurious mode change
+    act2 = ["in_vehicle"] * 6 + ["on_foot"] + ["in_vehicle"] * 6 + ["still"] + ["on_foot"] * 6 + ["in_vehicle"] + ["on_foot"] * 6
+    R2 = _R_from_track(lon, lat, ts, act2)
+    mode2, v2, _ = classify_modes(R2, P)
     assert (mode2[:13] == MODE_VEHICLE).all() and (mode2[14:] == MODE_WALK).all(), mode2
-    P3 = dict(P, MODE_SOURCE="activity")
-    mode3, _, _ = classify_modes(R2, P3)
-    assert mode3[13] == MODE_UNKNOWN and (mode3[:13] == MODE_VEHICLE).all(), "'still' between different modes stays unknown"
-    # a lone on_foot flicker inside a drive is too short for a walk run and becomes vehicle
-    act4 = ["in_vehicle"] * 6 + ["on_foot"] + ["in_vehicle"] * 6 + ["still"] + ["on_foot"] * 13
-    mode4, _, _ = classify_modes(_R_from_track(lon, lat, ts, act4), P)
-    assert (mode4[:13] == MODE_VEHICLE).all(), mode4[:13]
-    # walk-only trajectories: sparse points and stays never get a mode
-    R5 = _R_from_track(lon, lat, ts); R5["dense"][:5] = 0; R5["seg"][20] = 1
-    mode5, _, _ = classify_modes(R5, P)
-    assert (mode5[:5] == MODE_NONE).all() and mode5[20] == MODE_NONE
+    assert list(detect_mode_changes(R2, mode2, v2, P)[0]) == [14]
+    # no activity column at all: everything is "other", nothing is drawn or flagged
+    R3 = _R_from_track(lon, lat, ts)
+    mode3, v3, g3 = classify_modes(R3, P)
+    assert (mode3 == MODE_OTHER).all() and len(detect_mode_changes(R3, mode3, v3, P)[0]) == 0
+    assert len(detect_turns(R3, mode3, g3, P)[0]) == 1, "turns are found for every mode"
+    # sparse points and stays never get a mode
+    R4 = _R_from_track(lon, lat, ts, act); R4["dense"][:5] = 0; R4["seg"][20] = 1
+    mode4, _, _ = classify_modes(R4, P)
+    assert (mode4[:5] == MODE_NONE).all() and mode4[20] == MODE_NONE
     print("ok: modes, vehicle->walk change, sharp turn")
 
 

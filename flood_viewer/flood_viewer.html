@@ -699,7 +699,7 @@ const TRAJ_LAYERS = KINDS.flatMap(k => ROLES.map(r => `${k.src}-${r}`));
 const TRAJ_KIND = Object.fromEntries(KINDS.flatMap(k => ROLES.map(r => [`${k.src}-${r}`, `${ROLE_LABEL[r]} ${k.label}`])));
 const emptySlot = () => Object.fromEntries(TRAJ_LAYERS.map(l => [l, null]));
 const PROP_LABEL = {userid:"userid", n_points:"点数", trips:"トリップ", trip:"トリップ", mode:"モード", at:"時刻", v_before_kmh:"直前の車両速度 km/h", gap_min:"車両→徒歩の間隔 分", angle_deg:"転換角度 °"};
-const MODE_LABEL = {walk:"徒歩", vehicle:"車両", bike:"自転車", unknown:"不明"};
+const MODE_LABEL = {walk:"徒歩", vehicle:"車両", other:"その他"};
 
 // ============================================================
 // Mode & trajectory drawing
