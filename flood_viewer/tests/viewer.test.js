@@ -251,7 +251,7 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   await page.evaluate((t) => applyTime(t + 1), T_18); await waitSlot(page);
   await page.evaluate((t) => applyTime(t + 2), T_18); await waitSlot(page);
   assert.equal(await page.evaluate(() => S.lazy.loaded), "18:30");
-  assert.ok(await page.evaluate(() => S.lazy.cache.size >= 3 && S.lazy.cache.size <= 8), "slot cache bounded");
+  assert.ok(await page.evaluate(() => S.lazy.cache.size >= 3 && S.lazy.cache.size <= 4), "slot cache bounded");
   await page.evaluate((t) => applyTime(t), T_18); await waitSlot(page); await page.waitForTimeout(800);
 
   await page.click("#chkBase"); await page.waitForTimeout(500);

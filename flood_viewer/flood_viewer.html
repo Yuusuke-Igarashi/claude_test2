@@ -708,7 +708,7 @@ function trajStatus(text){
 }
 
 const hasTraj = () => !!(S.traj || S.lazy);
-const LAZY_CACHE = 8;
+const LAZY_CACHE = 4;   // parsed slots kept in memory (a real-data slot is ~80k features, ~100-200 MB parsed)
 
 // Lazy mode: make sure the slot for time index t is parsed into S.traj; loads asynchronously if needed.
 function ensureSlot(t){
