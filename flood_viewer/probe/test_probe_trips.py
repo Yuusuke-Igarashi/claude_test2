@@ -109,6 +109,30 @@ def main():
     d = haversine_m(lon[125], lat[125], lon[126], lat[126])
     assert 4900 < d < 5100, d
     print(f"ok: {n} points, stays {sl.max() + 1}, trips {tr.max() + 1}, reasons {sorted(set(rs) - {''})}")
+    test_dense(lon, lat, t)
+
+
+def test_dense(lon, lat, t):
+    """Dense-run rule via process_file on a tiny in-memory CSV: gaps <= 5 min and >= 10 points."""
+    import tempfile, os
+    import pandas as pd
+    from probe_trips import process_file, PARAMS
+    df = pd.DataFrame({"recordedat": (pd.Timestamp("2024-08-14") + pd.to_timedelta(t, unit="s")).strftime("%Y-%m-%d %H:%M:%S"),
+                       "lon": lon, "lat": lat, "userid": "u" * 64})
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "20240814.csv"); df.to_csv(path, index=False)
+        P = dict(PARAMS); P["NO_VIEWER"] = True
+        R = process_file(type("P", (), {"name": "20240814.csv", "stem": "20240814"})() if False else __import__("pathlib").Path(path), P)
+    dense = R["dense"]
+    # time gaps > 5 min are at 120 (2 h) and 133 (3 h): runs are 0..119 (120 pts), 120..132 (13 pts), 133..136 (4 pts).
+    # The 5 km position jump at 126 is 30 s apart, so it does not break a dense run (that is the trip rule's job).
+    assert dense[:133].all(), "runs of 120 and 13 points with gaps <= 5 min are dense"
+    assert not dense[133:].any(), "the final 4-point run is sparse"
+    nd = [tp[7] for tp in R["trips"]]                                  # n_dense per trip
+    nm = [tp[6] for tp in R["trips"]]                                  # n_move per trip
+    assert nd[:4] == nm[:4], "dense move points equal move points for the dense trips"
+    assert nm[4] == 3 and nd[4] == 0, "the last trip's 3 move points are sparse and get no line"
+    print("ok: dense runs")
 
 
 if __name__ == "__main__":

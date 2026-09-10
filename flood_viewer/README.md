@@ -74,6 +74,7 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | トリップ = 直前の一連の Stay + 連続する Move | | |
 | 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ（同一 Stay 内の間隔は除く） | 30 分 | `--time-gap-min` |
 | 位置ジャンプ: 連続点の見かけ速度がこれを超え、かつ距離がこれ以上 | 150 km/h, 500 m | `--jump-speed-kmh`, `--jump-min-dist-m` |
+| 密な点列: 間隔がこれ以下で連続し、この点数以上の点列だけを軌跡・トリップの線として描く（Stay 判定には掛けない。`--dense-for-stays` で掛ける） | 5 分, 10 点 | `--dense-max-gap-min`, `--dense-min-points`（0 で無効） |
 | 精度フィルタ: accuracy がこれを超える点を除外 | なし | `--max-accuracy-m` |
 | 範囲フィルタ: bbox 内の点だけを読み込み時に残す（GeoJSON の範囲からも指定可） | なし | `--bbox lon_min,lat_min,lon_max,lat_max` / `--area-geojson path` |
 | ビューワー用出力の範囲: この bbox 内に点を持つユーザーだけ出力 | bbox と同じ | `--viewer-bbox` |
@@ -85,9 +86,9 @@ notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08
 
 出力（`--out`）:
 
-- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）
+- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）
 - `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
-- `<stem>_trips.geojson`: トリップごとの Move 点の LineString（起点・終点 Stay、距離）
+- `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（5 分超の間隔で分割、n_move / n_dense、起点・終点 Stay、距離）
 - `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date` の日付なら event、他は baseline。
   各地物は kind = traj / dwell、id = userid の先頭 12 文字、time = 15 分刻みの窓終端 "HH:MM"。
   軌跡は窓内 [time−60 分, time] の Move 点（トリップ境界で分割、複数なら MultiLineString）、

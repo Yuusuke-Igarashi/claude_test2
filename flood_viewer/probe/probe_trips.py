@@ -21,6 +21,10 @@ Rules (parameters in PARAMS, overridable from the command line):
          STAY_METHOD=anchor uses the cheaper rule "all points within R of the run's first point".
          Speed is not used (speed 0 alone is not a stay).
   Move : every other point.
+  Dense: a run of consecutive points with gaps <= DENSE_MAX_GAP_MIN and >= DENSE_MIN_POINTS points.
+         Only dense Move points are drawn as trajectories (viewer) and trip lines; sparse points
+         keep their Stay/Move/trip labels (points.csv column dense = 1/0) but are not drawn, so
+         straight lines between distant sparse fixes disappear.
   Trip : the Move run plus the Stay run(s) immediately before it. A new trip id is forced when
          the time gap between consecutive points exceeds TIME_GAP_MIN (unless both points belong
          to the same Stay: sparse logging while stationary does not cut a trip), or when the
@@ -65,6 +69,9 @@ PARAMS = {
     "NO_VIEWER": False,       # skip the viewer GeoJSON outputs
     "NO_POINTS": False,       # skip the per-point CSV (largest output)
     "MERGED_VIEWER": False,   # also write the single-file baseline_/event_ trajectory+dwell GeoJSON (large)
+    "DENSE_MAX_GAP_MIN": 5.0, # dense run: consecutive points at most this many minutes apart ...
+    "DENSE_MIN_POINTS": 10,   # ... and at least this many points (0 = no density requirement)
+    "DENSE_FOR_STAYS": False, # also require dense runs for Stay detection (default: stays use all points)
 }
 
 EARTH_R = 6371008.8
@@ -359,6 +366,14 @@ def process_file(path: Path, P: dict):
     lon = df["lon"].to_numpy(float); lat = df["lat"].to_numpy(float)
     tsec = (df["recordedat"] - pd.Timestamp("1970-01-01")).dt.total_seconds().to_numpy(float)
     ucode = df["ucode"].to_numpy()
+    # dense runs: break where user changes or the gap exceeds DENSE_MAX_GAP_MIN; keep runs with enough points
+    dense = np.ones(n, dtype=np.int8)
+    dense_run = np.zeros(n, dtype=np.int64)
+    if n and P["DENSE_MIN_POINTS"] and P["DENSE_MIN_POINTS"] > 0:
+        brk = np.r_[True, (np.diff(ucode) != 0) | (np.diff(tsec) > P["DENSE_MAX_GAP_MIN"] * 60.0)]
+        dense_run = np.cumsum(brk) - 1
+        sizes = np.bincount(dense_run)
+        dense = (sizes[dense_run] >= int(P["DENSE_MIN_POINTS"])).astype(np.int8)
     seg = np.zeros(n, dtype=np.int8)          # 1 = Stay
     stay_no = np.zeros(n, dtype=np.int32)     # per-user stay number (1..), 0 = none
     trip_no = np.zeros(n, dtype=np.int32)     # per-user trip number (1..)
@@ -370,6 +385,12 @@ def process_file(path: Path, P: dict):
     for gi, (a, b) in enumerate(zip(starts, ends)):
         lo, la, tt = lon[a:b], lat[a:b], tsec[a:b]
         sl = detect_stays(lo, la, tt, P["STAY_RADIUS_M"], P["STAY_MIN_MIN"], P["STAY_METHOD"])
+        if P["DENSE_FOR_STAYS"]:
+            sl = np.where(dense[a:b] == 1, sl, -1)
+            # renumber stay runs after removing sparse points
+            if (sl >= 0).any():
+                ids = np.unique(sl[sl >= 0]); remap = {v: i for i, v in enumerate(ids)}
+                sl = np.array([remap.get(v, -1) if v >= 0 else -1 for v in sl])
         tr, rs = assign_trips(sl, lo, la, tt, P["TIME_GAP_MIN"], P["JUMP_SPEED_KMH"], P["JUMP_MIN_DIST_M"])
         seg[a:b] = (sl >= 0)
         stay_no[a:b] = np.where(sl >= 0, sl + 1, 0)
@@ -384,16 +405,18 @@ def process_file(path: Path, P: dict):
         for k in range(tr.max() + 1):
             pos = np.flatnonzero(tr == k)
             mv = pos[sl[pos] < 0]
+            mv = mv[dense[a + mv] == 1]          # line geometry from dense Move points only
             origin = int(sl[pos[0]]) + 1 if sl[pos[0]] >= 0 else 0
             nxt = pos[-1] + 1
             dest = int(sl[nxt]) + 1 if nxt < len(sl) and sl[nxt] >= 0 and rs[nxt] == "stay" else 0
             length = float(haversine_m(lo[mv][:-1], la[mv][:-1], lo[mv][1:], la[mv][1:]).sum()) if len(mv) > 1 else 0.0
-            trips.append((u, k + 1, rs[pos[0]], tt[pos[0]], tt[pos[-1]], len(pos), len(mv), length, origin, dest, a + mv))
+            trips.append((u, k + 1, rs[pos[0]], tt[pos[0]], tt[pos[-1]], len(pos), int((sl[pos] < 0).sum()), len(mv), length, origin, dest, a + mv))
         if (gi + 1) % 20000 == 0:
             log(f"  segmented {gi + 1:,}/{len(starts):,} users")
     log(f"  segmentation done: {len(starts):,} users, {len(stays):,} stays, {len(trips):,} trips in {time.perf_counter() - t0:.1f} s")
     return {"date": date, "df": df, "uids": uids, "lon": lon, "lat": lat, "tsec": tsec, "ucode": ucode,
-            "seg": seg, "stay_no": stay_no, "trip_no": trip_no, "reason": reason, "stays": stays, "trips": trips, "dropped": dropped}
+            "seg": seg, "stay_no": stay_no, "trip_no": trip_no, "reason": reason, "stays": stays, "trips": trips, "dropped": dropped,
+            "dense": dense, "dense_run": dense_run}
 
 
 def fmt_ts(sec):
@@ -466,6 +489,7 @@ def write_points_csv(R, path: Path, chunk=1_000_000):
             out["stay_no"] = R["stay_no"][sl]
             out["trip_no"] = R["trip_no"][sl]
             out["split_reason"] = np.array([REASON_CODES[i] for i in range(5)], dtype=object)[R["reason"][sl]]
+            out["dense"] = R["dense"][sl]
             out.to_csv(f, index=False, header=(a == 0))
             if n == 0:
                 break
@@ -486,18 +510,34 @@ def write_stays_geojson(R, path: Path):
 
 def write_trips_geojson(R, path: Path):
     w = GeoJSONWriter(path); uids = R["uids"]; lon, lat = R["lon"], R["lat"]
-    for (u, k, rs, t_start, t_end, npts, nmove, length, origin, dest, mv) in R["trips"]:
+    for (u, k, rs, t_start, t_end, npts, nmove, ndense, length, origin, dest, mv) in R["trips"]:
         if len(mv) < 2:
+            continue
+        geom = _split_line(mv, lon, lat, R["dense_run"])
+        if geom is None:
             continue
         us = ushort(uids[u])
         w.add({"type": "Feature",
                "properties": {"userid": str(uids[u]), "trip_id": f"{us}_T{k:03d}", "split_reason": rs,
                               "start": fmt_ts(t_start), "end": fmt_ts(t_end), "n_points": int(npts), "n_move": int(nmove),
-                              "length_m": round(length, 1),
+                              "n_dense": int(ndense), "length_m": round(length, 1),
                               "origin_stay": f"{us}_S{origin:03d}" if origin else "", "dest_stay": f"{us}_S{dest:03d}" if dest else ""},
-               "geometry": {"type": "LineString",
-                            "coordinates": [[round(float(x), 6), round(float(y), 6)] for x, y in zip(lon[mv], lat[mv])]}})
+               "geometry": geom})
     return w.close()
+
+
+def _split_line(idx, lon, lat, run):
+    """LineString over idx, split into a MultiLineString where the dense run id changes (gap > DENSE_MAX_GAP_MIN)."""
+    parts, cur = [], [idx[0]]
+    for i in range(1, len(idx)):
+        if run[idx[i]] != run[idx[i - 1]]:
+            parts.append(cur); cur = []
+        cur.append(idx[i])
+    parts.append(cur)
+    parts = [[[round(float(lon[i]), 6), round(float(lat[i]), 6)] for i in pp] for pp in parts if len(pp) >= 2]
+    if not parts:
+        return None
+    return {"type": "LineString", "coordinates": parts[0]} if len(parts) == 1 else {"type": "MultiLineString", "coordinates": parts}
 
 
 # ----------------------------------------------------------------------------------------------
@@ -522,7 +562,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     else:
         keep = np.ones(n, dtype=bool)
     # ---- trajectories: Move points exploded into the n_win windows they belong to ----
-    mv = np.flatnonzero(keep & (R["seg"] == 0))
+    mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1))
     mins = (tsec[mv] - day0) / 60.0
     k0 = np.ceil(mins / SLOT).astype(np.int64)                 # first window end >= point time
     k0 = np.maximum(k0, 1)
@@ -534,7 +574,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     rep, kk = rep[order], kk[order]
     key_u, key_k = ucode[rep], kk
     bounds = np.flatnonzero(np.r_[True, (np.diff(key_u) != 0) | (np.diff(key_k) != 0), True])
-    trip_no = R["trip_no"]
+    trip_no = R["trip_no"]; drun = R["dense_run"]
     n_traj = 0
     for a, b in zip(bounds[:-1], bounds[1:]):
         if b - a < 2:
@@ -542,7 +582,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         idx = rep[a:b]
         parts, cur = [], [idx[0]]
         for i in range(1, len(idx)):
-            if trip_no[idx[i]] != trip_no[idx[i - 1]]:
+            if trip_no[idx[i]] != trip_no[idx[i - 1]] or drun[idx[i]] != drun[idx[i - 1]]:
                 parts.append(cur); cur = []
             cur.append(idx[i])
         parts.append(cur)
@@ -595,13 +635,13 @@ def main():
         flag = f"--{k.lower().replace('_', '-')}"
         if k == "STAY_METHOD":
             ap.add_argument(flag, choices=["circle", "anchor"], default=v)
-        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS", "MERGED_VIEWER"):
+        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS", "MERGED_VIEWER", "DENSE_FOR_STAYS"):
             ap.add_argument(flag, action="store_true")
         elif k in ("BBOX", "VIEWER_BBOX"):
             ap.add_argument(flag, default=None, help="lon_min,lat_min,lon_max,lat_max")
         elif k == "AREA_GEOJSON":
             ap.add_argument(flag, default=None, help="GeoJSON whose extent is used as --bbox")
-        elif k in ("CHUNK_ROWS", "SAMPLE_USERS"):
+        elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS"):
             ap.add_argument(flag, type=int, default=v)
         else:
             ap.add_argument(flag, type=float, default=v)
@@ -641,8 +681,10 @@ def run(inputs, out, event_date="2024-08-21", **params):
         if writers is not None:
             n_traj, n_dwell = write_viewer(R, P, role, writers)
         reasons = {REASON_CODES[c]: int(v) for c, v in zip(*np.unique(R["reason"], return_counts=True)) if c}
+        n_dense = int(R["dense"].sum()); u_dense = len(np.unique(R["ucode"][R["dense"] == 1])) if n else 0
         print(f"{path.name}: date {R['date']} ({role}), users {len(np.unique(R['ucode'])):,}, points {n:,} (dropped {R['dropped']:,}), "
-              f"stay points {int((R['seg'] == 1).sum()):,}, stays {ns:,}, trips {nt:,} (with >=2 move points), "
+              f"dense points {n_dense:,} ({100 * n_dense / max(n, 1):.0f}%, {u_dense:,} users), "
+              f"stay points {int((R['seg'] == 1).sum()):,}, stays {ns:,}, trips {nt:,} (with >=2 dense move points), "
               f"viewer windows: trajectories {n_traj:,}, dwell {n_dwell:,}", flush=True)
         print(f"  trip starts by reason: {reasons}", flush=True)
         del R
