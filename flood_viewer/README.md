@@ -72,10 +72,17 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ（同一 Stay 内の間隔は除く） | 30 分 | `--time-gap-min` |
 | 位置ジャンプ: 連続点の見かけ速度がこれを超え、かつ距離がこれ以上 | 150 km/h, 500 m | `--jump-speed-kmh`, `--jump-min-dist-m` |
 | 精度フィルタ: accuracy がこれを超える点を除外 | なし | `--max-accuracy-m` |
+| 範囲フィルタ: bbox 内の点だけを読み込み時に残す（GeoJSON の範囲からも指定可） | なし | `--bbox lon_min,lat_min,lon_max,lat_max` / `--area-geojson path` |
+| ビューワー用出力の範囲: この bbox 内に点を持つユーザーだけ出力 | bbox と同じ | `--viewer-bbox` |
+| 当日フィルタ: ファイル名の日付（YYYYMMDD）以外の行を除外 | オフ | `--only-main-date` |
+| 試走: 先頭 N ユーザーだけ処理 / ビューワー出力を省略 | | `--sample-users N` / `--no-viewer` |
+
+1 日 2,000 万行・25 万ユーザー規模を想定し、チャンク読み込みでフィルタを適用しながら読む。
+notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08-21", AREA_GEOJSON="tokyo.geojson", ONLY_MAIN_DATE=True)` のように呼べる。
 
 出力（`--out`）:
 
-- `<stem>_points.csv`: 入力行 + segment（Stay/Move）, stay_id, trip_id, split_reason（start / stay / time_gap / jump）
+- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）
 - `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
 - `<stem>_trips.geojson`: トリップごとの Move 点の LineString（起点・終点 Stay、距離）
 - `baseline_trajectory.geojson` / `baseline_dwell.geojson` / `event_trajectory.geojson` / `event_dwell.geojson`:
