@@ -18,6 +18,9 @@ const T_18 = 24; // 12:00 + 24 * 15 min = 18:00
 
 const REQUIRED = ["tokyo_20240821_network.geojson", "baseline_speed.csv", "event_speed.csv", "baseline_count.csv", "event_count.csv"];
 const OPTIONAL = ["error.csv", "baseline_trajectory.geojson", "event_trajectory.geojson", "baseline_dwell.geojson", "event_dwell.geojson"];
+const SLOT_FILES = 2 * 48; // viewer/<role>_<HHMM>.geojson for baseline and event, 48 slots (12:00-23:45) in the sample
+// wait until the lazy slot for the current time is parsed
+const waitSlot = (page) => page.waitForFunction(() => !S.lazy || S.lazy.loaded === S.times[S.t], null, { timeout: 15000 });
 
 let server, base, browser;
 const errors = [];
@@ -40,6 +43,7 @@ function serve() {
   const types = { ".html": "text/html; charset=utf-8", ".csv": "text/csv", ".geojson": "application/geo+json", ".json": "application/json", ".js": "text/javascript", ".css": "text/css" };
   return createServer((req, res) => {
     const name = decodeURIComponent(req.url.split("?")[0].replace(/^\//, "")) || HTML;
+    if (name.includes("..")) { res.writeHead(400); res.end(); return; }
     for (const dir of [DIST, DATA]) {
       const p = join(dir, name);
       if (existsSync(p) && statSync(p).isFile()) {
@@ -104,10 +108,11 @@ after(async () => { await browser?.close(); server?.close(); });
 
 test("loads all files and reproduces the notebook's error.csv exactly", async () => {
   const page = await openViewer();
-  const info = await page.evaluate(() => ({ N: S.ids.length, T: S.T, traj: Object.values(S.traj).filter(Boolean).length, check: document.getElementById("pCheck").textContent }));
+  const info = await page.evaluate(() => ({ N: S.ids.length, T: S.T, lazy: S.lazy ? S.lazy.sources.size : 0, traj: S.traj, check: document.getElementById("pCheck").textContent }));
   assert.equal(info.T, 48);
   assert.ok(info.N > 1000);
-  assert.equal(info.traj, 4, "four trajectory/dwell datasets loaded");
+  assert.equal(info.lazy, SLOT_FILES, "per-slot viewer files registered via viewer/index.json");
+  assert.equal(info.traj, null, "nothing parsed until a slot is shown");
   assert.match(info.check, /不一致: 0 セル/, "in-page error computation must match error.csv at default thresholds");
   const ref = errorCountsFromCsv();
   for (const t of [0, T_18, 47]) {
@@ -186,11 +191,15 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   assert.equal(await page.evaluate(() => map.getLayoutProperty("links-base", "visibility")), "none", "traffic-coloured network hidden");
   assert.equal(await page.evaluate(() => map.getLayoutProperty("links-context", "visibility")), "visible");
   await page.evaluate((t) => { map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
-  await page.waitForTimeout(2000);
+  await waitSlot(page);
+  await page.waitForTimeout(1500);
+  assert.equal(await page.evaluate(() => S.lazy.loaded), "18:00", "only the 18:00 slot is parsed");
+  assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 4, "baseline+event traj+dwell for the slot");
   const st = await page.textContent("#trajStatus");
   const m = st.match(/平時 (\d+) 本・滞留 (\d+) 点 \/ イベント時 (\d+) 本・滞留 (\d+) 点/);
   assert.ok(m, "status lists counts: " + st);
   assert.ok(+m[1] > 0 && +m[3] > 0, "trajectories drawn at zoom 15");
+  assert.ok(+m[2] > 0 && +m[4] > 0, "dwell points drawn from the slot files");
 
   // hovering a link shows no chart panel in trajectory mode
   const link = await findLink(page, 2, T_18);
@@ -213,7 +222,8 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
     hovered: document.getElementById("tip").style.display, eventHl: map.getFilter("traj-event-hl")[2], baseHl: map.getFilter("traj-base-hl")[2],
     eventDwellHl: map.getFilter("dwell-event-hl")[2], baseOpacity: map.getPaintProperty("traj-base", "line-opacity"), eventOpacity: map.getPaintProperty("traj-event", "line-opacity"),
     hlRendered: map.queryRenderedFeatures({ layers: ["traj-event-hl"] }).length, focus: S.trajFocus,
-    underCursor: map.queryRenderedFeatures([x, y], { layers: ["traj-event", "dwell-event"] }).map((f) => f.properties.id),
+    // features within a few pixels of the (integer) mouse position; MapLibre's own hit test uses the rounded point
+    underCursor: map.queryRenderedFeatures([[Math.round(x) - 4, Math.round(y) - 4], [Math.round(x) + 4, Math.round(y) + 4]], { layers: ["traj-event", "dwell-event"] }).map((f) => f.properties.id),
   }), [tp.x, tp.y]);
   assert.equal(focus.hovered, "block", "tooltip shown");
   assert.ok(focus.focus && focus.focus.kind === "event" && focus.underCursor.includes(focus.focus.id), "focused trajectory is one under the cursor");
@@ -237,6 +247,13 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "fade removed");
   await page.evaluate(() => map.jumpTo({ zoom: 15.2 })); await page.waitForTimeout(1500);
 
+  // stepping through time loads other slots and keeps a bounded cache
+  await page.evaluate((t) => applyTime(t + 1), T_18); await waitSlot(page);
+  await page.evaluate((t) => applyTime(t + 2), T_18); await waitSlot(page);
+  assert.equal(await page.evaluate(() => S.lazy.loaded), "18:30");
+  assert.ok(await page.evaluate(() => S.lazy.cache.size >= 3 && S.lazy.cache.size <= 8), "slot cache bounded");
+  await page.evaluate((t) => applyTime(t), T_18); await waitSlot(page); await page.waitForTimeout(800);
+
   await page.click("#chkBase"); await page.waitForTimeout(500);
   assert.match(await page.textContent("#trajStatus"), /平時 0 本・滞留 0 点/);
   await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);
@@ -257,6 +274,30 @@ test("standalone file:// with the file picker, without optional files", async ()
   assert.equal(st.error, errorCountsFromCsv()[T_18], "same result without error.csv");
   assert.ok(await page.evaluate(() => document.getElementById("modeTraj").disabled), "trajectory mode disabled without trajectory files");
   assert.match(await page.textContent("#pCheck"), /未読み込み/);
+  await page.close();
+});
+
+test("standalone file:// with the folder picker uses the per-slot files", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#dirInput", DATA);
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
+  await page.evaluate((t) => { setMode("traj"); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
+  await waitSlot(page); await page.waitForTimeout(1500);
+  assert.match(await page.textContent("#trajStatus"), /イベント時 [1-9]\d* 本/, "trajectories drawn from a slot file read via FileReader");
+  await page.close();
+});
+
+test("single-file trajectory GeoJSON (no viewer/ folder) still loads whole-day datasets", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", [...REQUIRED, ...OPTIONAL].map((f) => join(DATA, f)));
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  assert.equal(await page.evaluate(() => S.lazy), null);
+  assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 4);
   await page.close();
 });
 

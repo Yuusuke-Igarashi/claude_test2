@@ -161,7 +161,8 @@ button:hover{background:#f0efec}
     <div id="filePick">
       <p>下のボタンから output フォルダ内のファイルをまとめて選択してください。必須は network.geojson と 4 つの CSV（baseline_speed, event_speed, baseline_count, event_count）、任意で error.csv（照合用）と軌跡・滞留の GeoJSON 4 ファイルです。<br>
       <span style="color:var(--muted)">HTML を output フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
-      <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv">
+      <p style="margin:6px 0 2px"><b>フォルダごと選択（推奨、viewer/ の時刻別ファイルも読めます）:</b> <input id="dirInput" type="file" webkitdirectory></p>
+      <p style="margin:2px 0"><span style="color:var(--muted)">またはファイルを個別に選択:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
     </div>
   </div>
 </div>
@@ -182,7 +183,8 @@ const CONFIG = {
     baseline_traj:  "baseline_trajectory.geojson",   // LineString / MultiLineString
     event_traj:     "event_trajectory.geojson",
     baseline_dwell: "baseline_dwell.geojson",        // MultiPoint / Point
-    event_dwell:    "event_dwell.geojson"
+    event_dwell:    "event_dwell.geojson",
+    viewer_dir:     "viewer"                         // per-slot files <role>_<HHMM>.geojson + index.json (loaded lazily)
   },
   // Trajectory mode
   TRAJ_MIN_ZOOM: 14,        // trajectories are drawn only at this zoom or closer
@@ -231,7 +233,8 @@ const S = {
   countsTarget: [], countsError: [],
   t: 0,
   mode: "traffic",      // "traffic" | "traj"
-  traj: null,           // {bt, et, bd, ed} parsed datasets or null
+  traj: null,           // {bt, et, bd, ed} parsed datasets (whole day, or the current slot in lazy mode) or null
+  lazy: null,           // {sources: Map("role_HH:MM" -> URL|File), cache: Map("HH:MM" -> {bt,et,bd,ed}), loaded: "HH:MM"|null, loading: "HH:MM"|null}
   showBase: true, showEvent: true,
   trajFocus: null, trajPin: null,   // {id, kind} of the highlighted trajectory (hover / click-pinned)
   hoverId: null, pinnedId: null,
@@ -271,6 +274,13 @@ async function loadViaFetch(){
     fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
     fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
   ]);
+  const idx = await fetchText(f.viewer_dir + "/index.json", true);
+  if(idx){
+    const index = JSON.parse(idx), sources = new Map();
+    for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
+    fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
+    return {network, bs, es, bc, ec, err, lazySources: sources};
+  }
   const [bt, et, bd, ed] = await Promise.all([
     fetchText(f.baseline_traj, true), fetchText(f.event_traj, true),
     fetchText(f.baseline_dwell, true), fetchText(f.event_dwell, true)
@@ -280,8 +290,13 @@ async function loadViaFetch(){
 
 function loadViaFiles(fileList){
   const want = CONFIG.files;
-  const byName = {};
-  for(const fl of fileList) byName[fl.name] = fl;
+  const byName = {}, sources = new Map();
+  for(const fl of fileList){
+    const m = fl.name.match(/^(baseline|event)_(\d{2})(\d{2})\.geojson$/);
+    if(m){ sources.set(`${m[1]}_${m[2]}:${m[3]}`, fl); continue; }
+    byName[fl.name] = fl;
+  }
+  if(sources.size) fileRow(want.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
   const read = (key, optional=false) => new Promise((res, rej) => {
     const name = want[key];
     const fl = byName[name];
@@ -291,9 +306,15 @@ function loadViaFiles(fileList){
     rd.onerror = () => rej(rd.error);
     rd.readAsText(fl);
   });
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true),
-                      read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed]) => ({network, bs, es, bc, ec, err, bt, et, bd, ed}));
+  const optional = sources.size ? [Promise.resolve(null), Promise.resolve(null), Promise.resolve(null), Promise.resolve(null)]
+                                : [read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)];
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed]) => ({network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null}));
+}
+
+function readSource(src){
+  if(typeof src === "string") return fetch(src, {cache:"no-store"}).then(r => { if(!r.ok) throw new Error(`HTTP ${r.status} ${src}`); return r.text(); });
+  return new Promise((res, rej) => { const rd = new FileReader(); rd.onload = () => res(rd.result); rd.onerror = () => rej(rd.error); rd.readAsText(src); });
 }
 
 // Parse a link x time matrix CSV. First column = id, header = times.
@@ -451,7 +472,11 @@ async function boot(loaderFn){
   checkAgainstRef();
   setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ / CSV 未対応リンク ${unmatched} 本`);
   await tick();
-  if(raw.bt || raw.et || raw.bd || raw.ed){
+  if(raw.lazySources && raw.lazySources.size){
+    S.lazy = {sources: raw.lazySources, cache: new Map(), loaded: null, loading: null};
+    const roles = new Set([...raw.lazySources.keys()].map(k => k.split("_")[0]));
+    setProgress(`軌跡: 時刻別ファイル ${raw.lazySources.size} 本（${[...roles].join(", ")}）を表示時に読み込みます`); await tick();
+  } else if(raw.bt || raw.et || raw.bd || raw.ed){
     setProgress("軌跡データを解析中 …"); await tick();
     S.traj = {
       bt: raw.bt ? parseTraj(raw.bt, "平時 軌跡") : null,
@@ -469,7 +494,7 @@ const tick = () => new Promise(r => setTimeout(r, 0));
 // Parse a trajectory / dwell GeoJSON. Each feature needs properties.id (link id) and
 // properties.time ("HH:MM", "HH:MM:SS" or ISO datetime; the HH:MM part is matched to the CSV header).
 function parseTraj(text, label){
-  const gj = JSON.parse(text);
+  const gj = typeof text === "string" ? JSON.parse(text) : text;
   const timeIdx = new Map(S.times.map((t,i) => [t,i]));
   const feats = [], byTime = Array.from({length:S.T}, () => []), bb = [];
   let dropped = 0;
@@ -637,7 +662,7 @@ function initMap(gj){
     }
     map.on("moveend", updateTraj);
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
-    if(!S.traj){ $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません"; }
+    if(!hasTraj()){ $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません"; }
   });
 }
 
@@ -649,7 +674,7 @@ const TRAJ_KIND = {"traj-base":"平時 軌跡", "traj-event":"イベント時 �
 // Mode & trajectory drawing
 // ============================================================
 function setMode(m){
-  if(m === "traj" && !S.traj) return;
+  if(m === "traj" && !hasTraj()) return;
   S.mode = m;
   const traj = m === "traj";
   $("modeTraffic").classList.toggle("on", !traj);
@@ -682,15 +707,51 @@ function trajStatus(text){
   if(z < CONFIG.TRAJ_MIN_ZOOM) el.textContent = `軌跡はズーム ${CONFIG.TRAJ_MIN_ZOOM} 以上で表示されます（現在 ${z.toFixed(1)}）`;
 }
 
+const hasTraj = () => !!(S.traj || S.lazy);
+const LAZY_CACHE = 8;
+
+// Lazy mode: make sure the slot for time index t is parsed into S.traj; loads asynchronously if needed.
+function ensureSlot(t){
+  const L = S.lazy; if(!L) return true;
+  const key = S.times[t];
+  if(L.loaded === key) return true;
+  if(L.cache.has(key)){ S.traj = L.cache.get(key); L.loaded = key; return true; }
+  if(L.loading === key) return false;
+  L.loading = key;
+  trajStatus(`${key} の軌跡を読み込み中 …`);
+  const kinds = [["baseline","bt","bd","平時"],["event","et","ed","イベント時"]];
+  Promise.all(kinds.map(([role]) => { const src = L.sources.get(`${role}_${key}`); return src ? readSource(src).then(JSON.parse) : Promise.resolve(null); }))
+    .then(results => {
+      const ds = {bt:null, et:null, bd:null, ed:null};
+      results.forEach((gj, i) => {
+        if(!gj) return;
+        const [, kt, kd, lab] = kinds[i];
+        const feats = gj.features || [];
+        const dwell = feats.filter(f => f.properties && f.properties.kind === "dwell");
+        const traj = feats.filter(f => !(f.properties && f.properties.kind === "dwell"));
+        ds[kt] = parseTraj({type:"FeatureCollection", features: traj}, `${lab} 軌跡`);
+        ds[kd] = parseTraj({type:"FeatureCollection", features: dwell}, `${lab} 滞留`);
+      });
+      L.cache.set(key, ds);
+      if(L.cache.size > LAZY_CACHE) L.cache.delete(L.cache.keys().next().value);
+      if(L.loading === key) L.loading = null;
+      if(S.times[S.t] === key){ S.traj = ds; L.loaded = key; updateTraj(); }
+    })
+    .catch(e => { console.error(e); L.loading = null; trajStatus(`${key} の軌跡を読み込めませんでした: ${e.message}`); });
+  return false;
+}
+
 function updateTraj(){
   if(!map || !map.getSource("traj-base")) return;
   hideTip();
+  if(S.mode === "traj" && S.lazy && map.getZoom() >= CONFIG.TRAJ_MIN_ZOOM && !ensureSlot(S.t)) return;
   const EMPTY = {type:"FeatureCollection", features:[]};
   const setAll = (o) => { for(const k in o) map.getSource(k).setData(o[k]); };
-  if(S.mode !== "traj" || !S.traj){
+  if(S.mode !== "traj" || !hasTraj()){
     setAll({"traj-base":EMPTY, "traj-event":EMPTY, "dwell-base":EMPTY, "dwell-event":EMPTY});
     trajStatus(); return;
   }
+  if(!S.traj){ setAll({"traj-base":EMPTY, "traj-event":EMPTY, "dwell-base":EMPTY, "dwell-event":EMPTY}); trajStatus(); return; }
   if(map.getZoom() < CONFIG.TRAJ_MIN_ZOOM){
     setAll({"traj-base":EMPTY, "traj-event":EMPTY, "dwell-base":EMPTY, "dwell-event":EMPTY});
     trajStatus(); return;
@@ -741,9 +802,9 @@ function trajCount(ds, id, t){
 function showTip(e, lid){
   const ft = e.features && e.features[0]; if(!ft) return;
   const p = ft.properties;
-  const extra = Object.keys(p).filter(k => k !== "id" && k !== "time").map(k => `<span class="k">${k}</span> ${p[k]}`).join(" · ");
+  const extra = Object.keys(p).filter(k => !["id","time","kind"].includes(k)).map(k => `<span class="k">${k}</span> ${String(p[k]).length > 40 ? String(p[k]).slice(0, 40) + "…" : p[k]}`).join(" · ");
   const tip = $("tip");
-  tip.innerHTML = `<b>Link ${p.id}</b> · ${TRAJ_KIND[lid]}<br><span class="k">${windowLabel(S.t)}</span>${extra ? "<br>" + extra : ""}`;
+  tip.innerHTML = `<b>ID ${p.id}</b> · ${TRAJ_KIND[lid]}<br><span class="k">${windowLabel(S.t)}</span>${extra ? "<br>" + extra : ""}`;
   tip.style.display = "block";
   const mapRect = $("map").getBoundingClientRect();
   let x = e.point.x + 14, y = e.point.y + 14;
@@ -988,7 +1049,7 @@ function drawChart(svg, a, b, errMask, title){
     console.warn("fetch failed, falling back to file picker", e);
     setProgress("");
     $("filePick").style.display = "block";
-    $("fileInput").addEventListener("change", async (ev) => {
+    for(const id of ["fileInput","dirInput"]) $(id).addEventListener("change", async (ev) => {
       $("filePick").style.display = "none";
       try{ await boot(() => loadViaFiles(ev.target.files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }

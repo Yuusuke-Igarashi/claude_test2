@@ -9,7 +9,7 @@
 ## 使い方
 
 配布物は `dist/flood_viewer_standalone.html` 1 ファイル（MapLibre GL JS 同梱、約 1.1 MB）。
-ダブルクリックで開き、ノートブックの output フォルダのファイルをまとめて選択する。
+ダブルクリックで開き、「フォルダごと選択」で output フォルダを選ぶ（viewer/ の時刻別ファイルは表示時に必要な分だけ読む）。
 output フォルダに置いて `python -m http.server` 経由で開けば自動で読み込む。
 
 | ファイル | 必須 | 内容 |
@@ -17,8 +17,9 @@ output フォルダに置いて `python -m http.server` 経由で開けば自動
 | tokyo_20240821_network.geojson | 必須 | リンク形状。properties: id, pair_id |
 | baseline_speed.csv / event_speed.csv / baseline_count.csv / event_count.csv | 必須 | リンク × 時刻の行列。id 列 + "HH:MM" 列 |
 | error.csv | 任意 | ノートブックの最終 error。照合にのみ使用 |
-| baseline_trajectory.geojson / event_trajectory.geojson | 任意 | LineString / MultiLineString。properties: id, time |
-| baseline_dwell.geojson / event_dwell.geojson | 任意 | MultiPoint / Point。properties: id, time |
+| viewer/<role>_<HHMM>.geojson + viewer/index.json | 任意（推奨） | 時刻別の軌跡・滞留（properties.kind = traj / dwell, id, time）。スライダーの時刻のファイルだけを読むので全域を出力できる |
+| baseline_trajectory.geojson / event_trajectory.geojson | 任意 | 1 日分をまとめた LineString / MultiLineString。properties: id, time。小規模向け |
+| baseline_dwell.geojson / event_dwell.geojson | 任意 | 同、MultiPoint / Point |
 
 `time` は 1 時間ウィンドウの終端で CSV ヘッダと同じ "HH:MM"。ISO 形式でも HH:MM 部分で照合する。
 
@@ -46,9 +47,11 @@ npm test                         # Playwright + node:test によるブラウザ�
 2. スライダー、キー操作、再生。
 3. 異常リンクのホバーでパネル・異常帯・2 系列が出て、クリックで固定できること。
 4. 閾値変更で件数が変わり、既定値に戻すと元の件数に戻ること。
-5. 軌跡モードのズーム制御、表示範囲内の件数、交通情報の非表示、軌跡ホバーでの強調と固定、平時オフ、M キー。
+5. 軌跡モードのズーム制御、時刻別ファイルの遅延読み込みとキャッシュ、表示範囲内の件数、交通情報の非表示、軌跡ホバーでの強調と固定、平時オフ、M キー。
 6. file:// で開いて必須 5 ファイルだけを選択した場合も同じ結果になり、軌跡ボタンが無効になること。
-7. JavaScript エラーが発生していないこと。
+7. file:// でフォルダごと選択すると viewer/ の時刻別ファイルが登録され、表示時に FileReader で読まれること。
+8. viewer/ が無く 1 日 1 ファイルの軌跡 GeoJSON だけの場合も従来通り読めること。
+9. JavaScript エラーが発生していないこと。
 
 GitHub Actions（`.github/workflows/flood-viewer.yml`）が `flood_viewer/` の変更で同じ手順を実行し、
 standalone HTML とスクリーンショットをアーティファクトとして残す。
@@ -85,9 +88,10 @@ notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08
 - `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）
 - `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
 - `<stem>_trips.geojson`: トリップごとの Move 点の LineString（起点・終点 Stay、距離）
-- `baseline_trajectory.geojson` / `baseline_dwell.geojson` / `event_trajectory.geojson` / `event_dwell.geojson`:
-  ビューワー軌跡モード用。id = userid の先頭 12 文字、time = 15 分刻みの窓終端 "HH:MM"、
+- `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date` の日付なら event、他は baseline。
+  各地物は kind = traj / dwell、id = userid の先頭 12 文字、time = 15 分刻みの窓終端 "HH:MM"。
   軌跡は窓内 [time−60 分, time] の Move 点（トリップ境界で分割、複数なら MultiLineString）、
-  滞留は窓に重なる Stay の重心 MultiPoint。`--event-date` の日付のファイルが event、他は baseline に集約される。
+  滞留は窓に重なる Stay の重心 MultiPoint。ビューワーは表示中の時刻のファイルだけを読むので `--viewer-bbox` は不要。
+  `--merged-viewer` で従来の 1 日 1 ファイル形式も併せて出力できる。
 
 合成データは格子状の仮想道路網で、実データではない。実データ規模（約 77,000 リンク × 48 時刻）での動作は未検証。

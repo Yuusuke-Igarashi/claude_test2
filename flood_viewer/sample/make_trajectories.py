@@ -102,4 +102,22 @@ save(traj["b"], "baseline_trajectory.geojson")
 save(traj["e"], "event_trajectory.geojson")
 save(dwell["b"], "baseline_dwell.geojson")
 save(dwell["e"], "event_dwell.geojson")
+
+# per-slot layout consumed lazily by the viewer: viewer/<role>_<HHMM>.geojson + index.json
+vdir = OUT / "viewer"; vdir.mkdir(exist_ok=True)
+index = {"roles": ["baseline", "event"], "slots": {}, "files": {}}
+for role, key in (("baseline", "b"), ("event", "e")):
+    by_slot = {}
+    for kind, feats in (("traj", traj[key]), ("dwell", dwell[key])):
+        for ft in feats:
+            f2 = {"type": "Feature", "properties": dict(ft["properties"], kind=kind), "geometry": ft["geometry"]}
+            by_slot.setdefault(ft["properties"]["time"], []).append(f2)
+    for tm in sorted(by_slot):
+        name = f"{role}_{tm.replace(':', '')}.geojson"
+        with open(vdir / name, "w") as f:
+            json.dump({"type": "FeatureCollection", "features": by_slot[tm]}, f, separators=(",", ":"))
+        index["slots"].setdefault(role, []).append(tm)
+        index["files"][name] = len(by_slot[tm])
+json.dump(index, open(vdir / "index.json", "w"), indent=1)
+print(f"viewer/: {len(index['files'])} slot files")
 print("links with trajectories:", selected)

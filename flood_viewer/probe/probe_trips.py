@@ -6,12 +6,14 @@ Output: per input file, in --out
   <stem>_points.csv          every input row + segment (Stay/Move), stay_id, trip_id, split_reason
   <stem>_stays.geojson       one Point per stay (centroid) with start/end/duration
   <stem>_trips.geojson       one LineString per trip (Move points; origin/destination stay ids)
-  and, merged over all inputs (for flood_viewer trajectory mode):
-  baseline_trajectory.geojson / baseline_dwell.geojson   (files whose date != --event-date)
-  event_trajectory.geojson    / event_dwell.geojson      (file whose date == --event-date)
-  Each feature: properties.id = user id, properties.time = "HH:MM" (end of a 1-hour window),
-  geometry = LineString/MultiLineString of Move points in [time-60min, time] (trajectory) or
-  MultiPoint of stay centroids overlapping the window (dwell).
+  and, for flood_viewer trajectory mode, one file per role and 15-min slot:
+  viewer/<role>_<HHMM>.geojson   role = baseline (date != --event-date) or event (date == --event-date)
+  viewer/index.json              roles, slots and feature counts
+  Each feature: properties.kind = "traj" | "dwell", properties.id = user id, properties.time = "HH:MM"
+  (end of the 1-hour window); geometry = LineString/MultiLineString of Move points in
+  [time-60min, time] (traj) or MultiPoint of stay centroids overlapping the window (dwell).
+  The viewer loads only the slot shown by the time slider, so the whole area can be exported.
+  --merged-viewer additionally writes the old single-file <role>_trajectory/_dwell.geojson.
 
 Rules (parameters in PARAMS, overridable from the command line):
   Stay : a run of consecutive points that can be enclosed by a circle of radius STAY_RADIUS_M
@@ -62,6 +64,7 @@ PARAMS = {
     "SAMPLE_USERS": 0,        # > 0: process only the first N users (for a timing trial)
     "NO_VIEWER": False,       # skip the viewer GeoJSON outputs
     "NO_POINTS": False,       # skip the per-point CSV (largest output)
+    "MERGED_VIEWER": False,   # also write the single-file baseline_/event_ trajectory+dwell GeoJSON (large)
 }
 
 EARTH_R = 6371008.8
@@ -413,6 +416,34 @@ class GeoJSONWriter:
         self.f.write("]}"); self.f.close(); return self.n
 
 
+class SlotWriters:
+    """One GeoJSON file per (role, HH:MM) under out/viewer, plus index.json; optional merged files."""
+    def __init__(self, out: Path, merged: bool):
+        self.dir = out / "viewer"; self.dir.mkdir(parents=True, exist_ok=True)
+        self.slot = {}; self.merged = {} if merged else None; self.out = out
+    def add(self, role, hhmm, kind, feature):
+        feature["properties"]["kind"] = kind
+        key = (role, hhmm)
+        if key not in self.slot:
+            self.slot[key] = GeoJSONWriter(self.dir / f"{role}_{hhmm.replace(':', '')}.geojson")
+        self.slot[key].add(feature)
+        if self.merged is not None:
+            mk = (role, kind)
+            if mk not in self.merged:
+                self.merged[mk] = GeoJSONWriter(self.out / f"{role}_{'trajectory' if kind == 'traj' else 'dwell'}.geojson")
+            self.merged[mk].add(feature)
+    def close(self):
+        index = {"roles": sorted({r for r, _ in self.slot}), "slots": {}, "files": {}}
+        for (role, hhmm), w in sorted(self.slot.items()):
+            n = w.close()
+            index["slots"].setdefault(role, []).append(hhmm)
+            index["files"][f"{role}_{hhmm.replace(':', '')}.geojson"] = n
+        with open(self.dir / "index.json", "w", encoding="utf-8") as f:
+            json.dump(index, f, ensure_ascii=False, indent=1)
+        merged_counts = {f"{r}_{k}": w.close() for (r, k), w in (self.merged or {}).items()}
+        return index, merged_counts
+
+
 def write_points_csv(R, path: Path, chunk=1_000_000):
     """Per-point CSV written in slices so the string columns never exist for the whole day at once."""
     df = R["df"]; n = len(df)
@@ -472,7 +503,7 @@ def write_trips_geojson(R, path: Path):
 # ----------------------------------------------------------------------------------------------
 # 3. Viewer-ready windows (vectorised): per user x 15-min slot, the last hour's Move path and stays
 # ----------------------------------------------------------------------------------------------
-def write_viewer(R, P: dict, traj_writer: GeoJSONWriter, dwell_writer: GeoJSONWriter):
+def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     lon, lat, tsec, ucode = R["lon"], R["lat"], R["tsec"], R["ucode"]
     uids = R["uids"]
     n = len(lon)
@@ -522,7 +553,7 @@ def write_viewer(R, P: dict, traj_writer: GeoJSONWriter, dwell_writer: GeoJSONWr
         hhmm = f"{mm // 60:02d}:{mm % 60:02d}"
         geom = {"type": "LineString", "coordinates": parts[0]} if len(parts) == 1 else {"type": "MultiLineString", "coordinates": parts}
         u = int(key_u[a])
-        traj_writer.add({"type": "Feature",
+        writers.add(role, hhmm, "traj", {"type": "Feature",
                          "properties": {"id": ushort(uids[u]), "time": hhmm, "userid": str(uids[u]), "n_points": int(b - a),
                                         "trips": ",".join(f"{ushort(uids[u])}_T{t:03d}" for t in sorted(set(int(trip_no[i]) for i in idx)))},
                          "geometry": geom})
@@ -548,7 +579,7 @@ def write_viewer(R, P: dict, traj_writer: GeoJSONWriter, dwell_writer: GeoJSONWr
         for a, b in zip(bounds[:-1], bounds[1:]):
             k = int(kk[a]); mm = int(k * SLOT); u = int(key_u[a])
             pts = [[round(float(slon[i]), 6), round(float(slat[i]), 6)] for i in rep[a:b]]
-            dwell_writer.add({"type": "Feature",
+            writers.add(role, f"{mm // 60:02d}:{mm % 60:02d}", "dwell", {"type": "Feature",
                               "properties": {"id": ushort(uids[u]), "time": f"{mm // 60:02d}:{mm % 60:02d}", "userid": str(uids[u]), "n_points": len(pts)},
                               "geometry": {"type": "MultiPoint", "coordinates": pts}})
             n_dwell += 1
@@ -564,7 +595,7 @@ def main():
         flag = f"--{k.lower().replace('_', '-')}"
         if k == "STAY_METHOD":
             ap.add_argument(flag, choices=["circle", "anchor"], default=v)
-        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS"):
+        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS", "MERGED_VIEWER"):
             ap.add_argument(flag, action="store_true")
         elif k in ("BBOX", "VIEWER_BBOX"):
             ap.add_argument(flag, default=None, help="lon_min,lat_min,lon_max,lat_max")
@@ -594,11 +625,7 @@ def run(inputs, out, event_date="2024-08-21", **params):
     log(f"params: {P}")
     args = argparse.Namespace(inputs=inputs, out=out, event_date=event_date)
 
-    writers = {}
-    def viewer_writers(role):
-        if role not in writers:
-            writers[role] = (GeoJSONWriter(args.out / f"{role}_trajectory.geojson"), GeoJSONWriter(args.out / f"{role}_dwell.geojson"))
-        return writers[role]
+    writers = None if P["NO_VIEWER"] else SlotWriters(args.out, bool(P["MERGED_VIEWER"]))
 
     for path in args.inputs:
         R = process_file(path, P)
@@ -611,18 +638,23 @@ def run(inputs, out, event_date="2024-08-21", **params):
         ns = write_stays_geojson(R, args.out / f"{stem}_stays.geojson")
         nt = write_trips_geojson(R, args.out / f"{stem}_trips.geojson")
         n_traj = n_dwell = 0
-        if not P["NO_VIEWER"]:
-            tw, dw = viewer_writers(role)
-            n_traj, n_dwell = write_viewer(R, P, tw, dw)
+        if writers is not None:
+            n_traj, n_dwell = write_viewer(R, P, role, writers)
         reasons = {REASON_CODES[c]: int(v) for c, v in zip(*np.unique(R["reason"], return_counts=True)) if c}
         print(f"{path.name}: date {R['date']} ({role}), users {len(np.unique(R['ucode'])):,}, points {n:,} (dropped {R['dropped']:,}), "
               f"stay points {int((R['seg'] == 1).sum()):,}, stays {ns:,}, trips {nt:,} (with >=2 move points), "
               f"viewer windows: trajectories {n_traj:,}, dwell {n_dwell:,}", flush=True)
         print(f"  trip starts by reason: {reasons}", flush=True)
         del R
-    for role, (tw, dw) in writers.items():
-        a, b = tw.close(), dw.close()
-        print(f"{role}_trajectory.geojson: {a:,} features / {role}_dwell.geojson: {b:,} features")
+    if writers is not None:
+        index, merged_counts = writers.close()
+        for role in index["roles"]:
+            files = [f for f in index["files"] if f.startswith(role + "_")]
+            tot = sum(index["files"][f] for f in files)
+            mx = max(index["files"][f] for f in files) if files else 0
+            print(f"viewer/{role}_HHMM.geojson: {len(files)} slot files, {tot:,} features (largest slot {mx:,})")
+        for k, v in merged_counts.items():
+            print(f"merged {k}: {v:,} features")
 
 
 if __name__ == "__main__":
