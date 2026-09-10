@@ -72,7 +72,7 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | Stay の判定法: `circle`（最小包含円）/ `anchor`（先頭点から R 以内、近似・高速） | circle | `--stay-method` |
 | Move: それ以外（速度 0 でも Move） | | |
 | トリップ = 直前の一連の Stay + 連続する Move | | |
-| 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ（同一 Stay 内の間隔は除く） | 30 分 | `--time-gap-min` |
+| 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ（同一 Stay 内の間隔は除く） | 5 分 | `--time-gap-min` |
 | 位置ジャンプ: 連続点の見かけ速度がこれを超え、かつ距離がこれ以上 | 150 km/h, 500 m | `--jump-speed-kmh`, `--jump-min-dist-m` |
 | 密な点列: 間隔がこれ以下で連続し、この点数以上の点列だけを軌跡・トリップの線として描く（Stay 判定には掛けない。`--dense-for-stays` で掛ける） | 5 分, 10 点 | `--dense-max-gap-min`, `--dense-min-points`（0 で無効） |
 | Stay の統合: 連続する Stay の間隔がこれ以下で、重心間距離がこれ以下なら 1 つの Stay にする（間の短い外出点も Stay に含める） | 10 分, 100 m | `--stay-merge-gap-min`, `--stay-merge-dist-m`（0 で無効） |

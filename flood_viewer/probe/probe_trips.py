@@ -68,7 +68,7 @@ PARAMS = {
     "STAY_RADIUS_M": 50.0,    # a stay's points all fit in a circle of this radius (minimum enclosing circle)
     "STAY_MIN_MIN": 20.0,     # minimum stay duration [minutes]
     "STAY_METHOD": "circle",  # "circle": minimum enclosing circle radius <= R; "anchor": all within R of the first point
-    "TIME_GAP_MIN": 30.0,     # a gap longer than this between consecutive points starts a new trip
+    "TIME_GAP_MIN": 5.0,      # a gap longer than this between consecutive points starts a new trip (same as the dense-run gap)
     "JUMP_SPEED_KMH": 150.0,  # implied speed above this ...
     "JUMP_MIN_DIST_M": 500.0, # ... over at least this distance is an unnatural position jump
     "WINDOW_MIN": 60,         # viewer trajectory window [minutes]
