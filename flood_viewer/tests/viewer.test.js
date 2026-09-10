@@ -288,6 +288,8 @@ test("standalone file:// with the file picker, without optional files", async ()
   const st = await status(page);
   assert.equal(st.error, errorCountsFromCsv()[T_18], "same result without error.csv");
   assert.ok(await page.evaluate(() => document.getElementById("modeTraj").disabled), "trajectory mode disabled without trajectory files");
+  assert.match(await page.textContent("#trajStatus"), /軌跡モードは使えません。選択 5 ファイル: 時刻別ファイル.*なし/, "the reason stays visible in traffic mode");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("trajStatus")).display), "block");
   assert.match(await page.textContent("#pCheck"), /未読み込み/);
   await page.close();
 });

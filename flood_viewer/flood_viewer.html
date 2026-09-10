@@ -287,24 +287,31 @@ async function loadViaFetch(){
     const index = JSON.parse(idx), sources = new Map();
     for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
     fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
-    return {network, bs, es, bc, ec, err, lazySources: sources};
+    return {network, bs, es, bc, ec, err, lazySources: sources, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
   }
   const [bt, et, bd, ed] = await Promise.all([
     fetchText(f.baseline_traj, true), fetchText(f.event_traj, true),
     fetchText(f.baseline_dwell, true), fetchText(f.event_dwell, true)
   ]);
-  return {network, bs, es, bc, ec, err, bt, et, bd, ed};
+  const loadInfo = `http 経由: ${location.href.replace(/[^/]*$/, "")}${f.viewer_dir}/index.json が取得できません（HTML と同じ階層に viewer フォルダを置いてください）`
+    + ([bt, et, bd, ed].some(Boolean) ? "。1 日 1 ファイル形式の軌跡を使用" : "。1 日 1 ファイル形式の軌跡もありません");
+  return {network, bs, es, bc, ec, err, bt, et, bd, ed, loadInfo};
 }
 
 function loadViaFiles(fileList){
   const want = CONFIG.files;
-  const byName = {}, sources = new Map();
+  const byName = {}, sources = new Map(), other = [];
+  let total = 0;
   for(const fl of fileList){
-    const m = fl.name.match(/^(baseline|event)_(\d{2})(\d{2})\.geojson$/);
-    if(m){ sources.set(`${m[1]}_${m[2]}:${m[3]}`, fl); continue; }
+    total++;
+    const m = fl.name.match(/^(baseline|event)_(\d{2})(\d{2})\.geojson$/i);
+    if(m){ sources.set(`${m[1].toLowerCase()}_${m[2]}:${m[3]}`, fl); continue; }
     byName[fl.name] = fl;
+    if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
   }
   if(sources.size) fileRow(want.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
+  const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
+    + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
   const read = (key, optional=false) => new Promise((res, rej) => {
     const name = want[key];
     const fl = byName[name];
@@ -317,7 +324,7 @@ function loadViaFiles(fileList){
   const optional = sources.size ? [Promise.resolve(null), Promise.resolve(null), Promise.resolve(null), Promise.resolve(null)]
                                 : [read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)];
   return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed]) => ({network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null}));
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed]) => ({network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, loadInfo}));
 }
 
 function readSource(src){
@@ -441,6 +448,7 @@ function fillParamInputs(){
 
 async function boot(loaderFn){
   const raw = await loaderFn();
+  S.loadInfo = raw.loadInfo || "";
   setProgress("CSV を解析中 …");
   await tick();
   S.bs = parseMatrix(raw.bs, {first:true});
@@ -670,7 +678,10 @@ function initMap(gj){
     }
     map.on("moveend", updateTraj);
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
-    if(!hasTraj()){ $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません"; }
+    if(!hasTraj()){
+      $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません: " + S.loadInfo;
+      trajStatus(`軌跡モードは使えません。${S.loadInfo}`, true);
+    }
   });
 }
 
@@ -718,9 +729,14 @@ function windowLabel(t){
   return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}–${S.times[t]}`;
 }
 
-function trajStatus(text){
+function trajStatus(text, force=false){
   const el = $("trajStatus");
-  if(S.mode !== "traj"){ el.style.display = "none"; return; }
+  if(S.mode !== "traj" && !force){
+    // no trajectory data at all: keep the reason visible in traffic mode
+    if(!hasTraj() && S.loadInfo){ el.style.display = "block"; el.textContent = `軌跡モードは使えません。${S.loadInfo}`; }
+    else el.style.display = "none";
+    return;
+  }
   el.style.display = "block";
   if(text !== undefined){ el.textContent = text; return; }
   const z = map.getZoom();
