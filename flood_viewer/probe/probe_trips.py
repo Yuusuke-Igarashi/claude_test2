@@ -49,6 +49,7 @@ PARAMS = {
     "WINDOW_MIN": 60,         # viewer trajectory window [minutes]
     "SLOT_MIN": 15,           # viewer time slots [minutes]
     "MAX_ACCURACY_M": None,   # drop points with accuracy above this (None = keep all)
+    "ONLY_MAIN_DATE": False,  # keep only rows of the file's main (most frequent) date
 }
 
 EARTH_R = 6371008.8
@@ -233,7 +234,7 @@ def assign_trips(stay_label: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np
 # ----------------------------------------------------------------------------------------------
 # I/O helpers
 # ----------------------------------------------------------------------------------------------
-def read_points(path: Path, max_accuracy_m):
+def read_points(path: Path, max_accuracy_m, only_main_date=False):
     df = pd.read_csv(path, dtype={"userid": str, "deviceid": str, "id": str})
     need = {"recordedat", "lon", "lat", "userid"}
     missing = need - set(df.columns)
@@ -245,6 +246,9 @@ def read_points(path: Path, max_accuracy_m):
     df = df.dropna(subset=["recordedat", "lon", "lat", "userid"])
     if max_accuracy_m is not None and "accuracy" in df.columns:
         df = df[~(df["accuracy"] > max_accuracy_m)]
+    if only_main_date and len(df):
+        main = df["recordedat"].dt.normalize().mode().iat[0]
+        df = df[df["recordedat"].dt.normalize() == main]
     df = df.sort_values(["userid", "recordedat"], kind="mergesort").reset_index(drop=True)
     return df, n0 - len(df)
 
@@ -263,7 +267,7 @@ class Stay:
 
 
 def process_file(path: Path, P: dict):
-    df, dropped = read_points(path, P["MAX_ACCURACY_M"])
+    df, dropped = read_points(path, P["MAX_ACCURACY_M"], P["ONLY_MAIN_DATE"])
     date = df["recordedat"].dt.strftime("%Y-%m-%d").mode().iat[0] if len(df) else path.stem
     df["segment"] = "Move"
     df["stay_id"] = ""
@@ -389,10 +393,13 @@ def main():
     for k, v in PARAMS.items():
         if k == "STAY_METHOD":
             ap.add_argument("--stay-method", choices=["circle", "anchor"], default=v)
+        elif k == "ONLY_MAIN_DATE":
+            ap.add_argument("--only-main-date", action="store_true", help="drop rows whose date differs from the file's main date")
         else:
             ap.add_argument(f"--{k.lower().replace('_', '-')}", type=float, default=v)
     args = ap.parse_args()
     P = {k: getattr(args, k.lower()) for k in PARAMS}
+    P["ONLY_MAIN_DATE"] = bool(P["ONLY_MAIN_DATE"])
     if P["MAX_ACCURACY_M"] is not None and math.isnan(P["MAX_ACCURACY_M"]):
         P["MAX_ACCURACY_M"] = None
     args.out.mkdir(parents=True, exist_ok=True)
@@ -400,7 +407,7 @@ def main():
     merged = {"baseline": ([], []), "event": ([], [])}
     for path in args.inputs:
         date, df, stays, trips, dropped = process_file(path, P)
-        stem = path.stem
+        stem = path.name.split(".")[0]          # "20240814.csv.gz" -> "20240814"
         out_df = df.copy()
         out_df["recordedat"] = out_df["recordedat"].dt.strftime("%Y-%m-%d %H:%M:%S.%f").str[:-3]
         out_df.to_csv(args.out / f"{stem}_points.csv", index=False)
