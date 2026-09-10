@@ -225,6 +225,12 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   });
   assert.ok(tp, "an event trajectory is rendered");
   await hover(page, tp);
+  // hover: tooltip only, nothing highlighted or faded (focus is applied on click)
+  assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "block", "tooltip on hover");
+  assert.equal(await page.evaluate(() => S.trajFocus), null, "no focus on hover");
+  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "nothing faded on hover");
+  const box0 = await page.locator("#map").boundingBox();
+  await page.mouse.click(box0.x + tp.x, box0.y + tp.y); await page.waitForTimeout(300);
   // several trajectories can overlap at one pixel; the topmost one under the cursor gets the focus
   const focus = await page.evaluate(([x, y]) => ({
     hovered: document.getElementById("tip").style.display, eventHl: map.getFilter("traj-event-hl")[2], baseHl: map.getFilter("traj-base-hl")[2],
@@ -233,8 +239,7 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
     // features within a few pixels of the (integer) mouse position; MapLibre's own hit test uses the rounded point
     underCursor: map.queryRenderedFeatures([[Math.round(x) - 4, Math.round(y) - 4], [Math.round(x) + 4, Math.round(y) + 4]], { layers: ["traj-event", "dwell-event"] }).map((f) => f.properties.id),
   }), [tp.x, tp.y]);
-  assert.equal(focus.hovered, "block", "tooltip shown");
-  assert.ok(focus.focus && focus.focus.kind === "event" && focus.underCursor.includes(focus.focus.id), "focused trajectory is one under the cursor");
+  assert.ok(focus.focus && focus.focus.kind === "event" && focus.underCursor.includes(focus.focus.id), "clicked trajectory is one under the cursor");
   tp.id = focus.focus.id;
   assert.equal(focus.eventHl, tp.id, "hovered event trajectory highlighted");
   assert.equal(focus.eventDwellHl, tp.id, "its dwell points highlighted");
@@ -243,9 +248,8 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   assert.ok(focus.hlRendered >= 1, "highlight layer renders the trajectory");
   await page.screenshot({ path: join(SHOTS, "trajectory_focus.png") });
 
-  // click pins the focus; moving away keeps it; clicking empty map clears it
+  // the click pinned the focus; moving away keeps it; clicking empty map clears it
   const box = await page.locator("#map").boundingBox();
-  await page.mouse.click(box.x + tp.x, box.y + tp.y); await page.waitForTimeout(200);
   assert.deepEqual(await page.evaluate(() => S.trajPin), { id: tp.id, kind: "event" }, "pinned");
   await page.mouse.move(box.x + 30, box.y + box.height - 30); await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => map.getFilter("traj-event-hl")[2]), tp.id, "pin survives mouse leave");

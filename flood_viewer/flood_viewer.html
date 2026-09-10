@@ -650,32 +650,35 @@ function initMap(gj){
     map.on("mousemove", "links-hit", onHover);
     map.on("mouseleave", "links-hit", () => { if(S.mode === "traj") return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
     map.on("click", "links-hit", onClick);
+    // Trajectory mode: one hit test per event over all 8 layers (per-layer listeners would run 8 queries
+    // per mouse move over ~100k features). Hover only shows the tooltip; the focus (highlight + fade)
+    // is applied on click, because re-filtering 16 layers on every mouse move stalls large slots.
+    const trajHit = (pt) => { const fts = map.queryRenderedFeatures(pt, {layers: TRAJ_LAYERS}); return fts.length ? fts[0] : null; };
+    let moveTimer = null, lastMove = null;
+    map.on("mousemove", (e) => {
+      if(S.mode !== "traj") return;
+      lastMove = e;
+      if(moveTimer) return;
+      moveTimer = setTimeout(() => {
+        moveTimer = null;
+        const ev = lastMove, ft = trajHit(ev.point);
+        if(ft){ map.getCanvas().style.cursor = "pointer"; showTip(ev, ft); }
+        else { map.getCanvas().style.cursor = ""; hideTip(); }
+      }, 80);
+    });
+    map.getCanvas().addEventListener("mouseleave", () => { if(S.mode === "traj"){ map.getCanvas().style.cursor = ""; hideTip(); } });
     map.on("click", (e) => {
       if(S.mode === "traj"){
-        const fts = map.queryRenderedFeatures(e.point, {layers: TRAJ_LAYERS.filter(l => map.getLayer(l))});
-        if(!fts.length){ S.trajPin = null; setTrajFocus(null); }
+        const ft = trajHit(e.point);
+        if(!ft){ S.trajPin = null; setTrajFocus(null); return; }
+        const f = {id: ft.properties.id, kind: ft.layer.id.endsWith("base") ? "base" : "event"};   // "kind" of a focus = role
+        S.trajPin = (S.trajPin && S.trajPin.id === f.id && S.trajPin.kind === f.kind) ? null : f;
+        setTrajFocus(S.trajPin);
         return;
       }
       const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
-    for(const lid of TRAJ_LAYERS){
-      const kind = lid.endsWith("base") ? "base" : "event";   // "kind" of a focus = role (base / event)
-      map.on("mousemove", lid, (e) => {
-        const ft = e.features && e.features[0]; if(!ft) return;
-        map.getCanvas().style.cursor = "pointer";
-        showTip(e, lid);
-        if(!S.trajPin) setTrajFocus({id: ft.properties.id, kind});
-      });
-      map.on("mouseleave", lid, () => { map.getCanvas().style.cursor = ""; hideTip(); if(!S.trajPin) setTrajFocus(null); });
-      map.on("click", lid, (e) => {
-        const ft = e.features && e.features[0]; if(!ft) return;
-        const f = {id: ft.properties.id, kind};
-        S.trajPin = (S.trajPin && S.trajPin.id === f.id && S.trajPin.kind === f.kind) ? null : f;
-        setTrajFocus(S.trajPin || f);
-        e.originalEvent.stopPropagation();
-      });
-    }
     map.on("moveend", updateTraj);
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
     if(!hasTraj()){
@@ -814,7 +817,7 @@ function updateTraj(){
   let diag = `　｜ この時刻のデータ全体: ${totals.join(" / ")}`;
   if(S.traj._missing && S.traj._missing.length) diag += `　｜ ファイルなし: ${S.traj._missing.join(", ")}`;
   if(total && !shown) diag += "　｜ 表示範囲内にはありません（「最寄りの軌跡へ」で移動）";
-  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: ${parts.join(" / ")}${diag}`);
+  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: ${parts.join(" / ")}${diag}　｜ クリックで同じ ID を強調（もう一度クリックか空白で解除）`);
 }
 
 // Fly to the feature of the current slot (visible roles / kinds) nearest to the map centre.
@@ -857,9 +860,9 @@ function trajCount(ds, id, t){
   return n;
 }
 
-function showTip(e, lid){
-  const ft = e.features && e.features[0]; if(!ft) return;
-  const p = ft.properties;
+function showTip(e, ft){
+  if(!ft) return;
+  const lid = ft.layer.id, p = ft.properties;
   const val = (k) => k === "mode" ? String(p[k]).split(",").map(m => MODE_LABEL[m] || m).join(",") : (String(p[k]).length > 40 ? String(p[k]).slice(0, 40) + "…" : p[k]);
   const extra = Object.keys(p).filter(k => !["id","time","kind"].includes(k) && p[k] !== null && p[k] !== "null").map(k => `<span class="k">${PROP_LABEL[k] || k}</span> ${val(k)}`).join(" · ");
   const tip = $("tip");
