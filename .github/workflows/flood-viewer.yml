@@ -30,6 +30,8 @@ jobs:
           pip install numpy pandas
           npm install
           npx playwright install --with-deps chromium
+      - name: Probe segmentation self-test
+        run: python3 probe/test_probe_trips.py
       - name: Generate sample data
         run: npm run data
       - name: Build standalone HTML

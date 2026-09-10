@@ -53,4 +53,33 @@ npm test                         # Playwright + node:test によるブラウザ�
 GitHub Actions（`.github/workflows/flood-viewer.yml`）が `flood_viewer/` の変更で同じ手順を実行し、
 standalone HTML とスクリーンショットをアーティファクトとして残す。
 
+## 位置ログの前処理（probe/）
+
+端末の位置ログ（1 行 1 測位: id, recordedat, lon, lat, accuracy, speed, userid, ... の日別 CSV）から
+Stay/Move 判定、トリップ ID 付与、ビューワー用 GeoJSON を作る。
+
+```
+python3 probe/probe_trips.py 2024-08-14.csv 2024-08-21.csv --out probe_out --event-date 2024-08-21
+python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
+```
+
+| 規則 | 既定値 | 引数 |
+|---|---|---|
+| Stay: 先頭点から半径 R 以内に連続して留まり、D 分以上 | R = 100 m, D = 20 分 | `--stay-radius-m`, `--stay-min-min` |
+| Move: それ以外（速度 0 でも Move） | | |
+| トリップ = 直前の一連の Stay + 連続する Move | | |
+| 時間ジャンプ: 連続点の間隔がこれを超えると新トリップ | 30 分 | `--time-gap-min` |
+| 位置ジャンプ: 連続点の見かけ速度がこれを超え、かつ距離がこれ以上 | 150 km/h, 500 m | `--jump-speed-kmh`, `--jump-min-dist-m` |
+| 精度フィルタ: accuracy がこれを超える点を除外 | なし | `--max-accuracy-m` |
+
+出力（`--out`）:
+
+- `<stem>_points.csv`: 入力行 + segment（Stay/Move）, stay_id, trip_id, split_reason（start / stay / time_gap / jump）
+- `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
+- `<stem>_trips.geojson`: トリップごとの Move 点の LineString（起点・終点 Stay、距離）
+- `baseline_trajectory.geojson` / `baseline_dwell.geojson` / `event_trajectory.geojson` / `event_dwell.geojson`:
+  ビューワー軌跡モード用。id = userid の先頭 12 文字、time = 15 分刻みの窓終端 "HH:MM"、
+  軌跡は窓内 [time−60 分, time] の Move 点（トリップ境界で分割、複数なら MultiLineString）、
+  滞留は窓に重なる Stay の重心 MultiPoint。`--event-date` の日付のファイルが event、他は baseline に集約される。
+
 合成データは格子状の仮想道路網で、実データではない。実データ規模（約 77,000 リンク × 48 時刻）での動作は未検証。
