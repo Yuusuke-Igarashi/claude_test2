@@ -85,18 +85,19 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | ビューワー用出力の範囲: この bbox 内に点を持つユーザーだけ出力 | bbox と同じ | `--viewer-bbox` |
 | 当日フィルタ: ファイル名の日付（YYYYMMDD）以外の行を除外 | オフ | `--only-main-date` |
 | 試走: 先頭 N ユーザーだけ処理 / ビューワー出力を省略 | | `--sample-users N` / `--no-viewer` |
+| 端末 ID: 既定では全出力に userid の先頭 12 文字（`id`）だけを書く。全桁が必要なら指定 | オフ | `--keep-userid` |
 
 1 日 2,000 万行・25 万ユーザー規模を想定し、チャンク読み込みでフィルタを適用しながら読む。
 notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08-21", AREA_GEOJSON="tokyo.geojson", ONLY_MAIN_DATE=True)` のように呼べる。
 
 出力（`--out`）:
 
-- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / other、Stay と疎な点は空）, flag（modechange / turn）
+- `<stem>_points.csv`: id（userid の先頭 12 文字。`--keep-userid` で userid 全桁）, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / other、Stay と疎な点は空）, flag（modechange / turn）
 - `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
 - `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle、起点・終点 Stay、距離）
 - `<stem>_events.geojson`: 車→徒歩の変化点（at, v_before_kmh, gap_min）と急な方向転換点（at, mode, angle_deg）の Point
 - `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date` の日付なら event、他は baseline。
-  各地物は kind = traj / dwell / modechange / turn、id = userid の先頭 12 文字、time = 15 分刻みの窓終端 "HH:MM"。
+  各地物は kind = traj / dwell / modechange / turn、id = userid の先頭 12 文字（userid 全桁は `--keep-userid` のときだけ）、time = 15 分刻みの窓終端 "HH:MM"。
   軌跡は窓内 [time−60 分, time] の徒歩の密な Move 点（トリップ・点列境界で分割、複数なら MultiLineString）、
   滞留は窓に重なる Stay の重心 MultiPoint、変化点・方向転換点は窓内に時刻が入る Point。
   ビューワーは表示中の時刻のファイルだけを読むので `--viewer-bbox` は不要。

@@ -135,8 +135,32 @@ def test_dense(lon, lat, t):
     assert nd[:4] == nm[:4], "dense move points equal move points for the dense trips"
     assert nm[4] == 3 and nd[4] == 0, "the last trip's 3 move points are sparse and get no line"
     print("ok: dense runs")
+    test_no_userid(lon, lat, t)
     test_merge_stays()
     test_modes_and_events()
+
+
+def test_no_userid(lon, lat, t):
+    """Default outputs carry only the 12-character id; KEEP_USERID=True restores the full userid."""
+    import tempfile, os, json, glob
+    import pandas as pd
+    from probe_trips import run
+    uid = "a" * 64
+    df = pd.DataFrame({"recordedat": (pd.Timestamp("2024-08-14") + pd.to_timedelta(t, unit="s")).strftime("%Y-%m-%d %H:%M:%S"),
+                       "lon": lon, "lat": lat, "userid": uid, "activitytype": "on_foot"})
+    with tempfile.TemporaryDirectory() as d:
+        src = os.path.join(d, "20240814.csv"); df.to_csv(src, index=False)
+        run([src], os.path.join(d, "out"), "2024-08-21")
+        texts = [open(f, encoding="utf-8").read() for f in glob.glob(os.path.join(d, "out", "**", "*"), recursive=True) if os.path.isfile(f)]
+        assert texts and all(uid not in x and "userid" not in x for x in texts), "full userid leaked into an output"
+        pts = pd.read_csv(os.path.join(d, "out", "20240814_points.csv"))
+        assert pts.columns[0] == "id" and (pts["id"] == uid[:12]).all()
+        st = json.load(open(os.path.join(d, "out", "20240814_stays.geojson")))["features"]
+        assert st and st[0]["properties"]["id"] == uid[:12] and "userid" not in st[0]["properties"]
+        run([src], os.path.join(d, "out2"), "2024-08-21", KEEP_USERID=True)
+        st = json.load(open(os.path.join(d, "out2", "20240814_stays.geojson")))["features"]
+        assert st[0]["properties"]["userid"] == uid
+    print("ok: no userid in outputs")
 
 
 def test_merge_stays():
