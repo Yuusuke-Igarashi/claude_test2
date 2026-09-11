@@ -255,6 +255,13 @@ let map = null;
 // ============================================================
 const $ = (id) => document.getElementById(id);
 function setProgress(msg){ $("progress").textContent = msg; }
+// Title from the network file name (tokyo_YYYYMMDD_network.geojson -> "Tokyo YYYY-MM-DD Flood Candidates")
+function setTitleFrom(name){
+  const m = String(name).match(/(\d{4})(\d{2})(\d{2})/);
+  if(!m) return;
+  const t = `Tokyo ${m[1]}-${m[2]}-${m[3]} Flood Candidates`;
+  document.title = t; document.querySelector("#topbar h1").textContent = t;
+}
 function fileRow(name, state){
   let li = document.querySelector(`#fileList li[data-name="${name}"]`);
   if(!li){ li = document.createElement("li"); li.dataset.name = name; $("fileList").appendChild(li); }
@@ -313,9 +320,14 @@ function loadViaFiles(fileList){
   const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
     + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
   const read = (key, optional=false) => new Promise((res, rej) => {
-    const name = want[key];
-    const fl = byName[name];
+    let name = want[key];
+    let fl = byName[name];
+    if(!fl && key === "network"){   // any *_network.geojson (other dates / areas) stands in for the default name
+      const alt = Object.keys(byName).filter(n => /network\.geojson$/i.test(n));
+      if(alt.length === 1){ name = alt[0]; fl = byName[name]; }
+    }
     if(!fl){ fileRow(name, optional ? "なし" : "未選択"); return optional ? res(null) : rej(new Error(`${name} が選択されていません`)); }
+    if(key === "network") setTitleFrom(name);
     const rd = new FileReader();
     rd.onload = () => { fileRow(name, `OK (${(rd.result.length/1048576).toFixed(1)} MB)`); res(rd.result); };
     rd.onerror = () => rej(rd.error);
