@@ -4,10 +4,9 @@ Produces 4 files in ./data:
   baseline_trajectory.geojson, event_trajectory.geojson  (LineString per link id x time)
   baseline_dwell.geojson,      event_dwell.geojson       (MultiPoint per link id x time)
 
-Feature properties:
-  id     : link id (string, matches network.geojson / CSV id)
+Feature properties (no identifiers, like the real output):
   time   : "HH:MM" end of the 1-hour window (matches CSV header)
-  n_probes (trajectory) / n_points (dwell) : sample attributes, shown in the tooltip
+  n_points etc. : sample attributes, shown in the tooltip
 
 Relies on the grid built by make_synthetic.py (same geometry rules).
 """
@@ -79,7 +78,7 @@ for ft in net["features"]:
             nodes = list(reversed(walk(A, B, back))) + [A, B] + walk(B, A, fwd)
             pts = densify(nodes)
             traj[kind].append({"type": "Feature",
-                               "properties": {"id": lid, "time": tm, "n_probes": random.randint(1, 6)},
+                               "properties": {"time": tm, "n_points": random.randint(10, 60)},
                                "geometry": {"type": "LineString", "coordinates": pts}})
             # dwell points: many near the link when flooded, occasionally at intersections otherwise
             dp = []
@@ -91,18 +90,18 @@ for ft in net["features"]:
                 dp.append(jitter(coord(random.choice([A, B])), 3e-5))
             if dp:
                 dwell[kind].append({"type": "Feature",
-                                    "properties": {"id": lid, "time": tm, "n_points": len(dp)},
+                                    "properties": {"time": tm, "n_points": len(dp)},
                                     "geometry": {"type": "MultiPoint", "coordinates": dp}})
             # events: people leaving cars and turning back are frequent on flooded links, rare otherwise
             at = f"{int(tm[:2]) - 1:02d}:{random.randint(0, 59):02d}"
             if flooded or random.random() < 0.08:
                 events[kind].append({"type": "Feature",
-                                     "properties": {"id": lid, "time": tm, "kind": "modechange", "at": at,
+                                     "properties": {"time": tm, "kind": "modechange", "at": at,
                                                     "v_before_kmh": round(random.uniform(15, 45), 1), "gap_min": round(random.uniform(0.5, 9), 1)},
                                      "geometry": {"type": "Point", "coordinates": jitter(pts[len(pts) // 2], 3e-5)}})
             if flooded or random.random() < 0.15:
                 events[kind].append({"type": "Feature",
-                                     "properties": {"id": lid, "time": tm, "kind": "turn", "at": at,
+                                     "properties": {"time": tm, "kind": "turn", "at": at,
                                                     "mode": random.choice(["walk", "vehicle"]), "angle_deg": round(random.uniform(120, 180), 1)},
                                      "geometry": {"type": "Point", "coordinates": jitter(pts[len(pts) // 3], 3e-5)}})
 

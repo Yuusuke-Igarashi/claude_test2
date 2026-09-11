@@ -4,14 +4,15 @@
 Input : one or more daily CSV files (header: id,recordedat,lon,lat,...,userid,deviceid,...).
 Output: per input file, in --out
   <stem>_points.csv          every input row + segment (Stay/Move), stay_id, trip_id, split_reason
-  All outputs identify a device only by the first 12 characters of userid (KEEP_USERID=False).
+  Only <stem>_points.csv carries a device identifier (userid); every GeoJSON / viewer feature is
+  anonymous (per-trip / per-stay attributes only).
   <stem>_stays.geojson       one Point per stay (centroid) with start/end/duration
   <stem>_trips.geojson       one LineString per trip (Move points; origin/destination stay ids)
   <stem>_events.geojson      one Point per vehicle->walk change and per sharp turn
   and, for flood_viewer trajectory mode, one file per role and 15-min slot:
   viewer/<role>_<HHMM>.geojson   role = baseline (date != --event-date) or event (date == --event-date)
   viewer/index.json              roles, slots and feature counts
-  Each feature: properties.kind = "traj" | "dwell" | "modechange" | "turn", properties.id = user id, properties.time = "HH:MM"
+  Each feature: properties.kind = "traj" | "dwell" | "modechange" | "turn", properties.time = "HH:MM"
   (end of the 1-hour window); geometry = LineString/MultiLineString of Move points in
   [time-60min, time] (traj) or MultiPoint of stay centroids overlapping the window (dwell).
   The viewer loads only the slot shown by the time slider, so the whole area can be exported.
@@ -90,7 +91,6 @@ PARAMS = {
     "MODE_MIN_MIN": 3.0,      # a walk / vehicle run (OS activity type) shorter than this becomes "other" (label flicker)
     "TURN_MIN_DEG": 120.0,    # direction change at or above this is a sharp turn ...
     "TURN_LEG_M": 50.0,       # ... measured over legs of at least this length
-    "KEEP_USERID": False,     # True: write the full userid into every output. False: only the 12-character id
 }
 
 MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_OTHER = 0, 1, 2, 3
@@ -670,9 +670,8 @@ def write_points_csv(R, path: Path, P: dict, chunk=1_000_000):
         for a in range(0, max(n, 1), chunk):
             b = min(a + chunk, n)
             sl = slice(a, b)
-            ids = R["uids"][R["ucode"][sl]]
             out = pd.DataFrame({
-                ("userid" if P["KEEP_USERID"] else "id"): ids if P["KEEP_USERID"] else np.array([ushort(u) for u in ids], dtype=object),
+                "userid": R["uids"][R["ucode"][sl]],
                 "recordedat": df["recordedat"].iloc[sl].dt.strftime("%Y-%m-%d %H:%M:%S.%f").str[:-3].to_numpy(),
                 "lon": R["lon"][sl], "lat": R["lat"][sl],
             })
@@ -694,21 +693,11 @@ def write_points_csv(R, path: Path, P: dict, chunk=1_000_000):
     return n
 
 
-def _who(uids, u, P):
-    """Identity properties of a feature: the 12-character id, plus the full userid only if KEEP_USERID."""
-    d = {"id": ushort(uids[u])}
-    if P["KEEP_USERID"]:
-        d["userid"] = str(uids[u])
-    return d
-
-
 def write_stays_geojson(R, path: Path, P: dict):
     w = GeoJSONWriter(path); uids = R["uids"]
     for (u, k, trip, t_start, t_end, clon, clat, npts, rad) in R["stays"]:
-        us = ushort(uids[u])
         w.add({"type": "Feature",
-               "properties": {**_who(uids, u, P), "stay_id": f"{us}_S{k:03d}", "trip_id": f"{us}_T{trip:03d}",
-                              "start": fmt_ts(t_start), "end": fmt_ts(t_end), "duration_min": round((t_end - t_start) / 60, 1),
+               "properties": {"start": fmt_ts(t_start), "end": fmt_ts(t_end), "duration_min": round((t_end - t_start) / 60, 1),
                               "n_points": int(npts), "radius_max_m": round(rad, 1)},
                "geometry": {"type": "Point", "coordinates": [round(float(clon), 6), round(float(clat), 6)]}})
     return w.close()
@@ -722,14 +711,13 @@ def write_trips_geojson(R, path: Path, P: dict):
         geom = _split_line(mv, lon, lat, R["dense_run"])
         if geom is None:
             continue
-        us = ushort(uids[u])
         md = R["mode"][mv]
         w.add({"type": "Feature",
-               "properties": {**_who(uids, u, P), "trip_id": f"{us}_T{k:03d}", "split_reason": rs,
+               "properties": {"split_reason": rs,
                               "start": fmt_ts(t_start), "end": fmt_ts(t_end), "n_points": int(npts), "n_move": int(nmove),
                               "n_dense": int(ndense), "n_walk": int((md == MODE_WALK).sum()), "n_vehicle": int((md == MODE_VEHICLE).sum()),
                               "length_m": round(length, 1),
-                              "origin_stay": f"{us}_S{origin:03d}" if origin else "", "dest_stay": f"{us}_S{dest:03d}" if dest else ""},
+                              "from_stay": bool(origin), "to_stay": bool(dest)},
                "geometry": geom})
     return w.close()
 
@@ -739,16 +727,12 @@ def write_events_geojson(R, path: Path, P: dict):
     w = GeoJSONWriter(path); uids = R["uids"]; lon, lat, tsec = R["lon"], R["lat"], R["tsec"]
     mc_idx, mc_v, mc_gap = R["modechanges"]; turn_idx, turn_ang = R["turns"]
     for i, vv, g in zip(mc_idx, mc_v, mc_gap):
-        us = ushort(uids[R["ucode"][i]])
         w.add({"type": "Feature",
-               "properties": {"kind": "modechange", **_who(uids, R["ucode"][i], P), "trip_id": f"{us}_T{R['trip_no'][i]:03d}",
-                              "at": fmt_ts(tsec[i]), "v_before_kmh": None if np.isnan(vv) else round(float(vv), 1), "gap_min": round(float(g), 1)},
+               "properties": {"kind": "modechange", "at": fmt_ts(tsec[i]), "v_before_kmh": None if np.isnan(vv) else round(float(vv), 1), "gap_min": round(float(g), 1)},
                "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
     for i, an in zip(turn_idx, turn_ang):
-        us = ushort(uids[R["ucode"][i]])
         w.add({"type": "Feature",
-               "properties": {"kind": "turn", **_who(uids, R["ucode"][i], P), "trip_id": f"{us}_T{R['trip_no'][i]:03d}",
-                              "at": fmt_ts(tsec[i]), "mode": MODE_NAMES[R["mode"][i]], "angle_deg": round(float(an), 1)},
+               "properties": {"kind": "turn", "at": fmt_ts(tsec[i]), "mode": MODE_NAMES[R["mode"][i]], "angle_deg": round(float(an), 1)},
                "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
     return w.close()
 
@@ -821,9 +805,9 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         geom = {"type": "LineString", "coordinates": parts[0]} if len(parts) == 1 else {"type": "MultiLineString", "coordinates": parts}
         u = int(key_u[a])
         writers.add(role, hhmm, "traj", {"type": "Feature",
-                         "properties": {**_who(uids, u, P), "time": hhmm, "n_points": int(b - a),
+                         "properties": {"time": hhmm, "n_points": int(b - a),
                                         "mode": ",".join(sorted(set(MODE_NAMES[R["mode"][idx]]))),
-                                        "trips": ",".join(f"{ushort(uids[u])}_T{t:03d}" for t in sorted(set(int(trip_no[i]) for i in idx)))},
+                                        "n_trips": len(set(int(trip_no[i]) for i in idx))},
                          "geometry": geom})
         n_traj += 1
     # ---- dwell: stay centroids exploded into the windows they overlap ----
@@ -848,7 +832,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
             k = int(kk[a]); mm = int(k * SLOT); u = int(key_u[a])
             pts = [[round(float(slon[i]), 6), round(float(slat[i]), 6)] for i in rep[a:b]]
             writers.add(role, f"{mm // 60:02d}:{mm % 60:02d}", "dwell", {"type": "Feature",
-                              "properties": {**_who(uids, u, P), "time": f"{mm // 60:02d}:{mm % 60:02d}", "n_points": len(pts)},
+                              "properties": {"time": f"{mm // 60:02d}:{mm % 60:02d}", "n_points": len(pts)},
                               "geometry": {"type": "MultiPoint", "coordinates": pts}})
             n_dwell += 1
     # ---- events (vehicle->walk, sharp turns): one Point per event, in every window that contains it ----
@@ -863,12 +847,11 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         kmin = np.maximum(np.ceil(mins / SLOT).astype(np.int64), 1)
         kmax = np.minimum(np.ceil((mins + W) / SLOT).astype(np.int64) - 1, int(1440 / SLOT))
         for j in np.flatnonzero(sel):
-            i = idx[j]; u = int(ucode[i]); us = ushort(uids[u])
+            i = idx[j]
             for k in range(int(kmin[j]), int(kmax[j]) + 1):
                 mm = int(k * SLOT); hhmm = f"{mm // 60:02d}:{mm % 60:02d}"
                 writers.add(role, hhmm, kind, {"type": "Feature",
-                                  "properties": {**_who(uids, u, P), "time": hhmm, "at": fmt_ts(tsec[i])[11:16],
-                                                 "trip": f"{us}_T{R['trip_no'][i]:03d}", **attrs(j)},
+                                  "properties": {"time": hhmm, "at": fmt_ts(tsec[i])[11:16], **attrs(j)},
                                   "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
                 n_ev += 1
     return n_traj, n_dwell, n_ev
@@ -883,7 +866,7 @@ def main():
         flag = f"--{k.lower().replace('_', '-')}"
         if k == "STAY_METHOD":
             ap.add_argument(flag, choices=["circle", "anchor"], default=v)
-        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS", "MERGED_VIEWER", "DENSE_FOR_STAYS", "KEEP_USERID"):
+        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS", "MERGED_VIEWER", "DENSE_FOR_STAYS"):
             ap.add_argument(flag, action="store_true")
         elif k in ("BBOX", "VIEWER_BBOX"):
             ap.add_argument(flag, default=None, help="lon_min,lat_min,lon_max,lat_max")

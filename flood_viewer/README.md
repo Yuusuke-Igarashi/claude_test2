@@ -4,7 +4,7 @@
 
 - **交通モード**: リンクを 対象外（灰）/ 対象（黒）/ 異常（赤）で着色。タイムスライダー、再生、リンクホバーで平時・イベント時の速度と台数の時系列を表示。
 - **閾値パネル（⚙）**: is_target の台数・速度、error1 の速度比・台数比・ほぼ消失、裏取り要否を画面で変更すると即時に再計算。error.csv を読み込んでいれば再計算結果との不一致セル数を表示。
-- **軌跡モード**: 各 ID × 時刻の直近 1 時間の徒歩軌跡（LineString）、滞留点、車→徒歩の変化点、急な方向転換点を平時・イベント時で表示。ズーム 14 以上で有効。交通量の情報（着色・件数・時系列パネル）は表示しない。地物のホバーで属性を表示し、クリックで同じ ID の地物だけを強調して他を薄くする（もう一度クリックか空白のクリックで解除）。ホバーで強調しないのは、大きな時刻でマウス移動ごとに 16 レイヤーを再フィルタすると遅延が大きいため。種類ごとの表示切替と「最寄りの軌跡へ」（現在時刻のデータのうち地図中心に最も近いものへ移動）を備え、状態行に表示範囲内の件数・その時刻のファイル全体の件数・見つからないファイル名を出す。
+- **軌跡モード**: 各 ID × 時刻の直近 1 時間の徒歩軌跡（LineString）、滞留点、車→徒歩の変化点、急な方向転換点を平時・イベント時で表示。ズーム 14 以上で有効。交通量の情報（着色・件数・時系列パネル）は表示しない。地物のホバーで属性を表示する。地物は端末の識別子を持たないので、選択や強調の機能はない。種類ごとの表示切替と「最寄りの軌跡へ」（現在時刻のデータのうち地図中心に最も近いものへ移動）を備え、状態行に表示範囲内の件数・その時刻のファイル全体の件数・見つからないファイル名を出す。
 
 ## 使い方
 
@@ -17,8 +17,8 @@ output フォルダに置いて `python -m http.server` 経由で開けば自動
 | tokyo_20240821_network.geojson | 必須 | リンク形状。properties: id, pair_id |
 | baseline_speed.csv / event_speed.csv / baseline_count.csv / event_count.csv | 必須 | リンク × 時刻の行列。id 列 + "HH:MM" 列 |
 | error.csv | 任意 | ノートブックの最終 error。照合にのみ使用 |
-| viewer/<role>_<HHMM>.geojson + viewer/index.json | 任意（推奨） | 時刻別の軌跡・滞留・変化点（properties.kind = traj / dwell / modechange / turn, id, time）。スライダーの時刻のファイルだけを読むので全域を出力できる |
-| baseline_trajectory.geojson / event_trajectory.geojson | 任意 | 1 日分をまとめた LineString / MultiLineString。properties: id, time。小規模向け |
+| viewer/<role>_<HHMM>.geojson + viewer/index.json | 任意（推奨） | 時刻別の軌跡・滞留・変化点（properties.kind = traj / dwell / modechange / turn, time）。スライダーの時刻のファイルだけを読むので全域を出力できる |
+| baseline_trajectory.geojson / event_trajectory.geojson | 任意 | 1 日分をまとめた LineString / MultiLineString。properties: time。小規模向け |
 | baseline_dwell.geojson / event_dwell.geojson | 任意 | 同、MultiPoint / Point |
 
 `time` は 1 時間ウィンドウの終端で CSV ヘッダと同じ "HH:MM"。ISO 形式でも HH:MM 部分で照合する。
@@ -47,7 +47,7 @@ npm test                         # Playwright + node:test によるブラウザ�
 2. スライダー、キー操作、再生。
 3. 異常リンクのホバーでパネル・異常帯・2 系列が出て、クリックで固定できること。
 4. 閾値変更で件数が変わり、既定値に戻すと元の件数に戻ること。
-5. 軌跡モードのズーム制御、時刻別ファイルの遅延読み込みとキャッシュ、表示範囲内の件数と全体件数の診断、4 種類の地物の描画と種類別の表示切替、交通情報の非表示、軌跡ホバーのツールチップとクリックでの強調・解除、平時オフ、「最寄りの軌跡へ」、M キー。
+5. 軌跡モードのズーム制御、時刻別ファイルの遅延読み込みとキャッシュ、表示範囲内の件数と全体件数の診断、4 種類の地物の描画と種類別の表示切替、交通情報の非表示、軌跡ホバーのツールチップ、平時オフ、「最寄りの軌跡へ」、M キー。
 6. file:// で開いて必須 5 ファイルだけを選択した場合も同じ結果になり、軌跡ボタンが無効になること。
 7. file:// でフォルダごと選択すると viewer/ の時刻別ファイルが登録され、表示時に FileReader で読まれること。
 8. viewer/ が無く 1 日 1 ファイルの軌跡 GeoJSON だけの場合も従来通り読めること。
@@ -85,19 +85,19 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | ビューワー用出力の範囲: この bbox 内に点を持つユーザーだけ出力 | bbox と同じ | `--viewer-bbox` |
 | 当日フィルタ: ファイル名の日付（YYYYMMDD）以外の行を除外 | オフ | `--only-main-date` |
 | 試走: 先頭 N ユーザーだけ処理 / ビューワー出力を省略 | | `--sample-users N` / `--no-viewer` |
-| 端末 ID: 既定では全出力に userid の先頭 12 文字（`id`）だけを書く。全桁が必要なら指定 | オフ | `--keep-userid` |
 
 1 日 2,000 万行・25 万ユーザー規模を想定し、チャンク読み込みでフィルタを適用しながら読む。
 notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08-21", AREA_GEOJSON="tokyo.geojson", ONLY_MAIN_DATE=True)` のように呼べる。
 
 出力（`--out`）:
 
-- `<stem>_points.csv`: id（userid の先頭 12 文字。`--keep-userid` で userid 全桁）, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / other、Stay と疎な点は空）, flag（modechange / turn）
+- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / other、Stay と疎な点は空）, flag（modechange / turn）
 - `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
-- `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle、起点・終点 Stay、距離）
+- `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle、起点・終点に Stay があるか、距離）
 - `<stem>_events.geojson`: 車→徒歩の変化点（at, v_before_kmh, gap_min）と急な方向転換点（at, mode, angle_deg）の Point
+- 端末・Stay・トリップの識別子を持つのは points.csv だけ。GeoJSON と viewer/ の地物は属性のみで、端末をまたいで結び付けられない
 - `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date` の日付なら event、他は baseline。
-  各地物は kind = traj / dwell / modechange / turn、id = userid の先頭 12 文字（userid 全桁は `--keep-userid` のときだけ）、time = 15 分刻みの窓終端 "HH:MM"。
+  各地物は kind = traj / dwell / modechange / turn、time = 15 分刻みの窓終端 "HH:MM"。識別子は持たない。
   軌跡は窓内 [time−60 分, time] の徒歩の密な Move 点（トリップ・点列境界で分割、複数なら MultiLineString）、
   滞留は窓に重なる Stay の重心 MultiPoint、変化点・方向転換点は窓内に時刻が入る Point。
   ビューワーは表示中の時刻のファイルだけを読むので `--viewer-bbox` は不要。

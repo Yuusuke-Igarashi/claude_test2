@@ -181,7 +181,7 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   await page.close();
 });
 
-test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic info", async () => {
+test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffic info", async () => {
   const page = await openViewer();
   await page.click("#modeTraj"); await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => S.mode), "traj");
@@ -214,50 +214,26 @@ test("trajectory mode: zoom gating, viewport filtering, hover focus, no traffic 
   await hover(page, link);
   assert.notEqual(await page.evaluate(() => document.getElementById("chartPanel").style.display), "block", "no time-series panel on link hover");
 
-  // hover an event trajectory: it and its dwell points are focused, everything else faded
+  // hover an event trajectory: tooltip only (features carry no identifier, nothing is highlighted)
   const tp = await page.evaluate(() => {
     const fts = map.queryRenderedFeatures({ layers: ["traj-event"] });
-    // pick the one whose mid-point is nearest the centre so it is not under the top bar
     const c0 = map.getCenter(); let best = null;
     for (const f of fts) { const cs = f.geometry.coordinates; const c = cs[Math.floor(cs.length / 2)];
-      const d = Math.hypot(c[0] - c0.lng, c[1] - c0.lat); if (!best || d < best.d) { const p = map.project(c); best = { d, id: f.properties.id, x: p.x, y: p.y }; } }
+      const d = Math.hypot(c[0] - c0.lng, c[1] - c0.lat); if (!best || d < best.d) { const p = map.project(c); best = { d, x: p.x, y: p.y }; } }
     return best;
   });
   assert.ok(tp, "an event trajectory is rendered");
   await hover(page, tp);
-  // hover: tooltip only, nothing highlighted or faded (focus is applied on click)
   assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "block", "tooltip on hover");
-  assert.equal(await page.evaluate(() => S.trajFocus), null, "no focus on hover");
-  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "nothing faded on hover");
-  const box0 = await page.locator("#map").boundingBox();
-  await page.mouse.click(box0.x + tp.x, box0.y + tp.y); await page.waitForTimeout(300);
-  // several trajectories can overlap at one pixel; the topmost one under the cursor gets the focus
-  const focus = await page.evaluate(([x, y]) => ({
-    hovered: document.getElementById("tip").style.display, eventHl: map.getFilter("traj-event-hl")[2], baseHl: map.getFilter("traj-base-hl")[2],
-    eventDwellHl: map.getFilter("dwell-event-hl")[2], baseOpacity: map.getPaintProperty("traj-base", "line-opacity"), eventOpacity: map.getPaintProperty("traj-event", "line-opacity"),
-    hlRendered: map.queryRenderedFeatures({ layers: ["traj-event-hl"] }).length, focus: S.trajFocus,
-    // features within a few pixels of the (integer) mouse position; MapLibre's own hit test uses the rounded point
-    underCursor: map.queryRenderedFeatures([[Math.round(x) - 4, Math.round(y) - 4], [Math.round(x) + 4, Math.round(y) + 4]], { layers: ["traj-event", "dwell-event"] }).map((f) => f.properties.id),
-  }), [tp.x, tp.y]);
-  assert.ok(focus.focus && focus.focus.kind === "event" && focus.underCursor.includes(focus.focus.id), "clicked trajectory is one under the cursor");
-  tp.id = focus.focus.id;
-  assert.equal(focus.eventHl, tp.id, "hovered event trajectory highlighted");
-  assert.equal(focus.eventDwellHl, tp.id, "its dwell points highlighted");
-  assert.equal(focus.baseHl, "", "baseline of the same link is not highlighted");
-  assert.ok(focus.baseOpacity < 0.2 && focus.eventOpacity < 0.2, "other trajectories faded");
-  assert.ok(focus.hlRendered >= 1, "highlight layer renders the trajectory");
-  await page.screenshot({ path: join(SHOTS, "trajectory_focus.png") });
-
-  // the click pinned the focus; moving away keeps it; clicking empty map clears it
+  assert.match(await page.textContent("#tip"), /イベント時 (徒歩軌跡|滞留|車→徒歩|方向転換)/);
+  assert.doesNotMatch(await page.textContent("#tip"), /ID |userid/, "no identifier in the tooltip");
+  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "nothing faded");
+  await page.screenshot({ path: join(SHOTS, "trajectory_hover.png") });
   const box = await page.locator("#map").boundingBox();
-  assert.deepEqual(await page.evaluate(() => S.trajPin), { id: tp.id, kind: "event" }, "pinned");
-  await page.mouse.move(box.x + 30, box.y + box.height - 30); await page.waitForTimeout(300);
-  assert.equal(await page.evaluate(() => map.getFilter("traj-event-hl")[2]), tp.id, "pin survives mouse leave");
-  await page.evaluate(() => map.jumpTo({ zoom: 12.5 })); await page.waitForTimeout(800);
-  await page.mouse.click(box.x + 30, box.y + box.height - 30); await page.waitForTimeout(300);
-  assert.equal(await page.evaluate(() => S.trajPin), null, "pin cleared by clicking empty map");
-  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "fade removed");
-  await page.evaluate(() => map.jumpTo({ zoom: 15.2 })); await page.waitForTimeout(1500);
+  await page.mouse.click(box.x + tp.x, box.y + tp.y); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "click changes nothing");
+  await page.mouse.move(700, 30); await page.waitForTimeout(300);   // onto the top bar: leaves the canvas
+  assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "none", "tooltip hidden when the mouse leaves the map");
 
   // stepping through time loads other slots and keeps a bounded cache
   await page.evaluate((t) => applyTime(t + 1), T_18); await waitSlot(page);

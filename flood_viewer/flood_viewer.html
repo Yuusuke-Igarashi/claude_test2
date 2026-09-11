@@ -148,8 +148,6 @@ button:hover{background:#f0efec}
     <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
     <span>速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
     <span>台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
-    <span id="roTrajL1" style="display:none">軌跡 本</span><span class="v" id="roBT" style="display:none">-</span><span class="v" id="roET" style="display:none">-</span>
-    <span id="roTrajL2" style="display:none">滞留 点</span><span class="v" id="roBD" style="display:none">-</span><span class="v" id="roED" style="display:none">-</span>
   </div>
   <svg id="chartSpeed" class="chart"></svg>
   <svg id="chartCount" class="chart"></svg>
@@ -244,7 +242,6 @@ const S = {
   traj: null,           // {bt, et, bd, ed} parsed datasets (whole day, or the current slot in lazy mode) or null
   lazy: null,           // {sources: Map("role_HH:MM" -> URL|File), cache: Map("HH:MM" -> {bt,et,bd,ed}), loaded: "HH:MM"|null, loading: "HH:MM"|null}
   show: {base: true, event: true, traj: true, dwell: true, mode: true, turn: true},
-  trajFocus: null, trajPin: null,   // {id, kind} of the highlighted trajectory (hover / click-pinned)
   hoverId: null, pinnedId: null,
   playing: false, timer: null
 };
@@ -518,7 +515,7 @@ async function boot(loaderFn){
 }
 const tick = () => new Promise(r => setTimeout(r, 0));
 
-// Parse a trajectory / dwell GeoJSON. Each feature needs properties.id (link id) and
+// Parse a trajectory / dwell GeoJSON. Each feature needs
 // properties.time ("HH:MM", "HH:MM:SS" or ISO datetime; the HH:MM part is matched to the CSV header).
 function parseTraj(text, label){
   const gj = typeof text === "string" ? JSON.parse(text) : text;
@@ -538,7 +535,6 @@ function parseTraj(text, label){
     if(!Number.isFinite(minx)) return dropped++;   // empty geometry
     const k = feats.length;
     ft.id = k;
-    ft.properties.id = String(ft.properties.id);
     ft.properties.time = tm;
     feats.push(ft); byTime[ti].push(k); bb.push(minx,miny,maxx,maxy);
   };
@@ -618,7 +614,6 @@ function initMap(gj){
     // trajectory / dwell layers (filled by updateTraj)
     const EMPTY = {type:"FeatureCollection", features:[]};
     for(const sid of TRAJ_LAYERS) map.addSource(sid, {type:"geojson", data: EMPTY});
-    const NONE = ["==", ["get","id"], ""];
     const lineLayer = (id, src, color, width, opacity, filter) => map.addLayer({
       id, type:"line", source:src, layout:{"line-cap":"round","line-join":"round"},
       paint:{"line-color":color, "line-width":width, "line-opacity":opacity}, ...(filter ? {filter} : {})
@@ -631,13 +626,6 @@ function initMap(gj){
       circleLayer(`dwell-${role}`, `dwell-${role}`, {"circle-radius":4.5, "circle-color":color, "circle-opacity":0.9, "circle-stroke-color":sfc, "circle-stroke-width":2, "circle-stroke-opacity":1});
       circleLayer(`turn-${role}`, `turn-${role}`, {"circle-radius":4.5, "circle-color":color, "circle-opacity":0.9, "circle-stroke-color":cssVar("--ink"), "circle-stroke-width":1.5, "circle-stroke-opacity":1});
       circleLayer(`mode-${role}`, `mode-${role}`, {"circle-radius":6, "circle-color":sfc, "circle-opacity":0.9, "circle-stroke-color":color, "circle-stroke-width":3, "circle-stroke-opacity":1});
-    }
-    for(const role of ROLES){
-      const color = cssVar(role === "base" ? "--series-1" : "--series-2"), sfc = cssVar("--surface");
-      lineLayer(`traj-${role}-hl`, `traj-${role}`, color, 5, 1, NONE);
-      circleLayer(`dwell-${role}-hl`, `dwell-${role}`, {"circle-radius":6, "circle-color":color, "circle-stroke-color":sfc, "circle-stroke-width":2}, NONE);
-      circleLayer(`turn-${role}-hl`, `turn-${role}`, {"circle-radius":6.5, "circle-color":color, "circle-stroke-color":cssVar("--ink"), "circle-stroke-width":2}, NONE);
-      circleLayer(`mode-${role}-hl`, `mode-${role}`, {"circle-radius":8, "circle-color":sfc, "circle-stroke-color":color, "circle-stroke-width":4}, NONE);
     }
 
     // hover highlight
@@ -662,9 +650,9 @@ function initMap(gj){
     map.on("mousemove", "links-hit", onHover);
     map.on("mouseleave", "links-hit", () => { if(S.mode === "traj") return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
     map.on("click", "links-hit", onClick);
-    // Trajectory mode: one hit test per event over all 8 layers (per-layer listeners would run 8 queries
-    // per mouse move over ~100k features). Hover only shows the tooltip; the focus (highlight + fade)
-    // is applied on click, because re-filtering 16 layers on every mouse move stalls large slots.
+    // Trajectory mode: one throttled hit test per mouse move over all 8 layers (per-layer listeners
+    // would run 8 queries per move over ~100k features). Hover shows the tooltip; features carry no
+    // device identifier, so there is nothing to select or highlight.
     const trajHit = (pt) => { const fts = map.queryRenderedFeatures(pt, {layers: TRAJ_LAYERS}); return fts.length ? fts[0] : null; };
     let moveTimer = null, lastMove = null;
     map.on("mousemove", (e) => {
@@ -680,14 +668,7 @@ function initMap(gj){
     });
     map.getCanvas().addEventListener("mouseleave", () => { if(S.mode === "traj"){ map.getCanvas().style.cursor = ""; hideTip(); } });
     map.on("click", (e) => {
-      if(S.mode === "traj"){
-        const ft = trajHit(e.point);
-        if(!ft){ S.trajPin = null; setTrajFocus(null); return; }
-        const f = {id: ft.properties.id, kind: ft.layer.id.endsWith("base") ? "base" : "event"};   // "kind" of a focus = role
-        S.trajPin = (S.trajPin && S.trajPin.id === f.id && S.trajPin.kind === f.kind) ? null : f;
-        setTrajFocus(S.trajPin);
-        return;
-      }
+      if(S.mode === "traj") return;
       const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
@@ -713,7 +694,7 @@ const KINDS = [   // src = source/layer prefix, kind = properties.kind in the sl
 const TRAJ_LAYERS = KINDS.flatMap(k => ROLES.map(r => `${k.src}-${r}`));
 const TRAJ_KIND = Object.fromEntries(KINDS.flatMap(k => ROLES.map(r => [`${k.src}-${r}`, `${ROLE_LABEL[r]} ${k.label}`])));
 const emptySlot = () => Object.fromEntries(TRAJ_LAYERS.map(l => [l, null]));
-const PROP_LABEL = {userid:"userid", n_points:"点数", trips:"トリップ", trip:"トリップ", mode:"モード", at:"時刻", v_before_kmh:"直前の車両速度 km/h", gap_min:"車両→徒歩の間隔 分", angle_deg:"転換角度 °"};
+const PROP_LABEL = {n_points:"点数", n_trips:"トリップ数", mode:"モード", at:"時刻", v_before_kmh:"直前の車両速度 km/h", gap_min:"車両→徒歩の間隔 分", angle_deg:"転換角度 °"};
 const MODE_LABEL = {walk:"徒歩", vehicle:"車両", other:"その他"};
 
 // ============================================================
@@ -733,8 +714,6 @@ function setMode(m){
   for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traj ? "none" : "visible");
   map.setLayoutProperty("links-context", "visibility", traj ? "visible" : "none");
   if(traj){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null); }
-  S.trajPin = null;
-  setTrajFocus(null);
   updateTraj();
 }
 
@@ -829,7 +808,7 @@ function updateTraj(){
   let diag = `　｜ この時刻のデータ全体: ${totals.join(" / ")}`;
   if(S.traj._missing && S.traj._missing.length) diag += `　｜ ファイルなし: ${S.traj._missing.join(", ")}`;
   if(total && !shown) diag += "　｜ 表示範囲内にはありません（「最寄りの軌跡へ」で移動）";
-  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: ${parts.join(" / ")}${diag}　｜ クリックで同じ ID を強調（もう一度クリックか空白で解除）`);
+  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: ${parts.join(" / ")}${diag}`);
 }
 
 // Fly to the feature of the current slot (visible roles / kinds) nearest to the map centre.
@@ -850,35 +829,13 @@ function flyToNearest(){
   map.flyTo({center:[best.x, best.y], zoom: Math.max(map.getZoom(), CONFIG.TRAJ_MIN_ZOOM + 1), duration: 600});
 }
 
-// Focus one trajectory (link id + baseline/event kind) together with its dwell points;
-// everything else is faded. f = {id, kind} or null.
-function setTrajFocus(f){
-  if(!map || !map.getLayer("traj-base-hl")) return;
-  S.trajFocus = f;
-  const idFor = (role) => (f && f.kind === role) ? f.id : "";
-  const dim = !!f;
-  for(const role of ROLES) for(const K of KINDS){
-    const lid = `${K.src}-${role}`;
-    map.setFilter(`${lid}-hl`, ["==", ["get","id"], idFor(role)]);
-    if(K.src === "traj") map.setPaintProperty(lid, "line-opacity", dim ? 0.12 : 0.7);
-    else { map.setPaintProperty(lid, "circle-opacity", dim ? 0.15 : 0.9); map.setPaintProperty(lid, "circle-stroke-opacity", dim ? 0.15 : 1); }
-  }
-}
-
-function trajCount(ds, id, t){
-  if(!ds) return null;
-  let n = 0;
-  for(const k of ds.byTime[t]) if(ds.feats[k].properties.id === id) n++;
-  return n;
-}
-
 function showTip(e, ft){
   if(!ft) return;
   const lid = ft.layer.id, p = ft.properties;
   const val = (k) => k === "mode" ? String(p[k]).split(",").map(m => MODE_LABEL[m] || m).join(",") : (String(p[k]).length > 40 ? String(p[k]).slice(0, 40) + "…" : p[k]);
-  const extra = Object.keys(p).filter(k => !["id","time","kind"].includes(k) && p[k] !== null && p[k] !== "null").map(k => `<span class="k">${PROP_LABEL[k] || k}</span> ${val(k)}`).join(" · ");
+  const extra = Object.keys(p).filter(k => !["time","kind"].includes(k) && p[k] !== null && p[k] !== "null").map(k => `<span class="k">${PROP_LABEL[k] || k}</span> ${val(k)}`).join(" · ");
   const tip = $("tip");
-  tip.innerHTML = `<b>ID ${p.id}</b> · ${TRAJ_KIND[lid]}<br><span class="k">${windowLabel(S.t)}</span>${extra ? "<br>" + extra : ""}`;
+  tip.innerHTML = `<b>${TRAJ_KIND[lid]}</b><br><span class="k">${windowLabel(S.t)}</span>${extra ? "<br>" + extra : ""}`;
   tip.style.display = "block";
   const mapRect = $("map").getBoundingClientRect();
   let x = e.point.x + 14, y = e.point.y + 14;
@@ -1022,13 +979,6 @@ function showChart(ft){
   $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k];
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(S.es[b+t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
-  const showT = !!S.traj;
-  for(const k of ["roTrajL1","roBT","roET","roTrajL2","roBD","roED"]) $(k).style.display = showT ? "" : "none";
-  if(showT){
-    const c = (ds) => { const n = trajCount(ds, p.id, t); return n === null ? "–" : String(n); };
-    $("roBT").textContent = c(S.traj["traj-base"]); $("roET").textContent = c(S.traj["traj-event"]);
-    $("roBD").textContent = c(S.traj["dwell-base"]); $("roED").textContent = c(S.traj["dwell-event"]);
-  }
   const errMask = S.err.subarray(b, b+T);
   drawChart($("chartSpeed"), S.bs.subarray(b,b+T), S.es.subarray(b,b+T), errMask, "速度 km/h");
   drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, "台数 /15分");
