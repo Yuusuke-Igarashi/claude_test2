@@ -242,6 +242,7 @@ const S = {
   traj: null,           // {bt, et, bd, ed} parsed datasets (whole day, or the current slot in lazy mode) or null
   lazy: null,           // {sources: Map("role_HH:MM" -> URL|File), cache: Map("HH:MM" -> {bt,et,bd,ed}), loaded: "HH:MM"|null, loading: "HH:MM"|null}
   show: {base: true, event: true, traj: true, dwell: true, mode: true, turn: true},
+  trajSel: null,        // {source, id, ds}: the clicked trajectory-mode feature (feature-state "sel")
   hoverId: null, pinnedId: null,
   playing: false, timer: null
 };
@@ -619,13 +620,16 @@ function initMap(gj){
       paint:{"line-color":color, "line-width":width, "line-opacity":opacity}, ...(filter ? {filter} : {})
     });
     const circleLayer = (id, src, paint, filter) => map.addLayer({id, type:"circle", source:src, paint, ...(filter ? {filter} : {})});
+    // the clicked feature (feature-state sel) is drawn larger; everything else keeps its size
+    const SEL = ["boolean", ["feature-state", "sel"], false];
+    const pick = (on, off) => ["case", SEL, on, off];
     for(const role of ROLES){
       const color = cssVar(role === "base" ? "--series-1" : "--series-2"), sfc = cssVar("--surface");
-      lineLayer(`traj-${role}`, `traj-${role}`, color, 2, 0.7);
+      lineLayer(`traj-${role}`, `traj-${role}`, color, pick(6, 2), pick(1, 0.7));
       // dwell: filled dot; mode change (left the car): ring; sharp turn: dot with a dark rim
-      circleLayer(`dwell-${role}`, `dwell-${role}`, {"circle-radius":4.5, "circle-color":color, "circle-opacity":0.9, "circle-stroke-color":sfc, "circle-stroke-width":2, "circle-stroke-opacity":1});
-      circleLayer(`turn-${role}`, `turn-${role}`, {"circle-radius":4.5, "circle-color":color, "circle-opacity":0.9, "circle-stroke-color":cssVar("--ink"), "circle-stroke-width":1.5, "circle-stroke-opacity":1});
-      circleLayer(`mode-${role}`, `mode-${role}`, {"circle-radius":6, "circle-color":sfc, "circle-opacity":0.9, "circle-stroke-color":color, "circle-stroke-width":3, "circle-stroke-opacity":1});
+      circleLayer(`dwell-${role}`, `dwell-${role}`, {"circle-radius":pick(8, 4.5), "circle-color":color, "circle-opacity":0.9, "circle-stroke-color":sfc, "circle-stroke-width":pick(3, 2), "circle-stroke-opacity":1});
+      circleLayer(`turn-${role}`, `turn-${role}`, {"circle-radius":pick(8, 4.5), "circle-color":color, "circle-opacity":0.9, "circle-stroke-color":cssVar("--ink"), "circle-stroke-width":pick(2.5, 1.5), "circle-stroke-opacity":1});
+      circleLayer(`mode-${role}`, `mode-${role}`, {"circle-radius":pick(10, 6), "circle-color":sfc, "circle-opacity":0.9, "circle-stroke-color":color, "circle-stroke-width":pick(5, 3), "circle-stroke-opacity":1});
     }
 
     // hover highlight
@@ -651,8 +655,8 @@ function initMap(gj){
     map.on("mouseleave", "links-hit", () => { if(S.mode === "traj") return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
     map.on("click", "links-hit", onClick);
     // Trajectory mode: one throttled hit test per mouse move over all 8 layers (per-layer listeners
-    // would run 8 queries per move over ~100k features). Hover shows the tooltip; features carry no
-    // device identifier, so there is nothing to select or highlight.
+    // would run 8 queries per move over ~100k features). Hover shows the tooltip; a click marks the
+    // one feature under the cursor (feature-state, no re-filtering of layers).
     const trajHit = (pt) => { const fts = map.queryRenderedFeatures(pt, {layers: TRAJ_LAYERS}); return fts.length ? fts[0] : null; };
     let moveTimer = null, lastMove = null;
     map.on("mousemove", (e) => {
@@ -668,7 +672,12 @@ function initMap(gj){
     });
     map.getCanvas().addEventListener("mouseleave", () => { if(S.mode === "traj"){ map.getCanvas().style.cursor = ""; hideTip(); } });
     map.on("click", (e) => {
-      if(S.mode === "traj") return;
+      if(S.mode === "traj"){
+        const ft = trajHit(e.point);
+        const same = ft && S.trajSel && S.trajSel.source === ft.layer.id && S.trajSel.id === ft.id;
+        setTrajSel(ft && !same ? {source: ft.layer.id, id: ft.id, ds: S.traj && S.traj[ft.layer.id]} : null);
+        return;
+      }
       const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
@@ -714,6 +723,7 @@ function setMode(m){
   for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traj ? "none" : "visible");
   map.setLayoutProperty("links-context", "visibility", traj ? "visible" : "none");
   if(traj){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null); }
+  setTrajSel(null);
   updateTraj();
 }
 
@@ -777,6 +787,8 @@ function updateTraj(){
   if(S.mode === "traj" && S.lazy && map.getZoom() >= CONFIG.TRAJ_MIN_ZOOM && !ensureSlot(S.t)) return;
   const EMPTY = {type:"FeatureCollection", features:[]};
   const clearAll = () => { for(const l of TRAJ_LAYERS) map.getSource(l).setData(EMPTY); };
+  // feature ids are indices within one parsed dataset: a selection only survives while that dataset is shown
+  if(S.trajSel && (!S.traj || S.traj[S.trajSel.source] !== S.trajSel.ds)) setTrajSel(null);
   if(S.mode !== "traj" || !hasTraj() || !S.traj || map.getZoom() < CONFIG.TRAJ_MIN_ZOOM){ clearAll(); trajStatus(); return; }
   const b = map.getBounds(), w = b.getWest(), e = b.getEast(), s = b.getSouth(), n = b.getNorth();
   const pick = (ds, on) => {
@@ -808,7 +820,7 @@ function updateTraj(){
   let diag = `　｜ この時刻のデータ全体: ${totals.join(" / ")}`;
   if(S.traj._missing && S.traj._missing.length) diag += `　｜ ファイルなし: ${S.traj._missing.join(", ")}`;
   if(total && !shown) diag += "　｜ 表示範囲内にはありません（「最寄りの軌跡へ」で移動）";
-  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: ${parts.join(" / ")}${diag}`);
+  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: ${parts.join(" / ")}${diag}　｜ クリックで強調（もう一度クリックか空白で解除）`);
 }
 
 // Fly to the feature of the current slot (visible roles / kinds) nearest to the map centre.
@@ -827,6 +839,13 @@ function flyToNearest(){
   }
   if(!best){ trajStatus(`${windowLabel(S.t)}: 表示中の種類・平時/イベント時に該当するデータがありません`); return; }
   map.flyTo({center:[best.x, best.y], zoom: Math.max(map.getZoom(), CONFIG.TRAJ_MIN_ZOOM + 1), duration: 600});
+}
+
+// Mark one trajectory-mode feature (source + feature id) via feature-state; null clears.
+function setTrajSel(sel){
+  if(S.trajSel) map.removeFeatureState({source: S.trajSel.source, id: S.trajSel.id});
+  S.trajSel = sel;
+  if(sel) map.setFeatureState({source: sel.source, id: sel.id}, {sel: true});
 }
 
 function showTip(e, ft){

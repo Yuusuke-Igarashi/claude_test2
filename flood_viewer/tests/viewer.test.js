@@ -227,11 +227,24 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "block", "tooltip on hover");
   assert.match(await page.textContent("#tip"), /イベント時 (徒歩軌跡|滞留|車→徒歩|方向転換)/);
   assert.doesNotMatch(await page.textContent("#tip"), /ID |userid/, "no identifier in the tooltip");
-  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "nothing faded");
+  assert.equal(await page.evaluate(() => S.trajSel), null, "nothing selected on hover");
   await page.screenshot({ path: join(SHOTS, "trajectory_hover.png") });
+  // click marks the one feature under the cursor (feature-state); a second click or an empty click clears it
   const box = await page.locator("#map").boundingBox();
   await page.mouse.click(box.x + tp.x, box.y + tp.y); await page.waitForTimeout(300);
-  assert.equal(await page.evaluate(() => map.getPaintProperty("traj-base", "line-opacity")), 0.7, "click changes nothing");
+  const sel = await page.evaluate(() => S.trajSel && { source: S.trajSel.source, id: S.trajSel.id, state: map.getFeatureState({ source: S.trajSel.source, id: S.trajSel.id }) });
+  assert.ok(sel && sel.state.sel === true, "clicked feature selected: " + JSON.stringify(sel));
+  assert.ok(await page.evaluate(() => map.queryRenderedFeatures({ layers: TRAJ_LAYERS }).filter((f) => f.state && f.state.sel).length) >= 1, "selected feature rendered with state");
+  await page.screenshot({ path: join(SHOTS, "trajectory_selected.png") });
+  await page.mouse.click(box.x + tp.x, box.y + tp.y); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => S.trajSel), null, "second click clears the selection");
+  assert.equal(await page.evaluate(([s, i]) => map.getFeatureState({ source: s, id: i }).sel, [sel.source, sel.id]), undefined, "feature-state removed");
+  await page.mouse.click(box.x + tp.x, box.y + tp.y); await page.waitForTimeout(300);
+  assert.ok(await page.evaluate(() => !!S.trajSel), "selected again");
+  await page.evaluate(() => map.jumpTo({ zoom: 12.5 })); await page.waitForTimeout(800);
+  await page.mouse.click(box.x + 30, box.y + box.height - 30); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => S.trajSel), null, "empty click clears the selection");
+  await page.evaluate(() => map.jumpTo({ zoom: 15.2 })); await page.waitForTimeout(1500);
   await page.mouse.move(700, 30); await page.waitForTimeout(300);   // onto the top bar: leaves the canvas
   assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "none", "tooltip hidden when the mouse leaves the map");
 
