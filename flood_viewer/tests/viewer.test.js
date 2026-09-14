@@ -271,6 +271,44 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.close();
 });
 
+test("rain slots and low-lying areas follow the time slider, toggles and date select", async () => {
+  const page = await openViewer();
+  assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "48 rain slots registered from rain/index.json");
+  assert.ok(await page.evaluate(() => !!S.lowland && map.getLayer("lowland") && map.getLayer("rain")), "rain and lowland layers exist");
+  assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none", "overlay controls shown");
+  assert.match(await page.textContent("#legendRain"), /降雨 mm\/h/);
+  assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821");
+  await page.evaluate((t) => applyTime(t + 2), T_18);   // 18:30 = peak
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
+  const peak = await page.evaluate(() => ({ max: Math.max(...S.rain.cur.vals) / 10, url: map.getSource("rain").url.slice(0, 21), w: S.rain.cur.w, h: S.rain.cur.h }));
+  assert.ok(peak.max > 80, "peak slot decoded: " + JSON.stringify(peak));
+  assert.equal(peak.url, "data:image/png;base64", "coloured image handed to the image source");
+  assert.deepEqual([peak.w, peak.h], [160, 96]);
+  // value readout at the wet centre and the no-data stripe
+  const centre = await page.evaluate(() => rainAt({ lng: 139.70 + 0.1 * (0.2 + 0.6 * 26 / 47), lat: 35.71 - 0.06 * (0.5 + 0.15 * Math.sin(26 / 6)) }));
+  assert.match(centre, /^\d+\.\d mm\/h$/, "readout: " + centre);
+  assert.ok(parseFloat(centre) > 60, "wet centre value " + centre);
+  assert.equal(await page.evaluate(() => rainAt({ lng: 139.7001, lat: 35.68 })), "–", "no-data stripe reads as –");
+  assert.equal(await page.evaluate(() => rainAt({ lng: 139.5, lat: 35.68 })), "", "outside the bounds reads empty");
+  // stepping time swaps the image; the cache is bounded
+  await page.evaluate((t) => applyTime(t), T_18);
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:00", null, { timeout: 15000 });
+  assert.ok(await page.evaluate(() => S.rain.cache.size >= 2 && S.rain.cache.size <= 8));
+  // toggles
+  await page.click("#chkRain"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "none");
+  await page.click("#chkRain"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
+  await page.click("#chkLowland"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("lowland", "visibility")), "none");
+  await page.click("#chkLowland");
+  // rain stays available in trajectory mode
+  await page.click("#modeTraj"); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
+  await page.screenshot({ path: join(SHOTS, "rain_overlay.png") });
+  await page.close();
+});
+
 test("standalone file:// with the file picker, without optional files", async () => {
   const page = await newPage();
   await page.goto("file://" + join(DIST, HTML));
@@ -281,6 +319,8 @@ test("standalone file:// with the file picker, without optional files", async ()
   const st = await status(page);
   assert.equal(st.error, errorCountsFromCsv()[T_18], "same result without error.csv");
   assert.ok(await page.evaluate(() => document.getElementById("modeTraj").disabled), "trajectory mode disabled without trajectory files");
+  assert.equal(await page.evaluate(() => S.rain), null, "no rain without the rain folder");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none");
   assert.match(await page.textContent("#trajStatus"), /軌跡モードは使えません。選択 5 ファイル: 時刻別ファイル.*なし/, "the reason stays visible in traffic mode");
   assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("trajStatus")).display), "block");
   assert.match(await page.textContent("#pCheck"), /未読み込み/);
@@ -294,6 +334,11 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.setInputFiles("#dirInput", DATA);
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
+  assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain slots found in the folder (rain/index.json + png)");
+  assert.ok(await page.evaluate(() => !!S.lowland), "lowland.geojson found in the folder");
+  await page.evaluate((t) => applyTime(t + 2), T_18);
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
+  assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 800), "rain slot decoded from a File object");
   await page.evaluate((t) => { setMode("traj"); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "trajectories drawn from a slot file read via FileReader");

@@ -5,7 +5,7 @@
   "description": "Standalone map viewer for the Tokyo 2024-08-21 flood candidate analysis (traffic + trajectory modes)",
   "type": "module",
   "scripts": {
-    "data": "python3 sample/make_synthetic.py && python3 sample/make_trajectories.py",
+    "data": "python3 sample/make_synthetic.py && python3 sample/make_trajectories.py && python3 sample/make_rain.py",
     "build": "node build_standalone.mjs",
     "test": "node --test tests/*.test.js",
     "all": "npm run data && npm run build && npm test"

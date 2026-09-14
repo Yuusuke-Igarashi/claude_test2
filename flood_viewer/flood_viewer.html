@@ -78,6 +78,12 @@ button:hover{background:#f0efec}
 .legend .ring::before{width:9px;height:9px;border-radius:50%;background:var(--surface);border:3px solid var(--c);box-shadow:none}
 .legend .turn::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);box-shadow:none}
 .legend .grp{color:var(--muted);margin-left:4px}
+#overlayOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
+#rainDate{font:inherit;font-size:12px;padding:1px 2px}
+#legendRain{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
+#legendRain .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
+#legendRain .lab{margin-right:6px}
+#legendRain .low{display:inline-block;width:16px;height:10px;background:rgba(120,90,40,.35);border:1px solid rgba(120,90,40,.8);margin:0 4px 0 12px;vertical-align:middle}
 #nearestBtn{font-size:12px;padding:2px 8px}
 #loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
 #loader .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:520px;max-width:90vw}
@@ -102,6 +108,10 @@ button:hover{background:#f0efec}
     <button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button>
   </span>
   <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
+  <span id="overlayOpts" style="display:none">
+    <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <select id="rainDate"></select> <b id="rainVal" class="stat"></b></label>
+    <label id="lowlandOpt" style="display:none"><input type="checkbox" id="chkLowland" checked> 低位地帯</label>
+  </span>
   <span id="trajOpts" style="display:none">
     <label><input type="checkbox" id="chkBase" checked> 平時</label><label><input type="checkbox" id="chkEvent" checked> イベント時</label>
     <label><input type="checkbox" id="chkTraj" checked> 軌跡</label><label><input type="checkbox" id="chkDwell" checked> 滞留</label><label><input type="checkbox" id="chkMode" checked> 車→徒歩</label><label><input type="checkbox" id="chkTurn" checked> 方向転換</label>
@@ -121,6 +131,7 @@ button:hover{background:#f0efec}
     <span class="turn" style="--c:var(--ink2)">方向転換</span>
   </span>
   <div id="trajStatus"></div>
+  <div id="legendRain"></div>
 </div>
 <div id="tip"></div>
 
@@ -190,8 +201,13 @@ const CONFIG = {
     event_traj:     "event_trajectory.geojson",
     baseline_dwell: "baseline_dwell.geojson",        // MultiPoint / Point
     event_dwell:    "event_dwell.geojson",
-    viewer_dir:     "viewer"                         // per-slot files <role>_<HHMM>.geojson + index.json (loaded lazily)
+    viewer_dir:     "viewer",                        // per-slot files <role>_<HHMM>.geojson + index.json (loaded lazily)
+    rain_dir:       "rain",                          // optional: rain_<YYYYMMDD>_<HHMM>.png + index.json from xrain_tiles.py
+    lowland:        "lowland.geojson"                // optional: low-lying area polygons (any GeoJSON, WGS84)
   },
+  // Rain colour scale [mm/h] (thresholds like the JMA precipitation-intensity legend); below the first step = transparent
+  RAIN_SCALE: [[1, "#a0d2ff"], [5, "#218cff"], [10, "#0041ff"], [20, "#faf500"], [30, "#ff9900"], [50, "#ff2800"], [80, "#b40068"]],
+  RAIN_OPACITY: 0.55,
   // Trajectory mode
   TRAJ_MIN_ZOOM: 14,        // trajectories are drawn only at this zoom or closer
   TRAJ_WINDOW_MIN: 60,      // each trajectory covers [time - window, time]
@@ -243,6 +259,9 @@ const S = {
   lazy: null,           // {sources: Map("role_HH:MM" -> URL|File), cache: Map("HH:MM" -> {bt,et,bd,ed}), loaded: "HH:MM"|null, loading: "HH:MM"|null}
   show: {base: true, event: true, traj: true, dwell: true, mode: true, turn: true},
   trajSel: null,        // {source, id, ds}: the clicked trajectory-mode feature (feature-state "sel")
+  rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, date, cur: {key, vals, alpha, w, h}}
+  lowland: null,        // GeoJSON of low-lying areas
+  showRain: true, showLowland: true,
   hoverId: null, pinnedId: null,
   playing: false, timer: null
 };
@@ -287,12 +306,17 @@ async function loadViaFetch(){
     fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
     fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
   ]);
+  const rainIdx = await fetchText(f.rain_dir + "/index.json", true);
+  const rain = rainIdx ? rainFromIndex(JSON.parse(rainIdx), (name) => `${f.rain_dir}/${name}`) : null;
+  if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
+  const lowlandTxt = await fetchText(f.lowland, true);
+  const lowland = lowlandTxt ? JSON.parse(lowlandTxt) : null;
   const idx = await fetchText(f.viewer_dir + "/index.json", true);
   if(idx){
     const index = JSON.parse(idx), sources = new Map();
     for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
     fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
-    return {network, bs, es, bc, ec, err, lazySources: sources, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
+    return {network, bs, es, bc, ec, err, lazySources: sources, rain, lowland, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
   }
   const [bt, et, bd, ed] = await Promise.all([
     fetchText(f.baseline_traj, true), fetchText(f.event_traj, true),
@@ -300,21 +324,33 @@ async function loadViaFetch(){
   ]);
   const loadInfo = `http 経由: ${location.href.replace(/[^/]*$/, "")}${f.viewer_dir}/index.json が取得できません（HTML と同じ階層に viewer フォルダを置いてください）`
     + ([bt, et, bd, ed].some(Boolean) ? "。1 日 1 ファイル形式の軌跡を使用" : "。1 日 1 ファイル形式の軌跡もありません");
-  return {network, bs, es, bc, ec, err, bt, et, bd, ed, loadInfo};
+  return {network, bs, es, bc, ec, err, bt, et, bd, ed, rain, lowland, loadInfo};
+}
+
+// Rain slot registry from rain/index.json: key "YYYYMMDD_HH:MM" -> source (url or File)
+function rainFromIndex(index, srcOf){
+  const sources = new Map();
+  for(const [date, slots] of Object.entries(index.dates || {})) for(const tm of slots) sources.set(`${date}_${tm}`, srcOf(`rain_${date}_${tm.replace(":", "")}.png`));
+  if(!sources.size) return null;
+  return {index, sources, cache: new Map(), date: Object.keys(index.dates).sort().pop(), cur: null, loading: null};
 }
 
 function loadViaFiles(fileList){
   const want = CONFIG.files;
-  const byName = {}, sources = new Map(), other = [];
-  let total = 0;
+  const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
+  let total = 0, rainIndexFile = null;
   for(const fl of fileList){
     total++;
     const m = fl.name.match(/^(baseline|event)_(\d{2})(\d{2})\.geojson$/i);
     if(m){ sources.set(`${m[1].toLowerCase()}_${m[2]}:${m[3]}`, fl); continue; }
+    const r = fl.name.match(/^rain_(\d{8})_(\d{2})(\d{2})\.png$/i);
+    if(r){ rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl); continue; }
+    if(fl.name === "index.json"){ if(/(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl; continue; }
     byName[fl.name] = fl;
     if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
   }
   if(sources.size) fileRow(want.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
+  if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（表示時に読み込み）${rainIndexFile ? "" : "。index.json なし"}`);
   const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
     + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
   const read = (key, optional=false) => new Promise((res, rej) => {
@@ -333,8 +369,13 @@ function loadViaFiles(fileList){
   });
   const optional = sources.size ? [Promise.resolve(null), Promise.resolve(null), Promise.resolve(null), Promise.resolve(null)]
                                 : [read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)];
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed]) => ({network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, loadInfo}));
+  const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse) : Promise.resolve(null);
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx]) => {
+      const rain = (rainIdx && rainFiles.size) ? rainFromIndex(rainIdx, (name) => rainFiles.get(name.replace(/^rain_(\d{8})_(\d{2})(\d{2})\.png$/, "$1_$2:$3"))) : null;
+      if(rain) for(const [k, v] of rain.sources) if(!v) rain.sources.delete(k);   // slots listed in index.json but not selected
+      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, loadInfo};
+    });
 }
 
 function readSource(src){
@@ -498,6 +539,9 @@ async function boot(loaderFn){
   checkAgainstRef();
   setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ / CSV 未対応リンク ${unmatched} 本`);
   await tick();
+  S.rain = raw.rain || null;
+  S.lowland = raw.lowland || null;
+  if(S.rain) { setProgress(`降雨: ${S.rain.sources.size} スロット（${Object.keys(S.rain.index.dates).join(", ")}）`); await tick(); }
   if(raw.lazySources && raw.lazySources.size){
     S.lazy = {sources: raw.lazySources, cache: new Map(), loaded: null, loading: null};
     const roles = new Set([...raw.lazySources.keys()].map(k => k.split("_")[0]));
@@ -575,6 +619,17 @@ function initMap(gj){
   map.addControl(new maplibregl.ScaleControl({unit:"metric"}), "bottom-right");
 
   map.once("style.load", () => {
+    // overlays under the road network: rain (image, coloured in updateRain) and low-lying areas (fill)
+    if(S.rain){
+      const [W, Sb, E, Nb] = S.rain.index.bounds;
+      map.addSource("rain", {type:"image", url: BLANK_PNG, coordinates: [[W, Nb], [E, Nb], [E, Sb], [W, Sb]]});
+      map.addLayer({id:"rain", type:"raster", source:"rain", paint:{"raster-opacity": CONFIG.RAIN_OPACITY, "raster-resampling":"nearest", "raster-fade-duration": 0}});
+    }
+    if(S.lowland){
+      map.addSource("lowland", {type:"geojson", data: S.lowland});
+      map.addLayer({id:"lowland", type:"fill", source:"lowland", paint:{"fill-color":"#785a28", "fill-opacity":0.22}});
+      map.addLayer({id:"lowland-line", type:"line", source:"lowland", paint:{"line-color":"#785a28", "line-opacity":0.7, "line-width":1}});
+    }
     map.addSource("links", { type:"geojson", data: gj, tolerance: 0.2, buffer: 8 });
     const cls = CLS_EXPR;
     const hov = ["coalesce", ["feature-state", "hover"], 0];
@@ -682,6 +737,8 @@ function initMap(gj){
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
     map.on("moveend", updateTraj);
+    setupOverlays();
+    updateRain();
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
     if(!hasTraj()){
       $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません: " + S.loadInfo;
@@ -841,6 +898,103 @@ function flyToNearest(){
   map.flyTo({center:[best.x, best.y], zoom: Math.max(map.getZoom(), CONFIG.TRAJ_MIN_ZOOM + 1), duration: 600});
 }
 
+// ============================================================
+// Rain (XRAIN 15-min slots) and low-lying areas
+// ============================================================
+const BLANK_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+const RAIN_CACHE = 8;
+
+function setupOverlays(){
+  const any = !!(S.rain || S.lowland);
+  $("overlayOpts").style.display = any ? "inline" : "none";
+  if(S.rain){
+    $("rainOpt").style.display = "inline";
+    const sel = $("rainDate"); sel.innerHTML = "";
+    for(const d of Object.keys(S.rain.index.dates).sort()){ const o = document.createElement("option"); o.value = d; o.textContent = `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}`; sel.appendChild(o); }
+    sel.value = S.rain.date;
+    sel.addEventListener("change", () => { S.rain.date = sel.value; sel.blur(); updateRain(); });
+    $("chkRain").addEventListener("change", (e) => { S.showRain = e.target.checked; e.target.blur(); updateRain(); });
+    const lg = $("legendRain");
+    lg.innerHTML = `<span class="lab">降雨 mm/h（15 分平均）</span>` + CONFIG.RAIN_SCALE.map(([v, c], i) => {
+      const next = CONFIG.RAIN_SCALE[i+1];
+      return `<span class="sw" style="background:${c}"></span><span class="lab">${v}${next ? "–" + next[0] : "+"}</span>`;
+    }).join("") + (S.lowland ? `<span class="low"></span><span class="lab">低位地帯</span>` : "");
+    lg.style.display = "flex";
+    // value under the cursor
+    let t = null;
+    map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; $("rainVal").textContent = rainAt(e.lngLat); }, 100); });
+  }
+  if(S.lowland){
+    $("lowlandOpt").style.display = "inline";
+    $("chkLowland").addEventListener("change", (e) => { S.showLowland = e.target.checked; e.target.blur();
+      for(const id of ["lowland","lowland-line"]) map.setLayoutProperty(id, "visibility", S.showLowland ? "visible" : "none"); });
+    if(!S.rain){ const lg = $("legendRain"); lg.innerHTML = `<span class="low" style="margin-left:0"></span><span class="lab">低位地帯</span>`; lg.style.display = "flex"; }
+  }
+}
+
+// Decode one slot PNG (R,G = value*10, A = data mask) into Uint16 values.
+function decodeRain(src){
+  const blobP = (typeof src === "string") ? fetch(src, {cache:"no-store"}).then(r => { if(!r.ok) throw new Error(`HTTP ${r.status} ${src}`); return r.blob(); }) : Promise.resolve(src);
+  return blobP.then(b => createImageBitmap(b)).then(bmp => {
+    const w = bmp.width, h = bmp.height;
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    const ctx = cv.getContext("2d", {willReadFrequently: true});
+    ctx.drawImage(bmp, 0, 0);
+    const d = ctx.getImageData(0, 0, w, h).data;
+    const vals = new Uint16Array(w*h), alpha = new Uint8Array(w*h);
+    for(let i = 0, j = 0; i < d.length; i += 4, j++){ vals[j] = (d[i] << 8) | d[i+1]; alpha[j] = d[i+3]; }
+    return {vals, alpha, w, h};
+  });
+}
+
+// Colour the decoded slot and hand it to the image source as a data URL.
+function paintRain(slot){
+  const {vals, alpha, w, h} = slot;
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const ctx = cv.getContext("2d");
+  const img = ctx.createImageData(w, h), d = img.data;
+  const scale = CONFIG.RAIN_SCALE.map(([v, c]) => [v*10, parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]);
+  for(let j = 0, i = 0; j < vals.length; j++, i += 4){
+    if(!alpha[j]) continue;
+    const v = vals[j]; let col = null;
+    for(let k = scale.length - 1; k >= 0; k--) if(v >= scale[k][0]){ col = scale[k]; break; }
+    if(!col) continue;
+    d[i] = col[1]; d[i+1] = col[2]; d[i+2] = col[3]; d[i+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv.toDataURL("image/png");
+}
+
+function rainKey(){ return S.rain ? `${S.rain.date}_${S.times[S.t]}` : null; }
+
+function updateRain(){
+  if(!map || !S.rain || !map.getSource("rain")) return;
+  const R = S.rain, key = rainKey();
+  map.setLayoutProperty("rain", "visibility", S.showRain ? "visible" : "none");
+  if(!S.showRain) return;
+  if(!R.sources.has(key)){ R.cur = null; map.getSource("rain").updateImage({url: BLANK_PNG}); $("rainVal").textContent = "（この時刻の降雨なし）"; return; }
+  if(R.cache.has(key)){ const c = R.cache.get(key); R.cur = {key, ...c}; map.getSource("rain").updateImage({url: c.url}); $("rainVal").textContent = ""; return; }
+  if(R.loading === key) return;
+  R.loading = key; $("rainVal").textContent = "読み込み中…";
+  decodeRain(R.sources.get(key)).then(slot => {
+    const c = {...slot, url: paintRain(slot)};
+    R.cache.set(key, c); if(R.cache.size > RAIN_CACHE) R.cache.delete(R.cache.keys().next().value);
+    if(R.loading === key) R.loading = null;
+    if(rainKey() === key){ R.cur = {key, ...c}; map.getSource("rain").updateImage({url: c.url}); $("rainVal").textContent = ""; }
+  }).catch(e => { console.error(e); R.loading = null; $("rainVal").textContent = `降雨を読み込めません: ${e.message}`; });
+}
+
+// Rain intensity [mm/h] of the current slot under a lng/lat, as text.
+function rainAt(ll){
+  const R = S.rain; if(!R || !R.cur || !S.showRain) return "";
+  const [W, Sb, E, Nb] = R.index.bounds;
+  if(ll.lng < W || ll.lng >= E || ll.lat <= Sb || ll.lat > Nb) return "";
+  const x = Math.floor((ll.lng - W) / (E - W) * R.cur.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * R.cur.h);
+  const j = y * R.cur.w + x;
+  if(!R.cur.alpha[j]) return "–";
+  return `${(R.cur.vals[j] / 10).toFixed(1)} mm/h`;
+}
+
 // Mark one trajectory-mode feature (source + feature id) via feature-state; null clears.
 function setTrajSel(sel){
   if(S.trajSel) map.removeFeatureState({source: S.trajSel.source, id: S.trajSel.id});
@@ -930,6 +1084,7 @@ function applyTime(t, force=false){
   }
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
   updateTraj();
+  updateRain();
 }
 
 function setupControls(){
