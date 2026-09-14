@@ -10,7 +10,9 @@ Output: per input file, in --out
   <stem>_trips.geojson       one LineString per trip (Move points; origin/destination stay ids)
   <stem>_events.geojson      one Point per vehicle->walk change and per sharp turn
   and, for flood_viewer trajectory mode, one file per role and 15-min slot:
-  viewer/<role>_<HHMM>.geojson   role = baseline (date != --event-date) or event (date == --event-date)
+  viewer/<role>_<HHMM>.geojson   role = event (file date in --event-date) or baseline (any other date).
+                                 Several days of one role are merged into the same slot files; each
+                                 viewer feature carries properties.date ("YYYY-MM-DD") to tell them apart.
   viewer/index.json              roles, slots and feature counts
   Each feature: properties.kind = "traj" | "dwell" | "modechange" | "turn", properties.time = "HH:MM"
   (end of the 1-hour window); geometry = LineString/MultiLineString of Move points in
@@ -805,7 +807,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         geom = {"type": "LineString", "coordinates": parts[0]} if len(parts) == 1 else {"type": "MultiLineString", "coordinates": parts}
         u = int(key_u[a])
         writers.add(role, hhmm, "traj", {"type": "Feature",
-                         "properties": {"time": hhmm, "n_points": int(b - a),
+                         "properties": {"time": hhmm, "date": R["date"], "n_points": int(b - a),
                                         "mode": ",".join(sorted(set(MODE_NAMES[R["mode"][idx]]))),
                                         "n_trips": len(set(int(trip_no[i]) for i in idx))},
                          "geometry": geom})
@@ -832,7 +834,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
             k = int(kk[a]); mm = int(k * SLOT); u = int(key_u[a])
             pts = [[round(float(slon[i]), 6), round(float(slat[i]), 6)] for i in rep[a:b]]
             writers.add(role, f"{mm // 60:02d}:{mm % 60:02d}", "dwell", {"type": "Feature",
-                              "properties": {"time": f"{mm // 60:02d}:{mm % 60:02d}", "n_points": len(pts)},
+                              "properties": {"time": f"{mm // 60:02d}:{mm % 60:02d}", "date": R["date"], "n_points": len(pts)},
                               "geometry": {"type": "MultiPoint", "coordinates": pts}})
             n_dwell += 1
     # ---- events (vehicle->walk, sharp turns): one Point per event, in every window that contains it ----
@@ -851,7 +853,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
             for k in range(int(kmin[j]), int(kmax[j]) + 1):
                 mm = int(k * SLOT); hhmm = f"{mm // 60:02d}:{mm % 60:02d}"
                 writers.add(role, hhmm, kind, {"type": "Feature",
-                                  "properties": {"time": hhmm, "at": fmt_ts(tsec[i])[11:16], **attrs(j)},
+                                  "properties": {"time": hhmm, "date": R["date"], "at": fmt_ts(tsec[i])[11:16], **attrs(j)},
                                   "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
                 n_ev += 1
     return n_traj, n_dwell, n_ev
@@ -861,7 +863,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("inputs", nargs="+", type=Path, help="daily CSV / CSV.GZ files")
     ap.add_argument("--out", type=Path, default=Path("out"))
-    ap.add_argument("--event-date", default="2024-08-21", help="files of this date go to event_*.geojson, others to baseline_*")
+    ap.add_argument("--event-date", default="2024-08-21", help="comma-separated dates: files of these dates go to event_*.geojson, others to baseline_*")
     for k, v in PARAMS.items():
         flag = f"--{k.lower().replace('_', '-')}"
         if k == "STAY_METHOD":
@@ -884,7 +886,12 @@ def main():
 def run(inputs, out, event_date="2024-08-21", **params):
     """Python entry point (usable from a notebook):
     run(["20240814.csv.gz", "20240821.csv.gz"], "probe_out", "2024-08-21", BBOX=(139.66,35.58,139.79,35.73), ONLY_MAIN_DATE=True)
+    event_date may be one "YYYY-MM-DD" string, a comma-separated string, or a list of them; files of those
+    dates become the event layer, all other input files the baseline layer (several days per role are merged).
     """
+    if isinstance(event_date, str):
+        event_date = [d.strip() for d in event_date.split(",") if d.strip()]
+    event_dates = {str(pd.Timestamp(d).date()) for d in event_date}
     P = dict(PARAMS); P.update({k.upper(): v for k, v in params.items()})
     if P["MAX_ACCURACY_M"] is not None and isinstance(P["MAX_ACCURACY_M"], float) and math.isnan(P["MAX_ACCURACY_M"]):
         P["MAX_ACCURACY_M"] = None
@@ -894,7 +901,8 @@ def run(inputs, out, event_date="2024-08-21", **params):
     inputs = [Path(p) for p in (inputs if isinstance(inputs, (list, tuple)) else [inputs])]
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     log(f"params: {P}")
-    args = argparse.Namespace(inputs=inputs, out=out, event_date=event_date)
+    args = argparse.Namespace(inputs=inputs, out=out, event_dates=event_dates)
+    log(f"event dates: {sorted(event_dates)}")
 
     writers = None if P["NO_VIEWER"] else SlotWriters(args.out, bool(P["MERGED_VIEWER"]))
 
@@ -902,7 +910,7 @@ def run(inputs, out, event_date="2024-08-21", **params):
         R = process_file(path, P)
         stem = path.name.split(".")[0]
         n = len(R["lon"])
-        role = "event" if R["date"] == args.event_date else "baseline"
+        role = "event" if R["date"] in args.event_dates else "baseline"
         if not P["NO_POINTS"]:
             log(f"  writing {stem}_points.csv ({n:,} rows)")
             write_points_csv(R, args.out / f"{stem}_points.csv", P)

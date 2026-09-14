@@ -703,7 +703,7 @@ const KINDS = [   // src = source/layer prefix, kind = properties.kind in the sl
 const TRAJ_LAYERS = KINDS.flatMap(k => ROLES.map(r => `${k.src}-${r}`));
 const TRAJ_KIND = Object.fromEntries(KINDS.flatMap(k => ROLES.map(r => [`${k.src}-${r}`, `${ROLE_LABEL[r]} ${k.label}`])));
 const emptySlot = () => Object.fromEntries(TRAJ_LAYERS.map(l => [l, null]));
-const PROP_LABEL = {n_points:"点数", n_trips:"トリップ数", mode:"モード", at:"時刻", v_before_kmh:"直前の車両速度 km/h", gap_min:"車両→徒歩の間隔 分", angle_deg:"転換角度 °"};
+const PROP_LABEL = {date:"日付", n_points:"点数", n_trips:"トリップ数", mode:"モード", at:"時刻", v_before_kmh:"直前の車両速度 km/h", gap_min:"車両→徒歩の間隔 分", angle_deg:"転換角度 °"};
 const MODE_LABEL = {walk:"徒歩", vehicle:"車両", other:"その他"};
 
 // ============================================================

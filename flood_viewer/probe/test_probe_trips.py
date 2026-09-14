@@ -163,6 +163,29 @@ def test_no_userid(lon, lat, t):
         tr = json.load(open(os.path.join(d, "out", "20240814_trips.geojson")))["features"]
         assert tr and "from_stay" in tr[0]["properties"] and "trip_id" not in tr[0]["properties"]
     print("ok: no identifiers outside points.csv")
+    test_multi_day(lon, lat, t)
+
+
+def test_multi_day(lon, lat, t):
+    """Two baseline days and two event days in one run share the slot files; features carry their date."""
+    import tempfile, os, json
+    import pandas as pd
+    from probe_trips import run
+    with tempfile.TemporaryDirectory() as d:
+        srcs = []
+        for day in ("2024-08-06", "2024-08-07", "2024-08-13", "2024-08-14"):
+            df = pd.DataFrame({"recordedat": (pd.Timestamp(day) + pd.to_timedelta(t, unit="s")).strftime("%Y-%m-%d %H:%M:%S"),
+                               "lon": lon, "lat": lat, "userid": "b" * 64, "activitytype": "on_foot"})
+            src = os.path.join(d, day.replace("-", "") + ".csv"); df.to_csv(src, index=False); srcs.append(src)
+        run(srcs, os.path.join(d, "out"), ["2024-08-13", "2024-08-14"], NO_POINTS=True)
+        idx = json.load(open(os.path.join(d, "out", "viewer", "index.json")))
+        assert idx["roles"] == ["baseline", "event"], idx["roles"]
+        for role, days in (("baseline", {"2024-08-06", "2024-08-07"}), ("event", {"2024-08-13", "2024-08-14"})):
+            f = os.path.join(d, "out", "viewer", f"{role}_0015.geojson")   # the track starts at 00:00
+            feats = json.load(open(f))["features"]
+            assert {ft["properties"]["date"] for ft in feats} == days, (role, {ft["properties"]["date"] for ft in feats})
+        assert sorted(os.listdir(os.path.join(d, "out")))[:4] == ["20240806_events.geojson", "20240806_stays.geojson", "20240806_trips.geojson", "20240807_events.geojson"]
+    print("ok: several days per role in one run")
 
 
 def test_merge_stays():

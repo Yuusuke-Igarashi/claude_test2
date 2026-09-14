@@ -96,7 +96,7 @@ notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08
 - `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle、起点・終点に Stay があるか、距離）
 - `<stem>_events.geojson`: 車→徒歩の変化点（at, v_before_kmh, gap_min）と急な方向転換点（at, mode, angle_deg）の Point
 - 端末・Stay・トリップの識別子を持つのは points.csv だけ。GeoJSON と viewer/ の地物は属性のみで、端末をまたいで結び付けられない
-- `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date` の日付なら event、他は baseline。
+- `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date`（カンマ区切りで複数可。`run()` ではリストも可）の日付なら event、他は baseline。同じ role の日が複数あれば同じ時刻別ファイルにまとめて書き、各地物の `date` 属性で日を区別する。
   各地物は kind = traj / dwell / modechange / turn、time = 15 分刻みの窓終端 "HH:MM"。識別子は持たない。
   軌跡は窓内 [time−60 分, time] の徒歩の密な Move 点（トリップ・点列境界で分割、複数なら MultiLineString）、
   滞留は窓に重なる Stay の重心 MultiPoint、変化点・方向転換点は窓内に時刻が入る Point。
