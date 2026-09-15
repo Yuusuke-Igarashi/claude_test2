@@ -273,15 +273,17 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
 
 test("rain slots and low-lying areas follow the time slider, toggles and date select", async () => {
   const page = await openViewer();
-  assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "48 rain slots registered from rain/index.json");
+  assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "48 rain GeoTIFF slots registered from rain/index.json");
   assert.ok(await page.evaluate(() => !!S.lowland && map.getLayer("lowland") && map.getLayer("rain")), "rain and lowland layers exist");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none", "overlay controls shown");
   assert.match(await page.textContent("#legendRain"), /降雨 mm\/h/);
   assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821");
   await page.evaluate((t) => applyTime(t + 2), T_18);   // 18:30 = peak
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
-  const peak = await page.evaluate(() => ({ max: Math.max(...S.rain.cur.vals) / 10, url: map.getSource("rain").url.slice(0, 21), w: S.rain.cur.w, h: S.rain.cur.h }));
-  assert.ok(peak.max > 80, "peak slot decoded: " + JSON.stringify(peak));
+  const peak = await page.evaluate(() => ({ max: Math.max(...S.rain.cur.vals), url: map.getSource("rain").url.slice(0, 21), w: S.rain.cur.w, h: S.rain.cur.h, nodata: S.rain.cur.nodata, bounds: S.rain.cur.bounds }));
+  assert.ok(peak.max > 80, "peak slot decoded from the GeoTIFF: " + JSON.stringify(peak));
+  assert.equal(peak.nodata, -1, "GDAL_NODATA read");
+  assert.ok(Math.abs(peak.bounds[0] - 139.70) < 1e-9 && Math.abs(peak.bounds[3] - 35.71) < 1e-9, "georeference from the tags: " + peak.bounds);
   assert.equal(peak.url, "data:image/png;base64", "coloured image handed to the image source");
   assert.deepEqual([peak.w, peak.h], [160, 96]);
   // value readout at the wet centre and the no-data stripe
@@ -337,11 +339,11 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
-  assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain slots found in the folder (rain/index.json + png)");
+  assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain slots found in the folder (rain_*.tif)");
   assert.ok(await page.evaluate(() => !!S.lowland), "lowland.geojson found in the folder");
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
-  assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 800), "rain slot decoded from a File object");
+  assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from a File object");
   await page.evaluate((t) => { setMode("traj"); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "trajectories drawn from a slot file read via FileReader");
@@ -363,7 +365,7 @@ test("three separate inputs: data files, rain folder, lowland GeoJSON", async ()
   assert.ok(await page.evaluate(() => !!S.lowland && !!map.getLayer("lowland")), "lowland from input 3");
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
-  assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 800), "rain slot decoded from the separate folder");
+  assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from the separate folder");
   await page.close();
 });
 

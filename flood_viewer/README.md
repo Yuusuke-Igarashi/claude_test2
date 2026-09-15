@@ -21,7 +21,7 @@ output フォルダに置いて `python -m http.server` 経由で開けば自動
 | viewer/<role>_<HHMM>.geojson + viewer/index.json | 任意（推奨） | 時刻別の軌跡・滞留・変化点（properties.kind = traj / dwell / modechange / turn, time）。スライダーの時刻のファイルだけを読むので全域を出力できる |
 | baseline_trajectory.geojson / event_trajectory.geojson | 任意 | 1 日分をまとめた LineString / MultiLineString。properties: time。小規模向け |
 | baseline_dwell.geojson / event_dwell.geojson | 任意 | 同、MultiPoint / Point |
-| rain/rain_<YYYYMMDD>_<HHMM>.png + rain/index.json | 任意 | XRAIN の 15 分平均降雨強度（`probe/xrain_tiles.py` の出力）。時刻ごとに画像を差し替え、色分けはビューワー側。日付はプルダウンで選ぶ |
+| rain/rain_<YYYYMMDD>_<HHMM>.tif + rain/index.json | 任意 | XRAIN の 15 分平均降雨強度の GeoTIFF（`probe/xrain_to_geotiff.py` の出力）。時刻ごとに差し替え、色分けはビューワー側。日付はプルダウンで選ぶ。フォルダ選択ではファイル名だけで登録するので index.json は http 経由のときだけ必要 |
 | lowland.geojson | 任意 | 低位地帯のポリゴン（WGS84）。道路の下に半透明で描く |
 
 `time` は 1 時間ウィンドウの終端で CSV ヘッダと同じ "HH:MM"。ISO 形式でも HH:MM 部分で照合する。
@@ -61,19 +61,20 @@ npm test                         # Playwright + node:test によるブラウザ�
 GitHub Actions（`.github/workflows/flood-viewer.yml`）が `flood_viewer/` の変更で同じ手順を実行し、
 standalone HTML とスクリーンショットをアーティファクトとして残す。
 
-## XRAIN 降雨の変換（probe/xrain_tiles.py）
+## XRAIN 降雨の変換（probe/xrain_to_geotiff.py）
 
 XRAIN の 250 m メッシュ 1 分値 CSV（`CX<1次メッシュ><YYYYMMDDhhmm>.csv`、320 × 320 のヘッダなし mm/h）を、
-15 分スロットごとの画像にまとめる。複数の 1 次メッシュは 1 枚にモザイクする。
+15 分スロットごとの GeoTIFF にする。処理は ① グリッド定義（入力に現れる 1 次メッシュ全体を 1 枚の経緯度格子に）→
+② 1 スロット分（15 分 × メッシュ数）のファイルを読む → ③ セルごとに平均して GeoTIFF に書く → ④ グリッドを空にして次のスロット、の繰り返し。
 
 ```
-python3 probe/xrain_tiles.py xrain_folder_or_zip --out probe_out/chiba     # -> probe_out/chiba/rain/
+python3 probe/xrain_to_geotiff.py xrain_folder_or_zip --out probe_out/chiba     # -> probe_out/chiba/rain/rain_YYYYMMDD_HHMM.tif
 ```
 
-- 値は PNG の R, G に `round(mm/h × 10)` を 16 bit で格納し、A = 0 をデータなしとする。色は付けない。
+- float32 1 バンド、EPSG:4326、nodata = −1、非圧縮。値は 15 分平均の降雨強度 [mm/h]（`--unit mm` でその 15 分の降雨量 [mm]）。
 - `--row-order` で CSV の 1 行目が北端（既定）か南端かを指定する。向きが逆だと南北反転するので、1 スロットを既知の雨域と見比べて確認する。
-- `index.json` に範囲（W, S, E, N）、格子数、日付ごとのスロット一覧、スロットごとの最大値を書く。
-- ビューワーは経緯度の等間隔格子を 4 隅で貼るため、メルカトルの歪みで南北方向に最大 1% 程度の位置ずれが出る（1 次メッシュ 1 枚で約 0.7 km）。
+- 依存は numpy のみ（GeoTIFF は直接書く）。rasterio で読めることを確認済み。
+- ビューワーは非圧縮・1 バンドの GeoTIFF を自前で読む（ModelTiepoint / ModelPixelScale から範囲、GDAL_NODATA から nodata）。GDAL 等で作った GeoTIFF も、非圧縮・1 バンドなら読める。経緯度格子を 4 隅で貼るため、メルカトルの歪みで南北方向に最大 1% 程度の位置ずれが出る。
 
 ## 位置ログの前処理（probe/）
 
