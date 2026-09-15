@@ -33,9 +33,17 @@ Rules (parameters in PARAMS, overridable from the command line):
   Stay merge: two consecutive stays whose gap is <= STAY_MERGE_GAP_MIN and whose centroids are
          within 2 x STAY_RADIUS_M become one stay (the short excursion between them included).
   Mode : dense Move points take the OS activity type: walk (on_foot, walking, running),
-         vehicle (in_vehicle) or other (still, on_bicycle, unknown, missing). The OS label flickers,
-         so a run of one mode shorter than MODE_MIN_MIN becomes "other", and an "other" run between
-         two runs of the same mode takes that mode.
+         vehicle (in_vehicle, on_bicycle) or other (still, unknown, missing). Points left "other"
+         are then estimated from the implied speed between neighbouring points of the same user,
+         trip and dense run (mean of the incoming and outgoing segment speeds where both exist):
+         <= WALK_MAX_KMH -> walk, >= VEHICLE_MIN_KMH -> vehicle, in between or not computable ->
+         other. The OS label flickers, so a run of one mode shorter than MODE_MIN_MIN becomes
+         "other", and an "other" run between two runs of the same mode takes that mode.
+  Walk jump: after all of that, every pair of consecutive walk points (same user / trip / dense
+         run) is checked with WALK_JUMP_KMH and WALK_JUMP_MIN_M: a segment faster AND longer than
+         both is not drawn, and trajectories, trip lines, turns and vehicle->walk changes never
+         cross it (points.csv column walk_break = 1 on the point after the cut). Points keep
+         their walk label.
   Mode change: a vehicle run followed by a walk run in the same trip: the first walk point is
          flagged (people leaving a car).
   Turn : a Move point where the incoming leg (from the last point >= TURN_LEG_M back) and the
@@ -93,11 +101,15 @@ PARAMS = {
     "MODE_MIN_MIN": 3.0,      # a walk / vehicle run (OS activity type) shorter than this becomes "other" (label flicker)
     "TURN_MIN_DEG": 120.0,    # direction change at or above this is a sharp turn ...
     "TURN_LEG_M": 50.0,       # ... measured over legs of at least this length
+    "WALK_MAX_KMH": 6.0,      # speed fill for "other" points: at or below this -> walk ...
+    "VEHICLE_MIN_KMH": 12.0,  # ... at or above this -> vehicle; in between stays other
+    "WALK_JUMP_KMH": 15.0,    # walk-only jump check: a segment between two walk points faster than this ...
+    "WALK_JUMP_MIN_M": 100.0, # ... and longer than this is cut (not drawn, not crossed by events)
 }
 
 MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_OTHER = 0, 1, 2, 3
 MODE_NAMES = np.array(["", "walk", "vehicle", "other"], dtype=object)
-ACT_MODE = {"in_vehicle": MODE_VEHICLE, "on_foot": MODE_WALK, "walking": MODE_WALK, "running": MODE_WALK}
+ACT_MODE = {"in_vehicle": MODE_VEHICLE, "on_bicycle": MODE_VEHICLE, "on_foot": MODE_WALK, "walking": MODE_WALK, "running": MODE_WALK}
 FLAG_NONE, FLAG_MODECHANGE, FLAG_TURN = 0, 1, 2
 FLAG_NAMES = np.array(["", "modechange", "turn"], dtype=object)
 
@@ -310,11 +322,14 @@ def merge_stays(sl: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np.ndarray,
 # ----------------------------------------------------------------------------------------------
 # 3. Travel mode (walk / vehicle / bike / unknown) on dense Move points, vectorised over the day
 # ----------------------------------------------------------------------------------------------
-def _runs(mode, group, elig):
+def _runs(mode, group, elig, extra_brk=None):
     """Run-length encode `mode` within `group` over eligible points. Returns (run id per point,
-    start, end (exclusive), mode, group) per run. Non-eligible points form their own runs."""
+    start, end (exclusive), mode, group) per run. Non-eligible points form their own runs.
+    extra_brk (bool per point) forces a run boundary before that point (walk jumps)."""
     n = len(mode)
     brk = np.r_[True, (group[1:] != group[:-1]) | (mode[1:] != mode[:-1]) | (elig[1:] != elig[:-1])]
+    if extra_brk is not None:
+        brk |= extra_brk
     start = np.flatnonzero(brk); end = np.r_[start[1:], n]
     run = np.cumsum(brk) - 1
     return run, start, end, mode[start].copy(), group[start]
@@ -327,25 +342,41 @@ def _bridge(mode, group, elig, tsec, max_s=None):
     prev_m = np.r_[MODE_NONE, rm[:-1]]; next_m = np.r_[rm[1:], MODE_NONE]
     prev_g = np.r_[-1, rg[:-1]]; next_g = np.r_[rg[1:], -1]
     fill = (prev_m == next_m) & (rm != prev_m) & np.isin(prev_m, (MODE_WALK, MODE_VEHICLE)) & (prev_g == rg) & (next_g == rg)
-    fill &= (rm == MODE_OTHER) if max_s is None else (tsec[end - 1] - tsec[start] < max_s)
+    if max_s is None:
+        fill &= (rm == MODE_OTHER)
+    else:
+        # only a run shorter than both of its neighbours is absorbed in one pass, so two adjacent
+        # short runs cannot swap modes simultaneously (the shorter one goes first, the loop repeats)
+        dur = tsec[end - 1] - tsec[start]
+        prev_d = np.r_[np.inf, dur[:-1]]; next_d = np.r_[dur[1:], np.inf]
+        fill &= (dur < max_s) & (dur < prev_d) & (dur < next_d)
     rm[fill] = prev_m[fill]
     return rm[run], bool(fill.any())
 
 
 def classify_modes(R, P: dict):
-    """Return (mode per point int8, implied speed km/h into each point, group id per point).
-    Mode comes from the OS activity type; runs shorter than MODE_MIN_MIN are "other" and are bridged."""
+    """Return (mode per point int8, implied speed km/h into each point, group id per point,
+    walk_break bool per point, segment group id per point).
+
+    Order: OS label (walk / vehicle incl. bicycle / other) -> speed fill of "other" points ->
+    flicker bridging (existing) -> walk-jump check on every walk point -> events use the result.
+    group = user x trip x dense run; wgroup additionally changes after every walk jump, so lines,
+    turns and mode changes never bridge a cut."""
     lon, lat, tsec = R["lon"], R["lat"], R["tsec"]
     n = len(lon)
     elig = (R["seg"] == 0) & (R["dense"] == 1)
     group = R["dense_run"].astype(np.int64) * (int(R["trip_no"].max()) + 1 if n else 1) + R["trip_no"]
-    v = np.full(n, np.nan)                    # implied speed, reported with mode changes (not used for the mode)
+    # implied speed of the segment into each point; NaN across users / trips / dense runs, at
+    # non-dense or Stay points, and when the two points share a timestamp
+    v = np.full(n, np.nan); d_in = np.full(n, np.nan)
     if n > 1:
         same = (group[1:] == group[:-1]) & elig[1:] & elig[:-1]
         d = haversine_m(lon[:-1], lat[:-1], lon[1:], lat[1:]); dt = tsec[1:] - tsec[:-1]
         ok = same & (dt > 0)
         vv = np.full(n - 1, np.nan); vv[ok] = d[ok] / dt[ok] * 3.6
-        v[1:] = vv
+        v[1:] = vv; d_in[1:] = np.where(ok, d, np.nan)
+    v_out = np.r_[v[1:], np.nan]              # speed of the segment out of each point
+    # ---- 1. OS label ----
     raw = np.full(n, MODE_OTHER, dtype=np.int8)
     df = R["df"]
     if "act" in df.columns:
@@ -353,30 +384,46 @@ def classify_modes(R, P: dict):
         act_mode = np.array([ACT_MODE.get(str(a).lower(), MODE_OTHER) for a in acts], dtype=np.int8)
         raw = act_mode[df["act"].to_numpy()]
     mode = raw.copy(); mode[~elig] = MODE_NONE
+    # ---- 2. speed fill: eligible "other" / missing points (still included) ----
+    with np.errstate(invalid="ignore"):
+        vp = np.where(np.isnan(v), v_out, np.where(np.isnan(v_out), v, (v + v_out) / 2.0))   # mean of in/out where both exist
+        und = elig & (mode == MODE_OTHER) & np.isfinite(vp)
+        mode = np.where(und & (vp <= float(P["WALK_MAX_KMH"])), MODE_WALK, mode)
+        mode = np.where(und & (vp >= float(P["VEHICLE_MIN_KMH"])), MODE_VEHICLE, mode).astype(np.int8)
+    n_fill = int(und.sum())
+    # ---- 3. existing flicker bridging ----
     min_s = float(P["MODE_MIN_MIN"]) * 60.0
-    # 1. short runs of anything inside one mode take that mode (repeat: merging exposes new neighbours)
-    for _ in range(8):
+    for _ in range(8):                        # short runs of anything inside one mode take that mode
         mode, changed = _bridge(mode, group, elig, tsec, min_s)
         if not changed:
             break
-    # 2. remaining short walk / vehicle runs are not trusted, 3. "other" between equal modes is bridged
-    run, start, end, rm, rg = _runs(mode, group, elig)
+    run, start, end, rm, rg = _runs(mode, group, elig)      # short walk / vehicle runs are not trusted
     rm[np.isin(rm, (MODE_WALK, MODE_VEHICLE)) & (tsec[end - 1] - tsec[start] < min_s)] = MODE_OTHER
-    mode, _ = _bridge(rm[run], group, elig, tsec)
+    mode, _ = _bridge(rm[run], group, elig, tsec)           # "other" between equal modes is bridged
     mode[~elig] = MODE_NONE
-    return mode.astype(np.int8), v, group
+    mode = mode.astype(np.int8)
+    # ---- 4. walk-jump check on every final walk point (incl. speed-filled / bridged ones) ----
+    walk_pair = np.zeros(n, dtype=bool)
+    walk_pair[1:] = (mode[1:] == MODE_WALK) & (mode[:-1] == MODE_WALK) & (group[1:] == group[:-1])
+    with np.errstate(invalid="ignore"):
+        wbreak = walk_pair & (v > float(P["WALK_JUMP_KMH"])) & (d_in > float(P["WALK_JUMP_MIN_M"]))
+    wbreak |= walk_pair & np.isnan(v) & np.isfinite(d_in) & (d_in > float(P["WALK_JUMP_MIN_M"]))   # same timestamp, far apart
+    wgroup = np.cumsum(np.r_[True, (group[1:] != group[:-1])] | wbreak) - 1
+    R["_mode_stats"] = {"speed_filled": n_fill, "walk_breaks": int(wbreak.sum())}
+    return mode, v, group, wbreak, wgroup
 
 
-def detect_mode_changes(R, mode, v, P: dict):
+def detect_mode_changes(R, mode, v, P: dict, wbreak=None):
     """Indices of the first walk point after a vehicle run in the same trip, with the vehicle run's
-    mean implied speed and the gap in minutes."""
+    mean implied speed and the gap in minutes. A walk jump ends the walk run, so a walk run that
+    starts after a cut has a walk run (not the vehicle run) before it and is never flagged."""
     n = len(mode)
     if n == 0:
         return np.array([], dtype=np.int64), np.array([]), np.array([])
     tsec = R["tsec"]
     elig = mode != MODE_NONE
     trip = R["ucode"].astype(np.int64) * (int(R["trip_no"].max()) + 1) + R["trip_no"]
-    run, start, end, rm, rg = _runs(mode, trip, elig)
+    run, start, end, rm, rg = _runs(mode, trip, elig, wbreak)
     nr = len(start)
     decided = np.isin(rm, (MODE_WALK, MODE_VEHICLE))
     last = np.maximum.accumulate(np.where(decided, np.arange(nr), -1))
@@ -603,16 +650,18 @@ def process_file(path: Path, P: dict):
          "seg": seg, "stay_no": stay_no, "trip_no": trip_no, "reason": reason, "stays": stays, "trips": trips, "dropped": dropped,
          "dense": dense, "dense_run": dense_run}
     t0 = time.perf_counter()
-    mode, v_kmh, group = classify_modes(R, P)
-    mc_idx, mc_v, mc_gap = detect_mode_changes(R, mode, v_kmh, P)
-    turn_idx, turn_ang = detect_turns(R, mode, group, P)
+    mode, v_kmh, group, wbreak, wgroup = classify_modes(R, P)
+    mc_idx, mc_v, mc_gap = detect_mode_changes(R, mode, v_kmh, P, wbreak)
+    turn_idx, turn_ang = detect_turns(R, mode, wgroup, P)        # legs never span a walk jump
     flag = np.zeros(n, dtype=np.int8)
     flag[turn_idx] = FLAG_TURN
     flag[mc_idx] = FLAG_MODECHANGE           # a point can be both; the mode change is the rarer, more specific one
-    R.update({"mode": mode, "v_kmh": v_kmh, "flag": flag,
+    R.update({"mode": mode, "v_kmh": v_kmh, "flag": flag, "wbreak": wbreak, "wgroup": wgroup,
               "modechanges": (mc_idx, mc_v, mc_gap), "turns": (turn_idx, turn_ang)})
     counts = {MODE_NAMES[m]: int(c) for m, c in zip(*np.unique(mode, return_counts=True)) if m}
-    log(f"  modes {counts}, vehicle->walk changes {len(mc_idx):,}, sharp turns {len(turn_idx):,} in {time.perf_counter() - t0:.1f} s")
+    ms = R.pop("_mode_stats")
+    log(f"  modes {counts} (speed-filled {ms['speed_filled']:,}, walk jumps cut {ms['walk_breaks']:,}), "
+        f"vehicle->walk changes {len(mc_idx):,}, sharp turns {len(turn_idx):,} in {time.perf_counter() - t0:.1f} s")
     return R
 
 
@@ -689,6 +738,7 @@ def write_points_csv(R, path: Path, P: dict, chunk=1_000_000):
             out["dense"] = R["dense"][sl]
             out["mode"] = MODE_NAMES[R["mode"][sl]]
             out["flag"] = FLAG_NAMES[R["flag"][sl]]
+            out["walk_break"] = R["wbreak"][sl].astype(np.int8)
             out.to_csv(f, index=False, header=(a == 0))
             if n == 0:
                 break
@@ -710,7 +760,7 @@ def write_trips_geojson(R, path: Path, P: dict):
     for (u, k, rs, t_start, t_end, npts, nmove, ndense, length, origin, dest, mv) in R["trips"]:
         if len(mv) < 2:
             continue
-        geom = _split_line(mv, lon, lat, R["dense_run"])
+        geom = _split_line(mv, lon, lat, R["wgroup"])
         if geom is None:
             continue
         md = R["mode"][mv]
@@ -740,8 +790,8 @@ def write_events_geojson(R, path: Path, P: dict):
 
 
 def _split_line(idx, lon, lat, run):
-    """LineString over idx, split into a MultiLineString where the dense run id changes (gap > DENSE_MAX_GAP_MIN)
-    or where points were skipped (idx not consecutive)."""
+    """LineString over idx, split into a MultiLineString where the segment id (dense run / trip /
+    walk jump) changes or where points were skipped (idx not consecutive)."""
     parts, cur = [], [idx[0]]
     for i in range(1, len(idx)):
         if run[idx[i]] != run[idx[i - 1]] or idx[i] != idx[i - 1] + 1:
@@ -762,7 +812,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     uids = R["uids"]
     n = len(lon)
     if n == 0:
-        return 0, 0
+        return 0, 0, 0
     W, SLOT = float(P["WINDOW_MIN"]), float(P["SLOT_MIN"])
     n_win = int(round(W / SLOT))
     vb = parse_bbox(P["VIEWER_BBOX"]) or parse_bbox(P["BBOX"])
@@ -787,7 +837,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     rep, kk = rep[order], kk[order]
     key_u, key_k = ucode[rep], kk
     bounds = np.flatnonzero(np.r_[True, (np.diff(key_u) != 0) | (np.diff(key_k) != 0), True])
-    trip_no = R["trip_no"]; drun = R["dense_run"]
+    trip_no = R["trip_no"]; drun = R["wgroup"]         # changes at trip, dense-run and walk-jump boundaries
     n_traj = 0
     for a, b in zip(bounds[:-1], bounds[1:]):
         if b - a < 2:

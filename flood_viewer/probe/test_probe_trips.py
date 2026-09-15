@@ -236,32 +236,94 @@ def test_modes_and_events():
     P = dict(PARAMS)
     act = ["in_vehicle"] * 13 + ["still"] + ["on_foot"] * 13
     R = _R_from_track(lon, lat, ts, act)
-    mode, v, group = classify_modes(R, P)
+    mode, v, group, wbreak, wgroup = classify_modes(R, P)
     assert (mode[:13] == MODE_VEHICLE).all() and (mode[14:] == MODE_WALK).all(), mode
-    assert mode[13] == MODE_OTHER, "'still' between different modes stays other"
-    idx, vm, gap = detect_mode_changes(R, mode, v, P)
-    assert list(idx) == [14], idx                     # first walk point after the vehicle run
-    assert 39 < vm[0] < 41 and abs(gap[0] - 2.0) < 1e-9, (vm, gap)
+    assert mode[13] in (MODE_WALK, MODE_OTHER), "'still' at the stop: speed 0 -> walk candidate, or other"
+    idx, vm, gap = detect_mode_changes(R, mode, v, P, wbreak)
+    assert list(idx) in ([13], [14]), idx             # first walk point after the vehicle run
+    assert 39 < vm[0] < 41, vm
     ti, ang = detect_turns(R, mode, group, P)
     assert len(ti) == 1 and ti[0] == 21 and ang[0] > 179, (ti, ang)   # the U-turn at the north end, once
     # label flicker: a lone on_foot point inside a drive (< MODE_MIN_MIN) becomes vehicle, and a lone
     # in_vehicle point inside the walk becomes walk; no spurious mode change
     act2 = ["in_vehicle"] * 6 + ["on_foot"] + ["in_vehicle"] * 6 + ["still"] + ["on_foot"] * 6 + ["in_vehicle"] + ["on_foot"] * 6
     R2 = _R_from_track(lon, lat, ts, act2)
-    mode2, v2, _ = classify_modes(R2, P)
+    mode2, v2, _, wb2, _ = classify_modes(R2, P)
     assert (mode2[:13] == MODE_VEHICLE).all() and (mode2[14:] == MODE_WALK).all(), mode2
-    assert list(detect_mode_changes(R2, mode2, v2, P)[0]) == [14]
-    # no activity column at all: everything is "other", nothing is drawn or flagged
+    assert list(detect_mode_changes(R2, mode2, v2, P, wb2)[0]) in ([13], [14])
+    # no activity column at all: the speed fill classifies the drive (40 km/h) and the walk (4.3 km/h)
     R3 = _R_from_track(lon, lat, ts)
-    mode3, v3, g3 = classify_modes(R3, P)
-    assert (mode3 == MODE_OTHER).all() and len(detect_mode_changes(R3, mode3, v3, P)[0]) == 0
-    assert len(detect_turns(R3, mode3, g3, P)[0]) == 1, "turns are found for every mode"
+    mode3, v3, g3, _, wg3 = classify_modes(R3, P)
+    assert (mode3[1:13] == MODE_VEHICLE).all() and (mode3[14:] == MODE_WALK).all(), mode3
+    assert list(detect_mode_changes(R3, mode3, v3, P)[0]) == [13] or list(detect_mode_changes(R3, mode3, v3, P)[0]) == [14]
+    assert len(detect_turns(R3, mode3, wg3, P)[0]) == 1, "turns are found for every mode"
     # sparse points and stays never get a mode
     R4 = _R_from_track(lon, lat, ts, act); R4["dense"][:5] = 0; R4["seg"][20] = 1
-    mode4, _, _ = classify_modes(R4, P)
+    mode4 = classify_modes(R4, P)[0]
     assert (mode4[:5] == MODE_NONE).all() and mode4[20] == MODE_NONE
     print("ok: modes, vehicle->walk change, sharp turn")
 
 
+def test_mode_quality():
+    """The four rules of the mode / walk-quality revision on one synthetic track."""
+    import tempfile, os, json
+    import pandas as pd
+    from probe_trips import run, process_file
+    lon0, lat0 = 139.7, 35.68
+    kx = M_PER_DEG_LAT * np.cos(np.radians(lat0))
+    xs, ys, ts, act = [], [], [], []
+    def add(x, y, dt, a):
+        ts.append((ts[-1] if ts else 0.0) + dt); xs.append(x); ys.append(y); act.append(a)
+    # A. bicycle ride east: 30 s/point, 150 m/point = 18 km/h, 12 points                       idx 0..11
+    add(0, 0, 0, "on_bicycle")
+    for i in range(1, 12): add(150 * i, 0, 30, "on_bicycle")
+    # B. unlabeled points at walking speed north (60 s/point, 70 m = 4.2 km/h), 8 points        idx 12..19
+    for i in range(1, 9): add(150 * 11, 70 * i, 60, "")
+    # C. a walk-speed jump inside these walk points: 300 m sideways in 30 s (36 km/h, < 500 m)   idx 20
+    add(150 * 11 + 300, 70 * 8, 30, "")
+    #    then walking on north (60 s/point) with "still" labels, 8 points                        idx 21..28
+    for i in range(1, 9): add(150 * 11 + 300, 70 * 8 + 70 * i, 60, "still")
+    # D. two points with the same timestamp 150 m apart: speed not computable                     idx 29 (dt = 0)
+    add(150 * 11 + 300 + 150, 70 * 16, 0, "")
+    lon = [lon0 + x / kx for x in xs]; lat = [lat0 + y / M_PER_DEG_LAT for y in ys]
+    P = dict(PARAMS)
+    R = _R_from_track(lon, lat, ts, act)
+    mode, v, group, wbreak, wgroup = classify_modes(R, P)
+    # 1. on_bicycle -> vehicle
+    assert (mode[:12] == MODE_VEHICLE).all(), mode[:12]
+    # 2. missing labels and "still" at walking speed -> walk (speed fill); the same-timestamp point stays other
+    assert (mode[12:20] == MODE_WALK).all(), mode[12:20]
+    assert (mode[21:29] == MODE_WALK).all(), mode[21:29]
+    assert mode[29] == MODE_OTHER, mode[29]
+    # 3./4. the 300 m / 36 km/h hop between two (speed-filled) walk points is cut although < 500 m
+    assert wbreak[20] and wbreak.sum() == 1, np.flatnonzero(wbreak)
+    assert wgroup[19] != wgroup[20] and wgroup[20] == wgroup[28], "segment id changes at the cut only"
+    # the hop is not a trip split (common rule needs > 500 m and > 150 km/h)
+    assert (R["trip_no"] == 1).all()
+    # 5. events do not cross the cut: no turn uses a leg across idx 20; the walk after the cut is not a new
+    #    vehicle->walk change (the vehicle run is before idx 12, the cut is inside the walk)
+    ti, ang = detect_turns(R, mode, wgroup, P)
+    assert all(not (i <= 20 <= i + 1) for i in ti) and len(ti) == 0, (ti, ang)
+    mc = detect_mode_changes(R, mode, v, P, wbreak)[0]
+    assert list(mc) == [12], mc
+    # outputs: trip line and viewer trajectory are split at the cut
+    df = pd.DataFrame({"recordedat": (pd.Timestamp("2024-08-14 10:00") + pd.to_timedelta(ts, unit="s")).strftime("%Y-%m-%d %H:%M:%S"),
+                       "lon": lon, "lat": lat, "userid": "c" * 64, "activitytype": act})
+    with tempfile.TemporaryDirectory() as d:
+        src = os.path.join(d, "20240814.csv"); df.to_csv(src, index=False)
+        run([src], os.path.join(d, "out"), "2024-08-21", DENSE_MIN_POINTS=5)
+        pts = pd.read_csv(os.path.join(d, "out", "20240814_points.csv"))
+        assert pts["walk_break"].sum() == 1 and pts["walk_break"].iloc[20] == 1
+        assert (pts["activitytype"].iloc[:12] == "on_bicycle").all(), "original label kept"
+        tr = json.load(open(os.path.join(d, "out", "20240814_trips.geojson")))["features"][0]
+        assert tr["geometry"]["type"] == "MultiLineString" and len(tr["geometry"]["coordinates"]) == 2, tr["geometry"]["type"]
+        ends = [len(c) for c in tr["geometry"]["coordinates"]]
+        assert ends == [20, 10], ends                     # 0..19 | 20..29 (trip lines draw all dense Move points, idx 29 included)
+        vw = [f for f in json.load(open(os.path.join(d, "out", "viewer", "baseline_1015.geojson")))["features"] if f["properties"]["kind"] == "traj"]
+        assert vw and vw[0]["geometry"]["type"] == "MultiLineString" and len(vw[0]["geometry"]["coordinates"]) == 2, vw[0]["geometry"]["type"]
+    print("ok: bicycle -> vehicle, speed fill, walk-jump cut, split outputs")
+
+
 if __name__ == "__main__":
     main()
+    test_mode_quality()

@@ -95,7 +95,9 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | 位置ジャンプ: 連続点の見かけ速度がこれを超え、かつ距離がこれ以上 | 150 km/h, 500 m | `--jump-speed-kmh`, `--jump-min-dist-m` |
 | 密な点列: 間隔がこれ以下で連続し、この点数以上の点列だけを軌跡・トリップの線として描く（Stay 判定には掛けない。`--dense-for-stays` で掛ける） | 5 分, 10 点 | `--dense-max-gap-min`, `--dense-min-points`（0 で無効） |
 | Stay の統合: 連続する Stay の間隔がこれ以下で、重心が Stay 半径の 2 倍以内なら 1 つの Stay にする（間の短い外出点も Stay に含める） | 10 分 | `--stay-merge-gap-min`（0 で無効） |
-| 移動モード: 密な Move 点に OS の activitytype を当てる。walk = on_foot / walking / running、vehicle = in_vehicle、other = それ以外（still, on_bicycle, unknown, 欠損）。ラベルは短く揺れるので、同じモードに挟まれたこれより短い区間はそのモードに吸収し、残った短い walk / vehicle 区間は other にする | 3 分 | `--mode-min-min` |
+| 移動モード: 密な Move 点に OS の activitytype を当てる。walk = on_foot / walking / running、vehicle = in_vehicle / on_bicycle、other = それ以外（still, unknown, 欠損）。ラベルは短く揺れるので、同じモードに挟まれたこれより短い区間はそのモードに吸収し（1 回の走査では両隣より短い区間だけ）、残った短い walk / vehicle 区間は other にする | 3 分 | `--mode-min-min` |
+| 速度による補完: Move かつ密な点で other に残った点（still・欠損を含む）を、同一ユーザー・トリップ・密な点列内の前後区間の見かけ速度（両方あれば平均）で判定。これ以下なら walk、これ以上なら vehicle、間や計算不能（同時刻など）は other のまま。OS ラベルの後・揺れ補正の前に適用 | 6 km/h, 12 km/h | `--walk-max-kmh`, `--vehicle-min-kmh` |
+| 徒歩ジャンプ: 補正後に walk となった全点について、連続する walk 点間の見かけ速度がこれを超え、かつ距離がこれを超える区間を切る。切った区間は線を結ばず、方向転換・車→徒歩の判定もまたがない。点のラベルは変えない（points.csv の walk_break = 1 が切れ目の直後の点） | 15 km/h, 100 m | `--walk-jump-kmh`, `--walk-jump-min-m` |
 | 車→徒歩: 同一トリップ内で vehicle 区間の次に walk 区間が来る。walk 区間の先頭点を出力 | | |
 | 急な方向転換: 手前の区間（後方に L 以上離れた点から）と先の区間（前方に L 以上離れた点まで）の方位差がこれ以上。全モードの密な Move 点が対象 | 120°, L = 50 m | `--turn-min-deg`, `--turn-leg-m` |
 | ビューワー軌跡: walk の点だけを描く | | |
@@ -110,7 +112,7 @@ notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08
 
 出力（`--out`）:
 
-- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / other、Stay と疎な点は空）, flag（modechange / turn）
+- `<stem>_points.csv`: userid, recordedat, lon, lat, accuracy, speed, activitytype + segment（Stay/Move）, stay_no, trip_no（ユーザー内の通し番号）, split_reason（start / stay / time_gap / jump）, dense（密な点列なら 1）, mode（walk / vehicle / other、Stay と疎な点は空）, flag（modechange / turn）, walk_break（徒歩ジャンプで切った直後の点なら 1）
 - `<stem>_stays.geojson`: Stay ごとの重心 Point（開始・終了・滞在分・点数・最大半径）
 - `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle、起点・終点に Stay があるか、距離）
 - `<stem>_events.geojson`: 車→徒歩の変化点（at, v_before_kmh, gap_min）と急な方向転換点（at, mode, angle_deg）の Point
