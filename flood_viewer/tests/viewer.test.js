@@ -314,6 +314,7 @@ test("standalone file:// with the file picker, without optional files", async ()
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   await page.evaluate((t) => applyTime(t), T_18);
   const st = await status(page);
@@ -332,6 +333,8 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし$/);
+  await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain slots found in the folder (rain/index.json + png)");
@@ -345,11 +348,31 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.close();
 });
 
+test("three separate inputs: data files, rain folder, lowland GeoJSON", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  assert.ok(await page.evaluate(() => document.getElementById("loadBtn").disabled), "load button disabled until input 1 is chosen");
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
+  await page.setInputFiles("#rainInput", join(DATA, "rain"));
+  await page.setInputFiles("#lowlandInput", join(DATA, "lowland.geojson"));
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 49 ファイル \/ 3: lowland\.geojson$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
+  assert.ok(await page.evaluate(() => !!S.lowland && !!map.getLayer("lowland")), "lowland from input 3");
+  await page.evaluate((t) => applyTime(t + 2), T_18);
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
+  assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 800), "rain slot decoded from the separate folder");
+  await page.close();
+});
+
 test("single-file trajectory GeoJSON (no viewer/ folder) still loads whole-day datasets", async () => {
   const page = await newPage();
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#fileInput", [...REQUIRED, ...OPTIONAL].map((f) => join(DATA, f)));
+  await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy), null);
   assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 4);

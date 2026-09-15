@@ -176,10 +176,14 @@ button:hover{background:#f0efec}
     <ul id="fileList"></ul>
     <div id="progress"></div>
     <div id="filePick">
-      <p>下のボタンから output フォルダ内のファイルをまとめて選択してください。必須は network.geojson と 4 つの CSV（baseline_speed, event_speed, baseline_count, event_count）、任意で error.csv（照合用）と軌跡・滞留の GeoJSON 4 ファイルです。<br>
+      <p>3 つの入力を選んで「読み込む」を押してください。1 だけが必須です。<br>
       <span style="color:var(--muted)">HTML を output フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
-      <p style="margin:6px 0 2px"><b>フォルダごと選択（推奨、viewer/ の時刻別ファイルも読めます）:</b> <input id="dirInput" type="file" webkitdirectory></p>
-      <p style="margin:2px 0"><span style="color:var(--muted)">またはファイルを個別に選択:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
+      <p style="margin:6px 0 2px"><b>1. 人流・車流データのフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">network.geojson、4 つの CSV、error.csv、viewer/ を含むフォルダ。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
+      <p style="margin:6px 0 2px"><b>2. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">rain_YYYYMMDD_HHMM.png と index.json を含むフォルダ</span></p>
+      <p style="margin:6px 0 2px"><b>3. 低位地帯の GeoJSON（任意）:</b> <input id="lowlandInput" type="file" accept=".geojson,.json"></p>
+      <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
   </div>
 </div>
@@ -335,17 +339,26 @@ function rainFromIndex(index, srcOf){
   return {index, sources, cache: new Map(), date: Object.keys(index.dates).sort().pop(), cur: null, loading: null};
 }
 
-function loadViaFiles(fileList){
+// fileList: the data folder (or individual files); rainList: the rain folder; lowlandFile: one GeoJSON.
+// Rain files and lowland.geojson inside the data folder are also accepted (an all-in-one folder).
+function loadViaFiles(fileList, rainList = [], lowlandFile = null){
   const want = CONFIG.files;
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
   let total = 0, rainIndexFile = null;
+  for(const fl of rainList){
+    const r = fl.name.match(/^rain_(\d{8})_(\d{2})(\d{2})\.png$/i);
+    if(r) rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl);
+    else if(fl.name === "index.json") rainIndexFile = fl;
+  }
+  if(lowlandFile) byName[want.lowland] = lowlandFile;
   for(const fl of fileList){
     total++;
     const m = fl.name.match(/^(baseline|event)_(\d{2})(\d{2})\.geojson$/i);
     if(m){ sources.set(`${m[1].toLowerCase()}_${m[2]}:${m[3]}`, fl); continue; }
     const r = fl.name.match(/^rain_(\d{8})_(\d{2})(\d{2})\.png$/i);
-    if(r){ rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl); continue; }
-    if(fl.name === "index.json"){ if(/(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl; continue; }
+    if(r){ if(!rainList.length) rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl); continue; }
+    if(fl.name === "index.json"){ if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl; continue; }
+    if(fl.name === want.lowland && lowlandFile) continue;   // the explicit file wins
     byName[fl.name] = fl;
     if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
   }
@@ -1248,9 +1261,17 @@ function drawChart(svg, a, b, errMask, title){
     console.warn("fetch failed, falling back to file picker", e);
     setProgress("");
     $("filePick").style.display = "block";
-    for(const id of ["fileInput","dirInput"]) $(id).addEventListener("change", async (ev) => {
+    const note = () => {
+      const main = $("dirInput").files.length || $("fileInput").files.length;
+      const parts = [main ? `1: ${main} ファイル` : "1: 未選択", `2: ${$("rainInput").files.length ? $("rainInput").files.length + " ファイル" : "なし"}`, `3: ${$("lowlandInput").files.length ? $("lowlandInput").files[0].name : "なし"}`];
+      $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
+    };
+    for(const id of ["fileInput","dirInput","rainInput","lowlandInput"]) $(id).addEventListener("change", note);
+    $("loadBtn").addEventListener("click", async () => {
+      const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
+      if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles(ev.target.files)); }
+      try{ await boot(() => loadViaFiles(main, $("rainInput").files, $("lowlandInput").files[0] || null)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }
