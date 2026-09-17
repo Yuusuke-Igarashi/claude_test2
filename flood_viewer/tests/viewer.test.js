@@ -278,6 +278,7 @@ test("rain slots and low-lying areas follow the time slider, toggles and date se
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none", "overlay controls shown");
   assert.match(await page.textContent("#legendRain"), /降雨 mm\/h/);
   assert.deepEqual(await page.evaluate(() => S.period), { event: { start: "2024-08-21 18:00", hours: 12, slot_min: 15 }, baseline: { start: "2024-08-14 18:00", hours: 12, slot_min: 15 } }, "period read from viewer/index.json");
+  assert.equal(await page.evaluate(() => document.querySelector("#topbar h1").textContent), "冠水候補 2024-08-21 18:00〜08-22 06:00（平時 08-14 18:00〜08-15 06:00）", "title from the period, not from the network file name");
   assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821", "date of the first slot (18:00 of the start day)");
   assert.ok(await page.evaluate(() => document.getElementById("rainDate").disabled), "date follows the period automatically");
   assert.equal(await page.evaluate(() => S.adjPrev[24]), 1, "23:45 -> 00:00 counts as consecutive");
