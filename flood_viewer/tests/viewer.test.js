@@ -282,6 +282,9 @@ test("rain slots and low-lying areas follow the time slider, toggles and date se
   assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821", "date of the first slot (18:00 of the start day)");
   assert.ok(await page.evaluate(() => document.getElementById("rainDate").disabled), "date follows the period automatically");
   assert.equal(await page.evaluate(() => S.adjPrev[24]), 1, "23:45 -> 00:00 counts as consecutive");
+  assert.equal(await page.evaluate(() => rainSlotKey("rain_20260813_2400.tif".match(RAIN_NAME))), "20260814_00:00", "a _2400 file name is the next day's 00:00 slot");
+  assert.equal(await page.evaluate(() => rainSlotKey("rain_20261231_2400.tif".match(RAIN_NAME))), "20270101_00:00", "year end");
+  assert.equal(await page.evaluate(() => { const d = S.rain.dates; S.rain.dates = ["20240821"]; const k = rainDateFor(24); S.rain.dates = d; return k; }), "20240822", "a missing day is not replaced by another day's rain");
   await page.evaluate((t) => applyTime(t + 2), T_18);   // 00:30 of the next day = peak
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240822", "after midnight the next day is used");

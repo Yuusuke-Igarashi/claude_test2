@@ -352,9 +352,19 @@ async function loadViaFetch(){
 // Rain slot registry: key "YYYYMMDD_HH:MM" -> source (url or File). From rain/index.json ({files:[{file,date,time}]})
 // or, with the folder picker, from the file names rain_<YYYYMMDD>_<HHMM>.tif.
 const RAIN_NAME = /^rain_(\d{8})_(\d{2})(\d{2})\.tiff?$/i;
+// Registry key "YYYYMMDD_HH:MM" from a file name match; "…_2400" (an older converter's name for the
+// slot ending at midnight) is registered as 00:00 of the next day, which is what the time axis asks for.
+function rainSlotKey(m){
+  let date = m[1], hh = m[2], mm = m[3];
+  if(hh === "24" && mm === "00"){
+    const d = new Date(Date.UTC(+date.slice(0, 4), +date.slice(4, 6) - 1, +date.slice(6, 8) + 1));
+    date = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`; hh = "00";
+  }
+  return `${date}_${hh}:${mm}`;
+}
 function rainFromIndex(index, srcOf){
   const sources = new Map();
-  for(const f of (index && index.files) || []){ const m = String(f.file || "").match(RAIN_NAME); if(m) sources.set(`${m[1]}_${m[2]}:${m[3]}`, srcOf(f.file)); }
+  for(const f of (index && index.files) || []){ const m = String(f.file || "").match(RAIN_NAME); if(m) sources.set(rainSlotKey(m), srcOf(f.file)); }
   return rainRegistry(sources, index);
 }
 function rainRegistry(sources, index){
@@ -371,7 +381,7 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null){
   let total = 0, rainIndexFile = null, viewerIndexFile = null;
   for(const fl of rainList){
     const r = fl.name.match(RAIN_NAME);
-    if(r) rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl);
+    if(r) rainFiles.set(rainSlotKey(r), fl);
     else if(fl.name === "index.json") rainIndexFile = fl;
   }
   if(lowlandFile) byName[want.lowland] = lowlandFile;
@@ -380,7 +390,7 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null){
     const m = fl.name.match(/^(baseline|event)_(\d{2})(\d{2})\.geojson$/i);
     if(m){ sources.set(`${m[1].toLowerCase()}_${m[2]}:${m[3]}`, fl); continue; }
     const r = fl.name.match(RAIN_NAME);
-    if(r){ if(!rainList.length) rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl); continue; }
+    if(r){ if(!rainList.length) rainFiles.set(rainSlotKey(r), fl); continue; }
     if(fl.name === "index.json"){
       if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl;
       else if(/(^|\/)viewer\/index\.json$/.test(fl.webkitRelativePath || "")) viewerIndexFile = fl;
@@ -1057,7 +1067,7 @@ function rainDateFor(t){
     if(mins <= startMin && !(t === 0 && mins > startMin)) day.setDate(day.getDate() + 1);   // at or before the start clock time = next day
     if(mins === startMin && t === 0) day.setDate(day.getDate() - 1);                         // a header that begins exactly at the start time
     const ymd = `${day.getFullYear()}${String(day.getMonth() + 1).padStart(2, "0")}${String(day.getDate()).padStart(2, "0")}`;
-    return R.dates.includes(ymd) ? ymd : R.date;
+    return ymd;   // no file for that day -> "no rain for this time", never another day's rain
   }
   return R.date;
 }

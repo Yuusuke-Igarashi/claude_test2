@@ -22,6 +22,7 @@ Usage: python3 xrain_to_geotiff.py <folder or zip> --out probe_out/chiba
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import io
 import json
 import re
@@ -105,6 +106,16 @@ def list_files(inputs):
     return files
 
 
+def abs_minute(date: str, minute: int) -> int:
+    """Minutes on one continuous axis across days, so a slot may end at 00:00 of the next day."""
+    return dt.date(int(date[:4]), int(date[4:6]), int(date[6:8])).toordinal() * 1440 + minute
+
+
+def slot_label(abs_min: int) -> tuple[str, int]:
+    """(YYYYMMDD, minute of that day) of an absolute minute; 24:00 becomes 00:00 of the next day."""
+    return dt.date.fromordinal(abs_min // 1440).strftime("%Y%m%d"), abs_min % 1440
+
+
 def read_csv(data: bytes, row_order: str) -> np.ndarray:
     g = np.loadtxt(io.BytesIO(data), delimiter=",", dtype=np.float32, ndmin=2)
     if g.shape[1] == N_CELL + 1 and np.isnan(g[:, -1]).all():        # trailing comma
@@ -180,25 +191,29 @@ def run(inputs, out, slot_min: int = 15, unit: str = "mmh", row_order: str = "no
     grid = Grid(meshes)
     log(f"{len(files):,} files, meshes {meshes}, grid {grid.ncol} x {grid.nrow}, "
         f"W{grid.west} S{grid.south:.4f} E{grid.east} N{grid.north:.4f}")
-    # slots: a minute m belongs to the slot ending at the next multiple of slot_min, window (T-slot, T]
-    slots = sorted({(d, ((m - 1) // slot_min + 1) * slot_min) for d, m, _ in files if ((m - 1) // slot_min + 1) * slot_min <= 1440})
+    # slots: a minute m belongs to the slot ending at the next multiple of slot_min, window (T-slot, T].
+    # Minutes are counted across days, so 23:46-00:00 form one slot named 00:00 of the next day.
+    by_abs = {(abs_minute(d, m), mesh): loader for (d, m, mesh), loader in files.items()}
+    slots = sorted({((a - 1) // slot_min + 1) * slot_min for a, _ in by_abs})
     written = []
-    for n, (date, end) in enumerate(slots, 1):
+    for n, end in enumerate(slots, 1):
         # 2. read the files of this slot
-        for minute in range(end - slot_min + 1, end + 1):
+        for a in range(end - slot_min + 1, end + 1):
             for mesh in meshes:
-                loader = files.get((date, minute, mesh))
+                loader = by_abs.get((a, mesh))
                 if loader is None:
                     continue
                 try:
                     grid.add(mesh, read_csv(loader(), row_order))
                 except Exception as ex:                                  # noqa: BLE001
-                    log(f"  skip {date} {minute // 60:02d}:{minute % 60:02d} {mesh}: {ex}")
+                    d_, m_ = slot_label(a)
+                    log(f"  skip {d_} {m_ // 60:02d}:{m_ % 60:02d} {mesh}: {ex}")
         # 3. aggregate and write
-        name = f"rain_{date}_{end // 60:02d}{end % 60:02d}.tif"
+        date, end_min = slot_label(end)
+        name = f"rain_{date}_{end_min // 60:02d}{end_min % 60:02d}.tif"
         arr = grid.result(unit)
         write_geotiff(out / name, arr, grid.west, grid.north, grid.dx, grid.dy)
-        written.append({"file": name, "date": date, "time": f"{end // 60:02d}:{end % 60:02d}", "minutes": int(grid.cnt.max()),
+        written.append({"file": name, "date": date, "time": f"{end_min // 60:02d}:{end_min % 60:02d}", "minutes": int(grid.cnt.max()),
                         "max": round(float(arr.max()), 1)})
         # 4. reset
         grid.reset()
