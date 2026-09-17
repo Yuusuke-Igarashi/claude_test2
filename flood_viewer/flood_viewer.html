@@ -474,6 +474,33 @@ function parseMatrix(text, {first=false, uint8=false}={}){
   return out;
 }
 
+// Period mode: the time axis is the period itself (start clock time + k * slot_min for hours), not the
+// column order of the traffic CSV. Columns are matched by "HH:MM"; a CSV built for a whole day
+// (00:00 … 23:45) is therefore rotated to start at the period start, and columns it lacks stay empty.
+function alignAxisToPeriod(){
+  const ev = S.period && S.period.event;
+  if(!ev || !ev.start) return null;
+  const m = String(ev.start).match(/(\d{2}):(\d{2})$/);
+  if(!m) return null;
+  const slot = +ev.slot_min || 15, n = Math.round((+ev.hours || 24) * 60 / slot), start = +m[1] * 60 + +m[2];
+  const want = [];
+  for(let k = 0; k < n; k++){ const t = (start + k * slot) % 1440; want.push(`${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`); }
+  if(want.length === S.T && want.every((w, i) => w === S.times[i])) return null;   // already in period order
+  const perm = want.map(w => S.times.indexOf(w)), missing = perm.filter(p => p < 0).length, N = S.ids.length, T0 = S.T;
+  const remap = (src, uint8) => {
+    const out = uint8 ? new Uint8Array(N * n) : new Float32Array(N * n);
+    if(!uint8) out.fill(NaN);
+    for(let r = 0; r < N; r++) for(let j = 0; j < n; j++){ const p = perm[j]; if(p >= 0) out[r * n + j] = src[r * T0 + p]; }
+    return out;
+  };
+  for(const k of ["bs", "es", "bc", "ec"]) S[k] = remap(S[k], false);
+  if(S.errRef) S.errRef = remap(S.errRef, true);
+  const note = `交通 CSV の時刻列（${S.times[0]} 開始、${T0} 列）を期間の並び（${want[0]} 開始、${n} 列）に合わせ直しました`
+    + (missing ? `。CSV にない ${missing} 列は空欄` : "");
+  S.times = want; S.T = n;
+  return note;
+}
+
 function defaultParams(){
   return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, speedRatio: CONFIG.SPEED_RATIO_LIMIT,
            countRatio: CONFIG.COUNT_RATIO_LIMIT, zeroRatio: CONFIG.ZERO_COUNT_RATIO_LIMIT, corrob: CONFIG.REQUIRE_CORROBORATION };
@@ -560,6 +587,8 @@ async function boot(loaderFn){
   S.bc = parseMatrix(raw.bc);
   S.ec = parseMatrix(raw.ec);
   S.errRef = raw.err ? parseMatrix(raw.err, {uint8:true}) : null;
+  S.axisNote = alignAxisToPeriod();
+  if(S.axisNote){ console.warn(S.axisNote); setProgress(S.axisNote); await tick(); }
   // time adjacency (for error3): consecutive columns exactly one interval apart
   const mins = S.times.map(t => { const [h,m] = t.split(":").map(Number); return h*60+m; });
   const step = S.T > 1 ? ((mins[1]-mins[0]) % 1440 + 1440) % 1440 : 15;
@@ -590,7 +619,7 @@ async function boot(loaderFn){
   fillParamInputs();
   recompute();
   checkAgainstRef();
-  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ / CSV 未対応リンク ${unmatched} 本`);
+  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}）/ CSV 未対応リンク ${unmatched} 本` + (S.axisNote ? ` ※${S.axisNote}` : ""));
   await tick();
   S.rain = raw.rain || null;
   S.lowland = raw.lowland || null;

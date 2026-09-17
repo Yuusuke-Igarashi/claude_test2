@@ -283,6 +283,27 @@ test("rain slots and low-lying areas follow the time slider, toggles and date se
   assert.ok(await page.evaluate(() => document.getElementById("rainDate").disabled), "date follows the period automatically");
   assert.equal(await page.evaluate(() => S.adjPrev[24]), 1, "23:45 -> 00:00 counts as consecutive");
   assert.equal(await page.evaluate(() => rainSlotKey("rain_20260813_2400.tif".match(RAIN_NAME))), "20260814_00:00", "a _2400 file name is the next day's 00:00 slot");
+  assert.equal(await page.evaluate(() => S.axisNote), null, "sample CSV columns already follow the period: nothing to realign");
+  const align = (period) => page.evaluate((period) => {
+    const keep = ["times", "T", "ids", "bs", "es", "bc", "ec", "errRef", "period"], saved = Object.fromEntries(keep.map(k => [k, S[k]]));
+    S.ids = ["a", "b"]; S.T = 4; S.times = ["00:00", "06:00", "12:00", "18:00"];   // a whole-day CSV, 6 h columns
+    S.bs = Float32Array.from([1, 2, 3, 4, 5, 6, 7, 8]); S.es = S.bs.slice(); S.bc = S.bs.slice(); S.ec = S.bs.slice();
+    S.errRef = Uint8Array.from([0, 1, 0, 0, 1, 0, 0, 0]);
+    S.period = period;
+    const note = alignAxisToPeriod();
+    const r = { note, times: S.times, T: S.T, bs: [...S.bs].map(v => Number.isNaN(v) ? null : v), err: [...S.errRef] };
+    Object.assign(S, saved);
+    return r;
+  }, period);
+  const rot = await align({ event: { start: "2026-08-13 12:00", hours: 24, slot_min: 360 } });
+  assert.deepEqual(rot.times, ["12:00", "18:00", "00:00", "06:00"], "a whole-day CSV is rotated to the period start");
+  assert.deepEqual(rot.bs, [3, 4, 1, 2, 7, 8, 5, 6], "columns matched by clock time");
+  assert.deepEqual(rot.err, [0, 0, 0, 1, 0, 0, 1, 0], "error.csv reordered the same way");
+  assert.match(rot.note, /00:00 開始、4 列.*12:00 開始、4 列/); assert.doesNotMatch(rot.note, /空欄/);
+  const gap = await align({ event: { start: "2026-08-13 12:00", hours: 12, slot_min: 180 } });
+  assert.deepEqual(gap.times, ["12:00", "15:00", "18:00", "21:00"], "axis = start + k * slot for hours");
+  assert.deepEqual(gap.bs, [3, null, 4, null, 7, null, 8, null], "times the CSV lacks stay empty");
+  assert.match(gap.note, /2 列は空欄/);
   assert.equal(await page.evaluate(() => rainSlotKey("rain_20261231_2400.tif".match(RAIN_NAME))), "20270101_00:00", "year end");
   assert.equal(await page.evaluate(() => { const d = S.rain.dates; S.rain.dates = ["20240821"]; const k = rainDateFor(24); S.rain.dates = d; return k; }), "20240822", "a missing day is not replaced by another day's rain");
   await page.evaluate((t) => applyTime(t + 2), T_18);   // 00:30 of the next day = peak
