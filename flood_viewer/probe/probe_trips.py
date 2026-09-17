@@ -105,6 +105,13 @@ PARAMS = {
     "VEHICLE_MIN_KMH": 12.0,  # ... at or above this -> vehicle; in between stays other
     "WALK_JUMP_KMH": 15.0,    # walk-only jump check: a segment between two walk points faster than this ...
     "WALK_JUMP_MIN_M": 100.0, # ... and longer than this is cut (not drawn, not crossed by events)
+    "PERIOD_START": None,     # "YYYY-MM-DD HH:MM": start of the event period (e.g. 12:00 of the flood day). The period
+                              # is PERIOD_HOURS long and may cross midnight; the baseline period starts
+                              # BASELINE_DAYS_BEFORE days earlier at the same clock time. All input files are read,
+                              # rows of each period (plus WINDOW_MIN before it) are joined across files, and the
+                              # viewer slots follow the period from its start. None = the old one-file-per-day mode.
+    "PERIOD_HOURS": 24,
+    "BASELINE_DAYS_BEFORE": 7,
 }
 
 MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_OTHER = 0, 1, 2, 3
@@ -592,8 +599,53 @@ def process_file(path: Path, P: dict):
     """Segment one daily file. Returns dict with arrays, uids, stays list, trips list, date."""
     log(f"{path.name}: reading")
     df, uids, dropped = read_points(path, P)
+    return process_frame(df, uids, dropped, P, path.stem)
+
+
+def read_period(paths, P: dict, t_start: pd.Timestamp, hours: float):
+    """Read every file that can hold rows of [t_start - WINDOW_MIN, t_start + hours], join them and
+    re-code the user ids across files. Returns (df, uids, dropped) like read_points."""
+    lo = t_start - pd.Timedelta(minutes=float(P["WINDOW_MIN"]))
+    hi = t_start + pd.Timedelta(hours=hours)
+    parts, dropped = [], 0
+    P1 = dict(P); P1["ONLY_MAIN_DATE"] = False
+    for path in paths:
+        fd = file_date(path)
+        if fd is not None and not (fd <= hi.normalize() and fd + pd.Timedelta(days=1) > lo):
+            continue                                   # the file's date cannot overlap the period
+        log(f"{path.name}: reading for the period {t_start:%Y-%m-%d %H:%M} +{hours:g} h")
+        df, uids, d0 = read_points(path, P1)
+        keep = (df["recordedat"] >= lo) & (df["recordedat"] < hi)
+        df = df[keep.to_numpy()].copy()
+        df["uid"] = uids[df["ucode"].to_numpy()]
+        acts = df.attrs.get("acts")
+        if "act" in df.columns:
+            df["act_name"] = acts[df["act"].to_numpy()]
+        part = df.drop(columns=["ucode", "act"], errors="ignore")
+        part.attrs = {}                                # frames with differing attrs cannot be concatenated
+        parts.append(part)
+        dropped += d0 + int((~keep).sum())
+    if not parts:
+        raise SystemExit(f"no input file covers {t_start:%Y-%m-%d %H:%M} +{hours:g} h")
+    df = pd.concat(parts, ignore_index=True); del parts
+    codes, uids = pd.factorize(df["uid"], sort=True)
+    df["ucode"] = codes.astype(np.int32)
+    if "act_name" in df.columns:
+        a_codes, a_names = pd.factorize(df["act_name"].fillna(""), sort=True)
+        df["act"] = a_codes.astype(np.int16)
+        df.attrs["acts"] = np.array(list(a_names) + [""], dtype=object)
+        df = df.drop(columns=["act_name"])
+    df = df.drop(columns=["uid"])
+    order = np.lexsort((df["recordedat"].to_numpy(), df["ucode"].to_numpy()))
+    df = df.iloc[order].reset_index(drop=True)
+    log(f"  period rows {len(df):,}, users {len(uids):,}")
+    return df, np.asarray(uids, dtype=object), dropped
+
+
+def process_frame(df, uids, dropped, P: dict, label: str):
+    """Segment one (user, time)-sorted frame. Returns dict with arrays, uids, stays list, trips list, date."""
     n = len(df)
-    date = df["recordedat"].dt.strftime("%Y-%m-%d").mode().iat[0] if n else path.stem
+    date = df["recordedat"].dt.strftime("%Y-%m-%d").mode().iat[0] if n else label
     lon = df["lon"].to_numpy(float); lat = df["lat"].to_numpy(float)
     tsec = (df["recordedat"] - pd.Timestamp("1970-01-01")).dt.total_seconds().to_numpy(float)
     ucode = df["ucode"].to_numpy()
@@ -689,12 +741,13 @@ class SlotWriters:
     """One GeoJSON file per (role, HH:MM) under out/viewer, plus index.json; optional merged files."""
     def __init__(self, out: Path, merged: bool):
         self.dir = out / "viewer"; self.dir.mkdir(parents=True, exist_ok=True)
-        self.slot = {}; self.merged = {} if merged else None; self.out = out
-    def add(self, role, hhmm, kind, feature):
+        self.slot = {}; self.order = {}; self.merged = {} if merged else None; self.out = out; self.period = {}
+    def add(self, role, hhmm, kind, feature, order=None):
         feature["properties"]["kind"] = kind
         key = (role, hhmm)
         if key not in self.slot:
             self.slot[key] = GeoJSONWriter(self.dir / f"{role}_{hhmm.replace(':', '')}.geojson")
+            self.order[key] = order if order is not None else int(hhmm[:2]) * 60 + int(hhmm[3:])
         self.slot[key].add(feature)
         if self.merged is not None:
             mk = (role, kind)
@@ -702,8 +755,8 @@ class SlotWriters:
                 self.merged[mk] = GeoJSONWriter(self.out / f"{role}_{'trajectory' if kind == 'traj' else 'dwell'}.geojson")
             self.merged[mk].add(feature)
     def close(self):
-        index = {"roles": sorted({r for r, _ in self.slot}), "slots": {}, "files": {}}
-        for (role, hhmm), w in sorted(self.slot.items()):
+        index = {"roles": sorted({r for r, _ in self.slot}), "slots": {}, "files": {}, "period": self.period}
+        for (role, hhmm), w in sorted(self.slot.items(), key=lambda kv: (kv[0][0], self.order[kv[0]])):
             n = w.close()
             index["slots"].setdefault(role, []).append(hhmm)
             index["files"][f"{role}_{hhmm.replace(':', '')}.geojson"] = n
@@ -807,7 +860,10 @@ def _split_line(idx, lon, lat, run):
 # ----------------------------------------------------------------------------------------------
 # 3. Viewer-ready windows (vectorised): per user x 15-min slot, the last hour's Move path and stays
 # ----------------------------------------------------------------------------------------------
-def write_viewer(R, P: dict, role: str, writers: SlotWriters):
+def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hours=None):
+    """Slot k (1..n_slots) ends at t0 + k*SLOT_MIN where t0 = midnight of the file's date (one-file mode)
+    or the period start (t_start). Labels are the clock time of the slot end, so a period that crosses
+    midnight runs 12:00, 12:15, ... 23:45, 00:00, ... 11:45 in slot order."""
     lon, lat, tsec, ucode = R["lon"], R["lat"], R["tsec"], R["ucode"]
     uids = R["uids"]
     n = len(lon)
@@ -816,7 +872,14 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     W, SLOT = float(P["WINDOW_MIN"]), float(P["SLOT_MIN"])
     n_win = int(round(W / SLOT))
     vb = parse_bbox(P["VIEWER_BBOX"]) or parse_bbox(P["BBOX"])
-    day0 = float((pd.Timestamp(R["date"]) - pd.Timestamp("1970-01-01")).total_seconds())   # midnight of the file's date (naive local time)
+    if t_start is None:
+        day0 = float((pd.Timestamp(R["date"]) - pd.Timestamp("1970-01-01")).total_seconds())   # midnight of the file's date (naive local time)
+        k_lo, k_hi = 1, int(1440 / SLOT)                    # slots 00:15 ... 24:00 of that day
+    else:
+        day0 = float((pd.Timestamp(t_start) - pd.Timestamp("1970-01-01")).total_seconds())
+        k_lo, k_hi = 0, int(round(float(hours) * 60 / SLOT)) - 1   # slot k ends at start + k*SLOT: labels equal the
+        # traffic CSV columns (12:00 ... 11:45); the slot labelled 12:00 shows the hour before the period start
+    lab = lambda k: pd.Timestamp(day0 + k * SLOT * 60.0, unit="s").strftime("%H:%M")
     # users to include: those with any point inside the viewer bbox
     if vb:
         inside = (lon >= vb[0]) & (lon <= vb[2]) & (lat >= vb[1]) & (lat <= vb[3])
@@ -825,13 +888,13 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
     else:
         keep = np.ones(n, dtype=bool)
     # ---- trajectories: dense walk points exploded into the n_win windows they belong to ----
-    mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1) & (R["mode"] == MODE_WALK) & (tsec >= day0))   # rows before the file's date are not drawn
-    mins = (tsec[mv] - day0) / 60.0
+    mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1) & (R["mode"] == MODE_WALK) & (tsec >= day0 - W * 60.0))
+    mins = (tsec[mv] - day0) / 60.0                             # may be slightly negative (the hour before the period)
     k0 = np.ceil(mins / SLOT).astype(np.int64)                 # first window end >= point time
-    k0 = np.maximum(k0, 1)
+    k0 = np.maximum(k0, k_lo)
     rep = np.repeat(mv, n_win)
     kk = np.repeat(k0, n_win) + np.tile(np.arange(n_win), len(mv))
-    ok = kk <= int(1440 / SLOT)
+    ok = (kk <= k_hi) & (kk * SLOT - W < np.repeat(mins, n_win))   # window (T_k - W, T_k] must contain the point
     rep, kk = rep[ok], kk[ok]
     order = np.lexsort((tsec[rep], kk, ucode[rep]))
     rep, kk = rep[order], kk[order]
@@ -852,15 +915,14 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         parts = [[[round(float(lon[i]), 6), round(float(lat[i]), 6)] for i in pp] for pp in parts if len(pp) >= 2]
         if not parts:
             continue
-        k = int(key_k[a]); mm = int(k * SLOT)
-        hhmm = f"{mm // 60:02d}:{mm % 60:02d}"
+        k = int(key_k[a]); hhmm = lab(k)
         geom = {"type": "LineString", "coordinates": parts[0]} if len(parts) == 1 else {"type": "MultiLineString", "coordinates": parts}
         u = int(key_u[a])
         writers.add(role, hhmm, "traj", {"type": "Feature",
-                         "properties": {"time": hhmm, "date": R["date"], "n_points": int(b - a),
+                         "properties": {"time": hhmm, "date": fmt_ts(tsec[idx[-1]])[:10], "n_points": int(b - a),
                                         "mode": ",".join(sorted(set(MODE_NAMES[R["mode"][idx]]))),
                                         "n_trips": len(set(int(trip_no[i]) for i in idx))},
-                         "geometry": geom})
+                         "geometry": geom}, order=k)
         n_traj += 1
     # ---- dwell: stay centroids exploded into the windows they overlap ----
     n_dwell = 0
@@ -872,8 +934,8 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
             m = np.isin(su, sel_users)
             su, s0, s1, slon, slat = su[m], s0[m], s1[m], slon[m], slat[m]
         # window k overlaps stay if start <= T_k and end > T_k - W  ->  k in [ceil(start/SLOT), floor((end + W)/SLOT - eps)]
-        kmin = np.maximum(np.ceil((s0 - day0) / 60.0 / SLOT).astype(np.int64), 1)
-        kmax = np.minimum(np.ceil((s1 - day0) / 60.0 / SLOT + W / SLOT).astype(np.int64) - 1, int(1440 / SLOT))
+        kmin = np.maximum(np.ceil((s0 - day0) / 60.0 / SLOT).astype(np.int64), k_lo)
+        kmax = np.minimum(np.ceil((s1 - day0) / 60.0 / SLOT + W / SLOT).astype(np.int64) - 1, k_hi)
         cnt = np.maximum(kmax - kmin + 1, 0)
         rep = np.repeat(np.arange(len(su)), cnt)
         kk = np.concatenate([np.arange(a_, b_ + 1) for a_, b_ in zip(kmin, kmax) if b_ >= a_]) if cnt.sum() else np.array([], dtype=np.int64)
@@ -881,11 +943,11 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         key_u = su[rep]
         bounds = np.flatnonzero(np.r_[True, (np.diff(key_u) != 0) | (np.diff(kk) != 0), True]) if len(rep) else np.array([0])
         for a, b in zip(bounds[:-1], bounds[1:]):
-            k = int(kk[a]); mm = int(k * SLOT); u = int(key_u[a])
+            k = int(kk[a]); u = int(key_u[a]); hhmm = lab(k)
             pts = [[round(float(slon[i]), 6), round(float(slat[i]), 6)] for i in rep[a:b]]
-            writers.add(role, f"{mm // 60:02d}:{mm % 60:02d}", "dwell", {"type": "Feature",
-                              "properties": {"time": f"{mm // 60:02d}:{mm % 60:02d}", "date": R["date"], "n_points": len(pts)},
-                              "geometry": {"type": "MultiPoint", "coordinates": pts}})
+            writers.add(role, hhmm, "dwell", {"type": "Feature",
+                              "properties": {"time": hhmm, "date": fmt_ts(day0 + k * SLOT * 60.0)[:10], "n_points": len(pts)},
+                              "geometry": {"type": "MultiPoint", "coordinates": pts}}, order=k)
             n_dwell += 1
     # ---- events (vehicle->walk, sharp turns): one Point per event, in every window that contains it ----
     n_ev = 0
@@ -895,16 +957,16 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters):
         if not len(idx):
             continue
         mins = (tsec[idx] - day0) / 60.0
-        sel = keep[idx] & (mins >= 0)
-        kmin = np.maximum(np.ceil(mins / SLOT).astype(np.int64), 1)
-        kmax = np.minimum(np.ceil((mins + W) / SLOT).astype(np.int64) - 1, int(1440 / SLOT))
+        sel = keep[idx] & (mins > -W)
+        kmin = np.maximum(np.ceil(mins / SLOT).astype(np.int64), k_lo)
+        kmax = np.minimum(np.ceil((mins + W) / SLOT).astype(np.int64) - 1, k_hi)
         for j in np.flatnonzero(sel):
             i = idx[j]
             for k in range(int(kmin[j]), int(kmax[j]) + 1):
-                mm = int(k * SLOT); hhmm = f"{mm // 60:02d}:{mm % 60:02d}"
+                hhmm = lab(k)
                 writers.add(role, hhmm, kind, {"type": "Feature",
-                                  "properties": {"time": hhmm, "date": R["date"], "at": fmt_ts(tsec[i])[11:16], **attrs(j)},
-                                  "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}})
+                                  "properties": {"time": hhmm, "date": fmt_ts(tsec[i])[:10], "at": fmt_ts(tsec[i])[11:16], **attrs(j)},
+                                  "geometry": {"type": "Point", "coordinates": [round(float(lon[i]), 6), round(float(lat[i]), 6)]}}, order=k)
                 n_ev += 1
     return n_traj, n_dwell, n_ev
 
@@ -924,8 +986,10 @@ def main():
             ap.add_argument(flag, default=None, help="lon_min,lat_min,lon_max,lat_max")
         elif k == "AREA_GEOJSON":
             ap.add_argument(flag, default=None, help="GeoJSON whose extent is used as --bbox")
-        elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS"):
+        elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS", "PERIOD_HOURS", "BASELINE_DAYS_BEFORE"):
             ap.add_argument(flag, type=int, default=v)
+        elif k == "PERIOD_START":
+            ap.add_argument(flag, default=None, help='"YYYY-MM-DD HH:MM" start of the event period (crossing midnight is fine)')
         else:
             ap.add_argument(flag, type=float, default=v)
     args = ap.parse_args()
@@ -956,11 +1020,27 @@ def run(inputs, out, event_date="2024-08-21", **params):
 
     writers = None if P["NO_VIEWER"] else SlotWriters(args.out, bool(P["MERGED_VIEWER"]))
 
-    for path in args.inputs:
-        R = process_file(path, P)
-        stem = path.name.split(".")[0]
+    # jobs: (label, role, loader, t_start, hours). Period mode joins files per period; else one job per file.
+    if P["PERIOD_START"]:
+        ev0 = pd.Timestamp(P["PERIOD_START"]); hours = float(P["PERIOD_HOURS"])
+        periods = {"event": ev0, "baseline": ev0 - pd.Timedelta(days=float(P["BASELINE_DAYS_BEFORE"]))}
+        log(f"periods: " + ", ".join(f"{r} {t:%Y-%m-%d %H:%M} +{hours:g} h" for r, t in periods.items()))
+        jobs = [(f"{r}_{t:%Y%m%d_%H%M}", r, (lambda t=t: read_period(args.inputs, P, t, hours)), t, hours) for r, t in periods.items()]
+        if writers is not None:
+            writers.period = {r: {"start": f"{t:%Y-%m-%d %H:%M}", "hours": hours, "slot_min": P["SLOT_MIN"]} for r, t in periods.items()}
+    else:
+        def one_file(path):
+            log(f"{path.name}: reading")
+            return read_points(path, P)
+        jobs = [(path.name.split(".")[0], None, (lambda path=path: one_file(path)), None, None) for path in args.inputs]
+
+    for stem, role, loader, t_start, hours in jobs:
+        df, uids, dropped = loader()
+        R = process_frame(df, uids, dropped, P, stem)
+        del df
         n = len(R["lon"])
-        role = "event" if R["date"] in args.event_dates else "baseline"
+        if role is None:
+            role = "event" if R["date"] in args.event_dates else "baseline"
         if not P["NO_POINTS"]:
             log(f"  writing {stem}_points.csv ({n:,} rows)")
             write_points_csv(R, args.out / f"{stem}_points.csv", P)
@@ -969,11 +1049,11 @@ def run(inputs, out, event_date="2024-08-21", **params):
         ne = write_events_geojson(R, args.out / f"{stem}_events.geojson", P)
         n_traj = n_dwell = n_ev = 0
         if writers is not None:
-            n_traj, n_dwell, n_ev = write_viewer(R, P, role, writers)
+            n_traj, n_dwell, n_ev = write_viewer(R, P, role, writers, t_start, hours)
         reasons = {REASON_CODES[c]: int(v) for c, v in zip(*np.unique(R["reason"], return_counts=True)) if c}
         n_dense = int(R["dense"].sum()); u_dense = len(np.unique(R["ucode"][R["dense"] == 1])) if n else 0
         modes = {MODE_NAMES[m]: int(c) for m, c in zip(*np.unique(R["mode"], return_counts=True)) if m}
-        print(f"{path.name}: date {R['date']} ({role}), users {len(np.unique(R['ucode'])):,}, points {n:,} (dropped {R['dropped']:,}), "
+        print(f"{stem}: date {R['date']} ({role}), users {len(np.unique(R['ucode'])):,}, points {n:,} (dropped {R['dropped']:,}), "
               f"dense points {n_dense:,} ({100 * n_dense / max(n, 1):.0f}%, {u_dense:,} users), "
               f"stay points {int((R['seg'] == 1).sum()):,}, stays {ns:,}, trips {nt:,} (with >=2 dense move points), "
               f"viewer windows: trajectories {n_traj:,} (walk), dwell {n_dwell:,}, events {n_ev:,}", flush=True)

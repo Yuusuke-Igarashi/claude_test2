@@ -14,11 +14,11 @@ const DIST = join(ROOT, "dist");
 const DATA = join(ROOT, "sample", "output");
 const SHOTS = join(here, "shots");
 const HTML = "flood_viewer_standalone.html";
-const T_18 = 24; // 12:00 + 24 * 15 min = 18:00
+const T_18 = 24; // 18:00 + 24 * 15 min = 00:00 (the sample axis crosses midnight)
 
 const REQUIRED = ["tokyo_20240821_network.geojson", "baseline_speed.csv", "event_speed.csv", "baseline_count.csv", "event_count.csv"];
 const OPTIONAL = ["error.csv", "baseline_trajectory.geojson", "event_trajectory.geojson", "baseline_dwell.geojson", "event_dwell.geojson"];
-const SLOT_FILES = 2 * 48; // viewer/<role>_<HHMM>.geojson for baseline and event, 48 slots (12:00-23:45) in the sample
+const SLOT_FILES = 2 * 48; // viewer/<role>_<HHMM>.geojson for baseline and event, 48 slots (18:00-05:45) in the sample
 // wait until the lazy slot for the current time is parsed
 const waitSlot = (page) => page.waitForFunction(() => !S.lazy || S.lazy.loaded === S.times[S.t], null, { timeout: 15000 });
 
@@ -127,10 +127,10 @@ test("loads all files and reproduces the notebook's error.csv exactly", async ()
 test("slider, play and keyboard change the time", async () => {
   const page = await openViewer();
   await page.locator("#slider").fill(String(T_18));
-  assert.equal((await status(page)).time, "18:00");
+  assert.equal((await status(page)).time, "00:00");
   await page.mouse.move(700, 450);
   await page.keyboard.press("ArrowRight");
-  assert.equal((await status(page)).time, "18:15");
+  assert.equal((await status(page)).time, "00:15");
   await page.keyboard.press("Space"); await page.waitForTimeout(1500); await page.keyboard.press("Space");
   const after = await page.evaluate(() => S.t);
   assert.ok(after > T_18 + 1, "playback advanced");
@@ -193,7 +193,7 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.evaluate((t) => { map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page);
   await page.waitForTimeout(1500);
-  assert.equal(await page.evaluate(() => S.lazy.loaded), "18:00", "only the 18:00 slot is parsed");
+  assert.equal(await page.evaluate(() => S.lazy.loaded), "00:00", "only the 00:00 slot is parsed");
   assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 8, "4 kinds x baseline+event for the slot");
   const st = await page.textContent("#trajStatus");
   const m = st.match(/平時 徒歩軌跡 (\d+) 本・滞留 (\d+) 点・車→徒歩 (\d+) 点・方向転換 (\d+) 点 \/ イベント時 徒歩軌跡 (\d+) 本・滞留 (\d+) 点・車→徒歩 (\d+) 点・方向転換 (\d+) 点/);
@@ -251,7 +251,7 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   // stepping through time loads other slots and keeps a bounded cache
   await page.evaluate((t) => applyTime(t + 1), T_18); await waitSlot(page);
   await page.evaluate((t) => applyTime(t + 2), T_18); await waitSlot(page);
-  assert.equal(await page.evaluate(() => S.lazy.loaded), "18:30");
+  assert.equal(await page.evaluate(() => S.lazy.loaded), "00:30");
   assert.ok(await page.evaluate(() => S.lazy.cache.size >= 3 && S.lazy.cache.size <= 4), "slot cache bounded");
   await page.evaluate((t) => applyTime(t), T_18); await waitSlot(page); await page.waitForTimeout(800);
 
@@ -277,9 +277,13 @@ test("rain slots and low-lying areas follow the time slider, toggles and date se
   assert.ok(await page.evaluate(() => !!S.lowland && map.getLayer("lowland") && map.getLayer("rain")), "rain and lowland layers exist");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none", "overlay controls shown");
   assert.match(await page.textContent("#legendRain"), /降雨 mm\/h/);
-  assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821");
-  await page.evaluate((t) => applyTime(t + 2), T_18);   // 18:30 = peak
-  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
+  assert.deepEqual(await page.evaluate(() => S.period), { event: { start: "2024-08-21 18:00", hours: 12, slot_min: 15 }, baseline: { start: "2024-08-14 18:00", hours: 12, slot_min: 15 } }, "period read from viewer/index.json");
+  assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821", "date of the first slot (18:00 of the start day)");
+  assert.ok(await page.evaluate(() => document.getElementById("rainDate").disabled), "date follows the period automatically");
+  assert.equal(await page.evaluate(() => S.adjPrev[24]), 1, "23:45 -> 00:00 counts as consecutive");
+  await page.evaluate((t) => applyTime(t + 2), T_18);   // 00:30 of the next day = peak
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
+  assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240822", "after midnight the next day is used");
   const peak = await page.evaluate(() => ({ max: Math.max(...S.rain.cur.vals), url: map.getSource("rain").url.slice(0, 21), w: S.rain.cur.w, h: S.rain.cur.h, nodata: S.rain.cur.nodata, bounds: S.rain.cur.bounds }));
   assert.ok(peak.max > 80, "peak slot decoded from the GeoTIFF: " + JSON.stringify(peak));
   assert.equal(peak.nodata, -1, "GDAL_NODATA read");
@@ -294,7 +298,7 @@ test("rain slots and low-lying areas follow the time slider, toggles and date se
   assert.equal(await page.evaluate(() => rainAt({ lng: 139.5, lat: 35.68 })), "", "outside the bounds reads empty");
   // stepping time swaps the image; the cache is bounded
   await page.evaluate((t) => applyTime(t), T_18);
-  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:00", null, { timeout: 15000 });
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:00", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => S.rain.cache.size >= 2 && S.rain.cache.size <= 8));
   // toggles
   await page.click("#chkRain"); await page.waitForTimeout(200);
@@ -342,7 +346,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain slots found in the folder (rain_*.tif)");
   assert.ok(await page.evaluate(() => !!S.lowland), "lowland.geojson found in the folder");
   await page.evaluate((t) => applyTime(t + 2), T_18);
-  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from a File object");
   await page.evaluate((t) => { setMode("traj"); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page); await page.waitForTimeout(1500);
@@ -364,7 +368,7 @@ test("three separate inputs: data files, rain folder, lowland GeoJSON", async ()
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
   assert.ok(await page.evaluate(() => !!S.lowland && !!map.getLayer("lowland")), "lowland from input 3");
   await page.evaluate((t) => applyTime(t + 2), T_18);
-  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240821_18:30", null, { timeout: 15000 });
+  await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from the separate folder");
   await page.close();
 });

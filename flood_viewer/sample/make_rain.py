@@ -15,12 +15,14 @@ OUT = Path(__file__).parent / "output"
 RAIN = OUT / "rain"; RAIN.mkdir(exist_ok=True)
 W, S, E, N = 139.70, 35.65, 139.80, 35.71          # synthetic network extent (make_synthetic.py: 40 x 30 cells)
 NX, NY = 160, 96                                    # 250 m-like cells
-DATE = "20240821"
-times = [f"{12 + i // 4:02d}:{(i % 4) * 15:02d}" for i in range(48)]
+DATES = ["20240821"] * 24 + ["20240822"] * 24     # the axis crosses midnight after 23:45
+times = [f"{((18 * 60 + 15 * i) // 60) % 24:02d}:{(18 * 60 + 15 * i) % 60:02d}" for i in range(48)]   # 18:00 ... 23:45, 00:00 ... 05:45
 xs = (np.arange(NX) + 0.5) / NX; ys = (np.arange(NY) + 0.5) / NY
 X, Y = np.meshgrid(xs, ys)
 index = {"unit": "mm/h (mean over the slot)", "nodata": NODATA, "bounds": [W, S, E, N], "width": NX, "height": NY, "slot_min": 15, "files": []}
+DATE = None
 for i, tm in enumerate(times):
+    DATE = DATES[i]
     # cell centre drifts from west to east; intensity peaks around 18:30 (i = 26)
     cx, cy = 0.2 + 0.6 * i / 47, 0.5 + 0.15 * np.sin(i / 6)
     peak = 90 * np.exp(-((i - 26) / 7) ** 2) + 3

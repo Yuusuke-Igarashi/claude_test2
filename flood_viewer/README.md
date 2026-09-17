@@ -107,9 +107,11 @@ python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
 | ビューワー用出力の範囲: この bbox 内に点を持つユーザーだけ出力 | bbox と同じ | `--viewer-bbox` |
 | 当日フィルタ: ファイル名の日付（YYYYMMDD）以外の行を除外 | オフ | `--only-main-date` |
 | 試走: 先頭 N ユーザーだけ処理 / ビューワー出力を省略 | | `--sample-users N` / `--no-viewer` |
+| 期間モード: イベント期間の開始時刻を与えると、そこから `PERIOD_HOURS` 時間（日をまたいでよい）をイベント、同じ時刻の `BASELINE_DAYS_BEFORE` 日前からを平時として、全入力ファイルから期間の行（前 1 時間を含む）を結合して処理する。時刻別ファイルは期間の先頭から 15 分刻み（例 12:00, 12:15, …, 23:45, 00:00, …, 11:45）で、交通 CSV の時刻列と同じ並びになる | なし（日別モード） | `--period-start "YYYY-MM-DD HH:MM"`, `--period-hours 24`, `--baseline-days-before 7` |
 
 1 日 2,000 万行・25 万ユーザー規模を想定し、チャンク読み込みでフィルタを適用しながら読む。
 notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08-21", AREA_GEOJSON="tokyo.geojson", ONLY_MAIN_DATE=True)` のように呼べる。
+期間モードの例: `probe_trips.run([08-06, 08-07, 08-13, 08-14 の 4 ファイル], "out", PERIOD_START="2026-08-13 12:00")`（イベント 08-13 12:00 → 08-14 12:00、平時 08-06 12:00 → 08-07 12:00）。出力の日別ファイルは `event_20260813_1200_*`, `baseline_20260806_1200_*` の 2 組になる。
 
 出力（`--out`）:
 
@@ -118,7 +120,7 @@ notebook からは `import probe_trips; probe_trips.run([files], "out", "2024-08
 - `<stem>_trips.geojson`: トリップごとの密な Move 点の LineString（全モード。5 分超の間隔で分割、n_move / n_dense / n_walk / n_vehicle、起点・終点に Stay があるか、距離）
 - `<stem>_events.geojson`: 車→徒歩の変化点（at, v_before_kmh, gap_min）と急な方向転換点（at, mode, angle_deg）の Point
 - 端末・Stay・トリップの識別子を持つのは points.csv だけ。GeoJSON と viewer/ の地物は属性のみで、端末をまたいで結び付けられない
-- `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。role は `--event-date`（カンマ区切りで複数可。`run()` ではリストも可）の日付なら event、他は baseline。同じ role の日が複数あれば同じ時刻別ファイルにまとめて書き、各地物の `date` 属性で日を区別する。
+- `viewer/<role>_<HHMM>.geojson` と `viewer/index.json`: ビューワー軌跡モード用。期間モードでは role は期間で決まり、index.json の `period` に各 role の開始時刻と長さを書く（ビューワーは降雨の日付をこれに合わせる）。日別モードでは role は `--event-date`（カンマ区切りで複数可）の日付なら event、他は baseline で、同じ role の日が複数あれば同じ時刻別ファイルにまとめて書く。各地物の `date` 属性はその窓の日付。
   各地物は kind = traj / dwell / modechange / turn、time = 15 分刻みの窓終端 "HH:MM"。識別子は持たない。
   軌跡は窓内 [time−60 分, time] の徒歩の密な Move 点（トリップ・点列境界で分割、複数なら MultiLineString）、
   滞留は窓に重なる Stay の重心 MultiPoint、変化点・方向転換点は窓内に時刻が入る Point。

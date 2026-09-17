@@ -17,7 +17,7 @@ OUT = Path(__file__).parent / "output"
 random.seed(7)
 
 net = json.load(open(OUT / "tokyo_20240821_network.geojson"))
-times = [f"{12 + i // 4:02d}:{(i % 4) * 15:02d}" for i in range(48)]
+times = [f"{((18 * 60 + 15 * i) // 60) % 24:02d}:{(18 * 60 + 15 * i) % 60:02d}" for i in range(48)]   # 18:00 ... 23:45, 00:00 ... 05:45
 lon0, lat0, dlon, dlat = 139.70, 35.65, 0.0025, 0.002
 center = (lon0 + 20 * dlon, lat0 + 15 * dlat)
 FLOOD_T = range(20, 32)          # 17:00 .. 19:45 (event window used by make_synthetic.py)
@@ -117,14 +117,15 @@ save(dwell["e"], "event_dwell.geojson")
 
 # per-slot layout consumed lazily by the viewer: viewer/<role>_<HHMM>.geojson + index.json
 vdir = OUT / "viewer"; vdir.mkdir(exist_ok=True)
-index = {"roles": ["baseline", "event"], "slots": {}, "files": {}}
+index = {"roles": ["baseline", "event"], "slots": {}, "files": {},
+         "period": {"event": {"start": "2024-08-21 18:00", "hours": 12, "slot_min": 15}, "baseline": {"start": "2024-08-14 18:00", "hours": 12, "slot_min": 15}}}
 for role, key in (("baseline", "b"), ("event", "e")):
     by_slot = {}
     for kind, feats in (("traj", traj[key]), ("dwell", dwell[key]), (None, events[key])):
         for ft in feats:
             f2 = {"type": "Feature", "properties": dict(ft["properties"], kind=kind or ft["properties"]["kind"]), "geometry": ft["geometry"]}
             by_slot.setdefault(ft["properties"]["time"], []).append(f2)
-    for tm in sorted(by_slot):
+    for tm in [x for x in times if x in by_slot]:
         name = f"{role}_{tm.replace(':', '')}.geojson"
         with open(vdir / name, "w") as f:
             json.dump({"type": "FeatureCollection", "features": by_slot[tm]}, f, separators=(",", ":"))

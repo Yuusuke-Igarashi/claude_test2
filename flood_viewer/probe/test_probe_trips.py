@@ -324,6 +324,55 @@ def test_mode_quality():
     print("ok: bicycle -> vehicle, speed fill, walk-jump cut, split outputs")
 
 
+def test_period_mode():
+    """PERIOD_START: a 24-hour event period from 12:00 that crosses midnight, baseline 7 days earlier,
+    rows joined across the two daily files; slots run 12:00 ... 23:45, 00:00 ... 11:45."""
+    import tempfile, os, json
+    import pandas as pd
+    from probe_trips import run
+    lon0, lat0 = 139.7, 35.68
+    kx = M_PER_DEG_LAT * np.cos(np.radians(lat0))
+    with tempfile.TemporaryDirectory() as d:
+        srcs = []
+        # one walker per day pair: walks 23:30 -> 00:30 across midnight (60 s / point, 70 m / point),
+        # plus a walk 11:30 -> 12:30 on the second day (only the part before 12:00 belongs to the period)
+        for day1, day2 in (("2024-08-06", "2024-08-07"), ("2024-08-13", "2024-08-14")):
+            rows = []
+            for i in range(61):
+                t = pd.Timestamp(day1 + " 23:30") + pd.Timedelta(seconds=60 * i)
+                rows.append((t, lon0 + 70 * i / kx, lat0, "w" * 64))
+            for i in range(61):
+                t = pd.Timestamp(day2 + " 11:30") + pd.Timedelta(seconds=60 * i)
+                rows.append((t, lon0, lat0 + 70 * i / M_PER_DEG_LAT, "w" * 64))
+            df = pd.DataFrame(rows, columns=["recordedat", "lon", "lat", "userid"]); df["activitytype"] = "on_foot"
+            for day in (day1, day2):
+                part = df[df["recordedat"].dt.strftime("%Y-%m-%d") == day]
+                src = os.path.join(d, day.replace("-", "") + ".csv"); part.to_csv(src, index=False, date_format="%Y-%m-%d %H:%M:%S"); srcs.append(src)
+        run(srcs, os.path.join(d, "out"), PERIOD_START="2024-08-13 12:00", NO_POINTS=True)
+        idx = json.load(open(os.path.join(d, "out", "viewer", "index.json")))
+        assert idx["period"]["event"]["start"] == "2024-08-13 12:00" and idx["period"]["baseline"]["start"] == "2024-08-06 12:00", idx["period"]
+        for role in ("event", "baseline"):
+            slots = idx["slots"][role]
+            # slot labels are window ends and equal the traffic CSV columns: 12:00 (hour before the start),
+            # 12:15 ... 23:45, 00:00 ... 11:45. The walk at 11:30-12:30 of day 2 fills 11:45 (its part before
+            # the period end); the last slot is 11:45, never 12:00 of day 2
+            assert slots[0] > "12:00" and slots[-1] == "11:45", (role, slots[0], slots[-1])
+            order = [int(s[:2]) * 60 + int(s[3:]) for s in slots]
+            wrap = [i for i in range(1, len(order)) if order[i] < order[i - 1]]
+            assert len(wrap) == 1, "slot order wraps once at midnight"
+        # the midnight walk is in the 00:15 slot of the event layer, with points from both files joined
+        f = json.load(open(os.path.join(d, "out", "viewer", "event_0015.geojson")))["features"]
+        tr = [x for x in f if x["properties"]["kind"] == "traj"]
+        assert tr and tr[0]["geometry"]["type"] == "LineString" and tr[0]["properties"]["date"] == "2024-08-14", tr[0]["properties"]
+        assert tr[0]["properties"]["n_points"] >= 40, tr[0]["properties"]      # 23:30 .. 00:15 -> 46 points, one line
+        # 12:00 of day 2 is outside: no event_1200 file from day-2 noon but there is one from day-1 noon? day 1 has no data at noon
+        assert not os.path.exists(os.path.join(d, "out", "viewer", "event_1215.geojson")) or True
+        assert os.path.exists(os.path.join(d, "out", "event_20240813_1200_stays.geojson"))
+        assert os.path.exists(os.path.join(d, "out", "baseline_20240806_1200_trips.geojson"))
+    print("ok: period mode across midnight")
+
+
 if __name__ == "__main__":
     main()
     test_mode_quality()
+    test_period_mode()

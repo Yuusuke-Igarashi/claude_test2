@@ -263,6 +263,7 @@ const S = {
   lazy: null,           // {sources: Map("role_HH:MM" -> URL|File), cache: Map("HH:MM" -> {bt,et,bd,ed}), loaded: "HH:MM"|null, loading: "HH:MM"|null}
   show: {base: true, event: true, traj: true, dwell: true, mode: true, turn: true},
   trajSel: null,        // {source, id, ds}: the clicked trajectory-mode feature (feature-state "sel")
+  period: null,         // viewer/index.json "period": {event:{start:"YYYY-MM-DD HH:MM", hours}, baseline:{...}} when the data span a period
   rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, date, cur: {key, vals, alpha, w, h}}
   lowland: null,        // GeoJSON of low-lying areas
   showRain: true, showLowland: true,
@@ -318,6 +319,7 @@ async function loadViaFetch(){
   const idx = await fetchText(f.viewer_dir + "/index.json", true);
   if(idx){
     const index = JSON.parse(idx), sources = new Map();
+    S.period = index.period || null;
     for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
     fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
     return {network, bs, es, bc, ec, err, lazySources: sources, rain, lowland, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
@@ -350,7 +352,7 @@ function rainRegistry(sources, index){
 function loadViaFiles(fileList, rainList = [], lowlandFile = null){
   const want = CONFIG.files;
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
-  let total = 0, rainIndexFile = null;
+  let total = 0, rainIndexFile = null, viewerIndexFile = null;
   for(const fl of rainList){
     const r = fl.name.match(RAIN_NAME);
     if(r) rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl);
@@ -363,7 +365,11 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null){
     if(m){ sources.set(`${m[1].toLowerCase()}_${m[2]}:${m[3]}`, fl); continue; }
     const r = fl.name.match(RAIN_NAME);
     if(r){ if(!rainList.length) rainFiles.set(`${r[1]}_${r[2]}:${r[3]}`, fl); continue; }
-    if(fl.name === "index.json"){ if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl; continue; }
+    if(fl.name === "index.json"){
+      if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl;
+      else if(/(^|\/)viewer\/index\.json$/.test(fl.webkitRelativePath || "")) viewerIndexFile = fl;
+      continue;
+    }
     if(fl.name === want.lowland && lowlandFile) continue;   // the explicit file wins
     byName[fl.name] = fl;
     if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
@@ -389,8 +395,10 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null){
   const optional = sources.size ? [Promise.resolve(null), Promise.resolve(null), Promise.resolve(null), Promise.resolve(null)]
                                 : [read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)];
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx]) => {
+  const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx]) => {
+      S.period = (viewerIdx && viewerIdx.period) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
       return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, loadInfo};
     });
@@ -527,9 +535,9 @@ async function boot(loaderFn){
   S.errRef = raw.err ? parseMatrix(raw.err, {uint8:true}) : null;
   // time adjacency (for error3): consecutive columns exactly one interval apart
   const mins = S.times.map(t => { const [h,m] = t.split(":").map(Number); return h*60+m; });
-  const step = S.T > 1 ? mins[1]-mins[0] : 15;
+  const step = S.T > 1 ? ((mins[1]-mins[0]) % 1440 + 1440) % 1440 : 15;
   S.adjPrev = new Uint8Array(S.T);
-  for(let c=1;c<S.T;c++) S.adjPrev[c] = (mins[c]-mins[c-1] === step) ? 1 : 0;
+  for(let c=1;c<S.T;c++) S.adjPrev[c] = (((mins[c]-mins[c-1]) % 1440 + 1440) % 1440 === step) ? 1 : 0;   // 23:45 -> 00:00 is adjacent
   setProgress("ネットワークを構築中 …");
   await tick();
   const gj = JSON.parse(raw.network);
@@ -931,6 +939,7 @@ function setupOverlays(){
     for(const d of S.rain.dates){ const o = document.createElement("option"); o.value = d; o.textContent = `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}`; sel.appendChild(o); }
     sel.value = S.rain.date;
     sel.addEventListener("change", () => { S.rain.date = sel.value; sel.blur(); updateRain(); });
+    if(S.period && S.period.event){ sel.disabled = true; sel.title = `イベント期間 ${S.period.event.start} から ${S.period.event.hours} 時間に合わせて自動選択`; }
     $("chkRain").addEventListener("change", (e) => { S.showRain = e.target.checked; e.target.blur(); updateRain(); });
     const lg = $("legendRain");
     const unit = (S.rain.index.unit || "").startsWith("mm (") ? "降雨量 mm（15 分）" : "降雨 mm/h（15 分平均）";
@@ -1019,7 +1028,23 @@ function paintRain(slot){
   return cv.toDataURL("image/png");
 }
 
-function rainKey(){ return S.rain ? `${S.rain.date}_${S.times[S.t]}` : null; }
+// Date of the current slot: from the event period when known (a slot after midnight belongs to the
+// next calendar day), else the date chosen in the select.
+function rainDateFor(t){
+  const R = S.rain; if(!R) return null;
+  const ev = S.period && S.period.event;
+  if(ev && ev.start){
+    const [d0, h0] = ev.start.split(" "); const startMin = +h0.slice(0, 2) * 60 + +h0.slice(3, 5);
+    const [h, m] = S.times[t].split(":").map(Number); const mins = h * 60 + m;
+    const day = new Date(d0 + "T00:00:00");
+    if(mins <= startMin && !(t === 0 && mins > startMin)) day.setDate(day.getDate() + 1);   // at or before the start clock time = next day
+    if(mins === startMin && t === 0) day.setDate(day.getDate() - 1);                         // a header that begins exactly at the start time
+    const ymd = `${day.getFullYear()}${String(day.getMonth() + 1).padStart(2, "0")}${String(day.getDate()).padStart(2, "0")}`;
+    return R.dates.includes(ymd) ? ymd : R.date;
+  }
+  return R.date;
+}
+function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null; }
 
 function updateRain(){
   if(!map || !S.rain || !map.getSource("rain")) return;
@@ -1028,6 +1053,7 @@ function updateRain(){
   if(!S.showRain) return;
   if(!R.sources.has(key)){ R.cur = null; map.getSource("rain").updateImage({url: BLANK_PNG}); $("rainVal").textContent = "（この時刻の降雨なし）"; return; }
   const show = (c) => { R.cur = {key, ...c}; map.getSource("rain").updateImage(c.bounds ? {url: c.url, coordinates: [[c.bounds[0], c.bounds[3]], [c.bounds[2], c.bounds[3]], [c.bounds[2], c.bounds[1]], [c.bounds[0], c.bounds[1]]]} : {url: c.url}); $("rainVal").textContent = ""; };
+  if(S.period && S.period.event && $("rainDate").value !== rainDateFor(S.t)) $("rainDate").value = rainDateFor(S.t);
   if(R.cache.has(key)){ show(R.cache.get(key)); return; }
   if(R.loading === key) return;
   R.loading = key; $("rainVal").textContent = "読み込み中…";

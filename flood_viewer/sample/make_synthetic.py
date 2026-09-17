@@ -7,7 +7,7 @@ OUT = Path(__file__).parent / "output"
 OUT.mkdir(exist_ok=True)
 random.seed(1); np.random.seed(1)
 
-times = [f"{12 + i // 4:02d}:{(i % 4) * 15:02d}" for i in range(48)]
+times = [f"{((18 * 60 + 15 * i) // 60) % 24:02d}:{(18 * 60 + 15 * i) % 60:02d}" for i in range(48)]   # 18:00 ... 23:45, 00:00 ... 05:45
 T = len(times)
 
 # grid network around Tokyo: 40 x 30 blocks, each edge as a pair of links (id, id+1)
