@@ -3,7 +3,7 @@
 東京 2024-08-21 の冠水候補分析（run2024.ipynb）の出力を地図で見るスタンドアローン HTML ビューワー。
 
 - **交通モード**: リンクを 対象外（灰）/ 対象（黒）/ 異常（赤）で着色。タイムスライダー、再生、リンクホバーで平時・イベント時の速度と台数の時系列を表示。
-- **閾値パネル（⚙）**: is_target の台数・速度、error1 の速度比・台数比・ほぼ消失、裏取り要否を画面で変更すると即時に再計算。error.csv を読み込んでいれば再計算結果との不一致セル数を表示。
+- **閾値パネル（⚙）**: is_target の台数・速度、異常レベル 1〜3 の速度比・台数比、裏取り要否を画面で変更すると即時に再計算。error.csv を読み込んでいれば再計算結果との不一致セル数を表示。
 - **降雨・低位地帯**: rain/ と lowland.geojson があれば両モード共通で道路の下に重ねる。降雨は時刻スライダーに連動して 15 分スロットの画像を読み、気象庁の降水強度凡例と同じ 8 段階で着色（1 mm/h 未満は透明）。カーソル位置の値を上部に表示。チェックで表示切替。
 - **軌跡モード**: 各 ID × 時刻の直近 1 時間の徒歩軌跡（LineString）、滞留点、車→徒歩の変化点、急な方向転換点を平時・イベント時で表示。ズーム 14 以上で有効。交通量の情報（着色・件数・時系列パネル）は表示しない。地物のホバーで属性を表示し、クリックでその地物だけを太く描く（もう一度クリックか空白のクリックで解除）。地物は端末の識別子を持たないので、同じ端末の地物をまとめて強調する機能はない。種類ごとの表示切替と「最寄りの軌跡へ」（現在時刻のデータのうち地図中心に最も近いものへ移動）を備え、状態行に表示範囲内の件数・その時刻のファイル全体の件数・見つからないファイル名を出す。
 
@@ -19,7 +19,7 @@ output フォルダに置いて `python -m http.server` 経由で開けば自動
 |---|---|---|
 | *_network.geojson（例 tokyo_20240821_network.geojson） | 必須 | リンク形状。properties: id, pair_id。フォルダ内に 1 つだけ置く |
 | baseline_speed.csv / event_speed.csv / baseline_count.csv / event_count.csv | 必須 | リンク × 時刻の行列。id 列 + "HH:MM" 列 |
-| error.csv | 任意 | ノートブックの最終 error。照合にのみ使用 |
+| error.csv | 任意 | ノートブックの error_level（0〜3）。異常が出たリンクの行だけでよい（無い行は 0）。旧形式（全リンク 0/1）も読める。照合にのみ使用 |
 | viewer/<role>_<HHMM>.geojson + viewer/index.json | 任意（推奨） | 時刻別の軌跡・滞留・変化点（properties.kind = traj / dwell / modechange / turn, time）。スライダーの時刻のファイルだけを読むので全域を出力できる |
 | baseline_trajectory.geojson / event_trajectory.geojson | 任意 | 1 日分をまとめた LineString / MultiLineString。properties: time。小規模向け |
 | baseline_dwell.geojson / event_dwell.geojson | 任意 | 同、MultiPoint / Point |
@@ -32,8 +32,9 @@ output フォルダに置いて `python -m http.server` 経由で開けば自動
 
 ```
 is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
-error1    = count_ratio < ZERO_COUNT_RATIO_LIMIT OR (speed_ratio <= SPEED_RATIO_LIMIT AND count_ratio <= COUNT_RATIO_LIMIT)
-error     = is_target AND error1 AND (対向リンクが同時刻に is_target&error1 OR 同一リンクが前後 15 分に is_target&error1)
+error1_k  = speed_ratio <= LEVEL_k.speed OR count_ratio <= LEVEL_k.count      (k = 1, 2, 3 = 0.75 / 0.60 / 0.50)
+error_k   = is_target AND error1_k AND (対向リンクが同時刻に is_target&error1_k OR 同一リンクが前後 15 分に is_target&error1_k)
+error_level = 満たした最も厳しい k（0 = 異常なし）。リンクは L1 橙 / L2 赤 / L3 暗赤で着色
 ```
 
 ## 開発・テスト
@@ -48,7 +49,7 @@ npm test                         # Playwright + node:test によるブラウザ�
 
 テスト内容（`tests/viewer.test.js`）:
 
-1. 10 ファイルの読み込み。既定閾値での画面内再計算が Python 側で独立に計算した error.csv と全セル一致すること、時刻別の異常本数が error.csv の列集計と一致すること。
+1. 10 ファイルの読み込み。既定閾値での画面内再計算が Python 側で独立に計算した error.csv（異常リンクのみ、レベル 0〜3）と全セル一致すること、時刻別の異常本数（合計とレベル別）が error.csv の列集計と一致すること。
 2. スライダー、キー操作、再生。
 3. 異常リンクのホバーでパネル・異常帯・2 系列が出て、クリックで固定できること。
 4. 閾値変更で件数が変わり、既定値に戻すと元の件数に戻ること。

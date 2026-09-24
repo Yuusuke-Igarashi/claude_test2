@@ -15,6 +15,7 @@
   --series-1:#2a78d6;   /* baseline */
   --series-2:#eb6834;   /* event    */
   --road-gray:#b4b2ab; --road-black:#1a1a19; --road-red:#d03b3b;
+  --lv1:#f0a23a; --lv2:#d03b3b; --lv3:#7a0f3d;   /* error level 1 / 2 / 3 (3 = strongest drop) */
   --font:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
 }
 html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);background:var(--page);font-size:13px}
@@ -47,7 +48,8 @@ button:hover{background:#f0efec}
 .chart .l1{stroke:var(--series-1);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
 .chart .l2{stroke:var(--series-2);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
 .chart .now{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
-.chart .err{fill:var(--road-red);opacity:.12}
+.chart .err{fill:var(--road-red);opacity:.16}
+.chart .err.l1{fill:var(--lv1)} .chart .err.l2{fill:var(--lv2)} .chart .err.l3{fill:var(--lv3)}
 .chart .cross{stroke:var(--muted);stroke-width:1}
 .chart .dot{stroke:var(--surface);stroke-width:2}
 .chart .tip{fill:var(--ink);font-size:11px}
@@ -103,7 +105,7 @@ button:hover{background:#f0efec}
   <button id="playBtn" title="Space">▶ 再生</button>
   <span id="timeLabel">--:--</span>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
-  <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本</span>
+  <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</span>
   <span class="seg" title="M キーで切替">
     <button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button>
   </span>
@@ -120,7 +122,9 @@ button:hover{background:#f0efec}
   <span class="legend" id="legendTraffic">
     <span style="--c:var(--road-gray)">対象外</span>
     <span style="--c:var(--road-black)">対象</span>
-    <span style="--c:var(--road-red)">異常</span>
+    <span style="--c:var(--lv1)">異常 L1</span>
+    <span style="--c:var(--lv2)">L2</span>
+    <span style="--c:var(--lv3)">L3</span>
   </span>
   <span class="legend" id="legendTraj" style="display:none">
     <span style="--c:var(--series-1)">平時</span><span style="--c:var(--series-2)">イベント時</span>
@@ -140,14 +144,15 @@ button:hover{background:#f0efec}
   <div class="grp">対象リンク（is_target）: 両方を満たす</div>
   <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="1" min="0"> 台/15分</div>
   <div class="row">平時速度 ≥ <input type="number" id="pMinSpeed" step="1" min="0"> km/h</div>
-  <div class="grp">異常（error1）: 対象リンクで、次のいずれか</div>
-  <div class="row">速度比 ≤ <input type="number" id="pSpeedRatio" step="0.05" min="0" max="2"> かつ 台数比 ≤ <input type="number" id="pCountRatio" step="0.05" min="0" max="2"></div>
-  <div class="row">または 台数比 &lt; <input type="number" id="pZeroRatio" step="0.01" min="0" max="1"> （ほぼ消失）</div>
-  <div class="grp">確定（error）</div>
-  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に異常、または同一リンクで前後 15 分も異常であることを要求する</label></div>
+  <div class="grp">異常レベル（error1）: 対象リンクで、速度比 ≤ 値 または 台数比 ≤ 値。番号が大きいほど厳しい（L3 ⊂ L2 ⊂ L1 になるよう設定する）</div>
+  <div class="row">L1: 速度比 ≤ <input type="number" id="pL1Speed" step="0.05" min="0" max="2"> または 台数比 ≤ <input type="number" id="pL1Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L2: 速度比 ≤ <input type="number" id="pL2Speed" step="0.05" min="0" max="2"> または 台数比 ≤ <input type="number" id="pL2Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> または 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
+  <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
+  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 15 分も同レベル以上であることを要求する</label></div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
-  <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
+  <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
 </div>
 
 <div id="chartPanel" class="panel">
@@ -165,7 +170,7 @@ button:hover{background:#f0efec}
   <div class="clegend">
     <span style="--c:var(--series-1)">平時 (baseline)</span>
     <span style="--c:var(--series-2)">イベント時 (event)</span>
-    <span style="--c:var(--road-red);opacity:.6">異常判定区間</span>
+    <span style="--c:var(--lv1)">異常 L1</span><span style="--c:var(--lv2)">L2</span><span style="--c:var(--lv3)">L3</span>
   </div>
   <div class="hint" id="cpHint">クリックで固定 / もう一度クリックで解除</div>
 </div>
@@ -217,13 +222,12 @@ const CONFIG = {
   TRAJ_WINDOW_MIN: 60,      // each trajectory covers [time - window, time]
   // Default thresholds (same as the notebook). Editable in the ⚙ panel.
   //   is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
-  //   error1    = count_ratio < ZERO_COUNT_RATIO_LIMIT OR (speed_ratio <= SPEED_RATIO_LIMIT AND count_ratio <= COUNT_RATIO_LIMIT)
-  //   error     = is_target AND error1 AND (pair link error1 at same time OR same link error1 at t±15min)
-  MIN_BASE_COUNT: 5,
-  MIN_BASE_SPEED: 15.0,
-  SPEED_RATIO_LIMIT: 0.6,
-  COUNT_RATIO_LIMIT: 0.4,
-  ZERO_COUNT_RATIO_LIMIT: 0.01,
+  //   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed OR count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest)
+  //   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)
+  //   error_level = highest k with error_k (0 = none). Levels must be nested (L3 ⊂ L2 ⊂ L1), as in the notebook.
+  MIN_BASE_COUNT: 2.5,      // notebook: 既存秋田分析の「日中 10 カウント/時以上」を 15 分換算
+  MIN_BASE_SPEED: 10.0,
+  ERROR_LEVELS: [{speed: 0.75, count: 0.75}, {speed: 0.60, count: 0.60}, {speed: 0.50, count: 0.50}],
   REQUIRE_CORROBORATION: true,
   // Basemap: GSI pale (地理院タイル). Alternative: OpenStreetMap.
   basemap: {
@@ -256,7 +260,7 @@ const S = {
   cur: null,            // Uint8Array[N] current class applied to map
   fids: null,           // Int32Array[N] feature id (numeric) or -1 if not in network
   hasData: null,        // Uint8Array[N] any finite baseline value
-  countsTarget: [], countsError: [],
+  countsTarget: [], countsError: [], countsLevel: [[], [], []],
   t: 0,
   mode: "traffic",      // "traffic" | "traj"
   traj: null,           // {bt, et, bd, ed} parsed datasets (whole day, or the current slot in lazy mode) or null
@@ -501,17 +505,46 @@ function alignAxisToPeriod(){
   return note;
 }
 
-function defaultParams(){
-  return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, speedRatio: CONFIG.SPEED_RATIO_LIMIT,
-           countRatio: CONFIG.COUNT_RATIO_LIMIT, zeroRatio: CONFIG.ZERO_COUNT_RATIO_LIMIT, corrob: CONFIG.REQUIRE_CORROBORATION };
+// error.csv from the notebook: link × time error levels (0–3). Rows may be a subset of the links (the
+// notebook writes only links with an error) in any order; links without a row are 0. An older 0/1 file
+// (all links, True/False or 1/0) is accepted as well and flagged as binary for the comparison.
+function parseRefLevels(text){
+  const lines = text.split(/\r?\n/);
+  const times = lines[0].split(",").slice(1).map(s => s.trim());
+  if(times.length !== S.T) throw new Error(`error.csv の時刻列数が一致しません (${times.length} vs ${S.T})`);
+  for(let i=0;i<S.T;i++) if(times[i] !== S.times[i]) throw new Error(`error.csv の時刻ヘッダが一致しません: ${times[i]} vs ${S.times[i]}`);
+  const N = S.ids.length, T = S.T, out = new Uint8Array(N*T);
+  let rows = 0, unknown = 0, maxv = 0;
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].length) continue;
+    rows++;
+    const cells = lines[i].split(","), r = S.idx.get(cells[0].trim());
+    if(r === undefined){ unknown++; continue; }
+    for(let c=0;c<T;c++){
+      const v = cells[c+1];
+      if(v === undefined || v === "") continue;
+      const x = (v === "True" || v === "true") ? 1 : (v === "False" || v === "false") ? 0 : parseInt(v, 10);
+      if(x > 0){ out[r*T+c] = x; if(x > maxv) maxv = x; }
+    }
+  }
+  S.errRefRows = rows; S.errRefUnknown = unknown; S.errRefBinary = maxv <= 1;
+  return out;
 }
 
-// Re-derive is_target / error1 / error2 / error3 / error / colour class from the raw matrices
-// with the current thresholds. Mirrors the notebook's logic.
+function defaultParams(){
+  return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
+           levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count})) };
+}
+
+// Re-derive is_target / error1 level / confirmed error level / colour class from the raw matrices
+// with the current thresholds. Mirrors the notebook's logic (levels nested: L3 ⊂ L2 ⊂ L1).
+//   S.e1[i]  = highest level k whose error1_k holds on a target cell (0 = none)
+//   S.err[i] = highest confirmed level = min(e1, max(e1 of pair at t, e1 at t-1, e1 at t+1)); without corroboration = e1
+//   S.cls[i] = 0 non-target, 1 target, 1+level for an error (2 = L1, 3 = L2, 4 = L3)
 function recompute(){
-  const N = S.ids.length, T = S.T, P = S.params;
+  const N = S.ids.length, T = S.T, P = S.params, L = P.levels.length;
   const tgt = S.tgt = new Uint8Array(N*T);
-  const e1 = S.e1 = new Uint8Array(N*T);          // is_target & error1
+  const e1 = S.e1 = new Uint8Array(N*T);
   const err = S.err = new Uint8Array(N*T);
   for(let i=0;i<N*T;i++){
     const bs = S.bs[i], bc = S.bc[i];
@@ -520,28 +553,30 @@ function recompute(){
     if(!t) continue;
     const sr = bs > 0 ? S.es[i]/bs : NaN;
     const cr = bc > 0 ? S.ec[i]/bc : NaN;
-    if(cr < P.zeroRatio || (sr <= P.speedRatio && cr <= P.countRatio)) e1[i] = 1;
+    let k = 0;
+    for(let l=0;l<L;l++) if(sr <= P.levels[l].speed || cr <= P.levels[l].count) k = l+1;
+    e1[i] = k;
   }
   for(let r=0;r<N;r++){
     const base = r*T, pr = S.pairRow[r], pb = pr >= 0 ? pr*T : -1;
     for(let c=0;c<T;c++){
-      const i = base+c;
-      if(!e1[i]) continue;
-      if(!P.corrob){ err[i] = 1; continue; }
-      const e2 = pb >= 0 && e1[pb+c];
-      const e3 = (c > 0 && S.adjPrev[c] && e1[i-1]) || (c < T-1 && S.adjPrev[c+1] && e1[i+1]);
-      if(e2 || e3) err[i] = 1;
+      const i = base+c, k = e1[i];
+      if(!k) continue;
+      if(!P.corrob){ err[i] = k; continue; }
+      const m = Math.max(pb >= 0 ? e1[pb+c] : 0, (c > 0 && S.adjPrev[c]) ? e1[i-1] : 0, (c < T-1 && S.adjPrev[c+1]) ? e1[i+1] : 0);
+      err[i] = Math.min(k, m);
     }
   }
   S.cls = new Uint8Array(N*T);
   S.countsTarget = new Array(T).fill(0);
   S.countsError = new Array(T).fill(0);
+  S.countsLevel = [0, 1, 2].map(() => new Array(T).fill(0));
   for(let i=0;i<N*T;i++){
-    const k = err[i] ? 2 : tgt[i] ? 1 : 0;
+    const k = err[i] ? 1 + err[i] : tgt[i] ? 1 : 0;
     S.cls[i] = k;
     const c = i % T;
     if(k >= 1) S.countsTarget[c]++;
-    if(k === 2) S.countsError[c]++;
+    if(k >= 2){ S.countsError[c]++; S.countsLevel[Math.min(k, 4) - 2][c]++; }
   }
   if(!S.cur) S.cur = new Uint8Array(N);
   if(!S.hasData){
@@ -555,25 +590,31 @@ function checkAgainstRef(){
   const el = $("pCheck");
   if(!S.errRef){ el.textContent = "error.csv は未読み込み（照合なし）"; el.className = "check"; return; }
   let diff = 0, refOn = 0;
-  for(let i=0;i<S.err.length;i++){ if(S.errRef[i]) refOn++; if(S.err[i] !== S.errRef[i]) diff++; }
+  const binary = S.errRefBinary;   // an old 0/1 error.csv: compare presence only
+  for(let i=0;i<S.err.length;i++){
+    const ref = S.errRef[i], mine = binary ? (S.err[i] ? 1 : 0) : S.err[i];
+    if(ref) refOn++; if(mine !== ref) diff++;
+  }
   const isDefault = JSON.stringify(S.params) === JSON.stringify(defaultParams());
-  el.textContent = `ノートブック error.csv との不一致: ${diff.toLocaleString()} セル（error.csv の異常 ${refOn.toLocaleString()} セル）` + (isDefault ? "" : " ※閾値が既定値と異なるため不一致は想定内");
+  el.textContent = `ノートブック error.csv との不一致: ${diff.toLocaleString()} セル（error.csv の異常 ${refOn.toLocaleString()} セル、${S.errRefRows.toLocaleString()} 行`
+    + (S.errRefUnknown ? `、ネットワークに無い id ${S.errRefUnknown} 行` : "") + (binary ? "、0/1 形式のため異常あり／なしで照合" : "、レベル 0〜3 で照合") + "）"
+    + (isDefault ? "" : " ※閾値が既定値と異なるため不一致は想定内");
   el.className = "check " + (diff === 0 ? "ok" : (isDefault ? "ng" : ""));
 }
 
 function applyParams(){
   const num = (id, fallback) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : fallback; };
   const d = defaultParams();
-  S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), speedRatio: num("pSpeedRatio", d.speedRatio),
-               countRatio: num("pCountRatio", d.countRatio), zeroRatio: num("pZeroRatio", d.zeroRatio), corrob: $("pCorrob").checked };
+  S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), corrob: $("pCorrob").checked,
+               levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count)})) };
   recompute();
   checkAgainstRef();
   if(map) applyTime(S.t);
 }
 function fillParamInputs(){
   const P = S.params;
-  $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pSpeedRatio").value = P.speedRatio;
-  $("pCountRatio").value = P.countRatio; $("pZeroRatio").value = P.zeroRatio; $("pCorrob").checked = P.corrob;
+  $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob;
+  P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; });
 }
 
 async function boot(loaderFn){
@@ -586,7 +627,7 @@ async function boot(loaderFn){
   S.es = parseMatrix(raw.es);
   S.bc = parseMatrix(raw.bc);
   S.ec = parseMatrix(raw.ec);
-  S.errRef = raw.err ? parseMatrix(raw.err, {uint8:true}) : null;
+  S.errRef = raw.err ? parseRefLevels(raw.err) : null;
   S.axisNote = alignAxisToPeriod();
   if(S.axisNote){ console.warn(S.axisNote); setProgress(S.axisNote); await tick(); }
   // time adjacency (for error3): consecutive columns exactly one interval apart
@@ -727,16 +768,16 @@ function initMap(gj){
             10, ["match", cls, 1, CONFIG.lineWidth.black*0.6, CONFIG.lineWidth.gray*0.6],
             14, ["match", cls, 1, CONFIG.lineWidth.black, CONFIG.lineWidth.gray],
             17, ["match", cls, 1, CONFIG.lineWidth.black*2.2, CONFIG.lineWidth.gray*2.2]],
-          "line-opacity": ["case", ["==", cls, 2], 0, f]
+          "line-opacity": ["case", [">=", cls, 2], 0, f]
         }
       });
       map.addLayer({
         id:"links-error"+suffix, type:"line", source:"links",
         layout:{ "line-cap":"round", "line-join":"round", visibility: visible ? "visible" : "none" },
         paint:{
-          "line-color": cssVar("--road-red"),
+          "line-color": ["match", cls, 2, cssVar("--lv1"), 3, cssVar("--lv2"), cssVar("--lv3")],
           "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
-          "line-opacity": ["case", ["==", cls, 2], f, 0]
+          "line-opacity": ["case", [">=", cls, 2], f, 0]
         }
       });
     };
@@ -1211,6 +1252,7 @@ function applyTime(t, force=false){
   $("slider").value = t;
   $("stTarget").textContent = S.countsTarget[t].toLocaleString();
   $("stError").textContent = S.countsError[t].toLocaleString();
+  for(let l=0;l<3;l++) $(`stL${l+1}`).textContent = S.countsLevel[l][t].toLocaleString();
   for(let r=0;r<N;r++){
     const fid = S.fids[r]; if(fid < 0) continue;
     const k = S.cls[r*T+t];
@@ -1233,7 +1275,7 @@ function setupControls(){
   $("settingsClose").addEventListener("click", () => { $("settings").style.display = "none"; });
   let pTimer = null;
   const schedule = () => { clearTimeout(pTimer); pTimer = setTimeout(applyParams, 250); };
-  for(const id of ["pMinCount","pMinSpeed","pSpeedRatio","pCountRatio","pZeroRatio"]){
+  for(const id of ["pMinCount","pMinSpeed","pL1Speed","pL1Count","pL2Speed","pL2Count","pL3Speed","pL3Count"]){
     $(id).addEventListener("input", schedule);
     $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
   }
@@ -1264,8 +1306,8 @@ function togglePlay(){
 // Chart panel (two single-axis charts: speed, count)
 // ============================================================
 let lastFeature = null;
-const STATUS_LABEL = {0:"対象外", 1:"対象", 2:"異常"};
-const STATUS_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--road-red)"};
+const STATUS_LABEL = {0:"対象外", 1:"対象", 2:"異常 レベル1", 3:"異常 レベル2", 4:"異常 レベル3"};
+const STATUS_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--lv1)", 3:"var(--lv2)", 4:"var(--lv3)"};
 
 function fmt(v, d=1){ return Number.isNaN(v) || v === undefined ? "–" : v.toFixed(d); }
 
@@ -1286,7 +1328,7 @@ function showChart(ft){
   const b = r*T;
   const k = S.cls[b+t];
   let label = STATUS_LABEL[k];
-  if(k === 1 && S.e1[b+t]) label = "対象（単独異常）";
+  if(k === 1 && S.e1[b+t]) label = `対象（単独異常 L${S.e1[b+t]}、裏取りなし）`;
   $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k];
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(S.es[b+t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
@@ -1325,9 +1367,9 @@ function drawChart(svg, a, b, errMask, title){
   if(errMask){
     let i = 0;
     while(i < T){
-      if(errMask[i]){ let j = i; while(j+1 < T && errMask[j+1]) j++;
+      if(errMask[i]){ const lv = errMask[i]; let j = i; while(j+1 < T && errMask[j+1] === lv) j++;   // one band per run of equal level
         const x0 = x(Math.max(0, i-0.5)), x1 = x(Math.min(T-1, j+0.5));
-        svg.appendChild(el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err"}));
+        svg.appendChild(el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err l" + Math.min(lv, 3)}));
         i = j+1; } else i++;
     }
   }

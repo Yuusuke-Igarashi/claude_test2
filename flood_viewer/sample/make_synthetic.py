@@ -66,33 +66,40 @@ for r in random.sample(range(N), 30):
     bs[r,:] = np.nan; bc[r,:] = np.nan; es[r,:] = np.nan; ec[r,:] = np.nan
 ec = np.where(np.isnan(ec), np.nan, np.maximum(ec, 0))
 
-# ---- error.csv with the notebook's logic (independent reference for the viewer's in-page computation) ----
-MIN_BASE_COUNT, MIN_BASE_SPEED, SPEED_RATIO_LIMIT, COUNT_RATIO_LIMIT, ZERO = 5, 15.0, 0.6, 0.4, 0.01
+# ---- error.csv with the notebook's multi-level logic (independent reference for the viewer's in-page computation) ----
+#   level k (1..3): is_target AND (speed_ratio <= s_k OR count_ratio <= c_k), confirmed when the pair link (same time)
+#   or the same link (t±1) also reaches level k. error_level = highest confirmed level. Levels are nested.
+MIN_BASE_COUNT, MIN_BASE_SPEED = 2.5, 10.0
+LEVELS = [(0.75, 0.75), (0.60, 0.60), (0.50, 0.50)]          # (speed, count) ratio thresholds of level 1, 2, 3
 with np.errstate(invalid="ignore", divide="ignore"):
     speed_ratio = np.where(bs > 0, es / bs, np.nan)
     count_ratio = np.where(bc > 0, ec / bc, np.nan)
-is_target = (bc >= MIN_BASE_COUNT) & (bs >= MIN_BASE_SPEED)
-error1 = (count_ratio < ZERO) | ((speed_ratio <= SPEED_RATIO_LIMIT) & (count_ratio <= COUNT_RATIO_LIMIT))
-valid1 = is_target & error1
+    is_target = (bc >= MIN_BASE_COUNT) & (bs >= MIN_BASE_SPEED)
+    e1 = np.zeros((N, T), dtype=int)
+    for k, (s, c) in enumerate(LEVELS, 1):
+        e1 = np.where(is_target & ((speed_ratio <= s) | (count_ratio <= c)), k, e1)
 row_of = {lid: r for r, lid in enumerate(ids)}
 pair_row = np.full(N, -1)
 for r, ft in enumerate(features[:N]):
     pid = ft["properties"].get("pair_id")
     if pid is not None and pid in row_of: pair_row[r] = row_of[pid]
-error2 = np.zeros_like(valid1)
-has_pair = pair_row >= 0
-error2[has_pair] = valid1[pair_row[has_pair]]
-error3 = np.zeros_like(valid1)
-error3[:, 1:] |= valid1[:, :-1]
-error3[:, :-1] |= valid1[:, 1:]
-err = (valid1 & (error2 | error3)).astype(int)
+pair_lv = np.zeros_like(e1); has_pair = pair_row >= 0; pair_lv[has_pair] = e1[pair_row[has_pair]]
+prev_lv = np.zeros_like(e1); prev_lv[:, 1:] = e1[:, :-1]
+next_lv = np.zeros_like(e1); next_lv[:, :-1] = e1[:, 1:]
+err = np.minimum(e1, np.maximum.reduce([pair_lv, prev_lv, next_lv]))
 
-def save(arr, name, boolean=False):
+def save(arr, name, rows=None, integer=False):
     df = pd.DataFrame(arr, index=pd.Index(ids, name="id"), columns=times)
-    if boolean: df = df.fillna(0).astype(int)
+    if rows is not None: df = df[rows]
+    if integer: df = df.fillna(0).astype(int)
     df.to_csv(OUT/name)
 
 save(bs, "baseline_speed.csv"); save(es, "event_speed.csv")
 save(bc, "baseline_count.csv"); save(ec, "event_count.csv")
-save(err, "error.csv", boolean=True)
-print("links", len(features), "csv rows", N, "error cells", int(err.sum()))
+# error.csv: only links with an error, values = level 0..3; error_level{k}.csv: links whose highest level is k
+link_level = err.max(axis=1)
+save(err, "error.csv", rows=link_level >= 1, integer=True)
+for k in (1, 2, 3):
+    save(err, f"error_level{k}.csv", rows=link_level == k, integer=True)
+print("links", len(features), "csv rows", N, "error links", int((link_level >= 1).sum()),
+      "cells by level", {k: int((err == k).sum()) for k in (1, 2, 3)}, "links by max level", {k: int((link_level == k).sum()) for k in (1, 2, 3)})

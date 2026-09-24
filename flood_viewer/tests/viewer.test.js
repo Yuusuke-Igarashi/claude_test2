@@ -27,14 +27,15 @@ const errors = [];
 // expected noise: basemap tiles offline, optional files absent (404), file:// fetch fallback (CORS or "URL scheme not supported")
 const NOISE = /gsi\.go\.jp|ERR_TUNNEL|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|404|CORS|ERR_FAILED|fetch failed|Fetch API cannot load|URL scheme "file"|is_target/;
 
-// Independent reference: count error cells per time column straight from error.csv
-function errorCountsFromCsv() {
+// Independent reference: count error cells per time column straight from error.csv (values = level 0..3,
+// only links with an error). level 0 = any level; 1..3 = exactly that level.
+function errorCountsFromCsv(level = 0) {
   const lines = readFileSync(join(DATA, "error.csv"), "utf8").trim().split(/\r?\n/);
   const T = lines[0].split(",").length - 1;
   const counts = new Array(T).fill(0);
   for (const line of lines.slice(1)) {
     const cells = line.split(",");
-    for (let c = 0; c < T; c++) if (cells[c + 1] === "1") counts[c]++;
+    for (let c = 0; c < T; c++) { const v = parseInt(cells[c + 1], 10); if (level ? v === level : v >= 1) counts[c]++; }
   }
   return counts;
 }
@@ -73,12 +74,13 @@ const status = (page) => page.evaluate(() => ({
   time: document.getElementById("timeLabel").textContent,
   target: +document.getElementById("stTarget").textContent.replace(/,/g, ""),
   error: +document.getElementById("stError").textContent.replace(/,/g, ""),
+  levels: [1, 2, 3].map((l) => +document.getElementById("stL" + l).textContent.replace(/,/g, "")),
 }));
 // nearest link of class `cls` to the viewport centre (screen coords)
 const findLink = (page, cls, t) => page.evaluate(([cls, t]) => {
   const T = S.T, c0 = map.getCenter(); let best = null;
   for (let r = 0; r < S.ids.length; r++) {
-    if (S.cls[r * T + t] !== cls || S.fids[r] < 0) continue;
+    if (S.cls[r * T + t] !== cls || S.fids[r] < 0) continue;   // cls: 0 other, 1 target, 2/3/4 = error level 1/2/3
     const c = S.gj.features[S.fids[r]].geometry.coordinates;
     const mid = [(c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2];
     if (!map.getBounds().contains(mid)) continue;
@@ -114,12 +116,16 @@ test("loads all files and reproduces the notebook's error.csv exactly", async ()
   assert.equal(info.lazy, SLOT_FILES, "per-slot viewer files registered via viewer/index.json");
   assert.equal(info.traj, null, "nothing parsed until a slot is shown");
   assert.match(info.check, /不一致: 0 セル/, "in-page error computation must match error.csv at default thresholds");
-  const ref = errorCountsFromCsv();
+  assert.match(info.check, /レベル 0〜3 で照合/, "error.csv holds levels (not 0/1)");
+  assert.ok(await page.evaluate(() => S.errRefRows < S.ids.length && !S.errRefBinary), "error.csv lists only the links with an error");
+  const ref = errorCountsFromCsv(), refL = [1, 2, 3].map((l) => errorCountsFromCsv(l));
   for (const t of [0, T_18, 47]) {
     await page.evaluate((t) => applyTime(t), t);
     const st = await status(page);
     assert.equal(st.error, ref[t], `error count at t=${t} matches error.csv`);
+    assert.deepEqual(st.levels, refL.map((c) => c[t]), `per-level counts at t=${t} match error.csv`);
   }
+  assert.ok(refL[0][T_18] > 0 && refL[2][T_18] > 0, "sample has level-1 and level-3 errors at 00:00");
   await page.screenshot({ path: join(SHOTS, "traffic_18.png") });
   await page.close();
 });
@@ -140,8 +146,8 @@ test("slider, play and keyboard change the time", async () => {
 test("hovering an error link shows the chart panel with the error band, click pins it", async () => {
   const page = await openViewer();
   await page.evaluate((t) => applyTime(t), T_18);
-  const pt = await findLink(page, 2, T_18);
-  assert.ok(pt, "an error link is visible");
+  const pt = await findLink(page, 4, T_18);
+  assert.ok(pt, "a level-3 error link is visible");
   await hover(page, pt);
   const cp = await page.evaluate(() => ({
     shown: document.getElementById("chartPanel").style.display, status: document.getElementById("cpStatus").textContent,
@@ -149,8 +155,9 @@ test("hovering an error link shows the chart panel with the error band, click pi
     es: document.getElementById("roES").textContent,
   }));
   assert.equal(cp.shown, "block");
-  assert.equal(cp.status, "異常");
+  assert.equal(cp.status, "異常 レベル3");
   assert.ok(cp.errRects >= 1, "error band drawn");
+  assert.ok(await page.evaluate(() => document.querySelectorAll("#chartSpeed rect.err.l3").length >= 1), "band carries the level class");
   assert.equal(cp.paths, 2, "baseline + event series");
   assert.notEqual(cp.es, "–");
   const box = await page.locator("#map").boundingBox();
@@ -165,9 +172,10 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   await page.evaluate((t) => applyTime(t), T_18);
   const base0 = await status(page);
   await page.click("#settingsBtn");
-  await page.fill("#pSpeedRatio", "0.3"); await page.waitForTimeout(500);
+  await page.fill("#pL1Speed", "0.5"); await page.fill("#pL1Count", "0.5"); await page.waitForTimeout(500);
   const strict = await status(page);
-  assert.ok(strict.error < base0.error, "stricter speed ratio -> fewer errors");
+  assert.ok(strict.error < base0.error, "stricter level-1 thresholds -> fewer errors");
+  assert.equal(strict.levels[2], base0.levels[2], "level 3 unchanged");
   assert.match(await page.textContent("#pCheck"), /想定内/);
   await page.fill("#pMinCount", "0"); await page.waitForTimeout(500);
   assert.ok((await status(page)).target > base0.target, "lower count threshold -> more targets");
@@ -210,7 +218,7 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.click("#chkMode"); await page.click("#chkTurn"); await page.waitForTimeout(400);
 
   // hovering a link shows no chart panel in trajectory mode
-  const link = await findLink(page, 2, T_18);
+  const link = await findLink(page, 4, T_18);   // the flooded block is level 3
   await hover(page, link);
   assert.notEqual(await page.evaluate(() => document.getElementById("chartPanel").style.display), "block", "no time-series panel on link hover");
 
