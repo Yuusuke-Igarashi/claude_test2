@@ -19,6 +19,14 @@ Output: per input file, in --out
   [time-60min, time] (traj) or MultiPoint of stay centroids overlapping the window (dwell).
   The viewer loads only the slot shown by the time slider, so the whole area can be exported.
   --merged-viewer additionally writes the old single-file <role>_trajectory/_dwell.geojson.
+  Grid (GRID_M > 0, default 100 m): grid/<param>_<HHMM>.tif, one GeoTIFF per 15-min slot and
+  parameter, flagging cells whose event value is >= GRID_UP (200 %) or <= GRID_DOWN (50 %) of the
+  baseline value (+1 / -1 / 0, nodata where both are 0). Parameters, each counted per cell over the
+  last hour (window (T-60min, T]): walkers (unique walking users), walk_dist_m (walk trajectory
+  length inside the cell), stays, turns, modechanges (vehicle->walk). grid/grid_flags.csv lists
+  the flagged cells, grid/index.json the grid definition; GRID_COUNT_RASTERS also writes the
+  baseline / event count rasters. The grid covers GRID_NETWORK (a GeoJSON, e.g. the road network)
+  or GRID_BBOX, else BBOX, else the data extent.
 
 Rules (parameters in PARAMS, overridable from the command line):
   Stay : a run of consecutive points that can be enclosed by a circle of radius STAY_RADIUS_M
@@ -69,6 +77,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import struct
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -112,6 +121,14 @@ PARAMS = {
                               # viewer slots follow the period from its start. None = the old one-file-per-day mode.
     "PERIOD_HOURS": 24,
     "BASELINE_DAYS_BEFORE": 7,
+    "GRID_M": 100.0,          # mesh size [m] of the grid outputs (grid/); 0 = no grid outputs
+    "GRID_NETWORK": None,     # GeoJSON (e.g. tokyo_YYYYMMDD_network.geojson) whose extent is the grid extent
+    "GRID_BBOX": None,        # or "lon_min,lat_min,lon_max,lat_max"; else BBOX, else the extent of the data
+    "GRID_UP": 2.0,           # event / baseline >= this -> flag +1 (200 %)
+    "GRID_DOWN": 0.5,         # event / baseline <= this -> flag -1 (50 %)
+    "GRID_MIN_COUNT": 0,      # flag only where max(baseline, event) >= this (0 = every cell with data, as specified)
+    "GRID_SAMPLE_M": 25.0,    # walk distance is attributed to cells by sampling each segment every this many metres
+    "GRID_COUNT_RASTERS": False,  # also write grid/<param>_<role>_<HHMM>.tif with the counts themselves
 }
 
 MODE_NONE, MODE_WALK, MODE_VEHICLE, MODE_OTHER = 0, 1, 2, 3
@@ -860,18 +877,13 @@ def _split_line(idx, lon, lat, run):
 # ----------------------------------------------------------------------------------------------
 # 3. Viewer-ready windows (vectorised): per user x 15-min slot, the last hour's Move path and stays
 # ----------------------------------------------------------------------------------------------
-def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hours=None):
-    """Slot k (1..n_slots) ends at t0 + k*SLOT_MIN where t0 = midnight of the file's date (one-file mode)
+def slot_frame(R, P: dict, t_start=None, hours=None):
+    """Slot k (k_lo..k_hi) ends at day0 + k*SLOT_MIN where day0 = midnight of the file's date (one-file mode)
     or the period start (t_start). Labels are the clock time of the slot end, so a period that crosses
-    midnight runs 12:00, 12:15, ... 23:45, 00:00, ... 11:45 in slot order."""
-    lon, lat, tsec, ucode = R["lon"], R["lat"], R["tsec"], R["ucode"]
-    uids = R["uids"]
-    n = len(lon)
-    if n == 0:
-        return 0, 0, 0
+    midnight runs 12:00, 12:15, ... 23:45, 00:00, ... 11:45 in slot order.
+    Returns (day0 [s], k_lo, k_hi, lab(k) -> "HH:MM", W [min], SLOT [min], n_win)."""
     W, SLOT = float(P["WINDOW_MIN"]), float(P["SLOT_MIN"])
     n_win = int(round(W / SLOT))
-    vb = parse_bbox(P["VIEWER_BBOX"]) or parse_bbox(P["BBOX"])
     if t_start is None:
         day0 = float((pd.Timestamp(R["date"]) - pd.Timestamp("1970-01-01")).total_seconds())   # midnight of the file's date (naive local time)
         k_lo, k_hi = 1, int(1440 / SLOT)                    # slots 00:15 ... 24:00 of that day
@@ -880,6 +892,28 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hour
         k_lo, k_hi = 0, int(round(float(hours) * 60 / SLOT)) - 1   # slot k ends at start + k*SLOT: labels equal the
         # traffic CSV columns (12:00 ... 11:45); the slot labelled 12:00 shows the hour before the period start
     lab = lambda k: pd.Timestamp(day0 + k * SLOT * 60.0, unit="s").strftime("%H:%M")
+    return day0, k_lo, k_hi, lab, W, SLOT, n_win
+
+
+def explode_windows(mins, k_lo, k_hi, SLOT, W, n_win):
+    """Point at `mins` (minutes after day0) belongs to the windows (T_k - W, T_k], T_k = k*SLOT.
+    Returns (point index repeated, k) for every (point, window) pair inside [k_lo, k_hi]."""
+    k0 = np.maximum(np.ceil(mins / SLOT).astype(np.int64), k_lo)      # first window end >= point time
+    rep = np.repeat(np.arange(len(mins)), n_win)
+    kk = np.repeat(k0, n_win) + np.tile(np.arange(n_win), len(mins))
+    ok = (kk <= k_hi) & (kk * SLOT - W < np.repeat(mins, n_win))       # window (T_k - W, T_k] must contain the point
+    return rep[ok], kk[ok]
+
+
+def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hours=None):
+    """Viewer slot files, see slot_frame() for the slot definition."""
+    lon, lat, tsec, ucode = R["lon"], R["lat"], R["tsec"], R["ucode"]
+    uids = R["uids"]
+    n = len(lon)
+    if n == 0:
+        return 0, 0, 0
+    day0, k_lo, k_hi, lab, W, SLOT, n_win = slot_frame(R, P, t_start, hours)
+    vb = parse_bbox(P["VIEWER_BBOX"]) or parse_bbox(P["BBOX"])
     # users to include: those with any point inside the viewer bbox
     if vb:
         inside = (lon >= vb[0]) & (lon <= vb[2]) & (lat >= vb[1]) & (lat <= vb[3])
@@ -970,6 +1004,228 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hour
                 n_ev += 1
     return n_traj, n_dwell, n_ev
 
+# ----------------------------------------------------------------------------------------------
+# 4. Mesh grid: per 15-min slot, counts over the last hour per cell, baseline vs event
+# ----------------------------------------------------------------------------------------------
+GRID_PARAMS = ["walkers", "walk_dist_m", "stays", "turns", "modechanges"]
+GRID_NODATA = -99.0
+
+
+def write_geotiff(path: Path, arr: np.ndarray, west: float, north: float, dx: float, dy: float, nodata=GRID_NODATA):
+    """Uncompressed float32 GeoTIFF, EPSG:4326, row 0 = north (same writer as xrain_to_geotiff.py)."""
+    h, w = arr.shape
+    data = arr.astype("<f4").tobytes()
+    ascii_nodata = (str(int(nodata)) if float(nodata).is_integer() else str(nodata)).encode() + b"\x00"
+    geokeys = struct.pack("<16H", 1, 1, 0, 3, 1024, 0, 1, 2, 1025, 0, 1, 1, 2048, 0, 1, 4326)
+    pixel_scale = struct.pack("<3d", dx, dy, 0.0)
+    tiepoint = struct.pack("<6d", 0.0, 0.0, 0.0, west, north, 0.0)
+    tags = [(256, 4, 1, w), (257, 4, 1, h), (258, 3, 1, 32), (259, 3, 1, 1), (262, 3, 1, 1), (273, 4, 1, None),
+            (277, 3, 1, 1), (278, 4, 1, h), (279, 4, 1, len(data)), (284, 3, 1, 1), (339, 3, 1, 3),
+            (33550, 12, 3, pixel_scale), (33922, 12, 6, tiepoint), (34735, 3, 16, geokeys), (42113, 2, len(ascii_nodata), ascii_nodata)]
+    tags.sort()
+    extra_off = 8 + 2 + 12 * len(tags) + 4
+    data_off = extra_off + sum(len(v) for _, _, _, v in tags if isinstance(v, bytes) and len(v) > 4)
+    extra, entries = b"", b""
+    for tag, typ, count, value in tags:
+        if tag == 273:
+            value = data_off
+        if isinstance(value, bytes):
+            if len(value) > 4:
+                entries += struct.pack("<HHII", tag, typ, count, extra_off + len(extra)); extra += value
+            else:
+                entries += struct.pack("<HHI", tag, typ, count) + value.ljust(4, b"\x00")
+        elif typ == 3:
+            entries += struct.pack("<HHIHH", tag, typ, count, value, 0)
+        else:
+            entries += struct.pack("<HHII", tag, typ, count, value)
+    with open(path, "wb") as f:
+        f.write(b"II*\x00" + struct.pack("<I", 8))
+        f.write(struct.pack("<H", len(tags)) + entries + struct.pack("<I", 0))
+        f.write(extra)
+        f.write(data)
+
+
+class Grid:
+    """Step 1: a lon/lat mesh of GRID_M x GRID_M metres (at the centre latitude) covering bbox.
+    Row 0 is the northern edge (GeoTIFF order); cell index = row * ncol + col.
+    Step 2 accumulates, per (role, parameter, slot label), sparse per-cell values."""
+    def __init__(self, bbox, cell_m: float):
+        west, south, east, north = (float(v) for v in bbox)
+        self.dy = cell_m / M_PER_DEG
+        self.dx = cell_m / (M_PER_DEG * math.cos(math.radians((south + north) / 2)))
+        self.ncol = max(1, int(math.ceil((east - west) / self.dx)))
+        self.nrow = max(1, int(math.ceil((north - south) / self.dy)))
+        self.west, self.north = west, north
+        self.east, self.south = west + self.ncol * self.dx, north - self.nrow * self.dy
+        self.cell_m = cell_m
+        self.acc: dict = {}          # (role, param, label) -> pd.Series(cell -> value)
+        self.roles: set = set()
+
+    def cell(self, lon, lat):
+        col = np.floor((np.asarray(lon, float) - self.west) / self.dx)
+        row = np.floor((self.north - np.asarray(lat, float)) / self.dy)
+        ok = (col >= 0) & (col < self.ncol) & (row >= 0) & (row < self.nrow)
+        return np.where(ok, row * self.ncol + col, -1).astype(np.int64)
+
+    def centre(self, cells):
+        cells = np.asarray(cells)
+        return self.west + (cells % self.ncol + 0.5) * self.dx, self.north - (cells // self.ncol + 0.5) * self.dy
+
+    def add(self, role, param, labels, cells, weights=None, unique_by=None):
+        """Add weights (default 1) per (label, cell); with unique_by (e.g. user codes) each
+        (label, cell, unique_by) is counted once."""
+        cells = np.asarray(cells); m = cells >= 0
+        if not m.any():
+            return
+        df = pd.DataFrame({"lab": np.asarray(labels)[m], "cell": cells[m]})
+        if unique_by is not None:
+            df["u"] = np.asarray(unique_by)[m]
+            df = df.drop_duplicates(["lab", "cell", "u"]); df["w"] = 1.0
+        else:
+            df["w"] = 1.0 if weights is None else np.asarray(weights, float)[m]
+        self.roles.add(role)
+        for lab, g in df.groupby("lab", sort=False):
+            v = g.groupby("cell")["w"].sum()
+            key = (role, param, lab)
+            self.acc[key] = v if key not in self.acc else self.acc[key].add(v, fill_value=0.0)
+
+    def dense(self, key):
+        arr = np.zeros(self.nrow * self.ncol, dtype=np.float32)
+        v = self.acc.get(key)
+        if v is not None:
+            arr[v.index.to_numpy()] = v.to_numpy(np.float32)
+        return arr
+
+    def close(self, out: Path, P: dict):
+        """Step 3: compare event with baseline per slot and parameter; write the flag rasters, the
+        flagged-cell CSV and index.json. Returns a summary dict."""
+        gdir = out / "grid"; gdir.mkdir(parents=True, exist_ok=True)
+        labels = sorted({lab for _, _, lab in self.acc})
+        up, down, min_count = float(P["GRID_UP"]), float(P["GRID_DOWN"]), float(P["GRID_MIN_COUNT"])
+        both = {"baseline", "event"} <= self.roles
+        files, n_up, n_down, rows = [], {}, {}, []
+        for param in GRID_PARAMS:
+            n_up[param] = n_down[param] = 0
+            for lab in labels:
+                hhmm = lab.replace(":", "")
+                if P["GRID_COUNT_RASTERS"] or not both:
+                    for role in sorted(self.roles):
+                        arr = self.dense((role, param, lab))
+                        name = f"{param}_{role}_{hhmm}.tif"
+                        write_geotiff(gdir / name, arr.reshape(self.nrow, self.ncol), self.west, self.north, self.dx, self.dy, nodata=GRID_NODATA)
+                        files.append(name)
+                if not both:
+                    continue
+                b = self.dense(("baseline", param, lab)); e = self.dense(("event", param, lab))
+                has = (b > 0) | (e > 0)
+                flag = np.full(len(b), GRID_NODATA, dtype=np.float32)
+                flag[has] = 0.0
+                with np.errstate(divide="ignore", invalid="ignore"):
+                    ratio = np.where(b > 0, e / b, np.where(e > 0, np.inf, np.nan))
+                cmp = has & (np.maximum(b, e) >= min_count)
+                flag[cmp & (ratio >= up)] = 1.0
+                flag[cmp & (ratio <= down)] = -1.0
+                name = f"{param}_{hhmm}.tif"
+                write_geotiff(gdir / name, flag.reshape(self.nrow, self.ncol), self.west, self.north, self.dx, self.dy, nodata=GRID_NODATA)
+                files.append(name)
+                fl = np.flatnonzero((flag == 1.0) | (flag == -1.0))
+                n_up[param] += int((flag == 1.0).sum()); n_down[param] += int((flag == -1.0).sum())
+                if len(fl):
+                    cx, cy = self.centre(fl)
+                    rows.append(pd.DataFrame({"time": lab, "param": param, "row": fl // self.ncol, "col": fl % self.ncol,
+                                              "lon": np.round(cx, 6), "lat": np.round(cy, 6), "baseline": b[fl], "event": e[fl],
+                                              "ratio": np.round(np.where(np.isinf(ratio[fl]), np.nan, ratio[fl]), 3), "flag": flag[fl].astype(int)}))
+        flags = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(columns=["time", "param", "row", "col", "lon", "lat", "baseline", "event", "ratio", "flag"])
+        flags.to_csv(gdir / "grid_flags.csv", index=False)
+        index = {"cell_m": self.cell_m, "bounds": [self.west, self.south, self.east, self.north], "width": self.ncol, "height": self.nrow,
+                 "dx": self.dx, "dy": self.dy, "nodata": GRID_NODATA, "params": GRID_PARAMS, "slots": labels, "roles": sorted(self.roles),
+                 "flag": {"up": up, "down": down, "min_count": min_count, "values": "1 = event/baseline >= up, -1 = <= down, 0 = neither, nodata = no data in either"},
+                 "files": files}
+        with open(gdir / "index.json", "w", encoding="utf-8") as f:
+            json.dump(index, f, ensure_ascii=False, indent=1)
+        return {"slots": len(labels), "files": len(files), "flagged_rows": len(flags), "up": n_up, "down": n_down, "compared": both}
+
+
+def write_grid(R, P: dict, role: str, grid: Grid, t_start=None, hours=None):
+    """Step 2 for one role: per slot (window = the last WINDOW_MIN minutes) count per cell
+    walkers (unique users with dense walk points), walk_dist_m (walk trajectory length inside the
+    cell, by sampling every GRID_SAMPLE_M along each drawn segment), stays (centroids overlapping the
+    window), turns and modechanges (event points in the window)."""
+    lon, lat, tsec, ucode = R["lon"], R["lat"], R["tsec"], R["ucode"]
+    n = len(lon)
+    if n == 0:
+        return
+    day0, k_lo, k_hi, lab, W, SLOT, n_win = slot_frame(R, P, t_start, hours)
+    labs = np.array([lab(k) for k in range(k_lo, k_hi + 1)], dtype=object)
+    L = lambda kk: labs[np.asarray(kk) - k_lo]
+    # ---- walkers: dense walk Move points (the same points the viewer draws) ----
+    mv = np.flatnonzero((R["seg"] == 0) & (R["dense"] == 1) & (R["mode"] == MODE_WALK) & (tsec >= day0 - W * 60.0))
+    mins = (tsec[mv] - day0) / 60.0
+    rep, kk = explode_windows(mins, k_lo, k_hi, SLOT, W, n_win)
+    pidx = mv[rep]
+    grid.add(role, "walkers", L(kk), grid.cell(lon[pidx], lat[pidx]), unique_by=ucode[pidx])
+    # ---- walk distance: drawn segments (consecutive dense walk points of one trip / walk group) ----
+    trip_no, wg = R["trip_no"], R["wgroup"]
+    a = mv[:-1]; b = mv[1:]
+    seg = (b == a + 1) & (trip_no[a] == trip_no[b]) & (wg[a] == wg[b])
+    a, b = a[seg], b[seg]
+    if len(a):
+        length = haversine_m(lon[a], lat[a], lon[b], lat[b])
+        ma, mb = (tsec[a] - day0) / 60.0, (tsec[b] - day0) / 60.0
+        kmin = np.maximum(np.ceil(mb / SLOT).astype(np.int64), k_lo)            # both ends inside (T_k - W, T_k]
+        kmax = np.minimum(np.ceil((ma + W) / SLOT).astype(np.int64) - 1, k_hi)
+        cnt = np.maximum(kmax - kmin + 1, 0)
+        ns = np.maximum(np.ceil(length / float(P["GRID_SAMPLE_M"])).astype(np.int64), 1)   # samples per segment
+        step = 200_000
+        for s0 in range(0, len(a), step):                                        # batches keep memory bounded
+            sl = slice(s0, s0 + step)
+            c = cnt[sl]; keep = c > 0
+            if not keep.any():
+                continue
+            si = np.flatnonzero(keep) + s0
+            r1 = np.repeat(si, cnt[si])                                          # segment x window
+            k1 = np.concatenate([np.arange(kmin[i], kmax[i] + 1) for i in si])
+            r2 = np.repeat(np.arange(len(r1)), ns[r1])                           # x samples
+            j = np.arange(len(r2)) - np.repeat(np.cumsum(ns[r1]) - ns[r1], ns[r1])
+            f = (j + 0.5) / ns[r1[r2]]
+            sa, sb = a[r1[r2]], b[r1[r2]]
+            slon = lon[sa] + f * (lon[sb] - lon[sa]); slat = lat[sa] + f * (lat[sb] - lat[sa])
+            grid.add(role, "walk_dist_m", L(k1[r2]), grid.cell(slon, slat), weights=length[r1[r2]] / ns[r1[r2]])
+    # ---- stays: centroid in every window the stay overlaps ----
+    if R["stays"]:
+        st = R["stays"]
+        s0 = np.array([s[3] for s in st]); s1 = np.array([s[4] for s in st])
+        slon = np.array([s[5] for s in st]); slat = np.array([s[6] for s in st])
+        kmin = np.maximum(np.ceil((s0 - day0) / 60.0 / SLOT).astype(np.int64), k_lo)
+        kmax = np.minimum(np.ceil((s1 - day0) / 60.0 / SLOT + W / SLOT).astype(np.int64) - 1, k_hi)
+        cnt = np.maximum(kmax - kmin + 1, 0)
+        if cnt.sum():
+            rep = np.repeat(np.arange(len(st)), cnt)
+            kk = np.concatenate([np.arange(a_, b_ + 1) for a_, b_ in zip(kmin, kmax) if b_ >= a_])
+            grid.add(role, "stays", L(kk), grid.cell(slon[rep], slat[rep]))
+    # ---- events: every window containing the point ----
+    for param, idx in (("turns", R["turns"][0]), ("modechanges", R["modechanges"][0])):
+        if not len(idx):
+            continue
+        idx = np.asarray(idx)
+        mins = (tsec[idx] - day0) / 60.0
+        sel = mins > -W
+        rep, kk = explode_windows(mins[sel], k_lo, k_hi, SLOT, W, n_win)
+        pidx = idx[sel][rep]
+        grid.add(role, param, L(kk), grid.cell(lon[pidx], lat[pidx]))
+
+
+def grid_extent(P: dict, R=None):
+    """Grid bbox: GRID_NETWORK extent, else GRID_BBOX, else BBOX / AREA_GEOJSON, else the data extent of R."""
+    if P["GRID_NETWORK"]:
+        return geojson_bbox(P["GRID_NETWORK"])
+    bb = parse_bbox(P["GRID_BBOX"]) or parse_bbox(P["BBOX"])
+    if bb:
+        return bb
+    if R is not None and len(R["lon"]):
+        return (float(R["lon"].min()), float(R["lat"].min()), float(R["lon"].max()), float(R["lat"].max()))
+    return None
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -980,12 +1236,14 @@ def main():
         flag = f"--{k.lower().replace('_', '-')}"
         if k == "STAY_METHOD":
             ap.add_argument(flag, choices=["circle", "anchor"], default=v)
-        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS", "MERGED_VIEWER", "DENSE_FOR_STAYS"):
+        elif k in ("ONLY_MAIN_DATE", "NO_VIEWER", "NO_POINTS", "MERGED_VIEWER", "DENSE_FOR_STAYS", "GRID_COUNT_RASTERS"):
             ap.add_argument(flag, action="store_true")
-        elif k in ("BBOX", "VIEWER_BBOX"):
+        elif k in ("BBOX", "VIEWER_BBOX", "GRID_BBOX"):
             ap.add_argument(flag, default=None, help="lon_min,lat_min,lon_max,lat_max")
         elif k == "AREA_GEOJSON":
             ap.add_argument(flag, default=None, help="GeoJSON whose extent is used as --bbox")
+        elif k == "GRID_NETWORK":
+            ap.add_argument(flag, default=None, help="GeoJSON (road network) whose extent is the grid extent")
         elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS", "PERIOD_HOURS", "BASELINE_DAYS_BEFORE"):
             ap.add_argument(flag, type=int, default=v)
         elif k == "PERIOD_START":
@@ -1019,6 +1277,12 @@ def run(inputs, out, event_date="2024-08-21", **params):
     log(f"event dates: {sorted(event_dates)}")
 
     writers = None if P["NO_VIEWER"] else SlotWriters(args.out, bool(P["MERGED_VIEWER"]))
+    grid = None
+    if P["GRID_M"] and float(P["GRID_M"]) > 0:
+        bb = grid_extent(P)
+        if bb:
+            grid = Grid(bb, float(P["GRID_M"]))
+            log(f"grid: {grid.ncol} x {grid.nrow} cells of {grid.cell_m:g} m, extent {tuple(round(v, 5) for v in (grid.west, grid.south, grid.east, grid.north))}")
 
     # jobs: (label, role, loader, t_start, hours). Period mode joins files per period; else one job per file.
     if P["PERIOD_START"]:
@@ -1050,6 +1314,16 @@ def run(inputs, out, event_date="2024-08-21", **params):
         n_traj = n_dwell = n_ev = 0
         if writers is not None:
             n_traj, n_dwell, n_ev = write_viewer(R, P, role, writers, t_start, hours)
+        if P["GRID_M"] and float(P["GRID_M"]) > 0:
+            if grid is None:                     # no extent given: the first job's data extent
+                bb = grid_extent(P, R)
+                if bb:
+                    grid = Grid(bb, float(P["GRID_M"]))
+                    log(f"grid from the data extent: {grid.ncol} x {grid.nrow} cells of {grid.cell_m:g} m")
+            if grid is not None:
+                t0 = time.perf_counter()
+                write_grid(R, P, role, grid, t_start, hours)
+                log(f"  grid counts accumulated ({role}) in {time.perf_counter() - t0:.1f} s")
         reasons = {REASON_CODES[c]: int(v) for c, v in zip(*np.unique(R["reason"], return_counts=True)) if c}
         n_dense = int(R["dense"].sum()); u_dense = len(np.unique(R["ucode"][R["dense"] == 1])) if n else 0
         modes = {MODE_NAMES[m]: int(c) for m, c in zip(*np.unique(R["mode"], return_counts=True)) if m}
@@ -1069,6 +1343,13 @@ def run(inputs, out, event_date="2024-08-21", **params):
             print(f"viewer/{role}_HHMM.geojson: {len(files)} slot files, {tot:,} features (largest slot {mx:,})")
         for k, v in merged_counts.items():
             print(f"merged {k}: {v:,} features")
+    if grid is not None:
+        g = grid.close(args.out, P)
+        if g["compared"]:
+            print(f"grid/: {g['slots']} slots x {len(GRID_PARAMS)} params -> {g['files']} rasters, flagged cells (up / down): "
+                  + ", ".join(f"{p} {g['up'][p]:,} / {g['down'][p]:,}" for p in GRID_PARAMS) + f"; grid_flags.csv {g['flagged_rows']:,} rows")
+        else:
+            print(f"grid/: only {sorted(grid.roles)} present, count rasters written, no baseline/event comparison")
 
 
 if __name__ == "__main__":

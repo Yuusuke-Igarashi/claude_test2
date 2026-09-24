@@ -101,6 +101,22 @@ python3 probe/test_truck_traffic.py     # 合成ネットワーク + 合成プ�
 
 目安: リンク 2 万本 × 点 50 万（1 時間分）で約 5 秒、ピークメモリ 0.7 GB（点 100 万あたり約 0.5〜1 GB）。
 
+## 100 m メッシュの増減グリッド（probe/probe_trips.py, grid/）
+
+`GRID_M`（既定 100 m）が正のとき、位置ログの前処理と同時に `grid/` を書く。
+
+1. 格子: `--grid-network`（道路ネットワーク GeoJSON）の範囲、無ければ `--grid-bbox` / `--bbox`、それも無ければデータの範囲を、
+   中心緯度で 100 m × 100 m になる経緯度セルで覆う（行 0 が北端）。
+2. 平時・イベント時それぞれ、15 分スロットごとに直近 1 時間（窓 (T−60 分, T]）の値をセル別に数える:
+   `walkers`（徒歩点を持つユニーク ID 数）、`walk_dist_m`（徒歩軌跡のうちセル内の長さ。線分を `GRID_SAMPLE_M` = 25 m 刻みで
+   標本化して配分）、`stays`（窓に重なる滞留の重心数）、`turns`（方向転換点数）、`modechanges`（車→徒歩の変化点数）。
+   徒歩点・滞留・変化点の定義はビューワーの軌跡モードと同じ。
+3. スロット × パラメータごとに イベント時 / 平時 を比べ、`GRID_UP`（2.0 = 200 %）以上なら +1、`GRID_DOWN`（0.5 = 50 %）以下なら −1、
+   その他 0、両方 0 のセルは nodata（−99）のラスタ `grid/<param>_<HHMM>.tif`（float32、EPSG:4326、非圧縮。QGIS でそのまま開ける）を書く。
+   平時 0 でイベント時 > 0 は +1、平時 > 0 でイベント時 0 は −1。`GRID_MIN_COUNT`（既定 0）で小さな件数の比較を除外できる。
+   `grid/grid_flags.csv` にフラグの付いたセル（time, param, row, col, lon, lat, baseline, event, ratio, flag）、`grid/index.json` に格子定義。
+   `--grid-count-rasters` で件数そのもののラスタ（`<param>_<role>_<HHMM>.tif`）も書く。
+
 ## 位置ログの前処理（probe/）
 
 端末の位置ログ（1 行 1 測位: id, recordedat, lon, lat, accuracy, speed, userid, ... の日別 CSV）から
@@ -109,6 +125,7 @@ Stay/Move 判定、トリップ ID 付与、ビューワー用 GeoJSON を作る
 ```
 python3 probe/probe_trips.py 2024-08-14.csv 2024-08-21.csv --out probe_out --event-date 2024-08-21
 python3 probe/test_probe_trips.py     # 合成軌跡による自己テスト
+python3 probe/probe_trips.py chiba_*.csv.gz --out probe_out --period-start "2026-08-13 12:00" --grid-network probe_out/tokyo_20250911_network.geojson
 ```
 
 | 規則 | 既定値 | 引数 |

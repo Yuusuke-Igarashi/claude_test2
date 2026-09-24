@@ -154,8 +154,8 @@ def test_no_userid(lon, lat, t):
         files = [f for f in glob.glob(os.path.join(d, "out", "**", "*"), recursive=True) if os.path.isfile(f) and not f.endswith("points.csv")]
         assert files
         for f in files:
-            x = open(f, encoding="utf-8").read()
-            assert uid[:12] not in x and "userid" not in x and '"id"' not in x and "_id" not in x, f"identifier in {f}"
+            x = open(f, "rb").read()          # GeoJSON / CSV / JSON / GeoTIFF alike: no identifier anywhere
+            assert uid[:12].encode() not in x and b"userid" not in x and b'"id"' not in x and b"_id" not in x, f"identifier in {f}"
         pts = pd.read_csv(os.path.join(d, "out", "20240814_points.csv"))
         assert pts.columns[0] == "userid" and (pts["userid"] == uid).all()
         st = json.load(open(os.path.join(d, "out", "20240814_stays.geojson")))["features"]
@@ -372,7 +372,72 @@ def test_period_mode():
     print("ok: period mode across midnight")
 
 
+def test_grid():
+    """GRID_M: 100 m mesh, per-slot counts over the last hour, event vs baseline flags.
+    Path A (east): 2 baseline walkers, 5 event walkers -> walkers +1 (250 %); path B (north): event only -> +1;
+    path C (west): 3 baseline, 1 event -> -1 (33 %); one stay on both days -> stays flag 0."""
+    import tempfile, os, json
+    import pandas as pd
+    from probe_trips import run, Grid
+    lon0, lat0 = 139.7, 35.68
+    kx = M_PER_DEG_LAT * np.cos(np.radians(lat0))
+    bbox = (lon0 - 2000 / kx, lat0 - 500 / M_PER_DEG_LAT, lon0 + 2000 / kx, lat0 + 2000 / M_PER_DEG_LAT)
+    def walk(rows, day, uid, x0, y0, dx, dy, t="13:00"):      # 15 points, 60 s apart, 70 m steps -> dense walk
+        for i in range(15):
+            rows.append((pd.Timestamp(f"{day} {t}") + pd.Timedelta(seconds=60 * i), lon0 + (x0 + dx * i) / kx, lat0 + (y0 + dy * i) / M_PER_DEG_LAT, uid, "on_foot"))
+    def stay(rows, day, uid):
+        for i in range(25):
+            rows.append((pd.Timestamp(f"{day} 13:00") + pd.Timedelta(seconds=60 * i), lon0 + 1500 / kx, lat0 + 1500 / M_PER_DEG_LAT, uid, "still"))
+    with tempfile.TemporaryDirectory() as d:
+        srcs = []
+        for day, nA, nB, nC in (("2024-08-06", 2, 0, 3), ("2024-08-13", 5, 4, 1)):
+            rows = []
+            for u in range(nA): walk(rows, day, f"A{u}" * 20, 100, 30, 70, 0)             # east, y = 30 m
+            for u in range(nB): walk(rows, day, f"B{u}" * 20, -30, 300, 0, 70)            # north, x = -30 m
+            for u in range(nC): walk(rows, day, f"C{u}" * 20, -300, -300, -70, 0)         # west
+            stay(rows, day, "S" * 60)
+            df = pd.DataFrame(rows, columns=["recordedat", "lon", "lat", "userid", "activitytype"])
+            src = os.path.join(d, day.replace("-", "") + ".csv"); df.to_csv(src, index=False, date_format="%Y-%m-%d %H:%M:%S"); srcs.append(src)
+        out = os.path.join(d, "out")
+        run(srcs, out, PERIOD_START="2024-08-13 12:00", NO_POINTS=True, NO_VIEWER=True, GRID_BBOX=",".join(map(str, bbox)), GRID_COUNT_RASTERS=True)
+        idx = json.load(open(os.path.join(out, "grid", "index.json")))
+        g = Grid(bbox, 100.0)
+        assert idx["width"] == g.ncol and idx["height"] == g.nrow and idx["cell_m"] == 100.0, idx
+        assert "walkers_1315.tif" in idx["files"] and "walkers_event_1315.tif" in idx["files"], idx["files"][:5]
+        fl = pd.read_csv(os.path.join(out, "grid", "grid_flags.csv"))
+        f15 = fl[fl.time == "13:15"]
+        cellA = int(g.cell(lon0 + 500 / kx, lat0 + 30 / M_PER_DEG_LAT))       # on path A
+        cellB = int(g.cell(lon0 - 30 / kx, lat0 + 800 / M_PER_DEG_LAT))       # on path B
+        cellC = int(g.cell(lon0 - 800 / kx, lat0 - 300 / M_PER_DEG_LAT))      # on path C
+        cellS = int(g.cell(lon0 + 1500 / kx, lat0 + 1500 / M_PER_DEG_LAT))    # the stay
+        f15 = f15.assign(cell=f15.row * g.ncol + f15.col)
+        def flag(param, cell):
+            r = f15[(f15.param == param) & (f15.cell == cell)]
+            return int(r.flag.iloc[0]) if len(r) else 0
+        assert flag("walkers", cellA) == 1 and flag("walkers", cellB) == 1 and flag("walkers", cellC) == -1, f15[f15.param == "walkers"]
+        assert flag("walk_dist_m", cellA) == 1 and flag("walk_dist_m", cellC) == -1
+        assert flag("stays", cellS) == 0 and not len(f15[f15.param == "stays"]), "1 stay on both days: no flag"
+        rA = f15[(f15.param == "walkers") & (f15.cell == cellA)].iloc[0]
+        assert rA.baseline == 2 and rA.event == 5 and abs(rA.ratio - 2.5) < 1e-6, rA
+        # the walk of 13:00-13:14 is in the windows (T-60min, T] ending 13:00 (its first point), 13:15, 13:30, 13:45 and 14:00 only
+        assert set(fl[fl.param == "walkers"].time) == {"13:00", "13:15", "13:30", "13:45", "14:00"}, set(fl.time)
+        # raster: a minimal TIFF read (single strip, float32 little-endian) of the 13:15 walkers flags
+        raw = open(os.path.join(out, "grid", "walkers_1315.tif"), "rb").read()
+        n = g.ncol * g.nrow
+        arr = np.frombuffer(raw[-4 * n:], dtype="<f4")
+        assert arr[cellA] == 1 and arr[cellC] == -1 and arr[cellS] == -99 and arr.shape[0] == n, (arr[cellA], arr[cellC], arr[cellS])
+        try:
+            import rasterio
+            with rasterio.open(os.path.join(out, "grid", "walkers_1315.tif")) as ds:
+                assert ds.crs.to_epsg() == 4326 and abs(ds.bounds.left - g.west) < 1e-9 and ds.nodata == -99
+                assert ds.read(1)[cellA // g.ncol, cellA % g.ncol] == 1
+        except ImportError:
+            pass
+    print("ok: grid flags")
+
+
 if __name__ == "__main__":
     main()
     test_mode_quality()
     test_period_mode()
+    test_grid()
