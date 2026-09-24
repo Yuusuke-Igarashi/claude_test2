@@ -74,6 +74,7 @@ button:hover{background:#f0efec}
 .seg button:disabled{color:var(--muted);cursor:not-allowed;background:var(--surface)}
 #trajOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
 #trajStatus{flex-basis:100%;display:none;color:var(--ink2);font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:6px}
+#truckStatus{flex-basis:100%;display:none;color:var(--ink2);font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:6px}
 #tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:320px}
 #tip .k{color:var(--muted)}
 .legend .pt::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--c)}
@@ -144,6 +145,7 @@ button:hover{background:#f0efec}
     <span class="turn" style="--c:var(--ink2)">方向転換</span>
   </span>
   <div id="trajStatus"></div>
+  <div id="truckStatus" style="display:none"></div>
   <div id="legendRain"></div>
   <div id="legendGrid"></div>
 </div>
@@ -648,6 +650,8 @@ function buildTruck(text, gj){
     if(R.en[i]) R.esp[i] = ess[i] / R.en[i];
   }
   R.tcls = new Uint8Array(n); R.cur = new Uint8Array(NF);
+  let cb = 0, ce = 0; for(let i=0;i<n;i++){ if(R.bh[i] >= 1) cb++; if(R.eh[i] >= 1) ce++; }
+  R.cellsBase = cb; R.cellsEvent = ce; R.dateList = dates; R.roleOf = roleOf;
   return R;
 }
 
@@ -666,6 +670,16 @@ function recomputeTruck(){
     R.tcls[i] = drop ? 2 : 1;
     const c = i % T; R.countsShown[c]++; if(drop) R.countsDrop[c]++;
   }
+}
+
+function truckStatus(){
+  const el = $("truckStatus"), R = S.truck;
+  if(S.mode !== "truck" || !R){ el.style.display = "none"; return; }
+  el.style.display = "block";
+  el.textContent = `トラック統計 traffic_15min.csv: ${R.rows.toLocaleString()} 行、日付 ${R.dateList.map(d => `${d}=${R.roleOf[d] === "event" ? "有事" : R.roleOf[d] === "baseline" ? "平時" : "対象外"}`).join(", ")}`
+    + `（${R.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）｜ ネットワークに無い Id ${R.unmatched.toLocaleString()} 行、時刻軸に無い時刻・対象外の日付 ${R.skipped.toLocaleString()} 行`
+    + `｜ 台数 1 以上のリンク×時刻: 平時 ${R.cellsBase.toLocaleString()}、有事 ${R.cellsEvent.toLocaleString()}`
+    + (R.cellsBase === 0 ? "　※平時のデータがありません: 平時の日付が無いか、Id がネットワークと一致していません" : "");
 }
 
 function applyTruckTime(t, force=false){
@@ -1094,6 +1108,7 @@ function setMode(m){
   setTrajSel(null);
   updateTraj();
   updateGrid();
+  truckStatus();
   if(truck) applyTruckTime(S.t, true);
 }
 
