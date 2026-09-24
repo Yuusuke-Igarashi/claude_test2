@@ -4,3 +4,4 @@ dist/
 sample/output/
 tests/shots/
 __pycache__/
+probe/testdata/

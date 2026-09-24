@@ -78,6 +78,28 @@ python3 probe/xrain_to_geotiff.py xrain_folder_or_zip --out probe_out/chiba     
 - 依存は numpy のみ（GeoTIFF は直接書く）。rasterio で読めることを確認済み。
 - ビューワーは非圧縮・1 バンドの GeoTIFF を自前で読む（ModelTiepoint / ModelPixelScale から範囲、GDAL_NODATA から nodata）。GDAL 等で作った GeoTIFF も、非圧縮・1 バンドなら読める。経緯度格子を 4 隅で貼るため、メルカトルの歪みで南北方向に最大 1% 程度の位置ずれが出る。
 
+## トラックプローブからの交通統計（probe/truck_traffic.ipynb）
+
+1 秒毎のトラックプローブ（zip 内の 1 時間毎 CSV: serial_number, record_time, speed, gps_latitude, gps_longitude, …）を
+TomTom 道路ネットワーク shp に最近傍法で割り付け、15 分ウィンドウ × リンク別の車両数 Hits と平均速度 AvgSp を出す。
+セル単位で意味を確認しながら進める想定の ipynb（`build_truck_traffic_nb.py` から生成）。
+
+1. ネットワーク集約: 座標列が同じ（逆向きも同じ）リンクを 1 本に統合。代表 Id = メンバー中の最小 Id。`network_agg.csv` / `.shp`
+2. zip を解凍せずに 1 時間分ずつ読む（`__MACOSX/` 等は除外、読めないファイルは記録して飛ばす）
+3. `STRtree.query_nearest` で最近傍リンク（50 m より遠い点はネットワーク外）
+4. (15 分ウィンドウ, 車両, リンク) ごとに在線判定: 平均速度 > max(制限速度 × 1.3, 制限速度 + 20) → over_speed、
+   観測数 < max(3, 0.3 × 期待通過秒数) → too_short（期待通過秒数はウィンドウの端で切れている分だけ短くする）、
+   最高速度 < 3 km/h → stopped（駐停車、数えない）
+5. 非割付の点を、非割付リストのリンクを除いた最近傍へ再割付。4 → 5 を新しい非割付が無くなるまで繰り返し。
+   同じウィンドウで 4 本以上のリンクから非割付になった車両はそのウィンドウで割付不可
+6. `traffic_YYYYMMDD_HHMM.csv`（Id, Hits, AvgSp, MedSp, n_points）、`traffic_15min.csv`、`groups.csv`（診断用、車両 ID を含む）、`summary.csv`
+
+```
+python3 probe/test_truck_traffic.py     # 合成ネットワーク + 合成プローブ zip でノートブックのセルを順に実行し、結果を検証
+```
+
+目安: リンク 2 万本 × 点 50 万（1 時間分）で約 5 秒、ピークメモリ 0.7 GB（点 100 万あたり約 0.5〜1 GB）。
+
 ## 位置ログの前処理（probe/）
 
 端末の位置ログ（1 行 1 測位: id, recordedat, lon, lat, accuracy, speed, userid, ... の日別 CSV）から
