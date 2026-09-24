@@ -62,6 +62,7 @@ button:hover{background:#f0efec}
 #settings h2 button{font-size:12px;padding:2px 8px}
 #settings .grp{margin:8px 0 4px;color:var(--muted);font-size:11px;letter-spacing:.02em}
 #settings .row{display:flex;align-items:center;gap:6px;margin:4px 0;color:var(--ink2);flex-wrap:wrap}
+#settings select{font:inherit;padding:2px 4px;border:1px solid var(--axis);border-radius:5px;background:var(--panel-bg,transparent);color:inherit}
 #settings input[type=number]{width:70px;font:inherit;padding:3px 6px;border:1px solid var(--axis);border-radius:5px;text-align:right;font-variant-numeric:tabular-nums}
 #settings .note{color:var(--muted);font-size:11px;margin-top:8px;line-height:1.5}
 #settings .check{margin-top:8px;color:var(--ink2);font-variant-numeric:tabular-nums}
@@ -139,7 +140,7 @@ button:hover{background:#f0efec}
   </span>
   <span class="legend" id="legendTruck" style="display:none">
     <span style="--c:var(--road-black)">平時 2 台以上（それ以外は非表示）</span>
-    <span style="--c:var(--road-red)">台数または速度が平時の 50 % 以下</span>
+    <span style="--c:var(--road-red)" id="legTruckDrop">台数または速度が平時の 50 % 以下</span>
     <span class="grp">｜</span>
     <span style="--c:var(--series-1)">直近 1 時間の軌跡 平時</span><span style="--c:var(--series-2)">有事</span>
   </span>
@@ -163,15 +164,15 @@ button:hover{background:#f0efec}
   <div class="grp">対象リンク（is_target）: 両方を満たす</div>
   <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="1" min="0"> 台/15分</div>
   <div class="row">平時速度 ≥ <input type="number" id="pMinSpeed" step="1" min="0"> km/h</div>
-  <div class="grp">異常レベル（error1）: 対象リンクで、速度比 ≤ 値 または 台数比 ≤ 値。番号が大きいほど厳しい（L3 ⊂ L2 ⊂ L1 になるよう設定する）</div>
-  <div class="row">L1: 速度比 ≤ <input type="number" id="pL1Speed" step="0.05" min="0" max="2"> または 台数比 ≤ <input type="number" id="pL1Count" step="0.05" min="0" max="2"></div>
-  <div class="row">L2: 速度比 ≤ <input type="number" id="pL2Speed" step="0.05" min="0" max="2"> または 台数比 ≤ <input type="number" id="pL2Count" step="0.05" min="0" max="2"></div>
-  <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> または 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
+  <div class="grp">異常レベル（error1）: 対象リンクで、速度比 ≤ 値 と 台数比 ≤ 値 を「または」（どちらか）か「かつ」（両方）で組み合わせる。番号が大きいほど厳しい（L3 ⊂ L2 ⊂ L1 になるよう設定する）</div>
+  <div class="row">L1: 速度比 ≤ <input type="number" id="pL1Speed" step="0.05" min="0" max="2"> <select id="pL1Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL1Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L2: 速度比 ≤ <input type="number" id="pL2Speed" step="0.05" min="0" max="2"> <select id="pL2Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL2Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> <select id="pL3Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
   <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
   <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 15 分も同レベル以上であることを要求する</label></div>
   <div class="grp">トラックプローブ（トラックタブ）</div>
   <div class="row">平時台数 ≥ <input type="number" id="pTruckMinHits" step="1" min="0"> 台/15分 のリンクだけを描く</div>
-  <div class="row">台数比 または 速度比 ≤ <input type="number" id="pTruckRatio" step="0.05" min="0" max="2"> で赤（比 = 有事 / 平時）</div>
+  <div class="row">台数比 <select id="pTruckOp"><option value="or">または</option><option value="and">かつ</option></select> 速度比 ≤ <input type="number" id="pTruckRatio" step="0.05" min="0" max="2"> で赤（比 = 有事 / 平時）</div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
   <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
@@ -249,6 +250,7 @@ const CONFIG = {
   // Truck tab: links with baseline Hits >= TRUCK_MIN_BASE_HITS are drawn; red when event Hits or AvgSp <= TRUCK_RATIO x baseline
   TRUCK_MIN_BASE_HITS: 2,
   TRUCK_RATIO: 0.5,
+  TRUCK_OP: "or",           // "or": Hits ratio or AvgSp ratio <= TRUCK_RATIO; "and": both
   // Rain colour scale [mm/h] (thresholds like the JMA precipitation-intensity legend); below the first step = transparent
   RAIN_SCALE: [[1, "#a0d2ff"], [5, "#218cff"], [10, "#0041ff"], [20, "#faf500"], [30, "#ff9900"], [50, "#ff2800"], [80, "#b40068"]],
   RAIN_OPACITY: 0.55,
@@ -257,12 +259,13 @@ const CONFIG = {
   TRAJ_WINDOW_MIN: 60,      // each trajectory covers [time - window, time]
   // Default thresholds (same as the notebook). Editable in the ⚙ panel.
   //   is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
-  //   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed OR count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest)
+  //   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed <op> count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest; op = ERROR_LEVEL_OP: "or" / "and")
   //   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)
   //   error_level = highest k with error_k (0 = none). Levels must be nested (L3 ⊂ L2 ⊂ L1), as in the notebook.
   MIN_BASE_COUNT: 2.5,      // notebook: 既存秋田分析の「日中 10 カウント/時以上」を 15 分換算
   MIN_BASE_SPEED: 10.0,
   ERROR_LEVELS: [{speed: 0.75, count: 0.75}, {speed: 0.60, count: 0.60}, {speed: 0.50, count: 0.50}],
+  ERROR_LEVEL_OP: "or",     // "or": either ratio at or below its value; "and": both (switchable per level in the ⚙ panel)
   REQUIRE_CORROBORATION: true,
   // Basemap: GSI pale (地理院タイル). Alternative: OpenStreetMap.
   basemap: {
@@ -609,8 +612,8 @@ function parseRefLevels(text){
 
 function defaultParams(){
   return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
-           levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count})),
-           truckMinHits: CONFIG.TRUCK_MIN_BASE_HITS, truckRatio: CONFIG.TRUCK_RATIO };
+           levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count, op: CONFIG.ERROR_LEVEL_OP})),
+           truckMinHits: CONFIG.TRUCK_MIN_BASE_HITS, truckRatio: CONFIG.TRUCK_RATIO, truckOp: CONFIG.TRUCK_OP };
 }
 
 // ---- Truck-probe statistics: network_agg.shp/.dbf (aggregated links, own geometry) + traffic_YYYYMMDD_HHMM.csv ----
@@ -737,13 +740,14 @@ function recomputeTruck(){
   const R = S.truck; if(!R) return;
   const P = S.params, T = S.T;
   R.countsShown = new Array(T).fill(0); R.countsDrop = new Array(T).fill(0);
+  const lg = $("legTruckDrop"); if(lg) lg.textContent = `台数${P.truckOp === "and" ? "と" : "または"}速度が平時の ${Math.round(P.truckRatio * 100)} % 以下`;
   for(let i=0;i<R.tcls.length;i++){
     const bh = R.bh[i];
     if(!(bh >= P.truckMinHits)){ R.tcls[i] = 0; continue; }
     const rh = R.eh[i] / bh;
     const bs = R.bsp[i], es = R.esp[i];
     const rs = bs > 0 ? (es === es ? es / bs : 0) : NaN;       // no event speed (no event rows) counts as 0
-    const drop = rh <= P.truckRatio || rs <= P.truckRatio;
+    const drop = P.truckOp === "and" ? (rh <= P.truckRatio && rs <= P.truckRatio) : (rh <= P.truckRatio || rs <= P.truckRatio);
     R.tcls[i] = drop ? 2 : 1;
     const c = i % T; R.countsShown[c]++; if(drop) R.countsDrop[c]++;
   }
@@ -789,7 +793,10 @@ function recompute(){
     const sr = bs > 0 ? S.es[i]/bs : NaN;
     const cr = bc > 0 ? S.ec[i]/bc : NaN;
     let k = 0;
-    for(let l=0;l<L;l++) if(sr <= P.levels[l].speed || cr <= P.levels[l].count) k = l+1;
+    for(let l=0;l<L;l++){
+      const lv = P.levels[l];
+      if(lv.op === "and" ? (sr <= lv.speed && cr <= lv.count) : (sr <= lv.speed || cr <= lv.count)) k = l+1;
+    }
     e1[i] = k;
   }
   for(let r=0;r<N;r++){
@@ -841,8 +848,8 @@ function applyParams(){
   const num = (id, fallback) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : fallback; };
   const d = defaultParams();
   S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), corrob: $("pCorrob").checked,
-               levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count)})),
-               truckMinHits: num("pTruckMinHits", d.truckMinHits), truckRatio: num("pTruckRatio", d.truckRatio) };
+               levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count), op: $(`pL${i+1}Op`).value === "and" ? "and" : "or"})),
+               truckMinHits: num("pTruckMinHits", d.truckMinHits), truckRatio: num("pTruckRatio", d.truckRatio), truckOp: $("pTruckOp").value === "and" ? "and" : "or" };
   recompute();
   recomputeTruck();
   checkAgainstRef();
@@ -851,8 +858,8 @@ function applyParams(){
 function fillParamInputs(){
   const P = S.params;
   $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob;
-  P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; });
-  $("pTruckMinHits").value = P.truckMinHits; $("pTruckRatio").value = P.truckRatio;
+  P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; $(`pL${i+1}Op`).value = l.op || "or"; });
+  $("pTruckMinHits").value = P.truckMinHits; $("pTruckRatio").value = P.truckRatio; $("pTruckOp").value = P.truckOp || "or";
 }
 
 async function boot(loaderFn){
@@ -1683,6 +1690,7 @@ function setupControls(){
     $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
   }
   $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
+  for(const id of ["pL1Op","pL2Op","pL3Op","pTruckOp"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
   $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
   $("modeTraffic").addEventListener("click", () => setMode("traffic"));
   $("modeTraj").addEventListener("click", () => setMode("traj"));

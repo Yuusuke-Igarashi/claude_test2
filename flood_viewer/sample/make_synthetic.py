@@ -1,5 +1,5 @@
 """Synthetic output files mimicking the notebook's outputs, for viewer testing."""
-import json, math, random
+import json, shutil, math, random
 import numpy as np, pandas as pd
 from pathlib import Path
 
@@ -105,7 +105,9 @@ for k in (1, 2, 3):
 # baseline 2024-08-14/15, event 2024-08-21/22 (the sample period runs 18:00 -> 05:45 across midnight); Id = the network link id
 import struct
 TR = OUT / "truck"; TR.mkdir(exist_ok=True)
-for old in TR.glob("*"): old.unlink()
+for old in TR.glob("*"):
+    if old.is_dir(): shutil.rmtree(old)
+    else: old.unlink()
 
 def write_shapefile(stem, lines, ids, lengths):
     recs, shx = b"", b""; xmin = ymin = 1e9; xmax = ymax = -1e9

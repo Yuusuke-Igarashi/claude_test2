@@ -183,6 +183,12 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   const noCorrob = await status(page);
   assert.ok(noCorrob.error >= strict.error, "without corroboration errors do not decrease");
   await page.click("#pDefault"); await page.waitForTimeout(500);
+  await page.selectOption("#pL1Op", "and"); await page.waitForTimeout(500);   // level 1 needs both ratios low
+  const andL1 = await status(page);
+  assert.ok(andL1.levels[0] < base0.levels[0] && andL1.error < base0.error, "AND at level 1 -> fewer level-1 links and fewer errors");
+  assert.equal(andL1.levels[2], base0.levels[2], "level 3 (still OR) unchanged");
+  assert.match(await page.textContent("#pCheck"), /想定内/);
+  await page.click("#pDefault"); await page.waitForTimeout(500);
   assert.deepEqual(await status(page), base0, "defaults restore the original counts");
   assert.match(await page.textContent("#pCheck"), /不一致: 0 セル/);
   await page.screenshot({ path: join(SHOTS, "settings.png") });
@@ -475,8 +481,15 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
   await hover(page, pt);
   const cp = await page.evaluate(() => ({ shown: document.getElementById("chartPanel").style.display, status: document.getElementById("cpStatus").textContent, title: document.getElementById("cpTitle").textContent, bc: document.getElementById("roBC").textContent, rects: document.querySelectorAll("#chartCount rect.err").length }));
   assert.equal(cp.shown, "block"); assert.match(cp.status, /低下/); assert.match(cp.title, /トラック/); assert.notEqual(cp.bc, "–"); assert.ok(cp.rects >= 1, "drop band drawn");
+  // AND: both Hits and AvgSp must be <= 50 % -> fewer red links; legend follows
+  await page.click("#settingsBtn"); await page.selectOption("#pTruckOp", "and"); await page.waitForTimeout(500);
+  const stAnd = await page.evaluate(() => +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""));
+  assert.ok(stAnd < st.drop, "AND -> fewer red links than OR");
+  assert.match(await page.textContent("#legTruckDrop"), /台数と速度/);
+  await page.selectOption("#pTruckOp", "or"); await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => +document.getElementById("stTruckDrop").textContent.replace(/,/g, "")), st.drop);
   // thresholds: ratio 0 -> only links with no event traffic stay red
-  await page.click("#settingsBtn"); await page.fill("#pTruckRatio", "0"); await page.waitForTimeout(500);
+  await page.fill("#pTruckRatio", "0"); await page.waitForTimeout(500);
   const st2 = await page.evaluate(() => +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""));
   assert.ok(st2 < st.drop, "lower ratio -> fewer red links");
   await page.fill("#pTruckMinHits", "100"); await page.waitForTimeout(500);
