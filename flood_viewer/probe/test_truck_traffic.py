@@ -73,6 +73,11 @@ def make_data():
     h12 += track("G", ts("12:30:00"), [(0, -500), (800, -500)], 45)
     h12 += track("H", ts("12:40:00"), [(0, -104), (200, -104)], 90)
     h13 = track("A", ts("13:40:00"), [(0, 0), (800, 0), (1400, 0)], 48)
+    # area polygon (like the user's tokyo.geojson: JGD2011 lon/lat): covers A-F and the stay; excludes G and H (south of y = -50 m)
+    ax0, ay0 = ll(-200, -50); ax1, ay1 = ll(1500, 2000)
+    json.dump({"type": "FeatureCollection", "name": "area", "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::6668"}},
+               "features": [{"type": "Feature", "properties": {"N03_004": "test"}, "geometry": {"type": "MultiPolygon",
+                             "coordinates": [[[[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1], [ax0, ay0]]]]}}]}, open(T / "area.geojson", "w"))
     cols = ["serial_number", "record_time", "travel_start_time", "speed", "gps_latitude", "gps_longitude", "gps_direction", "industry_flag"]
     with zipfile.ZipFile(T / "probe.zip", "w", zipfile.ZIP_DEFLATED) as z:
         for name, rows_ in [("probe/2025-09-10_12.csv", h12), ("probe/2025-09-10_13.csv", h13)]:
@@ -84,7 +89,7 @@ def make_data():
     return len(h12), len(h13)
 
 
-def run_notebook(out_dir):
+def run_notebook(out_dir, area=None):
     nb = json.load(open(HERE / "truck_traffic.ipynb", encoding="utf-8"))
     g = {"display": lambda x: print(x.to_string() if hasattr(x, "to_string") else x)}
     for i, c in enumerate(nb["cells"]):
@@ -95,6 +100,8 @@ def run_notebook(out_dir):
             src = src.replace('Path("../data/Flooding_2025/post/network.shp")', f'Path("{T / "network.shp"}")') \
                      .replace('Path("../data/truck_probe.zip")', f'Path("{T / "probe.zip"}")') \
                      .replace('Path("./traffic_out")', f'Path("{out_dir}")')
+            if area:
+                src = src.replace("AREA_GEOJSON = None", f'AREA_GEOJSON = "{area}"')
         print(f"\n---------------- cell {i} ----------------")
         exec(compile(src, f"cell{i}", "exec"), g)
     return g
@@ -120,8 +127,37 @@ def check(out_dir):
     assert st[("C", 1)] == "ok" and ("C", 4) not in st and st[("D", 1)] == "stopped" and ("H", 9) not in st, st
     files = sorted(p.name for p in O.glob("traffic_2025*.csv"))
     assert files == ["traffic_20250910_1200.csv", "traffic_20250910_1215.csv", "traffic_20250910_1330.csv"], files
-    assert list(pd.read_csv(O / files[0]).columns) == ["Id", "Hits", "AvgSp", "MedSp", "n_points"]
+    one = pd.read_csv(O / files[0]); assert list(one.columns) == ["Id", "Hits", "AvgSp", "MedSp", "n_points"]
+    # trajectories: window ends 12:15 .. 12:45 from file 12 (last point 12:40:08), 13:45 from file 13
+    tf = sorted(p.name for p in (O / "traj").glob("traj_*.geojson"))
+    assert tf == ["traj_20250910_1215.geojson", "traj_20250910_1230.geojson", "traj_20250910_1245.geojson", "traj_20250910_1345.geojson"], tf
+    f15 = json.load(open(O / "traj" / "traj_20250910_1215.geojson"))["features"]
+    assert len(f15) == 4, [f["properties"] for f in f15]          # A, B, C, E (D is parked -> too short, F/G/H later)
+    assert all(set(f["properties"]) == {"time", "date", "n_points", "v_mean", "v_max"} and f["properties"]["time"] == "12:15" for f in f15)
+    assert "serial" not in open(O / "traj" / "traj_20250910_1215.geojson").read() and not any("A" == k for f in f15 for k in f["properties"].values())
+    f45 = json.load(open(O / "traj" / "traj_20250910_1245.geojson"))["features"]
+    assert len(f45) == 7, len(f45)                                 # A B C E F G H (window 11:45-12:45; D parked dropped)
+    f1345 = json.load(open(O / "traj" / "traj_20250910_1345.geojson"))["features"]
+    assert len(f1345) == 1 and f1345[0]["properties"]["n_points"] == 106 and f1345[0]["geometry"]["type"] == "LineString"
+    assert len(f1345[0]["geometry"]["coordinates"]) < 20, "simplified (a straight 1.4 km track needs only a few vertices)"
+    idx = json.load(open(O / "traj" / "index.json")); assert idx["window_min"] == 60 and len(idx["files"]) == 4
     print("\ntest_truck_traffic: OK")
+
+
+def check_area(out_dir):
+    """AREA_GEOJSON: only points inside the polygon and links near its bbox are used."""
+    O = Path(out_dir)
+    links = pd.read_csv(O / "network_agg.csv")
+    assert 8 not in links.Id.tolist() and 1 in links.Id.tolist(), links.Id.tolist()      # the far link (3 km south) is outside the bbox + 1 km
+    s = pd.read_csv(O / "summary.csv"); r12 = s[s.file.str.endswith("_12.csv")].iloc[0]
+    assert r12.outside_area > 0 and r12.unassignable == 0 and r12.off_network == 0, r12.to_dict()   # C, G, H are outside the area
+    w = pd.read_csv(O / "traffic_15min.csv", parse_dates=["window"]).set_index(["window", "Id"])
+    assert int(w.loc[(pd.Timestamp("2025-09-10 12:00"), 1), "Hits"]) == 3, "A, C and E (inside the area)"
+    f15 = json.load(open(O / "traj" / "traj_20250910_1215.geojson"))["features"]
+    assert len(f15) == 4, len(f15)                                  # A, B, C, E (D parked; G, H outside the area)
+    tf = sorted(p.name for p in (O / "traj").glob("traj_*.geojson"))
+    assert tf == ["traj_20250910_1215.geojson", "traj_20250910_1230.geojson", "traj_20250910_1345.geojson"], tf   # no 12:45 slot: G and H are gone
+    print("test_truck_traffic (area): OK")
 
 
 if __name__ == "__main__":
@@ -129,3 +165,6 @@ if __name__ == "__main__":
     out = T / "out"
     run_notebook(out)
     check(out)
+    out2 = T / "out_area"
+    run_notebook(out2, area=str(T / "area.geojson"))
+    check_area(out2)

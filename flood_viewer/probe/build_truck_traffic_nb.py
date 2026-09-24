@@ -21,6 +21,10 @@ md(r'''
 5. **再割付**: 非割付になった点を、そのリンクを除いた最近傍リンクに付け直す。4 → 5 をリストが空になるまで繰り返す。
    同じウィンドウで 4 本以上のリンクから非割付になった車両は割付不可として除外
 6. **集計**: 15 分ウィンドウ × リンクの車両数・平均速度を集計し、ウィンドウ毎の CSV に書く
+7. **軌跡**: 15 分毎に、直近 1 時間の各車両の軌跡を GeoJSON に書く（ビューワーのトラックタブで重ねる）
+
+範囲を絞る場合は `AREA_GEOJSON` に区域ポリゴン（例: 新宿区の tokyo.geojson）を与えます。点はポリゴン内だけ、
+リンクはその外接矩形（+1 km）内だけを使うので、計算量が大きく減ります。
 
 必要なライブラリ: geopandas, shapely 2.x, pyproj, pandas, numpy。
 
@@ -39,7 +43,7 @@ md(r'''
 md("## 0. パラメータ")
 code(r'''
 from pathlib import Path
-import re, time, zipfile
+import json, re, time, zipfile
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -53,6 +57,7 @@ PROBE_ZIP   = Path("../data/truck_probe.zip")                   # 1 時間毎 CS
 MEMBER_RE   = r"\.(csv|txt)(\.gz)?$"                            # zip 内で読む対象ファイル名（正規表現、大文字小文字無視）
 OUT_DIR     = Path("./traffic_out")                             # 出力先
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+AREA_GEOJSON = None                                             # 範囲を絞る GeoJSON（例 "./tokyo.geojson"）。None = 絞らない
 
 # ---- 入力 CSV の列名（サンプルに合わせてある） ---------------------------
 COL_ID, COL_TIME, COL_SPEED, COL_LAT, COL_LON = "serial_number", "record_time", "speed", "gps_latitude", "gps_longitude"
@@ -77,8 +82,34 @@ MAX_ITER = 10                 # 4 → 5 の繰り返し上限（通常は 2〜5 
 
 WRITE_GROUPS = True           # ウィンドウ × 車両 × リンクの判定表（groups.csv、車両 ID を含む診断用）も書くか
 
+# ---- step 7: 直近 1 時間の軌跡（15 分毎） ----------------------------------
+TRAJ_OUT = True               # traj/traj_YYYYMMDD_HHMM.geojson を書くか（HHMM = 窓の終端。窓は (T-60 分, T]）
+TRAJ_WINDOW_MIN = 60          # 軌跡の窓 [分]
+TRAJ_GAP_MIN = 5.0            # この分数を超える欠測で軌跡を切る
+TRAJ_SIMPLIFY_M = 5.0         # 軌跡の間引き（Douglas-Peucker の許容誤差 [m]）
+TRAJ_MIN_LEN_M = 10.0         # これより短い軌跡（駐車中など）は書かない
+
 def log(msg):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
+''')
+
+md(r'''
+## 0b. 範囲（任意）
+
+`AREA_GEOJSON` を与えると、その全ポリゴンの和集合を範囲にします。CRS が JGD2011（EPSG:6668）の場合も、経緯度としては
+WGS84 と実質同じなのでそのまま使います。以降、点はこの範囲内だけ、リンクは外接矩形（+1 km）内だけになります。
+''')
+code(r'''
+AREA = None
+if AREA_GEOJSON:
+    a = gpd.read_file(AREA_GEOJSON)
+    if a.crs is not None and a.crs.to_epsg() not in (4326, 6668):
+        a = a.to_crs("EPSG:4326")
+    AREA = a.geometry.union_all() if hasattr(a.geometry, "union_all") else a.geometry.unary_union
+    print(f"範囲: {AREA_GEOJSON} ({len(a)} 地物, CRS {a.crs}) → 外接矩形 {tuple(round(v, 5) for v in AREA.bounds)}, "
+          f"面積 {AREA.area * 111.0 * 111.0 * np.cos(np.radians(AREA.centroid.y)):.1f} km2")
+else:
+    print("範囲の指定なし（全点・全リンク）")
 ''')
 
 md(r'''
@@ -113,6 +144,11 @@ fixed = {"Id": ("Id", "min"), "n_members": ("Id", "size"), "member_ids": ("Id", 
 others = {c: (c, "first") for c in net.columns if c not in fixed and c not in ("Id", "shape_key")}
 agg = net.sort_values("Id").groupby("shape_key", sort=False).agg(**fixed, **others).reset_index(drop=True)
 links = gpd.GeoDataFrame(agg, geometry="geometry", crs=net.crs).sort_values("Id").reset_index(drop=True)
+if AREA is not None:                          # 範囲の外接矩形 +1 km に掛かるリンクだけ
+    x0, y0, x1, y1 = AREA.bounds; pad = 0.01
+    n_all = len(links)
+    links = links.cx[x0 - pad:x1 + pad, y0 - pad:y1 + pad].reset_index(drop=True)
+    print(f"範囲で絞り込み: {n_all} → {len(links)} リンク")
 links["link_idx"] = np.arange(len(links))     # 以降の内部インデックス（0..n-1）
 
 CRS_M = links.estimate_utm_crs()
@@ -179,9 +215,14 @@ def read_member(name):
     df["t"] = parse_time(df["t"])
     df["speed"] = pd.to_numeric(df["speed"], errors="coerce")
     df = df.dropna(subset=["t", "lat", "lon", "speed"])
+    n1 = len(df)
+    if AREA is not None:                                                   # 範囲内の点だけ（外接矩形で粗く → ポリゴンで厳密に）
+        x0, y0, x1, y1 = AREA.bounds
+        df = df[(df.lon >= x0) & (df.lon <= x1) & (df.lat >= y0) & (df.lat <= y1)]
+        df = df[shapely.contains_xy(AREA, df.lon.to_numpy(), df.lat.to_numpy())]
     df = df.drop_duplicates(["vid", "t"]).sort_values(["vid", "t"]).reset_index(drop=True)
     df["window"] = df["t"].dt.floor(f"{WINDOW_MIN}min")
-    df.attrs["dropped"] = n0 - len(df)
+    df.attrs["dropped"] = n0 - len(df); df.attrs["outside"] = n1 - len(df)
     return df
 
 df = read_member(members[0])
@@ -364,7 +405,64 @@ display(stats.sort_values(["window", "Hits"], ascending=[True, False]).head(12))
 ''')
 
 md(r'''
-## 7. 全ファイルの処理
+## 7. 直近 1 時間の軌跡（15 分毎、step 7）
+
+窓の終端 T（15 分刻み）ごとに、(T−60 分, T] の各車両の点をつないだ線を `traj/traj_YYYYMMDD_HHMM.geojson` に書きます
+（HHMM は T。人流の viewer と同じ「直近 1 時間」の定義）。`TRAJ_GAP_MIN` を超える欠測で線を切り、投影座標で
+`TRAJ_SIMPLIFY_M` の Douglas-Peucker 間引きをして、`TRAJ_MIN_LEN_M` より短い線（駐車中など）は落とします。
+窓が前のファイルにまたがるので、前のファイルの末尾 1 時間分（`tail`）を引き継ぎます（ファイルは時刻順に処理する前提）。
+車両 ID は出力しません（properties: time, date, n_points, v_mean, v_max）。
+''')
+code(r'''
+TRAJ_DIR = OUT_DIR / "traj"; TRAJ_DIR.mkdir(exist_ok=True)
+from_m = Transformer.from_crs(CRS_M, "EPSG:4326", always_xy=True)
+
+def traj_slots(df, tail=None):
+    """df: 1 ファイル分の点、tail: 前のファイルの末尾 1 時間分。各スロットの GeoJSON を書き、
+    [(ファイル名, 地物数), ...] と次のファイルへ渡す tail を返す。"""
+    step, win = pd.Timedelta(minutes=WINDOW_MIN), pd.Timedelta(minutes=TRAJ_WINDOW_MIN)
+    cols = ["vid", "t", "speed", "lat", "lon"]
+    both = pd.concat([tail[tail.t < df.t.min()], df[cols]], ignore_index=True) if tail is not None and len(tail) else df[cols]
+    t_first = df.t.min().floor(f"{WINDOW_MIN}min") + step
+    t_last = df.t.max().ceil(f"{WINDOW_MIN}min")
+    written = []
+    for T in pd.date_range(t_first, t_last, freq=step):
+        w = both[(both.t > T - win) & (both.t <= T)]
+        feats = []
+        for vid, g in w.groupby("vid", sort=False):
+            g = g.sort_values("t")
+            gap = np.r_[True, np.diff(g.t.to_numpy()).astype("timedelta64[s]").astype(float) > TRAJ_GAP_MIN * 60]
+            lines = []
+            for _, gg in g.groupby(np.cumsum(gap)):
+                if len(gg) < 2:
+                    continue
+                x, y = to_m.transform(gg.lon.to_numpy(), gg.lat.to_numpy())
+                line = shapely.simplify(shapely.LineString(np.c_[x, y]), TRAJ_SIMPLIFY_M)
+                if line.length < TRAJ_MIN_LEN_M:
+                    continue
+                lon2, lat2 = from_m.transform(*line.xy)
+                lines.append([[round(float(a), 6), round(float(b), 6)] for a, b in zip(lon2, lat2)])
+            if not lines:
+                continue
+            geom = {"type": "LineString", "coordinates": lines[0]} if len(lines) == 1 else {"type": "MultiLineString", "coordinates": lines}
+            feats.append({"type": "Feature",
+                          "properties": {"time": T.strftime("%H:%M"), "date": T.strftime("%Y-%m-%d"), "n_points": int(len(g)),
+                                         "v_mean": round(float(g.speed.mean()), 1), "v_max": round(float(g.speed.max()), 1)},
+                          "geometry": geom})
+        name = f"traj_{T:%Y%m%d_%H%M}.geojson"
+        with open(TRAJ_DIR / name, "w", encoding="utf-8") as f:
+            json.dump({"type": "FeatureCollection", "features": feats}, f, ensure_ascii=False, separators=(",", ":"))
+        written.append((name, len(feats)))
+    return written, df[df.t > df.t.max() - win][cols]
+
+if TRAJ_OUT:
+    df = read_member(members[0])
+    written, tail = traj_slots(df)
+    print("\n".join(f"{n}: {c} 本" for n, c in written), "/ tail", len(tail), "点")
+''')
+
+md(r'''
+## 8. 全ファイルの処理
 
 上の step 2 → 6 を zip 内の全ファイルに対して実行します。メモリに残すのはファイルごとの集計結果（小さい）だけで、
 グループ表（`groups.csv`、`WRITE_GROUPS` のとき）はファイルごとに追記します。読めないファイルは記録して飛ばします。
@@ -372,7 +470,8 @@ md(r'''
 ''')
 code(r'''
 t_all = time.perf_counter()
-all_stats, summary = [], []
+all_stats, summary, traj_files = [], [], []
+tail = None
 (OUT_DIR / "groups.csv").unlink(missing_ok=True)
 for k, name in enumerate(members, 1):
     t0 = time.perf_counter()
@@ -380,7 +479,9 @@ for k, name in enumerate(members, 1):
         df = read_member(name)
         if df.empty:
             log(f"[{k}/{len(members)}] {name}: 0 rows, skip"); continue
-        dropped = df.attrs["dropped"]
+        dropped, outside = df.attrs["dropped"], df.attrs.get("outside", 0)
+        if TRAJ_OUT:
+            tw, tail = traj_slots(df, tail); traj_files += tw
         pts = assign_nearest(df); del df
         pts, groups, excluded = match_hour(pts, verbose=False)
         stats = aggregate_windows(groups)
@@ -388,7 +489,7 @@ for k, name in enumerate(members, 1):
             groups.assign(file=name).to_csv(OUT_DIR / "groups.csv", mode="a", header=not (OUT_DIR / "groups.csv").exists(), index=False)
         all_stats.append(stats)
         st = pts.status.value_counts()
-        summary.append({"file": name, "rows": len(pts), "dropped": dropped, "vehicles": pts.vid.nunique(),
+        summary.append({"file": name, "rows": len(pts), "dropped": dropped, "outside_area": outside, "vehicles": pts.vid.nunique(),
                         **{s: int(st.get(s, 0)) for s in ["ok", "stopped", "off_network", "over_speed", "too_short", "no_candidate", "unassignable"]},
                         "rejected_groups": len(excluded), "windows": stats.window.nunique(), "links_hit": stats.Id.nunique(), "error": ""})
         log(f"[{k}/{len(members)}] {name}: {len(pts):,} pts, {pts.vid.nunique():,} vehicles, ok {summary[-1]['ok']:,}, "
@@ -412,10 +513,14 @@ if all_stats:
     written = write_windows(stats_all)
     stats_all.to_csv(OUT_DIR / "traffic_15min.csv", index=False)
     log(f"done: {len(written)} window files, {len(stats_all):,} window×link rows, {time.perf_counter() - t_all:.1f} s → {OUT_DIR}")
+if traj_files:
+    with open(TRAJ_DIR / "index.json", "w", encoding="utf-8") as f:
+        json.dump({"window_min": TRAJ_WINDOW_MIN, "slot_min": WINDOW_MIN, "files": {n: c for n, c in traj_files}}, f, ensure_ascii=False, indent=1)
+    log(f"traj/: {len(traj_files)} slot files, {sum(c for _, c in traj_files):,} trajectories")
 ''')
 
 md(r'''
-## 8. 確認
+## 9. 確認
 
 - ウィンドウ別のリンク数・総 Hits・平均速度
 - Hits 上位リンク
