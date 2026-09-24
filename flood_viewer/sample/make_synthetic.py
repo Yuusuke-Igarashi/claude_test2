@@ -101,24 +101,51 @@ link_level = err.max(axis=1)
 save(err, "error.csv", rows=link_level >= 1, integer=True)
 for k in (1, 2, 3):
     save(err, f"error_level{k}.csv", rows=link_level == k, integer=True)
-# ---- truck/traffic_15min.csv (truck_traffic.ipynb output): both periods' dates, window = slot start ----
-# baseline 2024-08-14/15, event 2024-08-21/22 (the sample period runs 18:00 -> 05:45 across midnight)
-(OUT / "truck").mkdir(exist_ok=True)
+# ---- truck/: network_agg.shp/.shx/.dbf/.prj (aggregated links) + traffic_YYYYMMDD_HHMM.csv per window (truck_traffic.ipynb output) ----
+# baseline 2024-08-14/15, event 2024-08-21/22 (the sample period runs 18:00 -> 05:45 across midnight); Id = the network link id
+import struct
+TR = OUT / "truck"; TR.mkdir(exist_ok=True)
+for old in TR.glob("*"): old.unlink()
+
+def write_shapefile(stem, lines, ids, lengths):
+    recs, shx = b"", b""; xmin = ymin = 1e9; xmax = ymax = -1e9
+    for k, coords in enumerate(lines, 1):
+        xs = [c[0] for c in coords]; ys = [c[1] for c in coords]
+        box = (min(xs), min(ys), max(xs), max(ys)); xmin, ymin, xmax, ymax = min(xmin, box[0]), min(ymin, box[1]), max(xmax, box[2]), max(ymax, box[3])
+        content = struct.pack("<i4d2ii", 3, *box, 1, len(coords), 0) + b"".join(struct.pack("<2d", x, y) for x, y in coords)
+        shx += struct.pack(">2i", (100 + len(recs)) // 2, len(content) // 2)
+        recs += struct.pack(">2i", k, len(content) // 2) + content
+    def header(nbytes): return struct.pack(">6i", 9994, 0, 0, 0, 0, 0) + struct.pack(">i", nbytes // 2) + struct.pack("<2i", 1000, 3) + struct.pack("<8d", xmin, ymin, xmax, ymax, 0, 0, 0, 0)
+    open(f"{stem}.shp", "wb").write(header(100 + len(recs)) + recs)
+    open(f"{stem}.shx", "wb").write(header(100 + len(shx)) + shx)
+    fields = [("Id", "N", 10, 0), ("Length", "N", 10, 2), ("StreetName", "C", 20, 0)]
+    hlen = 32 + 32 * len(fields) + 1; rlen = 1 + sum(f[2] for f in fields)
+    hdr = struct.pack("<BBBBIHH20x", 3, 24, 9, 24, len(ids), hlen, rlen)
+    for name, typ, ln, dec in fields: hdr += name.encode().ljust(11, b"\0") + typ.encode() + b"\0" * 4 + bytes([ln, dec]) + b"\0" * 14
+    hdr += b"\r"
+    body = b"".join(b" " + str(i).rjust(10).encode() + f"{L:10.2f}".encode() + b"road".ljust(20) for i, L in zip(ids, lengths))
+    open(f"{stem}.dbf", "wb").write(hdr + body + b"\x1a")
+    open(f"{stem}.prj", "w").write('GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]')
+
 rng = np.random.default_rng(7)
-truck_rows = []
 truck_links = [r for r in range(N) if r % 3 == 0]
+write_shapefile(str(TR / "network_agg"), [features[r]["geometry"]["coordinates"] for r in truck_links], [ids[r] for r in truck_links], [250.0] * len(truck_links))
+per_window = {}
+n_truck_rows = 0
 for r in truck_links:
     base_h = rng.integers(0, 7); base_s = rng.uniform(20, 50)
     c = np.array(features[r]["geometry"]["coordinates"][0]); flooded = np.hypot(*(c - center)) < 0.02
     for ti, tm in enumerate(times):
-        day_b, day_e = ("2024-08-14", "2024-08-21") if ti < 24 else ("2024-08-15", "2024-08-22")
+        day_b, day_e = ("20240814", "20240821") if ti < 24 else ("20240815", "20240822")
         hb = max(0, base_h + rng.integers(-1, 2)); he = max(0, base_h + rng.integers(-1, 2))
         sb = base_s * (1 + 0.05 * rng.standard_normal()); se = base_s * (1 + 0.05 * rng.standard_normal())
         if flooded and 20 <= ti < 32: he = int(he * 0.2); se *= 0.3
-        if hb > 0: truck_rows.append((f"{day_b} {tm}:00", ids[r], hb, round(sb, 2), round(sb, 2), hb * 30))
-        if he > 0: truck_rows.append((f"{day_e} {tm}:00", ids[r], he, round(se, 2), round(se, 2), he * 30))
-pd.DataFrame(truck_rows, columns=["window", "Id", "Hits", "AvgSp", "MedSp", "n_points"]).to_csv(OUT / "truck" / "traffic_15min.csv", index=False)
-print("truck/traffic_15min.csv:", len(truck_rows), "rows,", len(truck_links), "links")
+        hhmm = tm.replace(":", "")
+        if hb > 0: per_window.setdefault(f"traffic_{day_b}_{hhmm}.csv", []).append((ids[r], hb, round(sb, 2), round(sb, 2), hb * 30))
+        if he > 0: per_window.setdefault(f"traffic_{day_e}_{hhmm}.csv", []).append((ids[r], he, round(se, 2), round(se, 2), he * 30))
+for name, rows_ in per_window.items():
+    pd.DataFrame(rows_, columns=["Id", "Hits", "AvgSp", "MedSp", "n_points"]).to_csv(TR / name, index=False); n_truck_rows += len(rows_)
+print("truck/: network_agg.shp", len(truck_links), "links,", len(per_window), "window files,", n_truck_rows, "rows")
 
 print("links", len(features), "csv rows", N, "error links", int((link_level >= 1).sum()),
       "cells by level", {k: int((err == k).sum()) for k in (1, 2, 3)}, "links by max level", {k: int((link_level == k).sum()) for k in (1, 2, 3)})

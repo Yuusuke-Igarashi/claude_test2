@@ -203,7 +203,7 @@ button:hover{background:#f0efec}
       <p style="margin:6px 0 2px"><b>2. 人流（位置ログの前処理結果）のフォルダ（任意）:</b> <input id="probeInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">probe_out: viewer/（時刻別ファイル）と grid/（100 m メッシュ）。軌跡タブとグリッド重畳に使う</span></p>
       <p style="margin:6px 0 2px"><b>3. トラックプローブのフォルダ（任意）:</b> <input id="truckInput" type="file" webkitdirectory><br>
-      <span style="color:var(--muted)">yazaki_out: traffic_15min.csv（平時と有事の両方の日付を含む）。トラックタブに使う</span></p>
+      <span style="color:var(--muted)">yazaki_out: network_agg.shp / .dbf と traffic_yyyymmdd_hhmm.csv（平時と有事の両方の日付）。トラックタブに使う</span></p>
       <span style="display:none"><input id="rainInput" type="file" webkitdirectory><input id="lowlandInput" type="file" accept=".geojson,.json"></span>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
@@ -230,7 +230,6 @@ const CONFIG = {
     viewer_dir:     "viewer",                        // per-slot files <role>_<HHMM>.geojson + index.json (loaded lazily)
     rain_dir:       "rain",                          // optional: rain_<YYYYMMDD>_<HHMM>.tif (GeoTIFF) + index.json from xrain_to_geotiff.py
     lowland:        "lowland.geojson",               // optional: low-lying area polygons (any GeoJSON, WGS84)
-    truck:          "truck/traffic_15min.csv",       // optional: truck-probe link statistics (truck_traffic.ipynb), both periods' dates
     grid_dir:       "grid"                           // optional: <param>_<HHMM>.tif flag rasters + index.json from probe_trips.py (GRID_M)
   },
   // Grid overlay (trajectory mode): flag rasters of probe_trips.py, +1 = event >= 200 % of baseline, -1 = <= 50 %, 0 = neither
@@ -365,7 +364,7 @@ async function loadViaFetch(){
   if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
   const lowlandTxt = await fetchText(f.lowland, true);
   const lowland = lowlandTxt ? JSON.parse(lowlandTxt) : null;
-  const truck = await fetchText(f.truck, true);
+  const truck = null;                                  // truck statistics are loaded from the folder picker only
   const gridIdx = await fetchText(f.grid_dir + "/index.json", true);
   const grid = gridIdx ? gridFromIndex(JSON.parse(gridIdx), (name) => `${f.grid_dir}/${name}`) : null;
   if(grid) fileRow(f.grid_dir + "/", `グリッド ${grid.sources.size} ラスタ（表示時に読み込み）`);
@@ -423,14 +422,22 @@ function rainRegistry(sources, index){
 }
 
 // fileList: the data folder (or individual files); rainList: the rain folder; lowlandFile: one GeoJSON;
-// truckList: the truck-probe output folder (traffic_15min.csv). Rain files, lowland.geojson and a
-// traffic_15min.csv inside the data folder are also accepted (an all-in-one folder).
+// truckList: the truck-probe output folder (network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv). Rain files and
+// lowland.geojson inside the data folder are also accepted (an all-in-one folder).
+const TRUCK_WINDOW = /^traffic_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})\.csv$/i;
 function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = []){
   const want = CONFIG.files;
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
-  let total = 0, rainIndexFile = null, viewerIndexFile = null, truckFile = null, gridIndexFile = null;
+  let total = 0, rainIndexFile = null, viewerIndexFile = null, gridIndexFile = null;
   const gridFiles = new Map();
-  for(const fl of truckList) if(fl.name === "traffic_15min.csv"){ truckFile = fl; break; }
+  const truck = {shp: null, dbf: null, windows: []};
+  for(const fl of truckList){
+    const m = fl.name.match(TRUCK_WINDOW);
+    if(m) truck.windows.push([`${m[1]}-${m[2]}-${m[3]}`, `${m[4]}:${m[5]}`, fl]);
+    else if(/^network_agg\.shp$/i.test(fl.name)) truck.shp = fl;
+    else if(/^network_agg\.dbf$/i.test(fl.name)) truck.dbf = fl;
+  }
+  const truckOk = truck.shp && truck.dbf && truck.windows.length;
   for(const fl of rainList){
     const r = fl.name.match(RAIN_NAME);
     if(r) rainFiles.set(rainSlotKey(r), fl);
@@ -452,13 +459,12 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
       continue;
     }
     if(fl.name === want.lowland && lowlandFile) continue;   // the explicit file wins
-    if(fl.name === "traffic_15min.csv"){ if(!truckFile) truckFile = fl; continue; }
     byName[fl.name] = fl;
     if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
   }
   if(sources.size) fileRow(want.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
   if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（GeoTIFF、表示時に読み込み）`);
-  fileRow("traffic_15min.csv", truckFile ? `トラック統計 (${(truckFile.size/1048576).toFixed(1)} MB)` : "なし");
+  if(truckList.length) fileRow("トラック", truckOk ? `network_agg.shp/.dbf + 時刻別 CSV ${truck.windows.length} 本` : `不足: ${[!truck.shp && "network_agg.shp", !truck.dbf && "network_agg.dbf", !truck.windows.length && "traffic_yyyymmdd_hhmm.csv"].filter(Boolean).join(", ")}`);
   if(gridFiles.size) fileRow(want.grid_dir + "/", `グリッド ${gridFiles.size} ラスタ（GeoTIFF、表示時に読み込み）`);
   const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
     + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
@@ -480,7 +486,8 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
                                 : [read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)];
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
-  const truckTxt = truckFile ? readSource(truckFile) : Promise.resolve(null);
+  const truckTxt = truckOk ? Promise.all([truck.shp.arrayBuffer(), truck.dbf.arrayBuffer(), ...truck.windows.map(w => readSource(w[2]))])
+      .then(([shp, dbf, ...texts]) => ({shp, dbf, windows: truck.windows.map((w, i) => [w[0], w[1], texts[i]])})) : Promise.resolve(null);
   const gridIndex = gridIndexFile ? readSource(gridIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex, truckTxt, gridIndex])
     .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx, truck, gridIdx]) => {
@@ -594,31 +601,53 @@ function defaultParams(){
            truckMinHits: CONFIG.TRUCK_MIN_BASE_HITS, truckRatio: CONFIG.TRUCK_RATIO };
 }
 
-// ---- Truck-probe statistics (traffic_15min.csv: window,Id,Hits,AvgSp,...) ----
-// Rows are assigned to baseline / event by their date: the period (viewer/index.json) when present,
-// otherwise the latest date is the event and every other date is baseline. Several dates of one role
-// are averaged per clock time (Hits over all dates of the role, AvgSp over the rows present). Values are
-// stored per network feature (feature id) x time step; links absent from the CSV have 0 Hits.
-function buildTruck(text, gj){
-  const lines = text.split(/\r?\n/), head = lines[0].split(",").map(s => s.trim());
-  const col = Object.fromEntries(["window", "Id", "Hits", "AvgSp"].map(k => [k, head.indexOf(k)]));
-  for(const k in col) if(col[k] < 0) throw new Error(`traffic_15min.csv に ${k} 列がありません`);
-  const fidOf = new Map(); for(const ft of gj.features) fidOf.set(String(ft.properties.id), ft.id);
-  const tIdx = new Map(S.times.map((t, i) => [t, i]));
-  const rows = []; const dateSet = new Set();
-  for(let i=1;i<lines.length;i++){
-    if(!lines[i].length) continue;
-    const c = lines[i].split(","), w = c[col.window].trim(), m = w.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
-    if(!m) continue;
-    rows.push([m[1], `${m[2]}:${m[3]}`, c[col.Id].trim(), parseFloat(c[col.Hits]), parseFloat(c[col.AvgSp])]);
-    dateSet.add(m[1]);
+// ---- Truck-probe statistics: network_agg.shp/.dbf (aggregated links, own geometry) + traffic_YYYYMMDD_HHMM.csv ----
+// Minimal shapefile reader: PolyLine / PolyLineZ / PolyLineM records (null records give no geometry).
+function parseShp(buf){
+  const dv = new DataView(buf), n = buf.byteLength, geoms = [];
+  let off = 100;
+  while(off + 8 <= n){
+    const len = dv.getInt32(off + 4, false) * 2, c = off + 8;
+    const type = len >= 4 ? dv.getInt32(c, true) : 0;
+    let geom = null;
+    if(type === 3 || type === 13 || type === 23){
+      const nParts = dv.getInt32(c + 36, true), nPts = dv.getInt32(c + 40, true);
+      const parts = []; for(let i=0;i<nParts;i++) parts.push(dv.getInt32(c + 44 + 4*i, true));
+      const p0 = c + 44 + 4*nParts, lines = [];
+      for(let i=0;i<nParts;i++){
+        const a = parts[i], b = i + 1 < nParts ? parts[i+1] : nPts, coords = [];
+        for(let j=a;j<b;j++) coords.push([dv.getFloat64(p0 + 16*j, true), dv.getFloat64(p0 + 16*j + 8, true)]);
+        if(coords.length >= 2) lines.push(coords);
+      }
+      if(lines.length) geom = lines.length === 1 ? {type:"LineString", coordinates: lines[0]} : {type:"MultiLineString", coordinates: lines};
+    }
+    geoms.push(geom);
+    off = c + len;
   }
-  const dates = [...dateSet].sort();
-  // a date belongs to a period when it lies between the period's first and last calendar day (inclusive)
+  return geoms;
+}
+// Minimal dBASE reader: field names and fixed-width text values (numbers are parsed by the caller).
+function parseDbf(buf){
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  const n = dv.getUint32(4, true), hlen = dv.getUint16(8, true), rlen = dv.getUint16(10, true);
+  const fields = []; let off = 32;
+  while(off + 32 <= hlen && u8[off] !== 0x0D){
+    let name = ""; for(let i=0;i<11 && u8[off+i];i++) name += String.fromCharCode(u8[off+i]);
+    fields.push({name, type: String.fromCharCode(u8[off+11]), len: u8[off+16]}); off += 32;
+  }
+  const dec = new TextDecoder("latin1"), recs = [];
+  for(let r=0;r<n;r++){
+    const base = hlen + r*rlen; if(base + rlen > u8.length) break;
+    const rec = {_deleted: u8[base] === 0x2A}; let p = base + 1;
+    for(const f of fields){ rec[f.name] = dec.decode(u8.subarray(p, p + f.len)).trim(); p += f.len; }
+    recs.push(rec);
+  }
+  return {fields: fields.map(f => f.name), recs};
+}
+// Dates -> roles: by the period (viewer/index.json) when the CSV has dates in both of its periods; otherwise the
+// latest date is the event and every other date is baseline (e.g. the day before + the flood day).
+function assignTruckRoles(dates){
   const inRange = (d, pd) => { if(!pd || !pd.start) return false; const a = new Date(pd.start.replace(" ", "T") + ":00Z"), b = new Date(a.getTime() + ((+pd.hours || 24) * 60 - 1) * 60e3); return d >= a.toISOString().slice(0, 10) && d <= b.toISOString().slice(0, 10); };
-  // Roles: by the period when the CSV has dates in both of its periods (e.g. the truck zip covered the same
-  // weeks); otherwise the latest date is the event and every other date is baseline (e.g. a truck zip of
-  // the day before and the flood day, while the flood baseline is a week earlier).
   const roleOf = {};
   let byPeriod = false;
   if(S.period && S.period.event && S.period.event.start){
@@ -626,12 +655,46 @@ function buildTruck(text, gj){
     byPeriod = dates.some(d => roleOf[d] === "event") && dates.some(d => roleOf[d] === "baseline");
   }
   if(!byPeriod) for(const d of dates) roleOf[d] = d === dates[dates.length - 1] ? "event" : "baseline";
-  const byRole = {baseline: dates.filter(d => roleOf[d] === "baseline"), event: dates.filter(d => roleOf[d] === "event"), byPeriod};
-  const NF = gj.features.length, T = S.T, n = NF * T;
-  const R = {bh: new Float32Array(n), eh: new Float32Array(n), bsp: new Float32Array(n).fill(NaN), esp: new Float32Array(n).fill(NaN),
-             bn: new Uint16Array(n), en: new Uint16Array(n), nf: NF, dates: byRole, rows: rows.length, unmatched: 0, skipped: 0};
+  return {roleOf, byRole: {baseline: dates.filter(d => roleOf[d] === "baseline"), event: dates.filter(d => roleOf[d] === "event"), byPeriod}};
+}
+// raw = {shp: ArrayBuffer, dbf: ArrayBuffer, windows: [[date "YYYY-MM-DD", "HH:MM", csvText], ...]}
+// Values are stored per aggregated link (shapefile record index) x time step; links absent from a window's
+// CSV have 0 Hits. Several dates of one role are averaged per clock time (Hits over the dates with data at
+// that clock time, AvgSp over the rows present).
+function buildTruck(raw){
+  const geoms = parseShp(raw.shp), dbf = parseDbf(raw.dbf);
+  const NF = Math.min(geoms.length, dbf.recs.length);
+  const idField = dbf.fields.find(f => f.toLowerCase() === "id") || dbf.fields[0];
+  const fidOf = new Map(), features = [];
+  const norm = (v) => { const x = Number(v); return Number.isFinite(x) ? String(Math.round(x)) : String(v).trim(); };
+  for(let i=0;i<NF;i++){
+    const id = norm(dbf.recs[i][idField]);
+    if(!fidOf.has(id)) fidOf.set(id, i);
+    if(geoms[i] && !dbf.recs[i]._deleted) features.push({type:"Feature", id: i, properties: {id, _row: -1}, geometry: geoms[i]});
+  }
+  const gj = {type:"FeatureCollection", features};
+  const tIdx = new Map(S.times.map((t, i) => [t, i]));
+  const rows = [], dateSet = new Set();
+  let badFiles = 0;
+  for(const [d, hhmm, text] of raw.windows){
+    const lines = text.split(/\r?\n/), head = lines[0].split(",").map(x => x.trim());
+    const ci = head.indexOf("Id"), ch = head.indexOf("Hits"), cs = head.indexOf("AvgSp");
+    if(ci < 0 || ch < 0){ badFiles++; continue; }
+    dateSet.add(d);
+    for(let i=1;i<lines.length;i++){
+      if(!lines[i].length) continue;
+      const c = lines[i].split(",");
+      rows.push([d, hhmm, norm(c[ci]), parseFloat(c[ch]), cs >= 0 ? parseFloat(c[cs]) : NaN]);
+    }
+  }
+  const dates = [...dateSet].sort();
+  const {roleOf, byRole} = assignTruckRoles(dates);
+  const T = S.T, n = NF * T;
+  const R = {gj, bh: new Float32Array(n), eh: new Float32Array(n), bsp: new Float32Array(n).fill(NaN), esp: new Float32Array(n).fill(NaN),
+             bn: new Uint16Array(n), en: new Uint16Array(n), nf: NF, dates: byRole, rows: rows.length, files: raw.windows.length, badFiles,
+             links: features.length, unmatched: 0, skipped: 0};
   const bss = new Float32Array(n), ess = new Float32Array(n);
-  const bdays = Array.from({length: T}, () => new Set()), edays = Array.from({length: T}, () => new Set());   // dates seen per clock time and role
+  const bdays = Array.from({length: T}, () => new Set()), edays = Array.from({length: T}, () => new Set());
   for(const [d, hhmm, id, hits, sp] of rows){
     const role = roleOf[d], f = fidOf.get(id), c = tIdx.get(hhmm);
     if(!role || c === undefined){ R.skipped++; continue; }
@@ -641,8 +704,6 @@ function buildTruck(text, gj){
     if(role === "baseline"){ R.bh[i] += hits || 0; if(sp === sp){ bss[i] += sp; R.bn[i]++; } }
     else { R.eh[i] += hits || 0; if(sp === sp){ ess[i] += sp; R.en[i]++; } }
   }
-  // Hits = mean over the dates of the role that have data at that clock time (a period crossing midnight has
-  // one date per clock time); AvgSp = mean of the rows present
   for(let i=0;i<n;i++){
     const c = i % T;
     R.bh[i] /= Math.max(1, bdays[c].size); R.eh[i] /= Math.max(1, edays[c].size);
@@ -676,8 +737,8 @@ function truckStatus(){
   const el = $("truckStatus"), R = S.truck;
   if(S.mode !== "truck" || !R){ el.style.display = "none"; return; }
   el.style.display = "block";
-  el.textContent = `トラック統計 traffic_15min.csv: ${R.rows.toLocaleString()} 行、日付 ${R.dateList.map(d => `${d}=${R.roleOf[d] === "event" ? "有事" : R.roleOf[d] === "baseline" ? "平時" : "対象外"}`).join(", ")}`
-    + `（${R.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）｜ ネットワークに無い Id ${R.unmatched.toLocaleString()} 行、時刻軸に無い時刻・対象外の日付 ${R.skipped.toLocaleString()} 行`
+  el.textContent = `トラック統計: network_agg ${R.links.toLocaleString()} リンク、時刻別 CSV ${R.files} 本 ${R.rows.toLocaleString()} 行、日付 ${R.dateList.map(d => `${d}=${R.roleOf[d] === "event" ? "有事" : R.roleOf[d] === "baseline" ? "平時" : "対象外"}`).join(", ")}`
+    + `（${R.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）｜ network_agg に無い Id ${R.unmatched.toLocaleString()} 行、時刻軸に無い時刻 ${R.skipped.toLocaleString()} 行` + (R.badFiles ? `、列が読めない CSV ${R.badFiles} 本` : "")
     + `｜ 台数 1 以上のリンク×時刻: 平時 ${R.cellsBase.toLocaleString()}、有事 ${R.cellsEvent.toLocaleString()}`
     + (R.cellsBase === 0 ? "　※平時のデータがありません: 平時の日付が無いか、Id がネットワークと一致していません" : "");
 }
@@ -689,7 +750,7 @@ function applyTruckTime(t, force=false){
   $("stTruckDrop").textContent = R.countsDrop[t].toLocaleString();
   for(let f=0;f<R.nf;f++){
     const k = R.tcls[f*T + t];
-    if(force || k !== R.cur[f]){ map.setFeatureState({source:"links", id:f}, {tcls:k}); R.cur[f] = k; }
+    if(force || k !== R.cur[f]){ map.setFeatureState({source:"truck-links", id:f}, {tcls:k}); R.cur[f] = k; }
   }
 }
 
@@ -822,9 +883,9 @@ async function boot(loaderFn){
   S.truck = null;
   if(raw.truck){
     try{
-      S.truck = buildTruck(raw.truck, gj);
+      S.truck = buildTruck(raw.truck);
       recomputeTruck();
-      setProgress(`トラック統計: ${S.truck.rows.toLocaleString()} 行（平時 ${S.truck.dates.baseline.join(", ") || "なし"} / 有事 ${S.truck.dates.event.join(", ") || "なし"}、${S.truck.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）`
+      setProgress(`トラック統計: リンク ${S.truck.links.toLocaleString()} 本、時刻別 CSV ${S.truck.files} 本 ${S.truck.rows.toLocaleString()} 行（平時 ${S.truck.dates.baseline.join(", ") || "なし"} / 有事 ${S.truck.dates.event.join(", ") || "なし"}、${S.truck.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）`
         + (S.truck.unmatched ? `、ネットワークに無い Id ${S.truck.unmatched.toLocaleString()} 行` : "") + (S.truck.skipped ? `、期間外・時刻不一致 ${S.truck.skipped.toLocaleString()} 行` : ""));
       await tick();
     }catch(e){ console.warn(e); setProgress(`トラック統計を読めません: ${e.message}`); await tick(); }
@@ -998,20 +1059,22 @@ function initMap(gj){
     });
     // truck tab: drawn links (black) and dropped links (red), by feature-state tcls
     const tcls = ["coalesce", ["feature-state", "tcls"], 0];
+    map.addSource("truck-links", { type:"geojson", data: S.truck ? S.truck.gj : {type:"FeatureCollection", features:[]}, tolerance: 0.2, buffer: 8 });
     map.addLayer({
-      id:"links-truck-base", type:"line", source:"links",
+      id:"links-truck-base", type:"line", source:"truck-links",
       layout:{ "line-cap":"round", "line-join":"round", visibility:"none" },
       paint:{ "line-color": cssVar("--road-black"),
               "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.black*0.6, 14, CONFIG.lineWidth.black, 17, CONFIG.lineWidth.black*2.2],
               "line-opacity": ["case", ["==", tcls, 1], 1, 0] }
     });
     map.addLayer({
-      id:"links-truck-red", type:"line", source:"links",
+      id:"links-truck-red", type:"line", source:"truck-links",
       layout:{ "line-cap":"round", "line-join":"round", visibility:"none" },
       paint:{ "line-color": cssVar("--road-red"),
               "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
               "line-opacity": ["case", ["==", tcls, 2], 1, 0] }
     });
+    map.addLayer({ id:"truck-hit", type:"line", source:"truck-links", layout:{visibility:"none"}, paint:{ "line-width": 10, "line-opacity": 0 } });
     // wide invisible hit layer
     map.addLayer({
       id:"links-hit", type:"line", source:"links",
@@ -1022,9 +1085,12 @@ function initMap(gj){
     applyTime(0, true);
     $("loader").style.display = "none";
 
-    map.on("mousemove", "links-hit", onHover);
-    map.on("mouseleave", "links-hit", () => { if(S.mode === "traj") return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
-    map.on("click", "links-hit", onClick);
+    map.on("mousemove", "links-hit", (e) => { if(S.mode === "traffic") onHover(e); });
+    map.on("mouseleave", "links-hit", () => { if(S.mode !== "traffic") return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("click", "links-hit", (e) => { if(S.mode === "traffic") onClick(e); });
+    map.on("mousemove", "truck-hit", (e) => { if(S.mode === "truck") onHover(e); });
+    map.on("mouseleave", "truck-hit", () => { if(S.mode !== "truck") return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("click", "truck-hit", (e) => { if(S.mode === "truck") onClick(e); });
     // Trajectory mode: one throttled hit test per mouse move over all 8 layers (per-layer listeners
     // would run 8 queries per move over ~100k features). Hover shows the tooltip; a click marks the
     // one feature under the cursor (feature-state, no re-filtering of layers).
@@ -1049,7 +1115,7 @@ function initMap(gj){
         setTrajSel(ft && !same ? {source: ft.layer.id, id: ft.id, ds: S.traj && S.traj[ft.layer.id]} : null);
         return;
       }
-      const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
+      const fts = map.queryRenderedFeatures(e.point, {layers:[S.mode === "truck" ? "truck-hit" : "links-hit"]});
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
     map.on("moveend", updateTraj);
@@ -1062,7 +1128,7 @@ function initMap(gj){
       $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません: " + S.loadInfo;
       trajStatus(`軌跡モードは使えません。${S.loadInfo}`, true);
     }
-    if(!S.truck){ $("modeTruck").disabled = true; $("modeTruck").title = "トラック統計（traffic_15min.csv）が読み込まれていません"; }
+    if(!S.truck){ $("modeTruck").disabled = true; $("modeTruck").title = "トラック統計（network_agg.shp/.dbf と traffic_yyyymmdd_hhmm.csv）が読み込まれていません"; }
   });
 }
 
@@ -1102,7 +1168,7 @@ function setMode(m){
   $("statTraffic").style.display = traffic ? "" : "none";
   $("statTruck").style.display = truck ? "" : "none";
   for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traffic ? "visible" : "none");
-  for(const id of ["links-truck-base","links-truck-red"]) map.setLayoutProperty(id, "visibility", truck ? "visible" : "none");
+  for(const id of ["links-truck-base","links-truck-red","truck-hit"]) map.setLayoutProperty(id, "visibility", truck ? "visible" : "none");
   map.setLayoutProperty("links-context", "visibility", traj ? "visible" : "none");
   S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null);
   setTrajSel(null);
@@ -1475,9 +1541,9 @@ function cssVar(n){ return getComputedStyle(document.documentElement).getPropert
 
 function setHover(fid){
   if(S.hoverId === fid) return;
-  if(S.hoverId !== null) map.setFeatureState({source:"links", id:S.hoverId}, {hover:0});
-  S.hoverId = fid;
-  if(fid !== null) map.setFeatureState({source:"links", id:fid}, {hover:1});
+  if(S.hoverId !== null) map.setFeatureState({source:S.hoverSrc || "links", id:S.hoverId}, {hover:0});
+  S.hoverId = fid; S.hoverSrc = S.mode === "truck" ? "truck-links" : "links";
+  if(fid !== null) map.setFeatureState({source:S.hoverSrc, id:fid}, {hover:1});
 }
 
 function placePanel(point){
@@ -1726,7 +1792,7 @@ function drawChart(svg, a, b, errMask, title){
       const probe = [...$("probeInput").files], nSlot = probe.filter(f => /^(baseline|event)_\d{4}\.geojson$/i.test(f.name)).length, nGrid = probe.filter(f => GRID_NAME.test(f.name)).length;
       const parts = [main ? `1: ${main} ファイル` : "1: 未選択",
                      `2: ${probe.length ? `時刻別 ${nSlot} 本・グリッド ${nGrid} 枚` : "なし"}`,
-                     `3: ${[...$("truckInput").files].some(f => f.name === "traffic_15min.csv") ? "traffic_15min.csv" : $("truckInput").files.length ? "traffic_15min.csv なし" : "なし"}`];
+                     `3: ${$("truckInput").files.length ? `時刻別 CSV ${[...$("truckInput").files].filter(f => TRUCK_WINDOW.test(f.name)).length} 本・network_agg ${[...$("truckInput").files].some(f => /^network_agg\.shp$/i.test(f.name)) && [...$("truckInput").files].some(f => /^network_agg\.dbf$/i.test(f.name)) ? "あり" : "なし"}` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
     for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput"]) $(id).addEventListener("change", note);

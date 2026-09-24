@@ -272,9 +272,7 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.click("#nearestBtn"); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
-  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(300);   // traj -> truck (M cycles the three tabs)
-  assert.equal(await page.evaluate(() => S.mode), "truck");
-  await page.keyboard.press("m"); await page.waitForTimeout(500);                                     // truck -> traffic
+  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);   // traj -> traffic (no truck data over http: the truck tab is skipped)
   assert.equal(await page.evaluate(() => S.mode), "traffic");
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared in traffic mode");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts back");
@@ -420,35 +418,46 @@ test("single-file trajectory GeoJSON (no viewer/ folder) still loads whole-day d
   await page.close();
 });
 
-test("truck tab: folder input 4, links with baseline Hits >= 2, red at <= 50 %, hover chart", async () => {
-  const page = await openViewer();   // http mode: truck/traffic_15min.csv picked up automatically
-  const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, dates: S.truck && S.truck.dates, disabled: document.getElementById("modeTruck").disabled }));
-  assert.ok(info.rows > 1000, "truck statistics parsed");
-  assert.deepEqual(info.dates, { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "dates assigned to roles by the period");
-  // dates outside the flood period (a truck zip of the day before + the flood day): latest date = event, others = baseline
-  const fb = await page.evaluate(() => { const r = buildTruck("window,Id,Hits,AvgSp\n2025-09-10 12:00:00,1,3,40\n2025-09-11 12:00:00,1,1,20\n2025-09-11 12:15:00,2,2,30\n", S.gj); return r.dates; });
-  assert.deepEqual(fb, { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false }, "fallback when the CSV dates do not match the period");
+test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with baseline Hits >= 2, red at <= 50 %, hover chart", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));
+  await page.setInputFiles("#truckInput", join(DATA, "truck"));
+  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, files: S.truck.files, links: S.truck.links, dates: S.truck.dates, unmatched: S.truck.unmatched, disabled: document.getElementById("modeTruck").disabled }));
+  assert.ok(info.rows > 1000 && info.files === 96 && info.links === 1560 && info.unmatched === 0, "shapefile + window CSVs parsed: " + JSON.stringify(info));
+  assert.deepEqual(info.dates, { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "roles by the period of viewer/index.json (folder 2)");
+  assert.deepEqual(await page.evaluate(() => { const p = S.period; S.period = { event: { start: "2024-08-21 18:00", hours: 12 }, baseline: { start: "2024-08-14 18:00", hours: 12 } };
+    const r = assignTruckRoles(["2024-08-14", "2024-08-15", "2024-08-21", "2024-08-22"]).byRole; S.period = p; return r; }),
+    { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "roles by the period when the dates match it");
+  assert.deepEqual(await page.evaluate(() => assignTruckRoles(["2025-09-10", "2025-09-11"]).byRole), { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false });
   assert.equal(info.disabled, false);
   await page.click("#modeTruck"); await page.waitForTimeout(300);
   await page.evaluate((t) => applyTime(t), T_18);
+  await page.waitForFunction(() => map.querySourceFeatures("truck-links").length > 0, null, { timeout: 15000 });   // tiles of the truck source rendered
   const st = await page.evaluate(() => ({ mode: S.mode, shown: +document.getElementById("stTruckShown").textContent.replace(/,/g, ""), drop: +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""),
-    vis: map.getLayoutProperty("links-truck-red", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), legend: getComputedStyle(document.getElementById("legendTruck")).display }));
-  assert.equal(st.mode, "truck"); assert.equal(st.vis, "visible"); assert.equal(st.base, "none"); assert.notEqual(st.legend, "none");
+    vis: map.getLayoutProperty("links-truck-red", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), legend: getComputedStyle(document.getElementById("legendTruck")).display,
+    status: document.getElementById("truckStatus").textContent, src: map.querySourceFeatures("truck-links").length > 0 }));
+  assert.equal(st.mode, "truck"); assert.equal(st.vis, "visible"); assert.equal(st.base, "none"); assert.notEqual(st.legend, "none"); assert.ok(st.src, "truck geometry rendered from the shapefile");
+  assert.match(st.status, /network_agg 1,560 リンク、時刻別 CSV 96 本/);
   assert.ok(st.shown > 0 && st.drop > 0 && st.drop < st.shown, "some drawn links, some dropped: " + JSON.stringify(st));
-  // independent recount from the CSV for 00:00: baseline Hits >= 2 -> shown; event Hits or AvgSp <= 50 % -> drop
+  // independent recount from the window CSVs for 00:00 (baseline 2024-08-15, event 2024-08-22)
   const ref = (() => {
-    const lines = readFileSync(join(DATA, "truck", "traffic_15min.csv"), "utf8").trim().split(/\r?\n/).slice(1);
-    const b = new Map(), e = new Map();
-    for (const l of lines) { const [w, id, h, s] = l.split(","); if (!w.endsWith(" 00:00:00")) continue; (w.startsWith("2024-08-15") ? b : e).set(id, [+h, +s]); }
+    const read = (name) => { const m = new Map(); for (const l of readFileSync(join(DATA, "truck", name), "utf8").trim().split(/\r?\n/).slice(1)) { const [id, h, s] = l.split(","); m.set(id, [+h, +s]); } return m; };
+    const b = read("traffic_20240815_0000.csv"), e = read("traffic_20240822_0000.csv");
     let shown = 0, drop = 0;
     for (const [id, [bh, bs]] of b) { if (bh < 2) continue; shown++; const ev = e.get(id) || [0, NaN]; if (ev[0] / bh <= 0.5 || (Number.isNaN(ev[1]) ? 0 : ev[1] / bs) <= 0.5) drop++; }
     return { shown, drop };
   })();
-  assert.deepEqual({ shown: st.shown, drop: st.drop }, ref, "counts match an independent recount of the CSV");
+  assert.deepEqual({ shown: st.shown, drop: st.drop }, ref, "counts match an independent recount of the CSVs");
   // hover a red link: chart panel with truck statistics
   const pt = await page.evaluate((t) => {
     const T = S.T, c0 = map.getCenter(); let best = null;
-    for (let f = 0; f < S.truck.nf; f++) { if (S.truck.tcls[f * T + t] !== 2) continue; const c = S.gj.features[f].geometry.coordinates; const mid = [(c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2];
+    for (const f of S.truck.gj.features) { if (S.truck.tcls[f.id * T + t] !== 2) continue; const c = f.geometry.coordinates; const mid = [(c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2];
       if (!map.getBounds().contains(mid)) continue; const d = Math.hypot(mid[0] - c0.lng, mid[1] - c0.lat); if (!best || d < best.d) { const p = map.project(mid); best = { d, x: p.x, y: p.y }; } }
     return best;
   }, T_18);
@@ -502,7 +511,7 @@ test("three folders: traffic (tomtom_out), probe (probe_out: viewer/ + grid/), t
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
   await page.setInputFiles("#truckInput", join(DATA, "truck"));                         // 3: the truck folder
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: traffic_15min\.csv$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, truck: !!S.truck, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, truckOff: document.getElementById("modeTruck").disabled }));
