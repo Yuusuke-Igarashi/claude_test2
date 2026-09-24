@@ -12,7 +12,8 @@
 ## 使い方
 
 配布物は `dist/flood_viewer_standalone.html` 1 ファイル（MapLibre GL JS 同梱、約 1.1 MB）。
-ダブルクリックで開き、3 つの入力（1: 人流・車流データのフォルダ＝必須、2: 降雨 rain フォルダ＝任意、3: 低位地帯 GeoJSON＝任意）を選んで「読み込む」を押す（viewer/ と rain/ の時刻別ファイルは表示時に必要な分だけ読む）。1 のフォルダに rain/ や lowland.geojson が入っていればそれも使う。1 のフォルダは probe_out のような出力フォルダそのままでよく、対象外のファイル（stays / trips / events の GeoJSON、gpkg など）は無視する。
+ダブルクリックで開き、3 つのフォルダ（1: 車流 = tomtom_out（必須）、2: 人流 = probe_out（viewer/ と grid/）、3: トラック = yazaki_out（traffic_15min.csv））を選んで「読み込む」を押す（viewer/ と grid/ の時刻別ファイルは表示時に必要な分だけ読む）。rain/ や lowland.geojson が 1 のフォルダに入っていればそれも使う（画面の入力欄は無い）。
+1 のフォルダは probe_out のような出力フォルダそのままでよく、対象外のファイル（stays / trips / events の GeoJSON、gpkg など）は無視する。
 期間モード（viewer/index.json に period がある）では時刻軸を期間そのもの（開始時刻から slot_min 刻みで hours 時間）とし、交通 CSV の列は "HH:MM" で照合する。1 日分 00:00〜23:45 の CSV は 12:00 開始に並べ直され、CSV にない時刻は空欄になる（状態行に注記）。
 ページ見出しは viewer/index.json の期間（例 「冠水候補 2026-08-13 12:00〜08-14 12:00（平時 08-06 12:00〜08-07 12:00）」）から付け、期間がないときはネットワークファイル名の日付を使う。
 output フォルダに置いて `python -m http.server` 経由で開けば自動で読み込む。

@@ -194,15 +194,15 @@ button:hover{background:#f0efec}
     <ul id="fileList"></ul>
     <div id="progress"></div>
     <div id="filePick">
-      <p>4 つの入力を選んで「読み込む」を押してください。1 だけが必須です。<br>
-      <span style="color:var(--muted)">HTML を output フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
-      <p style="margin:6px 0 2px"><b>1. 人流・車流データのフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
-      <span style="color:var(--muted)">network.geojson、4 つの CSV、error.csv、viewer/ を含むフォルダ。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
-      <p style="margin:6px 0 2px"><b>2. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
-      <span style="color:var(--muted)">rain_YYYYMMDD_HHMM.tif と index.json を含むフォルダ</span></p>
-      <p style="margin:6px 0 2px"><b>3. 低位地帯の GeoJSON（任意）:</b> <input id="lowlandInput" type="file" accept=".geojson,.json"></p>
-      <p style="margin:6px 0 2px"><b>4. トラックプローブのフォルダ（任意）:</b> <input id="truckInput" type="file" webkitdirectory><br>
-      <span style="color:var(--muted)">traffic_15min.csv（truck_traffic.ipynb の出力）を含むフォルダ。平時と有事の両方の日付を含むこと</span></p>
+      <p>3 つのフォルダを選んで「読み込む」を押してください。1 だけが必須です。<br>
+      <span style="color:var(--muted)">HTML を出力フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
+      <p style="margin:6px 0 2px"><b>1. 車流（TomTom 交通統計）のフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">tomtom_out: network.geojson、baseline_/event_ の speed・count CSV、error.csv。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
+      <p style="margin:6px 0 2px"><b>2. 人流（位置ログの前処理結果）のフォルダ（任意）:</b> <input id="probeInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">probe_out: viewer/（時刻別ファイル）と grid/（100 m メッシュ）。軌跡タブとグリッド重畳に使う</span></p>
+      <p style="margin:6px 0 2px"><b>3. トラックプローブのフォルダ（任意）:</b> <input id="truckInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">yazaki_out: traffic_15min.csv（平時と有事の両方の日付を含む）。トラックタブに使う</span></p>
+      <span style="display:none"><input id="rainInput" type="file" webkitdirectory><input id="lowlandInput" type="file" accept=".geojson,.json"></span>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
   </div>
@@ -1708,16 +1708,18 @@ function drawChart(svg, a, b, errMask, title){
     $("filePick").style.display = "block";
     const note = () => {
       const main = $("dirInput").files.length || $("fileInput").files.length;
-      const parts = [main ? `1: ${main} ファイル` : "1: 未選択", `2: ${$("rainInput").files.length ? $("rainInput").files.length + " ファイル" : "なし"}`, `3: ${$("lowlandInput").files.length ? $("lowlandInput").files[0].name : "なし"}`,
-                     `4: ${[...$("truckInput").files].some(f => f.name === "traffic_15min.csv") ? "traffic_15min.csv" : $("truckInput").files.length ? "traffic_15min.csv なし" : "なし"}`];
+      const probe = [...$("probeInput").files], nSlot = probe.filter(f => /^(baseline|event)_\d{4}\.geojson$/i.test(f.name)).length, nGrid = probe.filter(f => GRID_NAME.test(f.name)).length;
+      const parts = [main ? `1: ${main} ファイル` : "1: 未選択",
+                     `2: ${probe.length ? `時刻別 ${nSlot} 本・グリッド ${nGrid} 枚` : "なし"}`,
+                     `3: ${[...$("truckInput").files].some(f => f.name === "traffic_15min.csv") ? "traffic_15min.csv" : $("truckInput").files.length ? "traffic_15min.csv なし" : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
-    for(const id of ["fileInput","dirInput","rainInput","lowlandInput","truckInput"]) $(id).addEventListener("change", note);
+    for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput"]) $(id).addEventListener("change", note);
     $("loadBtn").addEventListener("click", async () => {
       const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
       if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles(main, $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files)); }
+      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }
