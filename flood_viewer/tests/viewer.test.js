@@ -470,6 +470,31 @@ test("truck tab: folder input 4, links with baseline Hits >= 2, red at <= 50 %, 
   await page.close();
 });
 
+test("grid overlay in trajectory mode: parameter select, slot follows the slider, legend", async () => {
+  const page = await openViewer();
+  assert.equal(await page.evaluate(() => S.grid ? S.grid.sources.size : 0), 48 * 5, "grid rasters registered from grid/index.json");
+  assert.deepEqual(await page.evaluate(() => S.grid.params.map(p => p[0])), ["walkers", "walk_dist_m", "stays", "turns", "modechanges"]);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "hidden in traffic mode");
+  await page.click("#modeTraj"); await page.waitForTimeout(300);
+  await page.evaluate((t) => applyTime(t + 2), T_18);          // 00:30 = inside the flood window
+  await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "walkers_00:30", null, { timeout: 15000 });
+  const g = await page.evaluate(() => ({ vis: map.getLayoutProperty("grid", "visibility"), max: Math.max(...S.grid.cur.vals), min: Math.min(...S.grid.cur.vals.filter(v => v !== -99)),
+    legend: document.getElementById("legendGrid").textContent, opt: getComputedStyle(document.getElementById("gridOpt")).display }));
+  assert.equal(g.vis, "visible"); assert.equal(g.max, 1); assert.equal(g.min, -1);
+  assert.match(g.legend, /徒歩移動者数.*200 % 以上.*50 % 以下/); assert.notEqual(g.opt, "none");
+  await page.selectOption("#gridParam", "stays");
+  await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "stays_00:30", null, { timeout: 15000 });
+  assert.match(await page.textContent("#legendGrid"), /滞留数/);
+  await page.click("#chkGrid"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "toggle hides the grid");
+  await page.click("#chkGrid"); await page.waitForTimeout(200);
+  await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 14 }));
+  assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "増加", "flag under the map centre (flood block)");
+  await page.click("#modeTraffic"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "hidden again in traffic mode");
+  await page.close();
+});
+
 test("no JavaScript errors were raised", () => {
   assert.deepEqual(errors, []);
 });

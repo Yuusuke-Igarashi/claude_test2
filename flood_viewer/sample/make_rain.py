@@ -20,6 +20,30 @@ times = [f"{((18 * 60 + 15 * i) // 60) % 24:02d}:{(18 * 60 + 15 * i) % 60:02d}" 
 xs = (np.arange(NX) + 0.5) / NX; ys = (np.arange(NY) + 0.5) / NY
 X, Y = np.meshgrid(xs, ys)
 index = {"unit": "mm/h (mean over the slot)", "nodata": NODATA, "bounds": [W, S, E, N], "width": NX, "height": NY, "slot_min": 15, "files": []}
+
+# ---- grid/<param>_<HHMM>.tif: flag rasters like probe_trips.py (+1 / -1 / 0, nodata -99) on a coarser 100 m-ish mesh ----
+GRID = OUT / "grid"; GRID.mkdir(exist_ok=True)
+GX, GY = 80, 60
+gdx, gdy = (E - W) / GX, (N - S) / GY
+gfiles = []
+rng = np.random.default_rng(3)
+for ti, tm in enumerate(times):
+    for param in ("walkers", "walk_dist_m", "stays", "turns", "modechanges"):
+        a = np.full((GY, GX), -99.0, dtype=np.float32)
+        yy, xx = np.mgrid[0:GY, 0:GX]
+        has = rng.random((GY, GX)) < 0.35
+        a[has] = 0.0
+        if 20 <= ti < 32:                                    # flood window: increase around the centre, decrease south of it
+            cx, cy = GX * 0.5, GY * 0.5; r = np.hypot(xx - cx, (yy - cy) * 1.3)
+            a[(r < 10) & has] = 1.0
+            a[(r >= 10) & (r < 18) & (yy > cy) & has] = -1.0
+        name = f"{param}_{tm.replace(':', '')}.tif"
+        write_geotiff(GRID / name, a, W, N, gdx, gdy, nodata=-99.0)
+        gfiles.append(name)
+json.dump({"cell_m": 100.0, "bounds": [W, S, E, N], "width": GX, "height": GY, "dx": gdx, "dy": gdy, "nodata": -99.0,
+           "params": ["walkers", "walk_dist_m", "stays", "turns", "modechanges"], "slots": times, "roles": ["baseline", "event"],
+           "flag": {"up": 2.0, "down": 0.5, "min_count": 0}, "files": gfiles}, open(GRID / "index.json", "w"), indent=1)
+print(f"grid/: {len(gfiles)} flag rasters")
 DATE = None
 for i, tm in enumerate(times):
     DATE = DATES[i]

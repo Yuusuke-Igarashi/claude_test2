@@ -85,6 +85,9 @@ button:hover{background:#f0efec}
 #legendRain{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
 #legendRain .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
 #legendRain .lab{margin-right:6px}
+#legendGrid{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
+#legendGrid .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
+#legendGrid .lab{margin-right:6px}
 #legendRain .low{display:inline-block;width:16px;height:10px;background:rgba(120,90,40,.35);border:1px solid rgba(120,90,40,.8);margin:0 4px 0 12px;vertical-align:middle}
 #nearestBtn{font-size:12px;padding:2px 8px}
 #loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
@@ -119,6 +122,7 @@ button:hover{background:#f0efec}
     <label><input type="checkbox" id="chkBase" checked> 平時</label><label><input type="checkbox" id="chkEvent" checked> イベント時</label>
     <label><input type="checkbox" id="chkTraj" checked> 軌跡</label><label><input type="checkbox" id="chkDwell" checked> 滞留</label><label><input type="checkbox" id="chkMode" checked> 車→徒歩</label><label><input type="checkbox" id="chkTurn" checked> 方向転換</label>
     <button id="nearestBtn" title="現在の時刻のデータのうち、地図中心に最も近いものへ移動">最寄りの軌跡へ</button>
+    <label id="gridOpt" style="display:none"><input type="checkbox" id="chkGrid" checked> グリッド <select id="gridParam"></select> <b id="gridVal" class="stat"></b></label>
   </span>
   <span class="legend" id="legendTraffic">
     <span style="--c:var(--road-gray)">対象外</span>
@@ -141,6 +145,7 @@ button:hover{background:#f0efec}
   </span>
   <div id="trajStatus"></div>
   <div id="legendRain"></div>
+  <div id="legendGrid"></div>
 </div>
 <div id="tip"></div>
 
@@ -223,8 +228,13 @@ const CONFIG = {
     viewer_dir:     "viewer",                        // per-slot files <role>_<HHMM>.geojson + index.json (loaded lazily)
     rain_dir:       "rain",                          // optional: rain_<YYYYMMDD>_<HHMM>.tif (GeoTIFF) + index.json from xrain_to_geotiff.py
     lowland:        "lowland.geojson",               // optional: low-lying area polygons (any GeoJSON, WGS84)
-    truck:          "truck/traffic_15min.csv"        // optional: truck-probe link statistics (truck_traffic.ipynb), both periods' dates
+    truck:          "truck/traffic_15min.csv",       // optional: truck-probe link statistics (truck_traffic.ipynb), both periods' dates
+    grid_dir:       "grid"                           // optional: <param>_<HHMM>.tif flag rasters + index.json from probe_trips.py (GRID_M)
   },
+  // Grid overlay (trajectory mode): flag rasters of probe_trips.py, +1 = event >= 200 % of baseline, -1 = <= 50 %, 0 = neither
+  GRID_PARAMS: [["walkers", "徒歩移動者数"], ["walk_dist_m", "徒歩移動距離"], ["stays", "滞留数"], ["turns", "引き返し数"], ["modechanges", "車→徒歩数"]],
+  GRID_COLORS: {up: "#d03b3b", down: "#2a78d6", same: "#b4b2ab"},
+  GRID_OPACITY: 0.45,
   // Truck tab: links with baseline Hits >= TRUCK_MIN_BASE_HITS are drawn; red when event Hits or AvgSp <= TRUCK_RATIO x baseline
   TRUCK_MIN_BASE_HITS: 2,
   TRUCK_RATIO: 0.5,
@@ -286,6 +296,8 @@ const S = {
   rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, date, cur: {key, vals, alpha, w, h}}
   lowland: null,        // GeoJSON of low-lying areas
   showRain: true, showLowland: true,
+  grid: null,           // {sources: Map("param_HH:MM" -> URL|File), index, cache, cur, loading, params} from grid/ or null
+  showGrid: true, gridParam: null,
   hoverId: null, pinnedId: null,
   playing: false, timer: null
 };
@@ -352,13 +364,16 @@ async function loadViaFetch(){
   const lowlandTxt = await fetchText(f.lowland, true);
   const lowland = lowlandTxt ? JSON.parse(lowlandTxt) : null;
   const truck = await fetchText(f.truck, true);
+  const gridIdx = await fetchText(f.grid_dir + "/index.json", true);
+  const grid = gridIdx ? gridFromIndex(JSON.parse(gridIdx), (name) => `${f.grid_dir}/${name}`) : null;
+  if(grid) fileRow(f.grid_dir + "/", `グリッド ${grid.sources.size} ラスタ（表示時に読み込み）`);
   const idx = await fetchText(f.viewer_dir + "/index.json", true);
   if(idx){
     const index = JSON.parse(idx), sources = new Map();
     S.period = index.period || null;
     for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
     fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
-    return {network, bs, es, bc, ec, err, lazySources: sources, rain, lowland, truck, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
+    return {network, bs, es, bc, ec, err, lazySources: sources, rain, lowland, truck, grid, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
   }
   const [bt, et, bd, ed] = await Promise.all([
     fetchText(f.baseline_traj, true), fetchText(f.event_traj, true),
@@ -366,7 +381,7 @@ async function loadViaFetch(){
   ]);
   const loadInfo = `http 経由: ${location.href.replace(/[^/]*$/, "")}${f.viewer_dir}/index.json が取得できません（HTML と同じ階層に viewer フォルダを置いてください）`
     + ([bt, et, bd, ed].some(Boolean) ? "。1 日 1 ファイル形式の軌跡を使用" : "。1 日 1 ファイル形式の軌跡もありません");
-  return {network, bs, es, bc, ec, err, bt, et, bd, ed, rain, lowland, truck, loadInfo};
+  return {network, bs, es, bc, ec, err, bt, et, bd, ed, rain, lowland, truck, grid, loadInfo};
 }
 
 // Rain slot registry: key "YYYYMMDD_HH:MM" -> source (url or File). From rain/index.json ({files:[{file,date,time}]})
@@ -387,6 +402,18 @@ function rainFromIndex(index, srcOf){
   for(const f of (index && index.files) || []){ const m = String(f.file || "").match(RAIN_NAME); if(m) sources.set(rainSlotKey(m), srcOf(f.file)); }
   return rainRegistry(sources, index);
 }
+const GRID_NAME = /^(walkers|walk_dist_m|stays|turns|modechanges)_(\d{2})(\d{2})\.tiff?$/i;
+function gridRegistry(sources, index){
+  if(!sources.size) return null;
+  const present = new Set([...sources.keys()].map(k => k.split("_").slice(0, -1).join("_")));
+  const params = CONFIG.GRID_PARAMS.filter(([p]) => present.has(p));
+  return {index: index || {}, sources, params, cache: new Map(), cur: null, loading: null};
+}
+function gridFromIndex(index, srcOf){
+  const sources = new Map();
+  for(const f of (index && index.files) || []){ const m = String(f).match(GRID_NAME); if(m) sources.set(`${m[1]}_${m[2]}:${m[3]}`, srcOf(f)); }
+  return gridRegistry(sources, index);
+}
 function rainRegistry(sources, index){
   if(!sources.size) return null;
   const dates = [...new Set([...sources.keys()].map(k => k.split("_")[0]))].sort();
@@ -399,7 +426,8 @@ function rainRegistry(sources, index){
 function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = []){
   const want = CONFIG.files;
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
-  let total = 0, rainIndexFile = null, viewerIndexFile = null, truckFile = null;
+  let total = 0, rainIndexFile = null, viewerIndexFile = null, truckFile = null, gridIndexFile = null;
+  const gridFiles = new Map();
   for(const fl of truckList) if(fl.name === "traffic_15min.csv"){ truckFile = fl; break; }
   for(const fl of rainList){
     const r = fl.name.match(RAIN_NAME);
@@ -413,9 +441,12 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
     if(m){ sources.set(`${m[1].toLowerCase()}_${m[2]}:${m[3]}`, fl); continue; }
     const r = fl.name.match(RAIN_NAME);
     if(r){ if(!rainList.length) rainFiles.set(rainSlotKey(r), fl); continue; }
+    const g = fl.name.match(GRID_NAME);
+    if(g && /(^|\/)grid\//.test(fl.webkitRelativePath || "")){ gridFiles.set(`${g[1]}_${g[2]}:${g[3]}`, fl); continue; }
     if(fl.name === "index.json"){
       if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl;
       else if(/(^|\/)viewer\/index\.json$/.test(fl.webkitRelativePath || "")) viewerIndexFile = fl;
+      else if(/(^|\/)grid\/index\.json$/.test(fl.webkitRelativePath || "")) gridIndexFile = fl;
       continue;
     }
     if(fl.name === want.lowland && lowlandFile) continue;   // the explicit file wins
@@ -426,6 +457,7 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
   if(sources.size) fileRow(want.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
   if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（GeoTIFF、表示時に読み込み）`);
   fileRow("traffic_15min.csv", truckFile ? `トラック統計 (${(truckFile.size/1048576).toFixed(1)} MB)` : "なし");
+  if(gridFiles.size) fileRow(want.grid_dir + "/", `グリッド ${gridFiles.size} ラスタ（GeoTIFF、表示時に読み込み）`);
   const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
     + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
   const read = (key, optional=false) => new Promise((res, rej) => {
@@ -447,11 +479,13 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const truckTxt = truckFile ? readSource(truckFile) : Promise.resolve(null);
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex, truckTxt])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx, truck]) => {
+  const gridIndex = gridIndexFile ? readSource(gridIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex, truckTxt, gridIndex])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx, truck, gridIdx]) => {
       S.period = (viewerIdx && viewerIdx.period) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
-      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, truck, loadInfo};
+      const grid = gridRegistry(gridFiles, gridIdx);
+      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, truck, grid, loadInfo};
     });
 }
 
@@ -786,6 +820,8 @@ async function boot(loaderFn){
   await tick();
   S.rain = raw.rain || null;
   S.lowland = raw.lowland || null;
+  S.grid = raw.grid || null;
+  if(S.grid){ S.gridParam = S.grid.params.length ? S.grid.params[0][0] : null; setProgress(`グリッド: ${S.grid.sources.size} ラスタ（${S.grid.params.map(p => p[1]).join(", ")}）`); await tick(); }
   if(S.rain) { setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick(); }
   if(raw.lazySources && raw.lazySources.size){
     S.lazy = {sources: raw.lazySources, cache: new Map(), loaded: null, loading: null};
@@ -869,6 +905,11 @@ function initMap(gj){
       const [W, Sb, E, Nb] = S.rain.index.bounds || [0, 0, 1e-6, 1e-6];   // real bounds come from each GeoTIFF
       map.addSource("rain", {type:"image", url: BLANK_PNG, coordinates: [[W, Nb], [E, Nb], [E, Sb], [W, Sb]]});
       map.addLayer({id:"rain", type:"raster", source:"rain", paint:{"raster-opacity": CONFIG.RAIN_OPACITY, "raster-resampling":"nearest", "raster-fade-duration": 0}});
+    }
+    if(S.grid){
+      const [W, Sb, E, Nb] = S.grid.index.bounds || [0, 0, 1e-6, 1e-6];   // real bounds come from each GeoTIFF
+      map.addSource("grid", {type:"image", url: BLANK_PNG, coordinates: [[W, Nb], [E, Nb], [E, Sb], [W, Sb]]});
+      map.addLayer({id:"grid", type:"raster", source:"grid", layout:{visibility:"none"}, paint:{"raster-opacity": CONFIG.GRID_OPACITY, "raster-resampling":"nearest", "raster-fade-duration": 0}});
     }
     if(S.lowland){
       map.addSource("lowland", {type:"geojson", data: S.lowland});
@@ -999,7 +1040,9 @@ function initMap(gj){
     });
     map.on("moveend", updateTraj);
     setupOverlays();
+    setupGrid();
     updateRain();
+    updateGrid();
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
     if(!hasTraj()){
       $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません: " + S.loadInfo;
@@ -1050,6 +1093,7 @@ function setMode(m){
   S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null);
   setTrajSel(null);
   updateTraj();
+  updateGrid();
   if(truck) applyTruckTime(S.t, true);
 }
 
@@ -1201,6 +1245,76 @@ function setupOverlays(){
       for(const id of ["lowland","lowland-line"]) map.setLayoutProperty(id, "visibility", S.showLowland ? "visible" : "none"); });
     if(!S.rain){ const lg = $("legendRain"); lg.innerHTML = `<span class="low" style="margin-left:0"></span><span class="lab">低位地帯</span>`; lg.style.display = "flex"; }
   }
+}
+
+// ---- Grid overlay (trajectory mode): one flag raster per parameter and slot ----
+function setupGrid(){
+  const G = S.grid; if(!G) return;
+  $("gridOpt").style.display = "inline";
+  const sel = $("gridParam"); sel.innerHTML = "";
+  for(const [p, label] of G.params){ const o = document.createElement("option"); o.value = p; o.textContent = label; sel.appendChild(o); }
+  if(S.gridParam) sel.value = S.gridParam;
+  sel.addEventListener("change", () => { S.gridParam = sel.value; sel.blur(); updateGrid(); });
+  $("chkGrid").addEventListener("change", (e) => { S.showGrid = e.target.checked; e.target.blur(); updateGrid(); });
+  let t = null;
+  map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; if(S.mode === "traj") $("gridVal").textContent = gridAt(e.lngLat); }, 100); });
+}
+function gridLegend(){
+  const lg = $("legendGrid"), G = S.grid;
+  if(!G || S.mode !== "traj" || !S.showGrid){ lg.style.display = "none"; return; }
+  const label = (G.params.find(p => p[0] === S.gridParam) || [S.gridParam, S.gridParam])[1];
+  const fl = G.index.flag || {}, up = Math.round((fl.up || 2) * 100), down = Math.round((fl.down || 0.5) * 100);
+  const c = CONFIG.GRID_COLORS;
+  lg.innerHTML = `<span class="lab">グリッド ${label}（直近 1 時間、有事 ÷ 平時）</span>`
+    + `<span class="sw" style="background:${c.up}"></span><span class="lab">${up} % 以上</span>`
+    + `<span class="sw" style="background:${c.down}"></span><span class="lab">${down} % 以下</span>`
+    + `<span class="sw" style="background:${c.same};opacity:.5"></span><span class="lab">変化なし</span><span class="lab">（両方 0 は透明）</span>`;
+  lg.style.display = "flex";
+}
+function paintGrid(slot){
+  const {vals, w, h, nodata} = slot;
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const ctx = cv.getContext("2d");
+  const img = ctx.createImageData(w, h), d = img.data;
+  const hex = (s) => [parseInt(s.slice(1,3),16), parseInt(s.slice(3,5),16), parseInt(s.slice(5,7),16)];
+  const up = hex(CONFIG.GRID_COLORS.up), down = hex(CONFIG.GRID_COLORS.down), same = hex(CONFIG.GRID_COLORS.same);
+  for(let j = 0, i = 0; j < vals.length; j++, i += 4){
+    const v = vals[j];
+    if(Number.isNaN(v) || v === nodata) continue;
+    const col = v >= 1 ? up : v <= -1 ? down : same;
+    d[i] = col[0]; d[i+1] = col[1]; d[i+2] = col[2]; d[i+3] = v === 0 ? 90 : 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv.toDataURL("image/png");
+}
+function gridKey(){ return S.grid && S.gridParam ? `${S.gridParam}_${S.times[S.t]}` : null; }
+function updateGrid(){
+  gridLegend();
+  if(!map || !S.grid || !map.getSource("grid")) return;
+  const G = S.grid, key = gridKey(), on = S.mode === "traj" && S.showGrid && !!key;
+  map.setLayoutProperty("grid", "visibility", on ? "visible" : "none");
+  if(!on) return;
+  if(!G.sources.has(key)){ G.cur = null; map.getSource("grid").updateImage({url: BLANK_PNG}); $("gridVal").textContent = "（この時刻のグリッドなし）"; return; }
+  const show = (c) => { G.cur = {key, ...c}; map.getSource("grid").updateImage(c.bounds ? {url: c.url, coordinates: [[c.bounds[0], c.bounds[3]], [c.bounds[2], c.bounds[3]], [c.bounds[2], c.bounds[1]], [c.bounds[0], c.bounds[1]]]} : {url: c.url}); $("gridVal").textContent = ""; };
+  if(G.cache.has(key)){ show(G.cache.get(key)); return; }
+  if(G.loading === key) return;
+  G.loading = key; $("gridVal").textContent = "読み込み中…";
+  decodeRain(G.sources.get(key)).then(slot => {
+    const c = {...slot, url: paintGrid(slot)};
+    G.cache.set(key, c); if(G.cache.size > RAIN_CACHE) G.cache.delete(G.cache.keys().next().value);
+    if(G.loading === key) G.loading = null;
+    if(gridKey() === key) show(c);
+  }).catch(e => { console.error(e); G.loading = null; $("gridVal").textContent = `グリッドを読み込めません: ${e.message}`; });
+}
+// Flag of the current grid slot under a lng/lat, as text.
+function gridAt(ll){
+  const G = S.grid; if(!G || !G.cur || !S.showGrid || !G.cur.bounds) return "";
+  const [W, Sb, E, Nb] = G.cur.bounds;
+  if(ll.lng < W || ll.lng >= E || ll.lat <= Sb || ll.lat > Nb) return "";
+  const x = Math.floor((ll.lng - W) / (E - W) * G.cur.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * G.cur.h);
+  const v = G.cur.vals[y * G.cur.w + x];
+  if(Number.isNaN(v) || v === G.cur.nodata) return "–";
+  return v >= 1 ? "増加" : v <= -1 ? "減少" : "変化なし";
 }
 
 // Minimal GeoTIFF reader for the converter's output: single band, uncompressed, strips, any of
@@ -1411,6 +1525,7 @@ function applyTime(t, force=false){
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
   updateTraj();
   updateRain();
+  updateGrid();
 }
 
 function setupControls(){
