@@ -123,7 +123,8 @@ button:hover{background:#f0efec}
     <label><input type="checkbox" id="chkBase" checked> 平時</label><label><input type="checkbox" id="chkEvent" checked> イベント時</label>
     <label><input type="checkbox" id="chkTraj" checked> 軌跡</label><label><input type="checkbox" id="chkDwell" checked> 滞留</label><label><input type="checkbox" id="chkMode" checked> 車→徒歩</label><label><input type="checkbox" id="chkTurn" checked> 方向転換</label>
     <button id="nearestBtn" title="現在の時刻のデータのうち、地図中心に最も近いものへ移動">最寄りの軌跡へ</button>
-    <label id="gridOpt" style="display:none"><input type="checkbox" id="chkGrid" checked> グリッド <select id="gridParam"></select> <b id="gridVal" class="stat"></b></label>
+    <label id="gridOpt" style="display:none"><input type="checkbox" id="chkGrid" checked> グリッド <select id="gridParam"></select>
+      比 ≥ <input type="number" id="gridUp" step="0.1" min="0" style="width:4em"> 赤 / ≤ <input type="number" id="gridDown" step="0.05" min="0" style="width:4em"> 青 <b id="gridVal" class="stat"></b></label>
   </span>
   <span class="legend" id="legendTraffic">
     <span style="--c:var(--road-gray)">対象外</span>
@@ -232,10 +233,13 @@ const CONFIG = {
     lowland:        "lowland.geojson",               // optional: low-lying area polygons (any GeoJSON, WGS84)
     grid_dir:       "grid"                           // optional: <param>_<HHMM>.tif flag rasters + index.json from probe_trips.py (GRID_M)
   },
-  // Grid overlay (trajectory mode): flag rasters of probe_trips.py, +1 = event >= 200 % of baseline, -1 = <= 50 %, 0 = neither
+  // Grid overlay (trajectory mode): ratio rasters of probe_trips.py (event / baseline, NaN where the baseline is 0);
+  // coloured red at >= GRID_UP, blue at <= GRID_DOWN, faint grey in between (thresholds editable next to the parameter select)
   GRID_PARAMS: [["walkers", "徒歩移動者数"], ["walk_dist_m", "徒歩移動距離"], ["stays", "滞留数"], ["turns", "引き返し数"], ["modechanges", "車→徒歩数"]],
   GRID_COLORS: {up: "#d03b3b", down: "#2a78d6", same: "#b4b2ab"},
   GRID_OPACITY: 0.45,
+  GRID_UP: 2.0,
+  GRID_DOWN: 0.5,
   // Truck tab: links with baseline Hits >= TRUCK_MIN_BASE_HITS are drawn; red when event Hits or AvgSp <= TRUCK_RATIO x baseline
   TRUCK_MIN_BASE_HITS: 2,
   TRUCK_RATIO: 0.5,
@@ -298,7 +302,7 @@ const S = {
   lowland: null,        // GeoJSON of low-lying areas
   showRain: true, showLowland: true,
   grid: null,           // {sources: Map("param_HH:MM" -> URL|File), index, cache, cur, loading, params} from grid/ or null
-  showGrid: true, gridParam: null,
+  showGrid: true, gridParam: null, gridUp: 2.0, gridDown: 0.5,
   hoverId: null, pinnedId: null,
   playing: false, timer: null
 };
@@ -1337,6 +1341,14 @@ function setupGrid(){
   if(S.gridParam) sel.value = S.gridParam;
   sel.addEventListener("change", () => { S.gridParam = sel.value; sel.blur(); updateGrid(); });
   $("chkGrid").addEventListener("change", (e) => { S.showGrid = e.target.checked; e.target.blur(); updateGrid(); });
+  S.gridUp = CONFIG.GRID_UP; S.gridDown = CONFIG.GRID_DOWN;
+  $("gridUp").value = S.gridUp; $("gridDown").value = S.gridDown;
+  let th = null;
+  const readTh = () => { const u = parseFloat($("gridUp").value), d = parseFloat($("gridDown").value); if(Number.isFinite(u)) S.gridUp = u; if(Number.isFinite(d)) S.gridDown = d; G.painted = null; updateGrid(); };
+  for(const id of ["gridUp", "gridDown"]){
+    $(id).addEventListener("input", () => { clearTimeout(th); th = setTimeout(readTh, 250); });
+    $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(th); readTh(); } e.stopPropagation(); });
+  }
   let t = null;
   map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; if(S.mode === "traj") $("gridVal").textContent = gridAt(e.lngLat); }, 100); });
 }
@@ -1344,12 +1356,12 @@ function gridLegend(){
   const lg = $("legendGrid"), G = S.grid;
   if(!G || S.mode !== "traj" || !S.showGrid){ lg.style.display = "none"; return; }
   const label = (G.params.find(p => p[0] === S.gridParam) || [S.gridParam, S.gridParam])[1];
-  const fl = G.index.flag || {}, up = Math.round((fl.up || 2) * 100), down = Math.round((fl.down || 0.5) * 100);
+  const up = Math.round(S.gridUp * 100), down = Math.round(S.gridDown * 100);
   const c = CONFIG.GRID_COLORS;
   lg.innerHTML = `<span class="lab">グリッド ${label}（直近 1 時間、有事 ÷ 平時）</span>`
     + `<span class="sw" style="background:${c.up}"></span><span class="lab">${up} % 以上</span>`
     + `<span class="sw" style="background:${c.down}"></span><span class="lab">${down} % 以下</span>`
-    + `<span class="sw" style="background:${c.same};opacity:.5"></span><span class="lab">変化なし</span><span class="lab">（両方 0 は透明）</span>`;
+    + `<span class="sw" style="background:${c.same};opacity:.5"></span><span class="lab">その間</span><span class="lab">（平時 0 のセルは透明）</span>`;
   lg.style.display = "flex";
 }
 function paintGrid(slot){
@@ -1361,9 +1373,9 @@ function paintGrid(slot){
   const up = hex(CONFIG.GRID_COLORS.up), down = hex(CONFIG.GRID_COLORS.down), same = hex(CONFIG.GRID_COLORS.same);
   for(let j = 0, i = 0; j < vals.length; j++, i += 4){
     const v = vals[j];
-    if(Number.isNaN(v) || v === nodata) continue;
-    const col = v >= 1 ? up : v <= -1 ? down : same;
-    d[i] = col[0]; d[i+1] = col[1]; d[i+2] = col[2]; d[i+3] = v === 0 ? 90 : 255;
+    if(Number.isNaN(v) || v === nodata) continue;                      // baseline 0 -> transparent
+    const col = v >= S.gridUp ? up : v <= S.gridDown ? down : same;
+    d[i] = col[0]; d[i+1] = col[1]; d[i+2] = col[2]; d[i+3] = col === same ? 90 : 255;
   }
   ctx.putImageData(img, 0, 0);
   return cv.toDataURL("image/png");
@@ -1376,12 +1388,16 @@ function updateGrid(){
   map.setLayoutProperty("grid", "visibility", on ? "visible" : "none");
   if(!on) return;
   if(!G.sources.has(key)){ G.cur = null; map.getSource("grid").updateImage({url: BLANK_PNG}); $("gridVal").textContent = "（この時刻のグリッドなし）"; return; }
-  const show = (c) => { G.cur = {key, ...c}; map.getSource("grid").updateImage(c.bounds ? {url: c.url, coordinates: [[c.bounds[0], c.bounds[3]], [c.bounds[2], c.bounds[3]], [c.bounds[2], c.bounds[1]], [c.bounds[0], c.bounds[1]]]} : {url: c.url}); $("gridVal").textContent = ""; };
+  const show = (c) => {   // painted with the current thresholds (repainted when they change: G.painted is reset)
+    const th = `${S.gridUp}/${S.gridDown}`;
+    if(!c.url || c.th !== th){ c.url = paintGrid(c); c.th = th; }
+    G.cur = {key, ...c}; map.getSource("grid").updateImage(c.bounds ? {url: c.url, coordinates: [[c.bounds[0], c.bounds[3]], [c.bounds[2], c.bounds[3]], [c.bounds[2], c.bounds[1]], [c.bounds[0], c.bounds[1]]]} : {url: c.url}); $("gridVal").textContent = "";
+  };
   if(G.cache.has(key)){ show(G.cache.get(key)); return; }
   if(G.loading === key) return;
   G.loading = key; $("gridVal").textContent = "読み込み中…";
   decodeRain(G.sources.get(key)).then(slot => {
-    const c = {...slot, url: paintGrid(slot)};
+    const c = {...slot};
     G.cache.set(key, c); if(G.cache.size > RAIN_CACHE) G.cache.delete(G.cache.keys().next().value);
     if(G.loading === key) G.loading = null;
     if(gridKey() === key) show(c);
@@ -1394,8 +1410,8 @@ function gridAt(ll){
   if(ll.lng < W || ll.lng >= E || ll.lat <= Sb || ll.lat > Nb) return "";
   const x = Math.floor((ll.lng - W) / (E - W) * G.cur.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * G.cur.h);
   const v = G.cur.vals[y * G.cur.w + x];
-  if(Number.isNaN(v) || v === G.cur.nodata) return "–";
-  return v >= 1 ? "増加" : v <= -1 ? "減少" : "変化なし";
+  if(Number.isNaN(v) || v === G.cur.nodata) return "–（平時 0）";
+  return `${(v * 100).toFixed(0)} %`;
 }
 
 // Minimal GeoTIFF reader for the converter's output: single band, uncompressed, strips, any of

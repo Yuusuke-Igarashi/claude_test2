@@ -373,9 +373,9 @@ def test_period_mode():
 
 
 def test_grid():
-    """GRID_M: 100 m mesh, per-slot counts over the last hour, event vs baseline flags.
-    Path A (east): 2 baseline walkers, 5 event walkers -> walkers +1 (250 %); path B (north): event only -> +1;
-    path C (west): 3 baseline, 1 event -> -1 (33 %); one stay on both days -> stays flag 0."""
+    """GRID_M: 100 m mesh, per-slot counts over the last hour, event / baseline ratio rasters.
+    Path A (east): 2 baseline walkers, 5 event walkers -> 2.5; path B (north): event only -> NaN (baseline 0);
+    path C (west): 3 baseline, 1 event -> 0.333; one stay on both days -> 1.0."""
     import tempfile, os, json
     import pandas as pd
     from probe_trips import run, Grid
@@ -401,39 +401,35 @@ def test_grid():
         out = os.path.join(d, "out")
         run(srcs, out, PERIOD_START="2024-08-13 12:00", NO_POINTS=True, NO_VIEWER=True, GRID_BBOX=",".join(map(str, bbox)), GRID_COUNT_RASTERS=True)
         idx = json.load(open(os.path.join(out, "grid", "index.json")))
-        g = Grid(bbox, 100.0)
-        assert idx["width"] == g.ncol and idx["height"] == g.nrow and idx["cell_m"] == 100.0, idx
+        g0 = Grid(bbox, 100.0)
+        assert idx["width"] == g0.ncol and idx["height"] == g0.nrow and idx["cell_m"] == 100.0, idx
         assert "walkers_1315.tif" in idx["files"] and "walkers_event_1315.tif" in idx["files"], idx["files"][:5]
-        fl = pd.read_csv(os.path.join(out, "grid", "grid_flags.csv"))
-        f15 = fl[fl.time == "13:15"]
-        cellA = int(g.cell(lon0 + 500 / kx, lat0 + 30 / M_PER_DEG_LAT))       # on path A
-        cellB = int(g.cell(lon0 - 30 / kx, lat0 + 800 / M_PER_DEG_LAT))       # on path B
-        cellC = int(g.cell(lon0 - 800 / kx, lat0 - 300 / M_PER_DEG_LAT))      # on path C
-        cellS = int(g.cell(lon0 + 1500 / kx, lat0 + 1500 / M_PER_DEG_LAT))    # the stay
-        f15 = f15.assign(cell=f15.row * g.ncol + f15.col)
-        def flag(param, cell):
-            r = f15[(f15.param == param) & (f15.cell == cell)]
-            return int(r.flag.iloc[0]) if len(r) else 0
-        assert flag("walkers", cellA) == 1 and flag("walkers", cellB) == 1 and flag("walkers", cellC) == -1, f15[f15.param == "walkers"]
-        assert flag("walk_dist_m", cellA) == 1 and flag("walk_dist_m", cellC) == -1
-        assert flag("stays", cellS) == 0 and not len(f15[f15.param == "stays"]), "1 stay on both days: no flag"
-        rA = f15[(f15.param == "walkers") & (f15.cell == cellA)].iloc[0]
-        assert rA.baseline == 2 and rA.event == 5 and abs(rA.ratio - 2.5) < 1e-6, rA
-        # the walk of 13:00-13:14 is in the windows (T-60min, T] ending 13:00 (its first point), 13:15, 13:30, 13:45 and 14:00 only
-        assert set(fl[fl.param == "walkers"].time) == {"13:00", "13:15", "13:30", "13:45", "14:00"}, set(fl.time)
-        # raster: a minimal TIFF read (single strip, float32 little-endian) of the 13:15 walkers flags
-        raw = open(os.path.join(out, "grid", "walkers_1315.tif"), "rb").read()
+        g = Grid(bbox, 100.0)
+        cellA = int(g.cell(lon0 + 500 / kx, lat0 + 30 / M_PER_DEG_LAT))       # on path A: 2 baseline, 5 event -> 2.5
+        cellB = int(g.cell(lon0 - 30 / kx, lat0 + 800 / M_PER_DEG_LAT))       # on path B: baseline 0 -> NaN
+        cellC = int(g.cell(lon0 - 800 / kx, lat0 - 300 / M_PER_DEG_LAT))      # on path C: 3 baseline, 1 event -> 0.333
+        cellS = int(g.cell(lon0 + 1500 / kx, lat0 + 1500 / M_PER_DEG_LAT))    # the stay: 1 / 1 -> 1.0
         n = g.ncol * g.nrow
-        arr = np.frombuffer(raw[-4 * n:], dtype="<f4")
-        assert arr[cellA] == 1 and arr[cellC] == -1 and arr[cellS] == -99 and arr.shape[0] == n, (arr[cellA], arr[cellC], arr[cellS])
+        def raster(name):
+            raw = open(os.path.join(out, "grid", name), "rb").read()      # single strip, float32 little-endian, data at the end
+            return np.frombuffer(raw[-4 * n:], dtype="<f4")
+        w = raster("walkers_1315.tif")
+        assert abs(w[cellA] - 2.5) < 1e-6 and np.isnan(w[cellB]) and abs(w[cellC] - 1 / 3) < 1e-6, (w[cellA], w[cellB], w[cellC])
+        assert np.isnan(w[w != w]).all() and np.isnan(w).sum() > n - 100, "cells without baseline traffic are NaN"
+        assert raster("stays_1315.tif")[cellS] == 1.0
+        d = raster("walk_dist_m_1315.tif"); assert d[cellA] > 2 and d[cellC] < 0.5
+        cb = raster("walkers_baseline_1315.tif"); assert cb[cellA] == 2 and cb[cellS] == 0 and cb[cellB] == 0
+        # cell A (500 m along the path, reached at 13:07) has baseline walkers in the windows ending 13:15 .. 14:00 only
+        assert {s for s in idx["slots"] if not np.isnan(raster(f"walkers_{s.replace(':', '')}.tif")[cellA])} == {"13:15", "13:30", "13:45", "14:00"}
+        assert idx["values"].startswith("event / baseline") and idx["nodata"] == "nan"
         try:
             import rasterio
             with rasterio.open(os.path.join(out, "grid", "walkers_1315.tif")) as ds:
-                assert ds.crs.to_epsg() == 4326 and abs(ds.bounds.left - g.west) < 1e-9 and ds.nodata == -99
-                assert ds.read(1)[cellA // g.ncol, cellA % g.ncol] == 1
+                assert ds.crs.to_epsg() == 4326 and abs(ds.bounds.left - g.west) < 1e-9 and np.isnan(ds.nodata)
+                assert abs(ds.read(1)[cellA // g.ncol, cellA % g.ncol] - 2.5) < 1e-6
         except ImportError:
             pass
-    print("ok: grid flags")
+    print("ok: grid ratios")
 
 
 if __name__ == "__main__":

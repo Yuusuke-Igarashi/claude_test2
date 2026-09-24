@@ -20,12 +20,11 @@ Output: per input file, in --out
   The viewer loads only the slot shown by the time slider, so the whole area can be exported.
   --merged-viewer additionally writes the old single-file <role>_trajectory/_dwell.geojson.
   Grid (GRID_M > 0, default 100 m): grid/<param>_<HHMM>.tif, one GeoTIFF per 15-min slot and
-  parameter, flagging cells whose event value is >= GRID_UP (200 %) or <= GRID_DOWN (50 %) of the
-  baseline value (+1 / -1 / 0, nodata where both are 0). Parameters, each counted per cell over the
-  last hour (window (T-60min, T]): walkers (unique walking users), walk_dist_m (walk trajectory
-  length inside the cell), stays, turns, modechanges (vehicle->walk). grid/grid_flags.csv lists
-  the flagged cells, grid/index.json the grid definition; GRID_COUNT_RASTERS also writes the
-  baseline / event count rasters. The grid covers GRID_NETWORK (a GeoJSON, e.g. the road network)
+  parameter holding the ratio event / baseline (float32, NaN where the baseline is 0). The colour
+  thresholds are chosen in the viewer. Parameters, each counted per cell over the last hour
+  (window (T-60min, T]): walkers (unique walking users), walk_dist_m (walk trajectory length inside
+  the cell), stays, turns, modechanges (vehicle->walk). grid/index.json holds the grid definition;
+  GRID_COUNT_RASTERS also writes the baseline / event count rasters (nodata -99). The grid covers GRID_NETWORK (a GeoJSON, e.g. the road network)
   or GRID_BBOX, else BBOX, else the data extent.
 
 Rules (parameters in PARAMS, overridable from the command line):
@@ -124,9 +123,6 @@ PARAMS = {
     "GRID_M": 100.0,          # mesh size [m] of the grid outputs (grid/); 0 = no grid outputs
     "GRID_NETWORK": None,     # GeoJSON (e.g. tokyo_YYYYMMDD_network.geojson) whose extent is the grid extent
     "GRID_BBOX": None,        # or "lon_min,lat_min,lon_max,lat_max"; else BBOX, else the extent of the data
-    "GRID_UP": 2.0,           # event / baseline >= this -> flag +1 (200 %)
-    "GRID_DOWN": 0.5,         # event / baseline <= this -> flag -1 (50 %)
-    "GRID_MIN_COUNT": 0,      # flag only where max(baseline, event) >= this (0 = every cell with data, as specified)
     "GRID_SAMPLE_M": 25.0,    # walk distance is attributed to cells by sampling each segment every this many metres
     "GRID_COUNT_RASTERS": False,  # also write grid/<param>_<role>_<HHMM>.tif with the counts themselves
 }
@@ -1097,15 +1093,15 @@ class Grid:
         return arr
 
     def close(self, out: Path, P: dict):
-        """Step 3: compare event with baseline per slot and parameter; write the flag rasters, the
-        flagged-cell CSV and index.json. Returns a summary dict."""
+        """Step 3: event / baseline ratio per slot and parameter as GeoTIFF (NaN where the baseline is 0,
+        so cells without baseline traffic are transparent), plus index.json. Colour thresholds are chosen
+        in the viewer. Returns a summary dict."""
         gdir = out / "grid"; gdir.mkdir(parents=True, exist_ok=True)
         labels = sorted({lab for _, _, lab in self.acc})
-        up, down, min_count = float(P["GRID_UP"]), float(P["GRID_DOWN"]), float(P["GRID_MIN_COUNT"])
         both = {"baseline", "event"} <= self.roles
-        files, n_up, n_down, rows = [], {}, {}, []
+        files, n_cells = [], {}
         for param in GRID_PARAMS:
-            n_up[param] = n_down[param] = 0
+            n_cells[param] = 0
             for lab in labels:
                 hhmm = lab.replace(":", "")
                 if P["GRID_COUNT_RASTERS"] or not both:
@@ -1117,33 +1113,18 @@ class Grid:
                 if not both:
                     continue
                 b = self.dense(("baseline", param, lab)); e = self.dense(("event", param, lab))
-                has = (b > 0) | (e > 0)
-                flag = np.full(len(b), GRID_NODATA, dtype=np.float32)
-                flag[has] = 0.0
                 with np.errstate(divide="ignore", invalid="ignore"):
-                    ratio = np.where(b > 0, e / b, np.where(e > 0, np.inf, np.nan))
-                cmp = has & (np.maximum(b, e) >= min_count)
-                flag[cmp & (ratio >= up)] = 1.0
-                flag[cmp & (ratio <= down)] = -1.0
+                    ratio = np.where(b > 0, e / b, np.nan).astype(np.float32)
                 name = f"{param}_{hhmm}.tif"
-                write_geotiff(gdir / name, flag.reshape(self.nrow, self.ncol), self.west, self.north, self.dx, self.dy, nodata=GRID_NODATA)
+                write_geotiff(gdir / name, ratio.reshape(self.nrow, self.ncol), self.west, self.north, self.dx, self.dy, nodata=float("nan"))
                 files.append(name)
-                fl = np.flatnonzero((flag == 1.0) | (flag == -1.0))
-                n_up[param] += int((flag == 1.0).sum()); n_down[param] += int((flag == -1.0).sum())
-                if len(fl):
-                    cx, cy = self.centre(fl)
-                    rows.append(pd.DataFrame({"time": lab, "param": param, "row": fl // self.ncol, "col": fl % self.ncol,
-                                              "lon": np.round(cx, 6), "lat": np.round(cy, 6), "baseline": b[fl], "event": e[fl],
-                                              "ratio": np.round(np.where(np.isinf(ratio[fl]), np.nan, ratio[fl]), 3), "flag": flag[fl].astype(int)}))
-        flags = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(columns=["time", "param", "row", "col", "lon", "lat", "baseline", "event", "ratio", "flag"])
-        flags.to_csv(gdir / "grid_flags.csv", index=False)
+                n_cells[param] += int((b > 0).sum())
         index = {"cell_m": self.cell_m, "bounds": [self.west, self.south, self.east, self.north], "width": self.ncol, "height": self.nrow,
-                 "dx": self.dx, "dy": self.dy, "nodata": GRID_NODATA, "params": GRID_PARAMS, "slots": labels, "roles": sorted(self.roles),
-                 "flag": {"up": up, "down": down, "min_count": min_count, "values": "1 = event/baseline >= up, -1 = <= down, 0 = neither, nodata = no data in either"},
-                 "files": files}
+                 "dx": self.dx, "dy": self.dy, "nodata": "nan", "params": GRID_PARAMS, "slots": labels, "roles": sorted(self.roles),
+                 "values": "event / baseline (ratio; NaN where the baseline is 0)", "count_nodata": GRID_NODATA, "files": files}
         with open(gdir / "index.json", "w", encoding="utf-8") as f:
             json.dump(index, f, ensure_ascii=False, indent=1)
-        return {"slots": len(labels), "files": len(files), "flagged_rows": len(flags), "up": n_up, "down": n_down, "compared": both}
+        return {"slots": len(labels), "files": len(files), "cells": n_cells, "compared": both}
 
 
 def write_grid(R, P: dict, role: str, grid: Grid, t_start=None, hours=None):
@@ -1346,8 +1327,8 @@ def run(inputs, out, event_date="2024-08-21", **params):
     if grid is not None:
         g = grid.close(args.out, P)
         if g["compared"]:
-            print(f"grid/: {g['slots']} slots x {len(GRID_PARAMS)} params -> {g['files']} rasters, flagged cells (up / down): "
-                  + ", ".join(f"{p} {g['up'][p]:,} / {g['down'][p]:,}" for p in GRID_PARAMS) + f"; grid_flags.csv {g['flagged_rows']:,} rows")
+            print(f"grid/: {g['slots']} slots x {len(GRID_PARAMS)} params -> {g['files']} ratio rasters (event / baseline), cells with baseline > 0: "
+                  + ", ".join(f"{p} {g['cells'][p]:,}" for p in GRID_PARAMS))
         else:
             print(f"grid/: only {sorted(grid.roles)} present, count rasters written, no baseline/event comparison")
 

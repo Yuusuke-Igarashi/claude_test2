@@ -487,10 +487,15 @@ test("grid overlay in trajectory mode: parameter select, slot follows the slider
   await page.click("#modeTraj"); await page.waitForTimeout(300);
   await page.evaluate((t) => applyTime(t + 2), T_18);          // 00:30 = inside the flood window
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "walkers_00:30", null, { timeout: 15000 });
-  const g = await page.evaluate(() => ({ vis: map.getLayoutProperty("grid", "visibility"), max: Math.max(...S.grid.cur.vals), min: Math.min(...S.grid.cur.vals.filter(v => v !== -99)),
-    legend: document.getElementById("legendGrid").textContent, opt: getComputedStyle(document.getElementById("gridOpt")).display }));
-  assert.equal(g.vis, "visible"); assert.equal(g.max, 1); assert.equal(g.min, -1);
+  const g = await page.evaluate(() => { const v = [...S.grid.cur.vals].filter(x => !Number.isNaN(x)); return { vis: map.getLayoutProperty("grid", "visibility"), max: Math.max(...v), min: Math.min(...v), nan: S.grid.cur.vals.length - v.length,
+    legend: document.getElementById("legendGrid").textContent, opt: getComputedStyle(document.getElementById("gridOpt")).display, url: S.grid.cur.url }; });
+  assert.equal(g.vis, "visible"); assert.equal(g.max, 3); assert.equal(g.min, 0.25); assert.ok(g.nan > 0, "baseline-0 cells are NaN");
   assert.match(g.legend, /徒歩移動者数.*200 % 以上.*50 % 以下/); assert.notEqual(g.opt, "none");
+  // thresholds typed next to the select repaint the slot and the legend
+  await page.fill("#gridUp", "5"); await page.fill("#gridDown", "0.1"); await page.waitForTimeout(500);
+  const g2 = await page.evaluate(() => ({ legend: document.getElementById("legendGrid").textContent, url: S.grid.cur.url, up: S.gridUp, down: S.gridDown }));
+  assert.match(g2.legend, /500 % 以上.*10 % 以下/); assert.deepEqual([g2.up, g2.down], [5, 0.1]); assert.notEqual(g2.url, g.url, "repainted");
+  await page.fill("#gridUp", "2"); await page.fill("#gridDown", "0.5"); await page.waitForTimeout(500);
   await page.selectOption("#gridParam", "stays");
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "stays_00:30", null, { timeout: 15000 });
   assert.match(await page.textContent("#legendGrid"), /滞留数/);
@@ -498,7 +503,7 @@ test("grid overlay in trajectory mode: parameter select, slot follows the slider
   assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "toggle hides the grid");
   await page.click("#chkGrid"); await page.waitForTimeout(200);
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 14 }));
-  assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "増加", "flag under the map centre (flood block)");
+  assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "300 %", "ratio under the map centre (flood block)");
   await page.click("#modeTraffic"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "hidden again in traffic mode");
   await page.close();
