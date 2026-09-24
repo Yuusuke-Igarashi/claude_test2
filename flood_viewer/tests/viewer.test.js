@@ -272,7 +272,9 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.click("#nearestBtn"); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
-  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);
+  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(300);   // traj -> truck (M cycles the three tabs)
+  assert.equal(await page.evaluate(() => S.mode), "truck");
+  await page.keyboard.press("m"); await page.waitForTimeout(500);                                     // truck -> traffic
   assert.equal(await page.evaluate(() => S.mode), "traffic");
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared in traffic mode");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts back");
@@ -372,7 +374,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
-  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
@@ -395,7 +397,7 @@ test("three separate inputs: data files, rain folder, lowland GeoJSON", async ()
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
   await page.setInputFiles("#rainInput", join(DATA, "rain"));
   await page.setInputFiles("#lowlandInput", join(DATA, "lowland.geojson"));
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 49 ファイル \/ 3: lowland\.geojson$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 49 ファイル \/ 3: lowland\.geojson \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
@@ -415,6 +417,53 @@ test("single-file trajectory GeoJSON (no viewer/ folder) still loads whole-day d
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy), null);
   assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 4);
+  await page.close();
+});
+
+test("truck tab: folder input 4, links with baseline Hits >= 2, red at <= 50 %, hover chart", async () => {
+  const page = await openViewer();   // http mode: truck/traffic_15min.csv picked up automatically
+  const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, dates: S.truck && S.truck.dates, disabled: document.getElementById("modeTruck").disabled }));
+  assert.ok(info.rows > 1000, "truck statistics parsed");
+  assert.deepEqual(info.dates, { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"] }, "dates assigned to roles by the period");
+  assert.equal(info.disabled, false);
+  await page.click("#modeTruck"); await page.waitForTimeout(300);
+  await page.evaluate((t) => applyTime(t), T_18);
+  const st = await page.evaluate(() => ({ mode: S.mode, shown: +document.getElementById("stTruckShown").textContent.replace(/,/g, ""), drop: +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""),
+    vis: map.getLayoutProperty("links-truck-red", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), legend: getComputedStyle(document.getElementById("legendTruck")).display }));
+  assert.equal(st.mode, "truck"); assert.equal(st.vis, "visible"); assert.equal(st.base, "none"); assert.notEqual(st.legend, "none");
+  assert.ok(st.shown > 0 && st.drop > 0 && st.drop < st.shown, "some drawn links, some dropped: " + JSON.stringify(st));
+  // independent recount from the CSV for 00:00: baseline Hits >= 2 -> shown; event Hits or AvgSp <= 50 % -> drop
+  const ref = (() => {
+    const lines = readFileSync(join(DATA, "truck", "traffic_15min.csv"), "utf8").trim().split(/\r?\n/).slice(1);
+    const b = new Map(), e = new Map();
+    for (const l of lines) { const [w, id, h, s] = l.split(","); if (!w.endsWith(" 00:00:00")) continue; (w.startsWith("2024-08-15") ? b : e).set(id, [+h, +s]); }
+    let shown = 0, drop = 0;
+    for (const [id, [bh, bs]] of b) { if (bh < 2) continue; shown++; const ev = e.get(id) || [0, NaN]; if (ev[0] / bh <= 0.5 || (Number.isNaN(ev[1]) ? 0 : ev[1] / bs) <= 0.5) drop++; }
+    return { shown, drop };
+  })();
+  assert.deepEqual({ shown: st.shown, drop: st.drop }, ref, "counts match an independent recount of the CSV");
+  // hover a red link: chart panel with truck statistics
+  const pt = await page.evaluate((t) => {
+    const T = S.T, c0 = map.getCenter(); let best = null;
+    for (let f = 0; f < S.truck.nf; f++) { if (S.truck.tcls[f * T + t] !== 2) continue; const c = S.gj.features[f].geometry.coordinates; const mid = [(c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2];
+      if (!map.getBounds().contains(mid)) continue; const d = Math.hypot(mid[0] - c0.lng, mid[1] - c0.lat); if (!best || d < best.d) { const p = map.project(mid); best = { d, x: p.x, y: p.y }; } }
+    return best;
+  }, T_18);
+  assert.ok(pt, "a red truck link is visible");
+  await hover(page, pt);
+  const cp = await page.evaluate(() => ({ shown: document.getElementById("chartPanel").style.display, status: document.getElementById("cpStatus").textContent, title: document.getElementById("cpTitle").textContent, bc: document.getElementById("roBC").textContent, rects: document.querySelectorAll("#chartCount rect.err").length }));
+  assert.equal(cp.shown, "block"); assert.match(cp.status, /低下/); assert.match(cp.title, /トラック/); assert.notEqual(cp.bc, "–"); assert.ok(cp.rects >= 1, "drop band drawn");
+  // thresholds: ratio 0 -> only links with no event traffic stay red
+  await page.click("#settingsBtn"); await page.fill("#pTruckRatio", "0"); await page.waitForTimeout(500);
+  const st2 = await page.evaluate(() => +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""));
+  assert.ok(st2 < st.drop, "lower ratio -> fewer red links");
+  await page.fill("#pTruckMinHits", "100"); await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => +document.getElementById("stTruckShown").textContent.replace(/,/g, "")), 0, "min Hits 100 hides everything");
+  await page.click("#pDefault"); await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => +document.getElementById("stTruckShown").textContent.replace(/,/g, "")), st.shown);
+  await page.screenshot({ path: join(SHOTS, "truck.png") });
+  // M key cycles traffic -> traj -> truck -> traffic
+  await page.mouse.move(700, 450); await page.keyboard.press("m"); assert.equal(await page.evaluate(() => S.mode), "traffic");
   await page.close();
 });
 

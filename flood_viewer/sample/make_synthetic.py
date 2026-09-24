@@ -101,5 +101,24 @@ link_level = err.max(axis=1)
 save(err, "error.csv", rows=link_level >= 1, integer=True)
 for k in (1, 2, 3):
     save(err, f"error_level{k}.csv", rows=link_level == k, integer=True)
+# ---- truck/traffic_15min.csv (truck_traffic.ipynb output): both periods' dates, window = slot start ----
+# baseline 2024-08-14/15, event 2024-08-21/22 (the sample period runs 18:00 -> 05:45 across midnight)
+(OUT / "truck").mkdir(exist_ok=True)
+rng = np.random.default_rng(7)
+truck_rows = []
+truck_links = [r for r in range(N) if r % 3 == 0]
+for r in truck_links:
+    base_h = rng.integers(0, 7); base_s = rng.uniform(20, 50)
+    c = np.array(features[r]["geometry"]["coordinates"][0]); flooded = np.hypot(*(c - center)) < 0.02
+    for ti, tm in enumerate(times):
+        day_b, day_e = ("2024-08-14", "2024-08-21") if ti < 24 else ("2024-08-15", "2024-08-22")
+        hb = max(0, base_h + rng.integers(-1, 2)); he = max(0, base_h + rng.integers(-1, 2))
+        sb = base_s * (1 + 0.05 * rng.standard_normal()); se = base_s * (1 + 0.05 * rng.standard_normal())
+        if flooded and 20 <= ti < 32: he = int(he * 0.2); se *= 0.3
+        if hb > 0: truck_rows.append((f"{day_b} {tm}:00", ids[r], hb, round(sb, 2), round(sb, 2), hb * 30))
+        if he > 0: truck_rows.append((f"{day_e} {tm}:00", ids[r], he, round(se, 2), round(se, 2), he * 30))
+pd.DataFrame(truck_rows, columns=["window", "Id", "Hits", "AvgSp", "MedSp", "n_points"]).to_csv(OUT / "truck" / "traffic_15min.csv", index=False)
+print("truck/traffic_15min.csv:", len(truck_rows), "rows,", len(truck_links), "links")
+
 print("links", len(features), "csv rows", N, "error links", int((link_level >= 1).sum()),
       "cells by level", {k: int((err == k).sum()) for k in (1, 2, 3)}, "links by max level", {k: int((link_level == k).sum()) for k in (1, 2, 3)})

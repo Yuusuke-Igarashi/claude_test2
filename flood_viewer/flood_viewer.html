@@ -106,8 +106,9 @@ button:hover{background:#f0efec}
   <span id="timeLabel">--:--</span>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
   <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</span>
+  <span class="stat" id="statTruck" style="display:none">トラック 表示 <b id="stTruckShown">-</b> 本 / 低下 <b id="stTruckDrop">-</b> 本</span>
   <span class="seg" title="M キーで切替">
-    <button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button>
+    <button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button><button id="modeTruck">トラック</button>
   </span>
   <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
   <span id="overlayOpts" style="display:none">
@@ -125,6 +126,10 @@ button:hover{background:#f0efec}
     <span style="--c:var(--lv1)">異常 L1</span>
     <span style="--c:var(--lv2)">L2</span>
     <span style="--c:var(--lv3)">L3</span>
+  </span>
+  <span class="legend" id="legendTruck" style="display:none">
+    <span style="--c:var(--road-black)">平時 2 台以上（それ以外は非表示）</span>
+    <span style="--c:var(--road-red)">台数または速度が平時の 50 % 以下</span>
   </span>
   <span class="legend" id="legendTraj" style="display:none">
     <span style="--c:var(--series-1)">平時</span><span style="--c:var(--series-2)">イベント時</span>
@@ -150,6 +155,9 @@ button:hover{background:#f0efec}
   <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> または 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
   <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
   <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 15 分も同レベル以上であることを要求する</label></div>
+  <div class="grp">トラックプローブ（トラックタブ）</div>
+  <div class="row">平時台数 ≥ <input type="number" id="pTruckMinHits" step="1" min="0"> 台/15分 のリンクだけを描く</div>
+  <div class="row">台数比 または 速度比 ≤ <input type="number" id="pTruckRatio" step="0.05" min="0" max="2"> で赤（比 = 有事 / 平時）</div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
   <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
@@ -181,13 +189,15 @@ button:hover{background:#f0efec}
     <ul id="fileList"></ul>
     <div id="progress"></div>
     <div id="filePick">
-      <p>3 つの入力を選んで「読み込む」を押してください。1 だけが必須です。<br>
+      <p>4 つの入力を選んで「読み込む」を押してください。1 だけが必須です。<br>
       <span style="color:var(--muted)">HTML を output フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
       <p style="margin:6px 0 2px"><b>1. 人流・車流データのフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">network.geojson、4 つの CSV、error.csv、viewer/ を含むフォルダ。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
       <p style="margin:6px 0 2px"><b>2. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
-      <span style="color:var(--muted)">rain_YYYYMMDD_HHMM.png と index.json を含むフォルダ</span></p>
+      <span style="color:var(--muted)">rain_YYYYMMDD_HHMM.tif と index.json を含むフォルダ</span></p>
       <p style="margin:6px 0 2px"><b>3. 低位地帯の GeoJSON（任意）:</b> <input id="lowlandInput" type="file" accept=".geojson,.json"></p>
+      <p style="margin:6px 0 2px"><b>4. トラックプローブのフォルダ（任意）:</b> <input id="truckInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">traffic_15min.csv（truck_traffic.ipynb の出力）を含むフォルダ。平時と有事の両方の日付を含むこと</span></p>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
   </div>
@@ -212,8 +222,12 @@ const CONFIG = {
     event_dwell:    "event_dwell.geojson",
     viewer_dir:     "viewer",                        // per-slot files <role>_<HHMM>.geojson + index.json (loaded lazily)
     rain_dir:       "rain",                          // optional: rain_<YYYYMMDD>_<HHMM>.tif (GeoTIFF) + index.json from xrain_to_geotiff.py
-    lowland:        "lowland.geojson"                // optional: low-lying area polygons (any GeoJSON, WGS84)
+    lowland:        "lowland.geojson",               // optional: low-lying area polygons (any GeoJSON, WGS84)
+    truck:          "truck/traffic_15min.csv"        // optional: truck-probe link statistics (truck_traffic.ipynb), both periods' dates
   },
+  // Truck tab: links with baseline Hits >= TRUCK_MIN_BASE_HITS are drawn; red when event Hits or AvgSp <= TRUCK_RATIO x baseline
+  TRUCK_MIN_BASE_HITS: 2,
+  TRUCK_RATIO: 0.5,
   // Rain colour scale [mm/h] (thresholds like the JMA precipitation-intensity legend); below the first step = transparent
   RAIN_SCALE: [[1, "#a0d2ff"], [5, "#218cff"], [10, "#0041ff"], [20, "#faf500"], [30, "#ff9900"], [50, "#ff2800"], [80, "#b40068"]],
   RAIN_OPACITY: 0.55,
@@ -261,8 +275,9 @@ const S = {
   fids: null,           // Int32Array[N] feature id (numeric) or -1 if not in network
   hasData: null,        // Uint8Array[N] any finite baseline value
   countsTarget: [], countsError: [], countsLevel: [[], [], []],
+  truck: null,          // truck-probe statistics per network feature x time (see buildTruck) or null
   t: 0,
-  mode: "traffic",      // "traffic" | "traj"
+  mode: "traffic",      // "traffic" | "traj" | "truck"
   traj: null,           // {bt, et, bd, ed} parsed datasets (whole day, or the current slot in lazy mode) or null
   lazy: null,           // {sources: Map("role_HH:MM" -> URL|File), cache: Map("HH:MM" -> {bt,et,bd,ed}), loaded: "HH:MM"|null, loading: "HH:MM"|null}
   show: {base: true, event: true, traj: true, dwell: true, mode: true, turn: true},
@@ -336,13 +351,14 @@ async function loadViaFetch(){
   if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
   const lowlandTxt = await fetchText(f.lowland, true);
   const lowland = lowlandTxt ? JSON.parse(lowlandTxt) : null;
+  const truck = await fetchText(f.truck, true);
   const idx = await fetchText(f.viewer_dir + "/index.json", true);
   if(idx){
     const index = JSON.parse(idx), sources = new Map();
     S.period = index.period || null;
     for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
     fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
-    return {network, bs, es, bc, ec, err, lazySources: sources, rain, lowland, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
+    return {network, bs, es, bc, ec, err, lazySources: sources, rain, lowland, truck, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
   }
   const [bt, et, bd, ed] = await Promise.all([
     fetchText(f.baseline_traj, true), fetchText(f.event_traj, true),
@@ -350,7 +366,7 @@ async function loadViaFetch(){
   ]);
   const loadInfo = `http 経由: ${location.href.replace(/[^/]*$/, "")}${f.viewer_dir}/index.json が取得できません（HTML と同じ階層に viewer フォルダを置いてください）`
     + ([bt, et, bd, ed].some(Boolean) ? "。1 日 1 ファイル形式の軌跡を使用" : "。1 日 1 ファイル形式の軌跡もありません");
-  return {network, bs, es, bc, ec, err, bt, et, bd, ed, rain, lowland, loadInfo};
+  return {network, bs, es, bc, ec, err, bt, et, bd, ed, rain, lowland, truck, loadInfo};
 }
 
 // Rain slot registry: key "YYYYMMDD_HH:MM" -> source (url or File). From rain/index.json ({files:[{file,date,time}]})
@@ -377,12 +393,14 @@ function rainRegistry(sources, index){
   return {index: index || {}, sources, dates, cache: new Map(), date: dates[dates.length - 1], cur: null, loading: null};
 }
 
-// fileList: the data folder (or individual files); rainList: the rain folder; lowlandFile: one GeoJSON.
-// Rain files and lowland.geojson inside the data folder are also accepted (an all-in-one folder).
-function loadViaFiles(fileList, rainList = [], lowlandFile = null){
+// fileList: the data folder (or individual files); rainList: the rain folder; lowlandFile: one GeoJSON;
+// truckList: the truck-probe output folder (traffic_15min.csv). Rain files, lowland.geojson and a
+// traffic_15min.csv inside the data folder are also accepted (an all-in-one folder).
+function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = []){
   const want = CONFIG.files;
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
-  let total = 0, rainIndexFile = null, viewerIndexFile = null;
+  let total = 0, rainIndexFile = null, viewerIndexFile = null, truckFile = null;
+  for(const fl of truckList) if(fl.name === "traffic_15min.csv"){ truckFile = fl; break; }
   for(const fl of rainList){
     const r = fl.name.match(RAIN_NAME);
     if(r) rainFiles.set(rainSlotKey(r), fl);
@@ -401,11 +419,13 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null){
       continue;
     }
     if(fl.name === want.lowland && lowlandFile) continue;   // the explicit file wins
+    if(fl.name === "traffic_15min.csv"){ if(!truckFile) truckFile = fl; continue; }
     byName[fl.name] = fl;
     if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
   }
   if(sources.size) fileRow(want.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
   if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（GeoTIFF、表示時に読み込み）`);
+  fileRow("traffic_15min.csv", truckFile ? `トラック統計 (${(truckFile.size/1048576).toFixed(1)} MB)` : "なし");
   const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
     + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
   const read = (key, optional=false) => new Promise((res, rej) => {
@@ -426,11 +446,12 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null){
                                 : [read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)];
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx]) => {
+  const truckTxt = truckFile ? readSource(truckFile) : Promise.resolve(null);
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex, truckTxt])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx, truck]) => {
       S.period = (viewerIdx && viewerIdx.period) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
-      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, loadInfo};
+      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, truck, loadInfo};
     });
 }
 
@@ -533,7 +554,90 @@ function parseRefLevels(text){
 
 function defaultParams(){
   return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
-           levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count})) };
+           levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count})),
+           truckMinHits: CONFIG.TRUCK_MIN_BASE_HITS, truckRatio: CONFIG.TRUCK_RATIO };
+}
+
+// ---- Truck-probe statistics (traffic_15min.csv: window,Id,Hits,AvgSp,...) ----
+// Rows are assigned to baseline / event by their date: the period (viewer/index.json) when present,
+// otherwise the latest date is the event and every other date is baseline. Several dates of one role
+// are averaged per clock time (Hits over all dates of the role, AvgSp over the rows present). Values are
+// stored per network feature (feature id) x time step; links absent from the CSV have 0 Hits.
+function buildTruck(text, gj){
+  const lines = text.split(/\r?\n/), head = lines[0].split(",").map(s => s.trim());
+  const col = Object.fromEntries(["window", "Id", "Hits", "AvgSp"].map(k => [k, head.indexOf(k)]));
+  for(const k in col) if(col[k] < 0) throw new Error(`traffic_15min.csv に ${k} 列がありません`);
+  const fidOf = new Map(); for(const ft of gj.features) fidOf.set(String(ft.properties.id), ft.id);
+  const tIdx = new Map(S.times.map((t, i) => [t, i]));
+  const rows = []; const dateSet = new Set();
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].length) continue;
+    const c = lines[i].split(","), w = c[col.window].trim(), m = w.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
+    if(!m) continue;
+    rows.push([m[1], `${m[2]}:${m[3]}`, c[col.Id].trim(), parseFloat(c[col.Hits]), parseFloat(c[col.AvgSp])]);
+    dateSet.add(m[1]);
+  }
+  const dates = [...dateSet].sort();
+  // a date belongs to a period when it lies between the period's first and last calendar day (inclusive)
+  const inRange = (d, pd) => { if(!pd || !pd.start) return false; const a = new Date(pd.start.replace(" ", "T") + ":00Z"), b = new Date(a.getTime() + ((+pd.hours || 24) * 60 - 1) * 60e3); return d >= a.toISOString().slice(0, 10) && d <= b.toISOString().slice(0, 10); };
+  const roleOf = {};
+  for(const d of dates){
+    if(S.period && S.period.event && S.period.event.start) roleOf[d] = inRange(d, S.period.event) ? "event" : inRange(d, S.period.baseline) ? "baseline" : null;
+    else roleOf[d] = d === dates[dates.length - 1] ? "event" : "baseline";
+  }
+  const byRole = {baseline: dates.filter(d => roleOf[d] === "baseline"), event: dates.filter(d => roleOf[d] === "event")};
+  const NF = gj.features.length, T = S.T, n = NF * T;
+  const R = {bh: new Float32Array(n), eh: new Float32Array(n), bsp: new Float32Array(n).fill(NaN), esp: new Float32Array(n).fill(NaN),
+             bn: new Uint16Array(n), en: new Uint16Array(n), nf: NF, dates: byRole, rows: rows.length, unmatched: 0, skipped: 0};
+  const bss = new Float32Array(n), ess = new Float32Array(n);
+  const bdays = Array.from({length: T}, () => new Set()), edays = Array.from({length: T}, () => new Set());   // dates seen per clock time and role
+  for(const [d, hhmm, id, hits, sp] of rows){
+    const role = roleOf[d], f = fidOf.get(id), c = tIdx.get(hhmm);
+    if(!role || c === undefined){ R.skipped++; continue; }
+    (role === "baseline" ? bdays : edays)[c].add(d);
+    if(f === undefined){ R.unmatched++; continue; }
+    const i = f * T + c;
+    if(role === "baseline"){ R.bh[i] += hits || 0; if(sp === sp){ bss[i] += sp; R.bn[i]++; } }
+    else { R.eh[i] += hits || 0; if(sp === sp){ ess[i] += sp; R.en[i]++; } }
+  }
+  // Hits = mean over the dates of the role that have data at that clock time (a period crossing midnight has
+  // one date per clock time); AvgSp = mean of the rows present
+  for(let i=0;i<n;i++){
+    const c = i % T;
+    R.bh[i] /= Math.max(1, bdays[c].size); R.eh[i] /= Math.max(1, edays[c].size);
+    if(R.bn[i]) R.bsp[i] = bss[i] / R.bn[i];
+    if(R.en[i]) R.esp[i] = ess[i] / R.en[i];
+  }
+  R.tcls = new Uint8Array(n); R.cur = new Uint8Array(NF);
+  return R;
+}
+
+// tcls: 0 hidden (baseline Hits below the minimum), 1 drawn, 2 red (event Hits or AvgSp <= ratio x baseline)
+function recomputeTruck(){
+  const R = S.truck; if(!R) return;
+  const P = S.params, T = S.T;
+  R.countsShown = new Array(T).fill(0); R.countsDrop = new Array(T).fill(0);
+  for(let i=0;i<R.tcls.length;i++){
+    const bh = R.bh[i];
+    if(!(bh >= P.truckMinHits)){ R.tcls[i] = 0; continue; }
+    const rh = R.eh[i] / bh;
+    const bs = R.bsp[i], es = R.esp[i];
+    const rs = bs > 0 ? (es === es ? es / bs : 0) : NaN;       // no event speed (no event rows) counts as 0
+    const drop = rh <= P.truckRatio || rs <= P.truckRatio;
+    R.tcls[i] = drop ? 2 : 1;
+    const c = i % T; R.countsShown[c]++; if(drop) R.countsDrop[c]++;
+  }
+}
+
+function applyTruckTime(t, force=false){
+  const R = S.truck; if(!R || !map) return;
+  const T = S.T;
+  $("stTruckShown").textContent = R.countsShown[t].toLocaleString();
+  $("stTruckDrop").textContent = R.countsDrop[t].toLocaleString();
+  for(let f=0;f<R.nf;f++){
+    const k = R.tcls[f*T + t];
+    if(force || k !== R.cur[f]){ map.setFeatureState({source:"links", id:f}, {tcls:k}); R.cur[f] = k; }
+  }
 }
 
 // Re-derive is_target / error1 level / confirmed error level / colour class from the raw matrices
@@ -606,8 +710,10 @@ function applyParams(){
   const num = (id, fallback) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : fallback; };
   const d = defaultParams();
   S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), corrob: $("pCorrob").checked,
-               levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count)})) };
+               levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count)})),
+               truckMinHits: num("pTruckMinHits", d.truckMinHits), truckRatio: num("pTruckRatio", d.truckRatio) };
   recompute();
+  recomputeTruck();
   checkAgainstRef();
   if(map) applyTime(S.t);
 }
@@ -615,6 +721,7 @@ function fillParamInputs(){
   const P = S.params;
   $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob;
   P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; });
+  $("pTruckMinHits").value = P.truckMinHits; $("pTruckRatio").value = P.truckRatio;
 }
 
 async function boot(loaderFn){
@@ -659,6 +766,16 @@ async function boot(loaderFn){
   S.params = defaultParams();
   fillParamInputs();
   recompute();
+  S.truck = null;
+  if(raw.truck){
+    try{
+      S.truck = buildTruck(raw.truck, gj);
+      recomputeTruck();
+      setProgress(`トラック統計: ${S.truck.rows.toLocaleString()} 行（平時 ${S.truck.dates.baseline.join(", ") || "なし"} / 有事 ${S.truck.dates.event.join(", ") || "なし"}）`
+        + (S.truck.unmatched ? `、ネットワークに無い Id ${S.truck.unmatched.toLocaleString()} 行` : "") + (S.truck.skipped ? `、期間外・時刻不一致 ${S.truck.skipped.toLocaleString()} 行` : ""));
+      await tick();
+    }catch(e){ console.warn(e); setProgress(`トラック統計を読めません: ${e.message}`); await tick(); }
+  }
   checkAgainstRef();
   setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}）/ CSV 未対応リンク ${unmatched} 本` + (S.axisNote ? ` ※${S.axisNote}` : ""));
   await tick();
@@ -819,6 +936,22 @@ function initMap(gj){
         "line-width": 7, "line-opacity": ["case", ["==", hov, 1], 0.45, 0], "line-blur": 1
       }
     });
+    // truck tab: drawn links (black) and dropped links (red), by feature-state tcls
+    const tcls = ["coalesce", ["feature-state", "tcls"], 0];
+    map.addLayer({
+      id:"links-truck-base", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round", visibility:"none" },
+      paint:{ "line-color": cssVar("--road-black"),
+              "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.black*0.6, 14, CONFIG.lineWidth.black, 17, CONFIG.lineWidth.black*2.2],
+              "line-opacity": ["case", ["==", tcls, 1], 1, 0] }
+    });
+    map.addLayer({
+      id:"links-truck-red", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round", visibility:"none" },
+      paint:{ "line-color": cssVar("--road-red"),
+              "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
+              "line-opacity": ["case", ["==", tcls, 2], 1, 0] }
+    });
     // wide invisible hit layer
     map.addLayer({
       id:"links-hit", type:"line", source:"links",
@@ -867,6 +1000,7 @@ function initMap(gj){
       $("modeTraj").disabled = true; $("modeTraj").title = "軌跡ファイルが読み込まれていません: " + S.loadInfo;
       trajStatus(`軌跡モードは使えません。${S.loadInfo}`, true);
     }
+    if(!S.truck){ $("modeTruck").disabled = true; $("modeTruck").title = "トラック統計（traffic_15min.csv）が読み込まれていません"; }
   });
 }
 
@@ -889,22 +1023,29 @@ const MODE_LABEL = {walk:"徒歩", vehicle:"車両", other:"その他"};
 // ============================================================
 // Mode & trajectory drawing
 // ============================================================
+const MODES = ["traffic", "traj", "truck"];
+const modeAvailable = (m) => m === "traffic" || (m === "traj" && hasTraj()) || (m === "truck" && !!S.truck);
 function setMode(m){
-  if(m === "traj" && !hasTraj()) return;
+  if(!modeAvailable(m)) return;
   S.mode = m;
-  const traj = m === "traj";
-  $("modeTraffic").classList.toggle("on", !traj);
+  const traj = m === "traj", truck = m === "truck", traffic = m === "traffic";
+  $("modeTraffic").classList.toggle("on", traffic);
   $("modeTraj").classList.toggle("on", traj);
+  $("modeTruck").classList.toggle("on", truck);
   $("trajOpts").style.display = traj ? "inline" : "none";
-  $("legendTraffic").style.display = traj ? "none" : "flex";
+  $("legendTraffic").style.display = traffic ? "flex" : "none";
   $("legendTraj").style.display = traj ? "flex" : "none";
+  $("legendTruck").style.display = truck ? "flex" : "none";
   // trajectory mode shows no traffic information: uniform context network, no counts, no chart panel
-  $("statTraffic").style.display = traj ? "none" : "";
-  for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traj ? "none" : "visible");
+  $("statTraffic").style.display = traffic ? "" : "none";
+  $("statTruck").style.display = truck ? "" : "none";
+  for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traffic ? "visible" : "none");
+  for(const id of ["links-truck-base","links-truck-red"]) map.setLayoutProperty(id, "visibility", truck ? "visible" : "none");
   map.setLayoutProperty("links-context", "visibility", traj ? "visible" : "none");
-  if(traj){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null); }
+  S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null);
   setTrajSel(null);
   updateTraj();
+  if(truck) applyTruckTime(S.t, true);
 }
 
 function windowLabel(t){
@@ -1219,7 +1360,7 @@ function pickFeature(fts){
   let best = fts[0], bk = -1;
   for(const f of fts){
     const r = f.properties._row;
-    const k = (r >= 0) ? S.cls[r*S.T + S.t] : -1;
+    const k = S.mode === "truck" ? (S.truck ? S.truck.tcls[f.id*S.T + S.t] : 0) : (r >= 0) ? S.cls[r*S.T + S.t] : -1;
     if(k > bk){ bk = k; best = f; }
   }
   return best;
@@ -1261,6 +1402,7 @@ function applyTime(t, force=false){
       S.cur[r] = k;
     }
   }
+  if(S.mode === "truck") applyTruckTime(t, force);
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
   updateTraj();
   updateRain();
@@ -1275,7 +1417,7 @@ function setupControls(){
   $("settingsClose").addEventListener("click", () => { $("settings").style.display = "none"; });
   let pTimer = null;
   const schedule = () => { clearTimeout(pTimer); pTimer = setTimeout(applyParams, 250); };
-  for(const id of ["pMinCount","pMinSpeed","pL1Speed","pL1Count","pL2Speed","pL2Count","pL3Speed","pL3Count"]){
+  for(const id of ["pMinCount","pMinSpeed","pL1Speed","pL1Count","pL2Speed","pL2Count","pL3Speed","pL3Count","pTruckMinHits","pTruckRatio"]){
     $(id).addEventListener("input", schedule);
     $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
   }
@@ -1283,6 +1425,7 @@ function setupControls(){
   $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
   $("modeTraffic").addEventListener("click", () => setMode("traffic"));
   $("modeTraj").addEventListener("click", () => setMode("traj"));
+  $("modeTruck").addEventListener("click", () => setMode("truck"));
   for(const [id, key] of [["chkBase","base"],["chkEvent","event"],["chkTraj","traj"],["chkDwell","dwell"],["chkMode","mode"],["chkTurn","turn"]])
     $(id).addEventListener("change", (e) => { S.show[key] = e.target.checked; e.target.blur(); updateTraj(); });
   $("nearestBtn").addEventListener("click", (e) => { e.target.blur(); flyToNearest(); });
@@ -1291,7 +1434,7 @@ function setupControls(){
     if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
     else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
     else if(e.key === " "){ togglePlay(); e.preventDefault(); }
-    else if(e.key === "m" || e.key === "M"){ setMode(S.mode === "traj" ? "traffic" : "traj"); }
+    else if(e.key === "m" || e.key === "M"){ let i = MODES.indexOf(S.mode); for(let k=0;k<MODES.length;k++){ i = (i + 1) % MODES.length; if(modeAvailable(MODES[i])){ setMode(MODES[i]); break; } } }
   });
 }
 function togglePlay(){
@@ -1311,8 +1454,24 @@ const STATUS_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--lv1)
 
 function fmt(v, d=1){ return Number.isNaN(v) || v === undefined ? "–" : v.toFixed(d); }
 
+const TRUCK_LABEL = {0:"平時の台数が少ない（非表示）", 1:"表示", 2:"低下（平時の 50 % 以下）"};
+const TRUCK_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--road-red)"};
+function showTruckChart(ft){
+  const R = S.truck, p = ft.properties, T = S.T, t = S.t, b = ft.id*T, k = R.tcls[b+t];
+  $("chartPanel").style.display = "block";
+  $("cpTitle").textContent = `Link ${p.id}（トラック）`;
+  $("cpSub").textContent = `平時 ${R.dates.baseline.join(", ") || "なし"} / 有事 ${R.dates.event.join(", ") || "なし"}`;
+  $("cpStatus").textContent = TRUCK_LABEL[k].replace("50 %", `${Math.round(S.params.truckRatio * 100)} %`); $("cpStatus").style.background = TRUCK_COLOR[k];
+  $("roBS").textContent = fmt(R.bsp[b+t]); $("roES").textContent = fmt(R.esp[b+t]);
+  $("roBC").textContent = fmt(R.bh[b+t]); $("roEC").textContent = fmt(R.eh[b+t]);
+  const mask = new Uint8Array(T); for(let c=0;c<T;c++) mask[c] = R.tcls[b+c] === 2 ? 2 : 0;
+  drawChart($("chartSpeed"), R.bsp.subarray(b,b+T), R.esp.subarray(b,b+T), mask, "速度 km/h（トラック）");
+  drawChart($("chartCount"), R.bh.subarray(b,b+T), R.eh.subarray(b,b+T), mask, "台数 /15分（トラック）");
+}
+
 function showChart(ft){
   lastFeature = ft;
+  if(S.mode === "truck" && S.truck) return showTruckChart(ft);
   const p = ft.properties;
   const r = p._row;
   const T = S.T, t = S.t;
@@ -1429,15 +1588,16 @@ function drawChart(svg, a, b, errMask, title){
     $("filePick").style.display = "block";
     const note = () => {
       const main = $("dirInput").files.length || $("fileInput").files.length;
-      const parts = [main ? `1: ${main} ファイル` : "1: 未選択", `2: ${$("rainInput").files.length ? $("rainInput").files.length + " ファイル" : "なし"}`, `3: ${$("lowlandInput").files.length ? $("lowlandInput").files[0].name : "なし"}`];
+      const parts = [main ? `1: ${main} ファイル` : "1: 未選択", `2: ${$("rainInput").files.length ? $("rainInput").files.length + " ファイル" : "なし"}`, `3: ${$("lowlandInput").files.length ? $("lowlandInput").files[0].name : "なし"}`,
+                     `4: ${[...$("truckInput").files].some(f => f.name === "traffic_15min.csv") ? "traffic_15min.csv" : $("truckInput").files.length ? "traffic_15min.csv なし" : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
-    for(const id of ["fileInput","dirInput","rainInput","lowlandInput"]) $(id).addEventListener("change", note);
+    for(const id of ["fileInput","dirInput","rainInput","lowlandInput","truckInput"]) $(id).addEventListener("change", note);
     $("loadBtn").addEventListener("click", async () => {
       const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
       if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles(main, $("rainInput").files, $("lowlandInput").files[0] || null)); }
+      try{ await boot(() => loadViaFiles(main, $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }
