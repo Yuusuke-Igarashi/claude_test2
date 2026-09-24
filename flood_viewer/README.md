@@ -29,7 +29,7 @@ output フォルダに置いて `python -m http.server` 経由で開けば自動
 | rain/rain_<YYYYMMDD>_<HHMM>.tif + rain/index.json | 任意 | XRAIN の 15 分平均降雨強度の GeoTIFF（`probe/xrain_to_geotiff.py` の出力）。時刻ごとに差し替え、色分けはビューワー側。日付はプルダウンで選ぶ。フォルダ選択ではファイル名だけで登録するので index.json は http 経由のときだけ必要 |
 | lowland.geojson | 任意 | 低位地帯のポリゴン（WGS84）。道路の下に半透明で描く |
 | grid/<param>_<HHMM>.tif + grid/index.json | 任意 | probe_trips.py の 100 m メッシュ比率ラスタ（有事 ÷ 平時、平時 0 のセルは NaN）。軌跡モードで、選んだ指標（徒歩移動者数・徒歩移動距離・滞留数・引き返し数・車→徒歩数）のその時刻のラスタを道路の下に半透明で描く。色の閾値は画面で指定 |
-| 入力 3 のフォルダ: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv | 任意 | トラックプローブのリンク統計（`probe/truck_traffic.ipynb` の出力）。形状は network_agg.shp をページ内で読む（外部ライブラリなし）。時刻別 CSV の日付から平時・有事を決める（人流の期間に合えばその期間、合わなければ最新日 = 有事、他 = 平時）。フォルダ選択のみ（http では読まない） |
+| 入力 3 のフォルダ: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv | 任意 | トラックプローブのリンク統計（`probe/truck_traffic.ipynb` の出力）。形状は network_agg.shp をページ内で読む（外部ライブラリなし）。時刻別 CSV の日付から平時・有事を決める（人流の期間に合えばその期間、合わなければ最新日 = 有事、他 = 平時。traj/ の日付は役割の判定に使わず、00:00 の枠は前日の役割）。フォルダ選択のみ（http では読まない） |
 
 `time` は 1 時間ウィンドウの終端で CSV ヘッダと同じ "HH:MM"。ISO 形式でも HH:MM 部分で照合する。
 

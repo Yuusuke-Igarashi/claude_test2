@@ -441,6 +441,12 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
     const r = assignTruckRoles(["2024-08-14", "2024-08-15", "2024-08-21", "2024-08-22"]).byRole; S.period = p; return r; }),
     { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "roles by the period when the dates match it");
   assert.deepEqual(await page.evaluate(() => assignTruckRoles(["2025-09-10", "2025-09-11"]).byRole), { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false });
+  // roles come from the CSV dates only; the traj_<next day>_0000 slot (data running to midnight) belongs to the previous day
+  assert.deepEqual(await page.evaluate(() => { const p = S.period; S.period = null;
+    const r = truckRoleMap(["2025-09-11", "2025-09-10", "2025-09-11"], [["2025-09-12", "00:00", 1], ["2025-09-11", "23:45", 2], ["2025-09-11", "00:00", 3], ["2025-09-01", "12:00", 4]]);
+    S.period = p; return { dates: r.dates, byRole: r.byRole, keys: [...r.trajSources.keys()], noRole: r.trajNoRole }; }),
+    { dates: ["2025-09-10", "2025-09-11"], byRole: { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false }, keys: ["event_00:00", "event_23:45", "baseline_00:00"], noRole: 1 },
+    "a trajectory file dated the day after the last CSV must not become the event day");
   assert.equal(info.disabled, false);
   await page.click("#modeTruck"); await page.waitForTimeout(300);
   await page.evaluate((t) => applyTime(t), T_18);

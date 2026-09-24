@@ -672,6 +672,18 @@ function assignTruckRoles(dates){
   if(!byPeriod) for(const d of dates) roleOf[d] = d === dates[dates.length - 1] ? "event" : "baseline";
   return {roleOf, byRole: {baseline: dates.filter(d => roleOf[d] === "baseline"), event: dates.filter(d => roleOf[d] === "event"), byPeriod}};
 }
+// Roles come from the dates of the window CSVs only. A trajectory slot file (traj_YYYYMMDD_HHMM, HHMM = window end)
+// takes the role of its date, except the 00:00 slot, which covers the last hour of the previous day and takes that
+// day's role (the notebook writes traj_<next day>_0000 for data that runs to midnight; that date must not be
+// mistaken for the latest = event day).
+function truckRoleMap(csvDates, traj){
+  const dates = [...new Set(csvDates)].sort();
+  const {roleOf, byRole} = assignTruckRoles(dates);
+  const prevDay = (d) => { const x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() - 1); return x.toISOString().slice(0, 10); };
+  const trajSources = new Map(); let trajNoRole = 0;
+  for(const [d, hhmm, fl] of traj || []){ const r = roleOf[hhmm === "00:00" ? prevDay(d) : d]; if(r) trajSources.set(`${r}_${hhmm}`, fl); else trajNoRole++; }
+  return {dates, roleOf, byRole, trajSources, trajNoRole};
+}
 // raw = {shp: ArrayBuffer, dbf: ArrayBuffer, windows: [[date "YYYY-MM-DD", "HH:MM", csvText], ...]}
 // Values are stored per aggregated link (shapefile record index) x time step; links absent from a window's
 // CSV have 0 Hits. Several dates of one role are averaged per clock time (Hits over the dates with data at
@@ -702,11 +714,7 @@ function buildTruck(raw){
       rows.push([d, hhmm, norm(c[ci]), parseFloat(c[ch]), cs >= 0 ? parseFloat(c[cs]) : NaN]);
     }
   }
-  for(const [d] of raw.traj || []) dateSet.add(d);
-  const dates = [...dateSet].sort();
-  const {roleOf, byRole} = assignTruckRoles(dates);
-  const trajSources = new Map();
-  for(const [d, hhmm, fl] of raw.traj || []) if(roleOf[d]) trajSources.set(`${roleOf[d]}_${hhmm}`, fl);
+  const {dates, roleOf, byRole, trajSources, trajNoRole} = truckRoleMap([...dateSet], raw.traj);
   const T = S.T, n = NF * T;
   const R = {gj, bh: new Float32Array(n), eh: new Float32Array(n), bsp: new Float32Array(n).fill(NaN), esp: new Float32Array(n).fill(NaN),
              bn: new Uint16Array(n), en: new Uint16Array(n), nf: NF, dates: byRole, rows: rows.length, files: raw.windows.length, badFiles,
@@ -731,7 +739,7 @@ function buildTruck(raw){
   R.tcls = new Uint8Array(n); R.cur = new Uint8Array(NF);
   R.traj = trajSources.size ? {sources: trajSources, cache: new Map(), loaded: null, loading: null} : null;
   let cb = 0, ce = 0; for(let i=0;i<n;i++){ if(R.bh[i] >= 1) cb++; if(R.eh[i] >= 1) ce++; }
-  R.cellsBase = cb; R.cellsEvent = ce; R.dateList = dates; R.roleOf = roleOf;
+  R.cellsBase = cb; R.cellsEvent = ce; R.dateList = dates; R.roleOf = roleOf; R.trajNoRole = trajNoRole;
   return R;
 }
 
@@ -760,8 +768,9 @@ function truckStatus(){
   el.textContent = `トラック統計: network_agg ${R.links.toLocaleString()} リンク、時刻別 CSV ${R.files} 本 ${R.rows.toLocaleString()} 行、日付 ${R.dateList.map(d => `${d}=${R.roleOf[d] === "event" ? "有事" : R.roleOf[d] === "baseline" ? "平時" : "対象外"}`).join(", ")}`
     + `（${R.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）｜ network_agg に無い Id ${R.unmatched.toLocaleString()} 行、時刻軸に無い時刻 ${R.skipped.toLocaleString()} 行` + (R.badFiles ? `、列が読めない CSV ${R.badFiles} 本` : "")
     + `｜ 台数 1 以上のリンク×時刻: 平時 ${R.cellsBase.toLocaleString()}、有事 ${R.cellsEvent.toLocaleString()}`
-    + (R.traj ? `｜ 軌跡ファイル ${R.traj.sources.size} 本` : "｜ 軌跡ファイルなし")
-    + (R.cellsBase === 0 ? "　※平時のデータがありません: 平時の日付が無いか、Id がネットワークと一致していません" : "");
+    + (R.traj ? `｜ 軌跡ファイル ${R.traj.sources.size} 本` + (R.trajNoRole ? `（日付が CSV に無い ${R.trajNoRole} 本は非表示）` : "") : "｜ 軌跡ファイルなし")
+    + (R.cellsBase === 0 ? "　※平時のデータがありません: 平時の日付が無いか、Id がネットワークと一致していません" : "")
+    + (R.cellsEvent === 0 ? "　※有事のデータがありません: 有事の日付が無いか、Id がネットワークと一致していません" : "");
 }
 
 function applyTruckTime(t, force=false){
