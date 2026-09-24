@@ -424,7 +424,10 @@ test("truck tab: folder input 4, links with baseline Hits >= 2, red at <= 50 %, 
   const page = await openViewer();   // http mode: truck/traffic_15min.csv picked up automatically
   const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, dates: S.truck && S.truck.dates, disabled: document.getElementById("modeTruck").disabled }));
   assert.ok(info.rows > 1000, "truck statistics parsed");
-  assert.deepEqual(info.dates, { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"] }, "dates assigned to roles by the period");
+  assert.deepEqual(info.dates, { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "dates assigned to roles by the period");
+  // dates outside the flood period (a truck zip of the day before + the flood day): latest date = event, others = baseline
+  const fb = await page.evaluate(() => { const r = buildTruck("window,Id,Hits,AvgSp\n2025-09-10 12:00:00,1,3,40\n2025-09-11 12:00:00,1,1,20\n2025-09-11 12:15:00,2,2,30\n", S.gj); return r.dates; });
+  assert.deepEqual(fb, { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false }, "fallback when the CSV dates do not match the period");
   assert.equal(info.disabled, false);
   await page.click("#modeTruck"); await page.waitForTimeout(300);
   await page.evaluate((t) => applyTime(t), T_18);

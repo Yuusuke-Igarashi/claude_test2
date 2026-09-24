@@ -580,12 +580,17 @@ function buildTruck(text, gj){
   const dates = [...dateSet].sort();
   // a date belongs to a period when it lies between the period's first and last calendar day (inclusive)
   const inRange = (d, pd) => { if(!pd || !pd.start) return false; const a = new Date(pd.start.replace(" ", "T") + ":00Z"), b = new Date(a.getTime() + ((+pd.hours || 24) * 60 - 1) * 60e3); return d >= a.toISOString().slice(0, 10) && d <= b.toISOString().slice(0, 10); };
+  // Roles: by the period when the CSV has dates in both of its periods (e.g. the truck zip covered the same
+  // weeks); otherwise the latest date is the event and every other date is baseline (e.g. a truck zip of
+  // the day before and the flood day, while the flood baseline is a week earlier).
   const roleOf = {};
-  for(const d of dates){
-    if(S.period && S.period.event && S.period.event.start) roleOf[d] = inRange(d, S.period.event) ? "event" : inRange(d, S.period.baseline) ? "baseline" : null;
-    else roleOf[d] = d === dates[dates.length - 1] ? "event" : "baseline";
+  let byPeriod = false;
+  if(S.period && S.period.event && S.period.event.start){
+    for(const d of dates) roleOf[d] = inRange(d, S.period.event) ? "event" : inRange(d, S.period.baseline) ? "baseline" : null;
+    byPeriod = dates.some(d => roleOf[d] === "event") && dates.some(d => roleOf[d] === "baseline");
   }
-  const byRole = {baseline: dates.filter(d => roleOf[d] === "baseline"), event: dates.filter(d => roleOf[d] === "event")};
+  if(!byPeriod) for(const d of dates) roleOf[d] = d === dates[dates.length - 1] ? "event" : "baseline";
+  const byRole = {baseline: dates.filter(d => roleOf[d] === "baseline"), event: dates.filter(d => roleOf[d] === "event"), byPeriod};
   const NF = gj.features.length, T = S.T, n = NF * T;
   const R = {bh: new Float32Array(n), eh: new Float32Array(n), bsp: new Float32Array(n).fill(NaN), esp: new Float32Array(n).fill(NaN),
              bn: new Uint16Array(n), en: new Uint16Array(n), nf: NF, dates: byRole, rows: rows.length, unmatched: 0, skipped: 0};
@@ -771,7 +776,7 @@ async function boot(loaderFn){
     try{
       S.truck = buildTruck(raw.truck, gj);
       recomputeTruck();
-      setProgress(`トラック統計: ${S.truck.rows.toLocaleString()} 行（平時 ${S.truck.dates.baseline.join(", ") || "なし"} / 有事 ${S.truck.dates.event.join(", ") || "なし"}）`
+      setProgress(`トラック統計: ${S.truck.rows.toLocaleString()} 行（平時 ${S.truck.dates.baseline.join(", ") || "なし"} / 有事 ${S.truck.dates.event.join(", ") || "なし"}、${S.truck.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）`
         + (S.truck.unmatched ? `、ネットワークに無い Id ${S.truck.unmatched.toLocaleString()} 行` : "") + (S.truck.skipped ? `、期間外・時刻不一致 ${S.truck.skipped.toLocaleString()} 行` : ""));
       await tick();
     }catch(e){ console.warn(e); setProgress(`トラック統計を読めません: ${e.message}`); await tick(); }
