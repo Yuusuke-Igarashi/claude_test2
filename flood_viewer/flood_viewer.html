@@ -84,9 +84,9 @@ button:hover{background:#f0efec}
 .legend .grp{color:var(--muted);margin-left:4px}
 #overlayOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
 #rainDate{font:inherit;font-size:12px;padding:1px 2px}
-#legendRain{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
-#legendRain .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
-#legendRain .lab{margin-right:6px}
+#legendRain,#legendFlood{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
+#legendRain .sw,#legendFlood .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
+#legendRain .lab,#legendFlood .lab{margin-right:6px}
 #legendGrid{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
 #legendGrid .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
 #legendGrid .lab{margin-right:6px}
@@ -119,6 +119,7 @@ button:hover{background:#f0efec}
   <span id="overlayOpts" style="display:none">
     <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <select id="rainDate"></select> <b id="rainVal" class="stat"></b></label>
     <label id="lowlandOpt" style="display:none"><input type="checkbox" id="chkLowland" checked> 低位地帯</label>
+    <label id="floodOpt" style="display:none"><input type="checkbox" id="chkFlood" checked> 浸水域 <b id="floodVal" class="stat"></b> <b id="floodHover" class="stat"></b></label>
   </span>
   <span id="truckOpts" style="display:none">
     <label><input type="checkbox" id="chkTruckTrajBase" checked> 軌跡 平時</label><label><input type="checkbox" id="chkTruckTrajEvent" checked> 軌跡 有事</label>
@@ -155,6 +156,7 @@ button:hover{background:#f0efec}
   <div id="trajStatus"></div>
   <div id="truckStatus" style="display:none"></div>
   <div id="legendRain"></div>
+  <div id="legendFlood"></div>
   <div id="legendGrid"></div>
 </div>
 <div id="tip"></div>
@@ -173,6 +175,8 @@ button:hover{background:#f0efec}
   <div class="grp">トラックプローブ（トラックタブ）</div>
   <div class="row">平時台数 ≥ <input type="number" id="pTruckMinHits" step="1" min="0"> 台/15分 のリンクだけを描く</div>
   <div class="row">台数比 <select id="pTruckOp"><option value="or">または</option><option value="and">かつ</option></select> 速度比 ≤ <input type="number" id="pTruckRatio" step="0.05" min="0" max="2"> で赤（比 = 有事 / 平時）</div>
+  <div class="grp">浸水域（入力 4）</div>
+  <div class="row">スライダーの時刻より <input type="number" id="pFloodMaxAge" step="10" min="0"> 分より古いファイルは表示しない（0 = 制限なし。時刻以前の最新のファイルを常に表示）</div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
   <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
@@ -204,7 +208,7 @@ button:hover{background:#f0efec}
     <ul id="fileList"></ul>
     <div id="progress"></div>
     <div id="filePick">
-      <p>3 つのフォルダを選んで「読み込む」を押してください。1 だけが必須です。<br>
+      <p>フォルダを選んで「読み込む」を押してください。1 だけが必須です。<br>
       <span style="color:var(--muted)">HTML を出力フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
       <p style="margin:6px 0 2px"><b>1. 車流（TomTom 交通統計）のフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">tomtom_out: network.geojson、baseline_/event_ の speed・count CSV、error.csv。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
@@ -212,6 +216,8 @@ button:hover{background:#f0efec}
       <span style="color:var(--muted)">probe_out: viewer/（時刻別ファイル）と grid/（100 m メッシュ）。軌跡タブとグリッド重畳に使う</span></p>
       <p style="margin:6px 0 2px"><b>3. トラックプローブのフォルダ（任意）:</b> <input id="truckInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">yazaki_out: network_agg.shp / .dbf と traffic_yyyymmdd_hhmm.csv（平時と有事の両方の日付）。トラックタブに使う</span></p>
+      <p style="margin:6px 0 2px"><b>4. 浸水域（時刻付き shp）のフォルダ（任意）:</b> <input id="floodInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">S1_yyyymmddhhmm.shp / .dbf（/ .cpg）など、ファイル名の末尾に日付時刻を持つポリゴン shp。各時刻には、その時刻以前の最新のファイルを重ねる</span></p>
       <span style="display:none"><input id="rainInput" type="file" webkitdirectory><input id="lowlandInput" type="file" accept=".geojson,.json"></span>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
@@ -251,6 +257,10 @@ const CONFIG = {
   TRUCK_MIN_BASE_HITS: 2,
   TRUCK_RATIO: 0.5,
   TRUCK_OP: "or",           // "or": Hits ratio or AvgSp ratio <= TRUCK_RATIO; "and": both
+  // Flood-extent shapefiles (input 4): <anything><YYYYMMDDHHMM>.shp; the latest file at or before the slider time is drawn.
+  FLOOD_SCALE: [[0, "#d2e7ff"], [0.3, "#8fc3f5"], [0.5, "#4a97e0"], [1.0, "#1f5fbf"], [2.0, "#0b2f7a"]],   // depth [m] -> fill colour (step)
+  FLOOD_OPACITY: 0.5,
+  FLOOD_MAX_AGE_MIN: 0,     // 0 = no limit; otherwise files older than this (minutes before the slot) are not shown
   // Rain colour scale [mm/h] (thresholds like the JMA precipitation-intensity legend); below the first step = transparent
   RAIN_SCALE: [[1, "#a0d2ff"], [5, "#218cff"], [10, "#0041ff"], [20, "#faf500"], [30, "#ff9900"], [50, "#ff2800"], [80, "#b40068"]],
   RAIN_OPACITY: 0.55,
@@ -309,6 +319,8 @@ const S = {
   period: null,         // viewer/index.json "period": {event:{start:"YYYY-MM-DD HH:MM", hours}, baseline:{...}} when the data span a period
   rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, date, cur: {key, vals, alpha, w, h}}
   lowland: null,        // GeoJSON of low-lying areas
+  flood: null,          // {sources: Map("YYYYMMDD_HHMM" -> {shp, dbf, cpg: File}), keys: [{key, abs}], dates, cache, cur, loading}
+  showFlood: true,
   showRain: true, showLowland: true,
   grid: null,           // {sources: Map("param_HH:MM" -> URL|File), index, cache, cur, loading, params} from grid/ or null
   showGrid: true, gridParam: null, gridUp: 2.0, gridDown: 0.5,
@@ -439,8 +451,25 @@ function rainRegistry(sources, index){
 // lowland.geojson inside the data folder are also accepted (an all-in-one folder).
 const TRUCK_WINDOW = /^traffic_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})\.csv$/i;
 const TRUCK_TRAJ = /^traj_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})\.geojson$/i;
-function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = []){
+const FLOOD_NAME = /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})\.(shp|dbf|cpg)$/i;
+function floodRegistry(floodList){
+  const by = new Map();
+  for(const fl of floodList || []){
+    const m = fl.name.match(FLOOD_NAME); if(!m) continue;
+    const key = `${m[1]}${m[2]}${m[3]}_${m[4]}${m[5]}`, stem = fl.name.slice(0, -4).toLowerCase();
+    const e = by.get(key) || {key, stem, shp: null, dbf: null, cpg: null};
+    if(e.stem !== stem && e.shp) continue;                     // one file set per time stamp (the first stem wins)
+    e[m[6].toLowerCase()] = fl; e.stem = stem; by.set(key, e);
+  }
+  const sources = new Map([...by.values()].filter(e => e.shp && e.dbf).map(e => [e.key, e]));
+  if(!sources.size) return null;
+  const keys = [...sources.keys()].sort().map(k => ({key: k, abs: new Date(`${k.slice(0,4)}-${k.slice(4,6)}-${k.slice(6,8)}T${k.slice(9,11)}:${k.slice(11,13)}:00`).getTime()}));
+  return {sources, keys, dates: [...new Set(keys.map(k => k.key.slice(0, 8)))].sort(), cache: new Map(), cur: null, loading: null, depthField: null};
+}
+function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [], floodList = []){
   const want = CONFIG.files;
+  const flood = floodRegistry(floodList);
+  if(floodList.length) fileRow("浸水域", flood ? `shp ${flood.sources.size} 時点（${flood.dates.join(", ")}、表示時に読み込み）` : "不足: 日付時刻付きの .shp と .dbf の組が見つかりません");
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
   let total = 0, rainIndexFile = null, viewerIndexFile = null, gridIndexFile = null;
   const gridFiles = new Map();
@@ -509,7 +538,7 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
       S.period = (viewerIdx && viewerIdx.period) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
       const grid = gridRegistry(gridFiles, gridIdx);
-      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, truck, grid, loadInfo};
+      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, truck, grid, flood, loadInfo};
     });
 }
 
@@ -613,7 +642,8 @@ function parseRefLevels(text){
 function defaultParams(){
   return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
            levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count, op: CONFIG.ERROR_LEVEL_OP})),
-           truckMinHits: CONFIG.TRUCK_MIN_BASE_HITS, truckRatio: CONFIG.TRUCK_RATIO, truckOp: CONFIG.TRUCK_OP };
+           truckMinHits: CONFIG.TRUCK_MIN_BASE_HITS, truckRatio: CONFIG.TRUCK_RATIO, truckOp: CONFIG.TRUCK_OP,
+           floodMaxAge: CONFIG.FLOOD_MAX_AGE_MIN };
 }
 
 // ---- Truck-probe statistics: network_agg.shp/.dbf (aggregated links, own geometry) + traffic_YYYYMMDD_HHMM.csv ----
@@ -635,6 +665,18 @@ function parseShp(buf){
         if(coords.length >= 2) lines.push(coords);
       }
       if(lines.length) geom = lines.length === 1 ? {type:"LineString", coordinates: lines[0]} : {type:"MultiLineString", coordinates: lines};
+    } else if(type === 5 || type === 15 || type === 25){
+      const nParts = dv.getInt32(c + 36, true), nPts = dv.getInt32(c + 40, true);
+      const parts = []; for(let i=0;i<nParts;i++) parts.push(dv.getInt32(c + 44 + 4*i, true));
+      const p0 = c + 44 + 4*nParts, polys = [];
+      const cw = (r) => { let a = 0; for(let i=1;i<r.length;i++) a += (r[i][0] - r[i-1][0]) * (r[i][1] + r[i-1][1]); return a > 0; };
+      for(let i=0;i<nParts;i++){
+        const a = parts[i], b = i + 1 < nParts ? parts[i+1] : nPts, ring = [];
+        for(let j=a;j<b;j++) ring.push([dv.getFloat64(p0 + 16*j, true), dv.getFloat64(p0 + 16*j + 8, true)]);
+        if(ring.length < 4) continue;
+        if(cw(ring) || !polys.length) polys.push([ring]); else polys[polys.length - 1].push(ring);   // shapefile: outer rings clockwise, holes counter-clockwise
+      }
+      if(polys.length) geom = polys.length === 1 ? {type:"Polygon", coordinates: polys[0]} : {type:"MultiPolygon", coordinates: polys};
     }
     geoms.push(geom);
     off = c + len;
@@ -642,15 +684,16 @@ function parseShp(buf){
   return geoms;
 }
 // Minimal dBASE reader: field names and fixed-width text values (numbers are parsed by the caller).
-function parseDbf(buf){
+function parseDbf(buf, encoding = "latin1"){
   const dv = new DataView(buf), u8 = new Uint8Array(buf);
   const n = dv.getUint32(4, true), hlen = dv.getUint16(8, true), rlen = dv.getUint16(10, true);
+  let dec; try{ dec = new TextDecoder(encoding); }catch(e){ dec = new TextDecoder("latin1"); }
   const fields = []; let off = 32;
   while(off + 32 <= hlen && u8[off] !== 0x0D){
-    let name = ""; for(let i=0;i<11 && u8[off+i];i++) name += String.fromCharCode(u8[off+i]);
-    fields.push({name, type: String.fromCharCode(u8[off+11]), len: u8[off+16]}); off += 32;
+    let nl = 0; while(nl < 11 && u8[off+nl]) nl++;
+    fields.push({name: dec.decode(u8.subarray(off, off + nl)), type: String.fromCharCode(u8[off+11]), len: u8[off+16]}); off += 32;
   }
-  const dec = new TextDecoder("latin1"), recs = [];
+  const recs = [];
   for(let r=0;r<n;r++){
     const base = hlen + r*rlen; if(base + rlen > u8.length) break;
     const rec = {_deleted: u8[base] === 0x2A}; let p = base + 1;
@@ -858,9 +901,11 @@ function applyParams(){
   const d = defaultParams();
   S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), corrob: $("pCorrob").checked,
                levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count), op: $(`pL${i+1}Op`).value === "and" ? "and" : "or"})),
-               truckMinHits: num("pTruckMinHits", d.truckMinHits), truckRatio: num("pTruckRatio", d.truckRatio), truckOp: $("pTruckOp").value === "and" ? "and" : "or" };
+               truckMinHits: num("pTruckMinHits", d.truckMinHits), truckRatio: num("pTruckRatio", d.truckRatio), truckOp: $("pTruckOp").value === "and" ? "and" : "or",
+               floodMaxAge: num("pFloodMaxAge", d.floodMaxAge) };
   recompute();
   recomputeTruck();
+  updateFlood();
   checkAgainstRef();
   if(map) applyTime(S.t);
 }
@@ -869,6 +914,7 @@ function fillParamInputs(){
   $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob;
   P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; $(`pL${i+1}Op`).value = l.op || "or"; });
   $("pTruckMinHits").value = P.truckMinHits; $("pTruckRatio").value = P.truckRatio; $("pTruckOp").value = P.truckOp || "or";
+  $("pFloodMaxAge").value = P.floodMaxAge || 0;
 }
 
 async function boot(loaderFn){
@@ -928,7 +974,9 @@ async function boot(loaderFn){
   await tick();
   S.rain = raw.rain || null;
   S.lowland = raw.lowland || null;
+  S.flood = raw.flood || null;
   S.grid = raw.grid || null;
+  if(S.flood){ setProgress(`浸水域: ${S.flood.sources.size} 時点（${S.flood.dates.join(", ")}）`); await tick(); }
   if(S.grid){ S.gridParam = S.grid.params.length ? S.grid.params[0][0] : null; setProgress(`グリッド: ${S.grid.sources.size} ラスタ（${S.grid.params.map(p => p[1]).join(", ")}）`); await tick(); }
   if(S.rain) { setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick(); }
   if(raw.lazySources && raw.lazySources.size){
@@ -1023,6 +1071,13 @@ function initMap(gj){
       map.addSource("lowland", {type:"geojson", data: S.lowland});
       map.addLayer({id:"lowland", type:"fill", source:"lowland", paint:{"fill-color":"#785a28", "fill-opacity":0.22}});
       map.addLayer({id:"lowland-line", type:"line", source:"lowland", paint:{"line-color":"#785a28", "line-opacity":0.7, "line-width":1}});
+    }
+    if(S.flood){
+      const step = ["step", ["coalesce", ["to-number", ["get", "depth"]], 0], CONFIG.FLOOD_SCALE[0][1]];
+      for(const [v, c] of CONFIG.FLOOD_SCALE.slice(1)) step.push(v, c);
+      map.addSource("flood", {type:"geojson", data: EMPTY_FC});
+      map.addLayer({id:"flood", type:"fill", source:"flood", paint:{"fill-color": step, "fill-opacity": CONFIG.FLOOD_OPACITY}});
+      map.addLayer({id:"flood-line", type:"line", source:"flood", paint:{"line-color":"#1f5fbf", "line-opacity":0.5, "line-width":0.6}});
     }
     map.addSource("links", { type:"geojson", data: gj, tolerance: 0.2, buffer: 8 });
     const cls = CLS_EXPR;
@@ -1359,12 +1414,25 @@ function flyToNearest(){
 // ============================================================
 // Rain (XRAIN 15-min slots) and low-lying areas
 // ============================================================
+const EMPTY_FC = {type:"FeatureCollection", features: []};
 const BLANK_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 const RAIN_CACHE = 8;
 
 function setupOverlays(){
-  const any = !!(S.rain || S.lowland);
+  const any = !!(S.rain || S.lowland || S.flood);
   $("overlayOpts").style.display = any ? "inline" : "none";
+  if(S.flood){
+    $("floodOpt").style.display = "inline";
+    $("chkFlood").addEventListener("change", (e) => { S.showFlood = e.target.checked; e.target.blur(); updateFlood(); });
+    const lg = $("legendFlood");
+    lg.innerHTML = `<span class="lab">浸水深 m</span>` + CONFIG.FLOOD_SCALE.map(([v, c], i) => {
+      const next = CONFIG.FLOOD_SCALE[i+1];
+      return `<span class="sw" style="background:${c};opacity:.75"></span><span class="lab">${v}${next ? "–" + next[0] : "+"}</span>`;
+    }).join("") + `<span class="lab" style="color:var(--muted)">（スライダーの時刻以前の最新の shp）</span>`;
+    lg.style.display = "flex";
+    let t = null;
+    map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; $("floodHover").textContent = floodAt(e.point); }, 100); });
+  }
   if(S.rain){
     $("rainOpt").style.display = "inline";
     const sel = $("rainDate"); sel.innerHTML = "";
@@ -1546,6 +1614,9 @@ function paintRain(slot){
 // next calendar day), else the date chosen in the select.
 function rainDateFor(t){
   const R = S.rain; if(!R) return null;
+  return slotDateFor(t, R.date);
+}
+function slotDateFor(t, fallback){
   const ev = S.period && S.period.event;
   if(ev && ev.start){
     const [d0, h0] = ev.start.split(" "); const startMin = +h0.slice(0, 2) * 60 + +h0.slice(3, 5);
@@ -1556,7 +1627,66 @@ function rainDateFor(t){
     const ymd = `${day.getFullYear()}${String(day.getMonth() + 1).padStart(2, "0")}${String(day.getDate()).padStart(2, "0")}`;
     return ymd;   // no file for that day -> "no rain for this time", never another day's rain
   }
-  return R.date;
+  return fallback;
+}
+
+// ---- Flood extent (input 4): the latest shapefile at or before the slot time ----
+function floodKeyFor(t){
+  const F = S.flood; if(!F) return null;
+  const ymd = slotDateFor(t, F.dates[F.dates.length - 1]);
+  const abs = new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}T${S.times[t]}:00`).getTime();
+  let best = null;
+  for(const k of F.keys){ if(k.abs <= abs) best = k; else break; }
+  if(best && S.params.floodMaxAge > 0 && abs - best.abs > S.params.floodMaxAge * 60e3) best = null;
+  return best ? {key: best.key, age: Math.round((abs - best.abs) / 60e3)} : null;
+}
+function floodEncoding(cpg){
+  const c = (cpg || "").trim();
+  if(!c) return "shift_jis";                                   // Japanese shapefiles without .cpg are usually cp932
+  if(/932|sjis|shift/i.test(c)) return "shift_jis";
+  if(/utf-?8/i.test(c)) return "utf-8";
+  if(/^\d+$/.test(c)) return "windows-" + c;
+  return c.toLowerCase();
+}
+function floodGeoJSON(shp, dbf, cpg){
+  const geoms = parseShp(shp), tab = parseDbf(dbf, floodEncoding(cpg));
+  const depthField = tab.fields.find(f => /浸水深|depth/i.test(f)) || null;
+  const feats = [];
+  for(let i=0;i<geoms.length;i++){
+    const g = geoms[i], r = tab.recs[i]; if(!g || (r && r._deleted)) continue;
+    const props = {}; if(r) for(const f of tab.fields) props[f] = r[f];
+    props.depth = depthField && r ? parseFloat(r[depthField]) : null;
+    feats.push({type:"Feature", properties: props, geometry: g});
+  }
+  return {gj: {type:"FeatureCollection", features: feats}, fields: tab.fields, depthField};
+}
+function loadFlood(key){
+  const src = S.flood.sources.get(key);
+  return Promise.all([src.shp.arrayBuffer(), src.dbf.arrayBuffer(), src.cpg ? src.cpg.text() : Promise.resolve("")])
+    .then(([shp, dbf, cpg]) => floodGeoJSON(shp, dbf, cpg));
+}
+function updateFlood(){
+  if(!map || !S.flood || !map.getSource("flood")) return;
+  const F = S.flood, k = floodKeyFor(S.t);
+  for(const id of ["flood", "flood-line"]) map.setLayoutProperty(id, "visibility", S.showFlood ? "visible" : "none");
+  if(!k){ if(F.cur){ F.cur = null; map.getSource("flood").setData(EMPTY_FC); } $("floodVal").textContent = "（この時刻以前の浸水域なし）"; $("floodHover").textContent = ""; return; }
+  const label = `${k.key.slice(4,6)}/${k.key.slice(6,8)} ${k.key.slice(9,11)}:${k.key.slice(11,13)} 時点` + (k.age ? `（${k.age} 分前）` : "");
+  const show = (d) => { if(F.cur !== k.key){ F.cur = k.key; F.depthField = d.depthField; F.fields = d.fields; map.getSource("flood").setData(d.gj); } $("floodVal").textContent = `${label}、${d.gj.features.length.toLocaleString()} 区画`; };
+  if(F.cache.has(k.key)) return show(F.cache.get(k.key));
+  if(F.loading === k.key) return;
+  F.loading = k.key; $("floodVal").textContent = `${label}、読み込み中…`;
+  loadFlood(k.key).then(d => {
+    F.cache.set(k.key, d); if(F.cache.size > 12) F.cache.delete(F.cache.keys().next().value);
+    F.loading = null; const now = floodKeyFor(S.t); if(now && now.key === k.key) show(d);
+  }).catch(e => { console.error(e); F.loading = null; $("floodVal").textContent = `浸水域を読み込めません: ${e.message}`; });
+}
+function floodAt(point){
+  const F = S.flood; if(!F || !F.cur || !S.showFlood) return "";
+  const f = map.queryRenderedFeatures(point, {layers: ["flood"]})[0]; if(!f) return "";
+  const p = f.properties, out = [];
+  if(F.depthField) out.push(`${F.depthField} ${p[F.depthField]}`);
+  for(const re of [/水位/, /地盤高/, /meshcode/i]) for(const name of (F.fields || [])) if(name !== F.depthField && re.test(name)) out.push(`${name} ${p[name]}`);
+  return out.length ? out.join(" / ") : (F.fields || []).slice(0, 3).map(n => `${n} ${p[n]}`).join(" / ");
 }
 function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null; }
 
@@ -1682,6 +1812,7 @@ function applyTime(t, force=false){
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
   updateTraj();
   updateRain();
+  updateFlood();
   updateGrid();
 }
 
@@ -1694,7 +1825,7 @@ function setupControls(){
   $("settingsClose").addEventListener("click", () => { $("settings").style.display = "none"; });
   let pTimer = null;
   const schedule = () => { clearTimeout(pTimer); pTimer = setTimeout(applyParams, 250); };
-  for(const id of ["pMinCount","pMinSpeed","pL1Speed","pL1Count","pL2Speed","pL2Count","pL3Speed","pL3Count","pTruckMinHits","pTruckRatio"]){
+  for(const id of ["pMinCount","pMinSpeed","pL1Speed","pL1Count","pL2Speed","pL2Count","pL3Speed","pL3Count","pTruckMinHits","pTruckRatio","pFloodMaxAge"]){
     $(id).addEventListener("input", schedule);
     $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
   }
@@ -1870,15 +2001,16 @@ function drawChart(svg, a, b, errMask, title){
       const probe = [...$("probeInput").files], nSlot = probe.filter(f => /^(baseline|event)_\d{4}\.geojson$/i.test(f.name)).length, nGrid = probe.filter(f => GRID_NAME.test(f.name)).length;
       const parts = [main ? `1: ${main} ファイル` : "1: 未選択",
                      `2: ${probe.length ? `時刻別 ${nSlot} 本・グリッド ${nGrid} 枚` : "なし"}`,
-                     `3: ${$("truckInput").files.length ? `時刻別 CSV ${[...$("truckInput").files].filter(f => TRUCK_WINDOW.test(f.name)).length} 本・network_agg ${[...$("truckInput").files].some(f => /^network_agg\.shp$/i.test(f.name)) && [...$("truckInput").files].some(f => /^network_agg\.dbf$/i.test(f.name)) ? "あり" : "なし"}・軌跡 ${[...$("truckInput").files].filter(f => TRUCK_TRAJ.test(f.name)).length} 本` : "なし"}`];
+                     `3: ${$("truckInput").files.length ? `時刻別 CSV ${[...$("truckInput").files].filter(f => TRUCK_WINDOW.test(f.name)).length} 本・network_agg ${[...$("truckInput").files].some(f => /^network_agg\.shp$/i.test(f.name)) && [...$("truckInput").files].some(f => /^network_agg\.dbf$/i.test(f.name)) ? "あり" : "なし"}・軌跡 ${[...$("truckInput").files].filter(f => TRUCK_TRAJ.test(f.name)).length} 本` : "なし"}`,
+                     `4: ${$("floodInput").files.length ? `浸水域 shp ${[...$("floodInput").files].filter(f => /\.shp$/i.test(f.name) && FLOOD_NAME.test(f.name)).length} 時点` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
-    for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput"]) $(id).addEventListener("change", note);
+    for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput","floodInput"]) $(id).addEventListener("change", note);
     $("loadBtn").addEventListener("click", async () => {
       const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
       if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files)); }
+      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files, $("floodInput").files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }

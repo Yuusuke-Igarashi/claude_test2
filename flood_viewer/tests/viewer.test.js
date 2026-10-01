@@ -378,7 +378,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
-  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
@@ -401,7 +401,7 @@ test("three separate inputs: data files, rain folder, lowland GeoJSON", async ()
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
   await page.setInputFiles("#rainInput", join(DATA, "rain"));
   await page.setInputFiles("#lowlandInput", join(DATA, "lowland.geojson"));
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
@@ -431,7 +431,7 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));
   await page.setInputFiles("#truckInput", join(DATA, "truck"));
-  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり・軌跡 96 本$/);
+  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり・軌跡 96 本 \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, files: S.truck.files, links: S.truck.links, dates: S.truck.dates, unmatched: S.truck.unmatched, disabled: document.getElementById("modeTruck").disabled }));
@@ -545,11 +545,58 @@ test("three folders: traffic (tomtom_out), probe (probe_out: viewer/ + grid/), t
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
   await page.setInputFiles("#truckInput", join(DATA, "truck"));                         // 3: the truck folder
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり・軌跡 96 本$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり・軌跡 96 本 \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, truck: !!S.truck, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, truckOff: document.getElementById("modeTruck").disabled }));
   assert.deepEqual(st, { lazy: SLOT_FILES, truck: true, rain: null, grid: null, trajOff: false, truckOff: false });
+  await page.close();
+});
+
+test("flood-extent shapefiles (input 4): latest file at or before the slot, cp932 attributes, depth colours, max age, toggle", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
+  await page.setInputFiles("#floodInput", join(DATA, "flood"));
+  assert.match(await page.textContent("#pickNote"), /4: 浸水域 shp 4 時点$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const reg = await page.evaluate(() => ({ n: S.flood.sources.size, keys: S.flood.keys.map((k) => k.key), dates: S.flood.dates, opt: getComputedStyle(document.getElementById("floodOpt")).display, legend: document.getElementById("legendFlood").textContent }));
+  assert.deepEqual(reg.keys, ["20240821_2110", "20240821_2240", "20240821_2330", "20240822_0050"]); assert.deepEqual(reg.dates, ["20240821", "20240822"]);
+  assert.notEqual(reg.opt, "none"); assert.match(reg.legend, /浸水深 m.*2\+/);
+  // 19:00: nothing before the first snapshot
+  await page.evaluate(() => applyTime(S.times.indexOf("19:00")));
+  assert.equal(await page.evaluate(() => floodKeyFor(S.t)), null);
+  assert.match(await page.textContent("#floodVal"), /以前の浸水域なし/);
+  // 00:30 (next day): the 23:30 snapshot, 60 minutes old
+  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
+  assert.deepEqual(await page.evaluate(() => floodKeyFor(S.t)), { key: "20240821_2330", age: 60 });
+  await page.waitForFunction(() => S.flood.cur === "20240821_2330", null, { timeout: 15000 });
+  const d = await page.evaluate(() => { const gj = S.flood.cache.get("20240821_2330").gj; return { n: gj.features.length, depthField: S.flood.depthField, props: Object.keys(gj.features[0].properties), depth: gj.features.map((f) => f.properties.depth), type: gj.features[0].geometry.type, text: document.getElementById("floodVal").textContent }; });
+  assert.equal(d.n, 29, "cells within radius 3"); assert.equal(d.depthField, "浸水深"); assert.deepEqual(d.props, ["meshcode", "JIcode", "浸水深", "水位", "地盤高", "depth"], "cp932 field names decoded");
+  assert.ok(Math.max(...d.depth) > 2 && Math.min(...d.depth) >= 0.1, "depths parsed: " + d.depth.slice(0, 5)); assert.equal(d.type, "Polygon");
+  assert.match(d.text, /08\/21 23:30 時点（60 分前）、29 区画/);
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 14 }));
+  await page.waitForFunction(() => map.queryRenderedFeatures({ layers: ["flood"] }).length > 0, null, { timeout: 15000 });
+  const hover = await page.evaluate(() => floodAt(map.project([139.7505, 35.6805])));
+  assert.match(hover, /浸水深 2\.\d+ \/ 水位 7\.\d+ \/ 地盤高 5\.000 \/ meshcode 53395050/, "attributes under the cursor: " + hover);
+  // 01:00: the 00:50 snapshot (10 minutes old); max age 30 min at 00:30 hides the 23:30 one
+  await page.evaluate(() => applyTime(S.times.indexOf("01:00")));
+  assert.deepEqual(await page.evaluate(() => floodKeyFor(S.t)), { key: "20240822_0050", age: 10 });
+  await page.waitForFunction(() => S.flood.cur === "20240822_0050", null, { timeout: 15000 });
+  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
+  await page.click("#settingsBtn"); await page.fill("#pFloodMaxAge", "30"); await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => floodKeyFor(S.t)), null, "older than the max age -> hidden");
+  assert.match(await page.textContent("#floodVal"), /以前の浸水域なし/);
+  await page.click("#pDefault"); await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => S.flood.cur), "20240821_2330");
+  await page.click("#chkFlood"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("flood", "visibility")), "none");
+  await page.click("#chkFlood"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("flood", "visibility")), "visible");
+  await page.screenshot({ path: join(SHOTS, "flood.png") });
   await page.close();
 });
 

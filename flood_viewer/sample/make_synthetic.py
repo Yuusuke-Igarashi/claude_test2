@@ -161,6 +161,49 @@ for ti, tm in enumerate(times):
                           "geometry": {"type": "LineString", "coordinates": [c[0], c[1], [c[1][0] + dlon, c[1][1]]]}})
         json.dump({"type": "FeatureCollection", "features": feats}, open(TR / "traj" / f"traj_{day}_{tm.replace(':', '')}.geojson", "w"))
         n_traj_files += 1
+# flood/S1_YYYYMMDDHHMM.shp: flood-extent polygons (100 m mesh cells) at irregular observation times; dbf in cp932 with
+# the fields of the real files (meshcode, JIcode, 浸水深, 水位, 地盤高). Each snapshot grows around the flooded centre.
+FL = OUT / "flood"
+if FL.exists(): shutil.rmtree(FL)
+FL.mkdir()
+def write_polygon_shapefile(stem, rings, fields, rows, encoding="cp932"):
+    recs, shx = b"", b""; xmin = ymin = 1e9; xmax = ymax = -1e9
+    for k, ring in enumerate(rings, 1):
+        xs = [c[0] for c in ring]; ys = [c[1] for c in ring]
+        box = (min(xs), min(ys), max(xs), max(ys)); xmin, ymin, xmax, ymax = min(xmin, box[0]), min(ymin, box[1]), max(xmax, box[2]), max(ymax, box[3])
+        content = struct.pack("<i4d2ii", 5, *box, 1, len(ring), 0) + b"".join(struct.pack("<2d", x, y) for x, y in ring)
+        shx += struct.pack(">2i", (100 + len(recs)) // 2, len(content) // 2)
+        recs += struct.pack(">2i", k, len(content) // 2) + content
+    if not rings: xmin = ymin = xmax = ymax = 0.0
+    def header(nbytes): return struct.pack(">6i", 9994, 0, 0, 0, 0, 0) + struct.pack(">i", nbytes // 2) + struct.pack("<2i", 1000, 5) + struct.pack("<8d", xmin, ymin, xmax, ymax, 0, 0, 0, 0)
+    open(f"{stem}.shp", "wb").write(header(100 + len(recs)) + recs)
+    open(f"{stem}.shx", "wb").write(header(100 + len(shx)) + shx)
+    hlen = 32 + 32 * len(fields) + 1; rlen = 1 + sum(f[2] for f in fields)
+    hdr = struct.pack("<BBBBIHH", 3, 24, 9, 24, len(rows), hlen, rlen) + b"\0" * 17 + bytes([0x13]) + b"\0\0"   # 0x13 = cp932 language driver
+    for name, typ, ln, dec in fields: hdr += name.encode(encoding).ljust(11, b"\0") + typ.encode() + b"\0" * 4 + bytes([ln, dec]) + b"\0" * 14
+    hdr += b"\r"
+    body = b""
+    for row in rows:
+        body += b" "
+        for (name, typ, ln, dec), v in zip(fields, row):
+            body += (str(v).ljust(ln).encode(encoding) if typ == "C" else (f"{v:{ln}.{dec}f}" if dec else str(v).rjust(ln)).encode())[:ln]
+    open(f"{stem}.dbf", "wb").write(hdr + body + b"\x1a")
+    open(f"{stem}.prj", "w").write('GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]')
+    open(f"{stem}.cpg", "w").write("cp932")
+flood_fields = [("meshcode", "C", 20, 0), ("JIcode", "N", 12, 0), ("浸水深", "N", 19, 3), ("水位", "N", 19, 3), ("地盤高", "N", 19, 3)]
+cell = 0.0011   # ~100 m
+n_flood_cells = 0
+for stamp, radius in [("202408212110", 1), ("202408212240", 2), ("202408212330", 3), ("202408220050", 4)]:
+    rings, rows = [], []
+    for i in range(-radius, radius + 1):
+        for j in range(-radius, radius + 1):
+            if i * i + j * j > radius * radius: continue
+            x0, y0 = center[0] + i * cell, center[1] + j * cell
+            rings.append([(x0, y0), (x0, y0 + cell), (x0 + cell, y0 + cell), (x0 + cell, y0), (x0, y0)])   # clockwise = outer ring
+            depth = round(max(0.1, 2.5 * (1 - math.hypot(i, j) / (radius + 0.5))), 3)
+            rows.append((f"5339{i + 50:02d}{j + 50:02d}", 13104, depth, round(5.0 + depth, 3), 5.0))
+    write_polygon_shapefile(str(FL / f"S1_{stamp}"), rings, flood_fields, rows); n_flood_cells += len(rows)
+print("flood/: 4 snapshots,", n_flood_cells, "mesh cells")
 print("truck/: network_agg.shp", len(truck_links), "links,", len(per_window), "window files,", n_truck_rows, "rows,", n_traj_files, "trajectory slot files")
 
 print("links", len(features), "csv rows", N, "error links", int((link_level >= 1).sum()),
