@@ -574,6 +574,11 @@ test("flood-extent shapefiles (input 4): latest file at or before the slot, cp93
   await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
   assert.deepEqual(await page.evaluate(() => floodKeyFor(S.t)), { key: "20240821_2330", age: 60 });
   await page.waitForFunction(() => S.flood.cur === "20240821_2330", null, { timeout: 15000 });
+  // without a period the date of slot 0 comes from the network file name; the clock wrap at 00:00 adds a day
+  assert.deepEqual(await page.evaluate(() => { const p = S.period, dd = S.dataDate; S.period = null; S.dataDate = "20240821";
+    const r = [floodKeyFor(S.times.indexOf("00:30")), floodKeyFor(S.times.indexOf("18:00")), floodKeyFor(S.times.indexOf("22:45"))];
+    S.dataDate = "20240820"; r.push(floodKeyFor(S.times.indexOf("00:30"))); S.period = p; S.dataDate = dd; return r; }),
+    [{ key: "20240821_2330", age: 60 }, null, { key: "20240821_2240", age: 5 }, null], "slot dates without a period");
   const d = await page.evaluate(() => { const gj = S.flood.cache.get("20240821_2330").gj; return { n: gj.features.length, depthField: S.flood.depthField, props: Object.keys(gj.features[0].properties), depth: gj.features.map((f) => f.properties.depth), type: gj.features[0].geometry.type, text: document.getElementById("floodVal").textContent }; });
   assert.equal(d.n, 29, "cells within radius 3"); assert.equal(d.depthField, "浸水深"); assert.deepEqual(d.props, ["meshcode", "JIcode", "浸水深", "水位", "地盤高", "depth"], "cp932 field names decoded");
   assert.ok(Math.max(...d.depth) > 2 && Math.min(...d.depth) >= 0.1, "depths parsed: " + d.depth.slice(0, 5)); assert.equal(d.type, "Polygon");

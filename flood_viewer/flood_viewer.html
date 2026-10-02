@@ -319,6 +319,7 @@ const S = {
   period: null,         // viewer/index.json "period": {event:{start:"YYYY-MM-DD HH:MM", hours}, baseline:{...}} when the data span a period
   rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, date, cur: {key, vals, alpha, w, h}}
   lowland: null,        // GeoJSON of low-lying areas
+  dataDate: null,       // "YYYYMMDD" from the network file name (fallback date of slot 0)
   flood: null,          // {sources: Map("YYYYMMDD_HHMM" -> {shp, dbf, cpg: File}), keys: [{key, abs}], dates, cache, cur, loading}
   showFlood: true,
   showRain: true, showLowland: true,
@@ -340,6 +341,7 @@ function setTitle(t){ document.title = t; document.querySelector("#topbar h1").t
 function setTitleFrom(name){
   const m = String(name).match(/(\d{4})(\d{2})(\d{2})/);
   if(!m) return;
+  S.dataDate = `${m[1]}${m[2]}${m[3]}`;                       // date of the first slot when no period is known
   setTitle(`Tokyo ${m[1]}-${m[2]}-${m[3]} Flood Candidates`);
 }
 // "冠水候補 2026-08-13 12:00〜08-14 12:00（平時 08-06 12:00〜08-07 12:00）" from the period in viewer/index.json
@@ -1631,10 +1633,21 @@ function slotDateFor(t, fallback){
 }
 
 // ---- Flood extent (input 4): the latest shapefile at or before the slot time ----
+// Absolute time of slot t: slot 0 is on the event period's start date (else the date in the network file name,
+// else the first flood date); every wrap of the clock along the axis (23:45 -> 00:00) adds a day.
+function floodSlotTime(t){
+  const F = S.flood;
+  const ev = S.period && S.period.event && S.period.event.start;
+  const ymd = ev ? ev.slice(0, 10).replace(/-/g, "") : (S.dataDate || F.dates[0]);
+  const mins = (x) => { const [h, m] = S.times[x].split(":").map(Number); return h * 60 + m; };
+  let days = 0; for(let i=1;i<=t;i++) if(mins(i) < mins(i-1)) days++;
+  const d = new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}T${S.times[t]}:00`);
+  d.setDate(d.getDate() + days);
+  return d.getTime();
+}
 function floodKeyFor(t){
   const F = S.flood; if(!F) return null;
-  const ymd = slotDateFor(t, F.dates[F.dates.length - 1]);
-  const abs = new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}T${S.times[t]}:00`).getTime();
+  const abs = floodSlotTime(t);
   let best = null;
   for(const k of F.keys){ if(k.abs <= abs) best = k; else break; }
   if(best && S.params.floodMaxAge > 0 && abs - best.abs > S.params.floodMaxAge * 60e3) best = null;
