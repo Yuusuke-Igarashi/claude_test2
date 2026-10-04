@@ -558,7 +558,8 @@ def route_of(asg, via):
 
 t0 = time.perf_counter()
 segments, n_short = match_all(s, cand)
-log(f"区間 {len(segments):,}（点列 {s.seq.nunique():,}、短くて捨てた点 {n_short:,}）in {time.perf_counter() - t0:.1f} s")
+log(f"区間 {len(segments):,}（点列 {s.seq.nunique():,}、短くて捨てた点 {n_short:,}）in {time.perf_counter() - t0:.1f} s "
+    f"/ 近傍表を作ったリンク {len(_NBR):,} / {n_links:,} 本（候補に現れたリンクだけ。平均 {np.mean([len(v) for v in _NBR.values()]) if _NBR else 0:.1f} 本に届く）")
 for rows_, asg, via in segments[:3]:
     print(f"  {s.t.iat[rows_[0]]:%H:%M} 点 {len(rows_)} → 経路 {[int(links.Id[L]) for L in route_of(asg, via)]}")
 ''')
