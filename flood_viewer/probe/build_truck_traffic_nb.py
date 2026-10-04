@@ -82,6 +82,10 @@ CAND_R_M = 50.0               # 候補リンクは点からこの距離 [m] 以�
 CAND_MAX = 5                  # 候補リンクは近い順にこの本数まで
 MIN_SEQ_POINTS = 3            # 間引き後の点がこれ未満の区間は使わない
 
+# ---- step 6: 点を経路に沿って並べるとき、先に飛びすぎる点（GPS の外れ値）を外す上限 ----------------------------
+JUMP_BASE_M = 50.0            # 直前の点から弧長で JUMP_BASE_M + JUMP_SPEED_MS × 経過秒 を超えて進む点は、今の位置に留める
+JUMP_SPEED_MS = 40.0          # [m/s]（144 km/h）
+
 # ---- step 5-2, 5-3: コスト -----------------------------------------------
 SIGMA_M = 15.0                # 観測コスト = (点からリンクまでの距離 / SIGMA_M)^2  … GPS 誤差の想定幅
 C_SWITCH = 1.0                # 接続リンクへの乗り換え 1 本あたりのコスト
@@ -425,13 +429,13 @@ def downsample(df):
     el = t - t[new][grp]                                                     # 経過秒（点列内）
     bd, bt = np.floor(cum / SAMPLE_M), np.floor(el / SAMPLE_MAX_S)
     keep = new | np.r_[False, (bd[1:] != bd[:-1]) | (bt[1:] != bt[:-1])]   # 30 m 刻み・60 秒刻みの境界を越えた最初の点
-    s = df[keep].reset_index(drop=True)
-    s["seq0"] = grp[keep]
-    return s
+    out = df[keep].reset_index(drop=True)
+    out["seq0"] = grp[keep]
+    return out
 
-def candidates(s):
-    """間引き後の各点の候補リンク。列: row（s の行番号）, link, dist, pos。点ごとに近い順、最大 CAND_MAX 本。"""
-    pts = shapely.points(s.x.to_numpy(), s.y.to_numpy())
+def candidates(sampled):
+    """間引き後の各点の候補リンク。列: row（sampled の行番号）, link, dist, pos。点ごとに近い順、最大 CAND_MAX 本。"""
+    pts = shapely.points(sampled.x.to_numpy(), sampled.y.to_numpy())
     pi, li = tree.query(pts, predicate="dwithin", distance=CAND_R_M)
     c = pd.DataFrame({"row": pi, "link": li})
     c["dist"] = shapely.distance(pts[pi], GEOM[li])
@@ -440,23 +444,23 @@ def candidates(s):
     c = c[c.groupby("row").cumcount() < CAND_MAX].reset_index(drop=True)
     return c
 
-def sequences(s, cand):
-    """点列番号 seq（seq0 をさらに候補の無い点で切る）と、1 つ前の点との直線距離 straight を s に付ける。"""
-    has = np.zeros(len(s), dtype=bool); has[cand.row.unique()] = True
-    seq0 = s.seq0.to_numpy()
+def sequences(sampled, cand):
+    """点列番号 seq（seq0 をさらに候補の無い点で切る）と、1 つ前の点との直線距離 straight を sampled に付ける。"""
+    has = np.zeros(len(sampled), dtype=bool); has[cand.row.unique()] = True
+    seq0 = sampled.seq0.to_numpy()
     start = np.r_[True, (seq0[1:] != seq0[:-1]) | ~has[:-1]]
-    s["seq"] = np.cumsum(start)
-    d = np.r_[0.0, np.hypot(np.diff(s.x.to_numpy()), np.diff(s.y.to_numpy()))]
+    sampled["seq"] = np.cumsum(start)
+    d = np.r_[0.0, np.hypot(np.diff(sampled.x.to_numpy()), np.diff(sampled.y.to_numpy()))]
     d[start] = 0.0
-    s["straight"] = d
-    return s
+    sampled["straight"] = d
+    return sampled
 
 t0 = time.perf_counter()
-s = downsample(traj)
-cand = candidates(s)
-s = sequences(s, cand)
-log(f"点 {len(traj):,} → 間引き後 {len(s):,}（{len(traj) / max(len(s), 1):.1f} 分の 1）/ 点列 {s.seq.nunique():,} / "
-    f"候補 {len(cand):,}（点あたり平均 {len(cand) / max(len(s), 1):.1f} 本、候補なし {int(len(s) - cand.row.nunique()):,} 点） in {time.perf_counter() - t0:.1f} s")
+sampled = downsample(traj)
+cand = candidates(sampled)
+sampled = sequences(sampled, cand)
+log(f"点 {len(traj):,} → 間引き後 {len(sampled):,}（{len(traj) / max(len(sampled), 1):.1f} 分の 1）/ 点列 {sampled.seq.nunique():,} / "
+    f"候補 {len(cand):,}（点あたり平均 {len(cand) / max(len(sampled), 1):.1f} 本、候補なし {int(len(sampled) - cand.row.nunique()):,} 点） in {time.perf_counter() - t0:.1f} s")
 display(cand.head(8))
 ''')
 
@@ -486,12 +490,12 @@ def route_distance(Lp, posp, L, pos):
     d = (LEN[Lp] - posp if ex == 1 else posp) + between + (pos if en == 0 else LEN[L] - pos)
     return d, len(path) + 1, path
 
-def viterbi(seq):
-    """seq: 1 点列の候補（row 順に並んだ DataFrame。列 row, link, dist, pos, straight）。
+def viterbi(cands):
+    """cands: 1 点列の候補（row 順に並んだ DataFrame。列 row, link, dist, pos, straight）。
     区間ごとに (点の行番号の並び, 各点の割当リンク, 各遷移で間に通過したリンク列) を返す。
     MIN_SEQ_POINTS 未満で捨てた区間の点数も返す。"""
-    rows = seq.row.to_numpy(); links_ = seq.link.to_numpy().tolist(); dist = seq.dist.to_numpy(); pos = seq.pos.to_numpy()
-    straight = seq.straight.to_numpy()                                   # 点 k と点 k-1 の直線距離（点の候補行で同じ値）
+    rows = cands.row.to_numpy(); links_ = cands.link.to_numpy().tolist(); dist = cands.dist.to_numpy(); pos = cands.pos.to_numpy()
+    straight = cands.straight.to_numpy()                                 # 点 k と点 k-1 の直線距離（点の候補行で同じ値）
     starts = np.flatnonzero(np.r_[True, rows[1:] != rows[:-1]]); ends = np.r_[starts[1:], len(rows)]
     segments, n_short = [], 0
     seg_rows, back, cost_prev = [], [], None      # 現在の区間: 点の行番号、各点の候補ごとの (L, 前の候補番号, 通過リンク列)、直前のコスト
@@ -538,30 +542,30 @@ def viterbi(seq):
     finish()
     return segments, n_short
 
-def match_all(s, cand):
+def match_all(sampled, cand):
     """全点列に viterbi を適用。区間の一覧 [(点の行番号, 割当リンク, 通過リンク列), ...] と、捨てた短い区間の点数を返す。"""
-    c = cand.merge(s[["seq", "straight"]], left_on="row", right_index=True, how="inner")
+    c = cand.merge(sampled[["seq", "straight"]], left_on="row", right_index=True, how="inner")
     out, n_short = [], 0
     for _, g in c.groupby("seq", sort=False):
         segs, k = viterbi(g)
         out.extend(segs); n_short += k
     return out, n_short
 
-def route_of(asg, via):
-    """割当リンクと通過リンク列を並べた経路（重複を除く）。"""
+def route_sequence(asg, via):
+    """割当リンクと通過リンク列を走った順に並べた経路（連続する同じリンクだけまとめる。離れて再び通れば 2 回並ぶ）。"""
     route = []
     for k, L in enumerate(asg):
-        route.append(L)
-        if k < len(via):
-            route.extend(via[k])
-    return list(dict.fromkeys(route))
+        for L2 in (L,) + (via[k] if k < len(via) else ()):
+            if not route or route[-1] != L2:
+                route.append(L2)
+    return route
 
 t0 = time.perf_counter()
-segments, n_short = match_all(s, cand)
-log(f"区間 {len(segments):,}（点列 {s.seq.nunique():,}、短くて捨てた点 {n_short:,}）in {time.perf_counter() - t0:.1f} s "
+segments, n_short = match_all(sampled, cand)
+log(f"区間 {len(segments):,}（点列 {sampled.seq.nunique():,}、短くて捨てた点 {n_short:,}）in {time.perf_counter() - t0:.1f} s "
     f"/ 近傍表を作ったリンク {len(_NBR):,} / {n_links:,} 本（候補に現れたリンクだけ。平均 {np.mean([len(v) for v in _NBR.values()]) if _NBR else 0:.1f} 本に届く）")
 for rows_, asg, via in segments[:3]:
-    print(f"  {s.t.iat[rows_[0]]:%H:%M} 点 {len(rows_)} → 経路 {[int(links.Id[L]) for L in route_of(asg, via)]}")
+    print(f"  {sampled.t.iat[rows_[0]]:%H:%M} 点 {len(rows_)} → 経路 {[int(links.Id[L]) for L in route_sequence(asg, via)]}")
 ''')
 
 md(r'''
@@ -570,10 +574,11 @@ md(r'''
 区間の経路（リンクの列。同じリンクを 2 回通ればそのまま 2 回並ぶ）を 1 本の折れ線とみなし、始点からの道のり（弧長）を持たせます。
 リンクの i 番目の出現は弧長の区間 `[off[i], off[i+1])` を占めます。
 
-1. 区間の時間範囲にある 1 秒毎の各点を経路上のリンクに射影し（最近傍、`CAND_R_M` 以内）、弧長 `s` を求める。
-   同じリンクが経路に複数回出てくるときは、直前の `s` に最も近い出現を選ぶ。`s` は時間順に単調非減少にする（戻りは直前の値で止める）
-2. 点のリンク = `s` を含む出現のリンク。隣のリンクへの乗り換えは一度きりで、GPS のずれで前後に揺れない
-3. 各出現の進入時刻 `t_enter` と退出時刻 `t_exit` は、`s` が `off[i]`, `off[i+1]` をまたいだ時刻を前後の点から線形補間して決める。
+1. 区間の時間範囲にある 1 秒毎の各点を経路上のリンクに射影し（最近傍、`CAND_R_M` 以内）、弧長 `arc` を求める。
+   同じリンクが経路に複数回出てくるときは、直前の弧長に最も近い出現を選ぶ。弧長は時間順に単調非減少にする（戻りは直前の値で止める）。
+   経過時間で走れる距離（`JUMP_BASE_M + JUMP_SPEED_MS × 秒`）を超えて先に飛ぶ点は GPS の外れ値とみなし、直前の位置に留める
+2. 点のリンク = 弧長を含む出現のリンク。隣のリンクへの乗り換えは一度きりで、GPS のずれで前後に揺れない
+3. 各出現の進入時刻 `t_enter` と退出時刻 `t_exit` は、弧長が `off[i]`, `off[i+1]` をまたいだ時刻を前後の点から線形補間して決める。
    点が 1 つも落ちない短いリンクも、こうして進入・退出時刻を持つ（`n_points = 0`）
 
 出力は 2 つの表です（どちらも車両 ID を含むので共有しません）。
@@ -581,82 +586,74 @@ md(r'''
 - `link_stays.*`: 車両がリンクにいた時間帯（serial_number, Id, t_enter, t_exit, n_points, v_mean, リンク属性）
 ''')
 code(r'''
-def route_sequence(asg, via):
-    """割当リンクと通過リンク列を走った順に並べた経路（連続する同じリンクだけまとめる。離れて再び通れば 2 回並ぶ）。"""
-    seq = []
-    for k, L in enumerate(asg):
-        for L2 in (L,) + (via[k] if k < len(via) else ()):
-            if not seq or seq[-1] != L2:
-                seq.append(L2)
-    return seq
-
-def route_offsets(seq):
-    """経路の各出現について、始点→終点の向きに走るか（fwd）と、経路上の弧長の始まり off（len = len(seq) + 1）。"""
-    n = len(seq); fwd = [True] * n
-    for i, L in enumerate(seq):
-        if n == 1:
+def route_offsets(route):
+    """経路の各出現について、始点→終点の向きに走るか（fwd）と、経路上の弧長の始まり off（len = len(route) + 1）。
+    向きは隣のリンクとの接し方で決める: 終点側が次のリンクに接していれば順方向。どちらにも接していない（想定外）なら順方向。"""
+    n = len(route); fwd = [True] * n
+    for i, L in enumerate(route):
+        if n == 1:                                                     # 1 本だけの経路は向きを決められない（結果には影響しない）
             break
-        if i + 1 < n:                                                  # 終点側が次のリンクに接していれば順方向
-            nxt = seq[i + 1]; ends = (U[nxt], V[nxt])
+        if i + 1 < n:
+            nxt = route[i + 1]; ends = (U[nxt], V[nxt])
             fwd[i] = V[L] in ends or U[L] not in ends
         else:                                                          # 最後のリンクは、始点側が前のリンクに接していれば順方向
-            prv = seq[i - 1]; ends = (U[prv], V[prv])
+            prv = route[i - 1]; ends = (U[prv], V[prv])
             fwd[i] = U[L] in ends or V[L] not in ends
-    return fwd, np.r_[0.0, np.cumsum([LEN[L] for L in seq])]
+    return fwd, np.r_[0.0, np.cumsum([LEN[L] for L in route])]
 
-def place_on_route(seq, fwd, off, pts):
-    """各点の経路上の弧長 s と出現番号 occ（単調非減少。経路のリンクから CAND_R_M 以上離れた点は occ = -1）。"""
-    uniq = list(dict.fromkeys(seq))
+def place_on_route(route, fwd, off, pts, t_sec):
+    """各点の経路上の弧長 arc と出現番号 occ（時間順に単調非減少。経路のリンクから CAND_R_M 以上離れた点は occ = -1）。"""
+    uniq = list(dict.fromkeys(route))
     pi, li = STRtree(GEOM[uniq]).query_nearest(pts, max_distance=CAND_R_M, all_matches=False)
     near = np.full(len(pts), -1); near[pi] = li                       # 点ごとの最近傍リンク（uniq の番号）
     pos = np.full(len(pts), np.nan); pos[pi] = shapely.line_locate_point(GEOM[np.asarray(uniq)[li]], pts[pi])
     occ_of = {}                                                        # リンク → 経路での出現番号の一覧
-    for i, L in enumerate(seq):
+    for i, L in enumerate(route):
         occ_of.setdefault(L, []).append(i)
-    s = np.full(len(pts), np.nan); occ = np.full(len(pts), -1)
-    cur, s_prev = 0, 0.0
+    arc = np.full(len(pts), np.nan); occ = np.full(len(pts), -1)
+    cur, a_prev, t_prev = 0, 0.0, None                                 # 今いる出現、直前の弧長、直前の時刻
     for j in range(len(pts)):
         if near[j] < 0:
             continue
         L = uniq[near[j]]
-        best = None                                                    # 直前の s に最も近い、戻らない出現
+        best = None                                                    # 直前の弧長に最も近い、戻らない出現
         for i in occ_of[L]:
             if i < cur:
                 continue
-            sj = off[i] + (pos[j] if fwd[i] else LEN[L] - pos[j])
-            if best is None or abs(sj - s_prev) < abs(best[1] - s_prev):
-                best = (i, sj)
-        if best is None:                                               # 前の出現にしか近くない点（GPS の揺れ）: 今の出現に留める
-            occ[j], s[j] = cur, s_prev
-            continue
-        cur, s_prev = best[0], max(best[1], s_prev)
-        occ[j], s[j] = cur, s_prev
-    return s, occ
+            aj = off[i] + (pos[j] if fwd[i] else LEN[L] - pos[j])
+            if best is None or abs(aj - a_prev) < abs(best[1] - a_prev):
+                best = (i, aj)
+        # 前の出現にしか近くない点（GPS の揺れ）や、経過時間で走れる距離を超えて先に飛ぶ点（外れ値）は、今の位置に留める
+        jump_ok = best is not None and (t_prev is None or best[1] - a_prev <= JUMP_BASE_M + JUMP_SPEED_MS * (t_sec[j] - t_prev))
+        if jump_ok:
+            cur, a_prev = best[0], max(best[1], a_prev)
+        occ[j], arc[j] = cur, a_prev
+        t_prev = t_sec[j]
+    return arc, occ
 
-def assign_segment(vcode, seq, pts, t_ns, speed):
+def assign_segment(vcode, route, pts, t, speed):
     """1 区間: 点ごとのリンク（内部番号、無ければ -1）と、出現ごとの滞在 (vcode, link, t_enter, t_exit, n_points, v_mean)。"""
-    fwd, off = route_offsets(seq)
-    s, occ = place_on_route(seq, fwd, off, pts)
+    t_ns = t.astype("datetime64[ns]").astype(np.int64)                 # ns の整数（pandas 3 は us 解像度のことがある）
+    fwd, off = route_offsets(route)
+    arc, occ = place_on_route(route, fwd, off, pts, t_ns / 1e9)
     ok = occ >= 0
-    link_of = np.where(ok, np.asarray(seq)[np.maximum(occ, 0)], -1)
+    link_of = np.where(ok, np.asarray(route)[np.maximum(occ, 0)], -1)
     stays = []
-    if ok.sum() >= 1:
-        s_ok, t_ok = s[ok], t_ns[ok].astype("datetime64[ns]").astype(np.int64)      # ns の整数（pandas 3 は us 解像度のことがある）
-        s_mono = s_ok + np.arange(len(s_ok)) * 1e-9                    # 補間のために狭義単調にする
-        cross = np.interp(off, s_mono, t_ok, left=t_ok[0], right=t_ok[-1])   # 各境界をまたいだ時刻
-        cross[0], cross[-1] = t_ok[0], t_ok[-1]
-        n_pt = np.bincount(occ[ok], minlength=len(seq)); v_sum = np.bincount(occ[ok], weights=speed[ok], minlength=len(seq))
-        for i, L in enumerate(seq):
-            if cross[i + 1] > cross[i] or n_pt[i]:                     # 最後まで到達しなかった出現（長さ 0）は出さない
+    if ok.any():
+        arc_mono = arc[ok] + np.arange(int(ok.sum())) * 1e-9           # 補間のために狭義単調にする
+        cross = np.interp(off, arc_mono, t_ns[ok])                     # 各境界をまたいだ時刻（範囲外は最初・最後の点の時刻）
+        n_pt = np.bincount(occ[ok], minlength=len(route)); v_sum = np.bincount(occ[ok], weights=speed[ok], minlength=len(route))
+        for i, L in enumerate(route):
+            if cross[i + 1] > cross[i] or n_pt[i]:                     # 到達しなかった出現（長さ 0 で点も無い）は出さない
                 stays.append((vcode, L, int(cross[i]), int(cross[i + 1]), int(n_pt[i]), v_sum[i] / n_pt[i] if n_pt[i] else np.nan))
     return link_of, stays
 
-def assign_points(traj, s, segments):
+def assign_points(traj, sampled, segments):
     """全区間に assign_segment を適用。点ごとのリンク配列と滞在の表を返す。"""
     link_of = np.full(len(traj), -1, dtype=np.int64)
     stays = []
-    by_v = {}                                                          # 車両 → [(開始時刻, 経路), ...]
-    s_t, s_v = s.t.to_numpy(), s.vcode.to_numpy()
+    by_v = {}                                                          # 車両 → [(区間の開始時刻, 経路), ...]
+    s_t, s_v = sampled.t.to_numpy(), sampled.vcode.to_numpy()
     for rows_, asg, via in segments:
         by_v.setdefault(int(s_v[rows_[0]]), []).append((s_t[rows_[0]], route_sequence(asg, via)))
     v, t = traj.vcode.to_numpy(), traj.t.to_numpy()
@@ -667,17 +664,18 @@ def assign_points(traj, s, segments):
         if not segs:
             continue
         segs.sort(key=lambda z: z[0])
-        which = np.maximum(np.searchsorted(np.array([z[0] for z in segs]), t[a:b], side="right") - 1, 0)   # 各点が属する区間
-        for si, (_, seq) in enumerate(segs):
+        # 各点が属する区間 = 開始時刻がその点以前で最後の区間（最初の区間より前の点は最初の区間）
+        which = np.maximum(np.searchsorted(np.array([z[0] for z in segs]), t[a:b], side="right") - 1, 0)
+        for si, (_, route) in enumerate(segs):
             idx = a + np.flatnonzero(which == si)
-            lk, st = assign_segment(int(v[a]), seq, pts[idx], t[idx], sp[idx])
+            lk, st = assign_segment(int(v[a]), route, pts[idx], t[idx], sp[idx])
             link_of[idx] = lk; stays.extend(st)
     stays = pd.DataFrame(stays, columns=["vcode", "link", "t_enter", "t_exit", "n_points", "v_mean"])
     stays["t_enter"] = pd.to_datetime(stays.t_enter, unit="ns"); stays["t_exit"] = pd.to_datetime(stays.t_exit, unit="ns")
     return link_of, stays
 
 t0 = time.perf_counter()
-link_of, stays = assign_points(traj, s, segments)
+link_of, stays = assign_points(traj, sampled, segments)
 matched = traj.loc[link_of >= 0, ["vcode", "t", "lat", "lon", "speed"]].copy()
 matched["Id"] = links.Id.to_numpy()[link_of[link_of >= 0]]
 stays["Id"] = links.Id.to_numpy()[stays.link.to_numpy()]
@@ -696,7 +694,7 @@ md(r'''
 
 `link_stays` の滞在時間帯をウィンドウに展開し（進入した窓から退出した窓まで）、ウィンドウ × リンクで
 **Hits = その窓にいた車両数、AvgSp = 車両ごとの平均速度（その窓・そのリンク上の点の平均）の平均、MedSp = その中央値、n_points = 点数** にまとめます。
-ウィンドウ内の最高速度が `MOVING_KMH` 未満の車両（駐停車）は、そのウィンドウでは数えません。
+ウィンドウ内の最高速度が `MOVING_KMH` 未満の車両（駐停車）は、そのウィンドウでは数えません（点の無いウィンドウは判定できないので数えます）。
 ウィンドウ毎に `traffic_YYYYMMDD_HHMM.csv`（`Id` は集約後の代表 Id。観測の無いリンクは行を持たない。通過だけで点の無いリンクは AvgSp が空）、
 全体を `traffic_15min.csv` に書きます。
 ''')
@@ -705,13 +703,13 @@ def window_stats(matched, stays):
     W = pd.Timedelta(minutes=WINDOW_MIN)
     p = matched[["vcode", "t", "speed", "Id"]].copy(); p["window"] = p.t.dt.floor(W)
     vmax = p.groupby(["vcode", "window"]).speed.max()                              # 車両 × 窓の最高速度（駐停車の判定）
-    moving = vmax[vmax >= MOVING_KMH].index
+    parked = vmax[vmax < MOVING_KMH].index                                          # 点が無い窓（通過だけ）は判定できないので残す
     # 滞在を窓に展開: 進入した窓から退出した窓まで（退出時刻ちょうどの窓境界は含めない）
     w0 = stays.t_enter.dt.floor(W); w1 = (stays.t_exit - pd.Timedelta(1, "ns")).dt.floor(W); w1 = w1.where(w1 >= w0, w0)
     n_w = ((w1 - w0) // W + 1).to_numpy()
     win = pd.DatetimeIndex(w0.repeat(n_w).to_numpy()) + pd.to_timedelta(np.concatenate([np.arange(k) for k in n_w]) * WINDOW_MIN, unit="min")
     ex = pd.DataFrame({"vcode": stays.vcode.to_numpy().repeat(n_w), "Id": stays.Id.to_numpy().repeat(n_w), "window": win}).drop_duplicates()
-    ex = ex[pd.MultiIndex.from_arrays([ex.vcode, ex.window]).isin(moving)]
+    ex = ex[~pd.MultiIndex.from_arrays([ex.vcode, ex.window]).isin(parked)]
     sp = p.groupby(["window", "Id", "vcode"]).agg(v=("speed", "mean"), n=("speed", "size")).reset_index()   # 窓 × リンク × 車両の速度
     per_vehicle = ex.merge(sp, on=["window", "Id", "vcode"], how="left")
     stats = (per_vehicle.groupby(["window", "Id"])
@@ -801,8 +799,8 @@ md(r'''
 ''')
 code(r'''
 summary = {"files": len(members), "rows_scanned": int(scan.rows.sum()) if "scan" in globals() and "rows" in scan else None,
-           "vehicles_in_area": len(VCODE), "trajectory_points": int(len(traj)), "sampled_points": int(len(s)),
-           "no_candidate_points": int(len(s) - cand.row.nunique()), "short_points": int(n_short), "segments": len(segments),
+           "vehicles_in_area": len(VCODE), "trajectory_points": int(len(traj)), "sampled_points": int(len(sampled)),
+           "no_candidate_points": int(len(sampled) - cand.row.nunique()), "short_points": int(n_short), "segments": len(segments),
            "matched_points": int((link_of >= 0).sum()), "unmatched_points": int((link_of < 0).sum()),
            "link_stays": int(len(stays)), "stays_without_points": int((stays.n_points == 0).sum()),
            "windows": int(stats.window.nunique()), "links_hit": int(stats.Id.nunique()), "traj_slot_files": len(traj_files)}
