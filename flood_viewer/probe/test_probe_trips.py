@@ -432,8 +432,53 @@ def test_grid():
     print("ok: grid ratios")
 
 
+
+
+
+def test_grid_users():
+    """grid_users.py: distinct user ids per cell and 15-min bin, baseline vs event, period mode across midnight.
+    Cell X: baseline 2 users, event 3 -> ratio 1.5; cell Y: event only -> NaN; a user with many points in one
+    cell counts once; the bin (T-15, T] puts a point at 23:30:00 into slot 23:30 and 23:30:01 into 23:45."""
+    import tempfile, os, json
+    import pandas as pd
+    import grid_users
+    from probe_trips import Grid
+    lon0, lat0 = 139.7, 35.68
+    kx = M_PER_DEG_LAT * np.cos(np.radians(lat0))
+    bbox = (lon0 - 500 / kx, lat0 - 500 / M_PER_DEG_LAT, lon0 + 500 / kx, lat0 + 500 / M_PER_DEG_LAT)
+    X = (lon0 + 150 / kx, lat0 + 150 / M_PER_DEG_LAT); Y = (lon0 - 350 / kx, lat0 - 350 / M_PER_DEG_LAT)
+    with tempfile.TemporaryDirectory() as d:
+        srcs = []
+        for day, nX, nY in (("2024-08-06", 2, 0), ("2024-08-13", 3, 2)):
+            rows = []
+            for u in range(nX):
+                for s in range(0, 600, 60):                                        # 10 points in cell X, 23:20-23:29
+                    rows.append((pd.Timestamp(f"{day} 23:20") + pd.Timedelta(seconds=s), X[0], X[1], f"X{u}" * 20))
+            for u in range(nY):
+                rows.append((pd.Timestamp(f"{day} 23:30:00"), Y[0], Y[1], f"Y{u}" * 20))    # exactly on the bin edge -> slot 23:30
+                rows.append((pd.Timestamp(f"{day} 23:30:01"), Y[0], Y[1], f"Y{u}" * 20))    # -> slot 23:45
+            df = pd.DataFrame(rows, columns=["recordedat", "lon", "lat", "userid"])
+            src = os.path.join(d, day.replace("-", "") + ".csv"); df.to_csv(src, index=False, date_format="%Y-%m-%d %H:%M:%S"); srcs.append(src)
+        out = os.path.join(d, "out")
+        idx = grid_users.run(srcs, out, PERIOD_START="2024-08-13 12:00", GRID_BBOX=",".join(map(str, bbox)))
+        g = Grid(bbox, 100.0); n = g.ncol * g.nrow
+        assert idx["params"] == ["users"] and idx["labels"]["users"] and idx["window_min"] == 15 and idx["slots"][0] == "12:00" and idx["slots"][-1] == "11:45"
+        assert idx["days"] == {"event": 1, "baseline": 1} and "users_event_2330.tif" in idx["files"] and "users_2330.tif" in idx["files"]
+        def raster(name):
+            raw = open(os.path.join(out, "grid_users", name), "rb").read()
+            return np.frombuffer(raw[-4 * n:], dtype="<f4")
+        cX, cY = int(g.cell(*X)), int(g.cell(*Y))
+        b, e, r = raster("users_baseline_2330.tif"), raster("users_event_2330.tif"), raster("users_2330.tif")
+        assert b[cX] == 2 and e[cX] == 3 and abs(r[cX] - 1.5) < 1e-6, (b[cX], e[cX], r[cX])          # 10 points per user count once
+        assert b[cY] == 0 and e[cY] == 2 and np.isnan(r[cY]), (b[cY], e[cY], r[cY])                   # 23:30:00 belongs to the 23:30 bin
+        assert raster("users_event_2345.tif")[cY] == 2 and raster("users_event_2345.tif")[cX] == 0       # 23:30:01 belongs to 23:45
+        assert np.isnan(r).sum() == n - 1, "only cell X has a baseline"
+    print("ok: grid_users counts and ratios")
+
+
 if __name__ == "__main__":
     main()
     test_mode_quality()
     test_period_mode()
     test_grid()
+    test_grid_users()

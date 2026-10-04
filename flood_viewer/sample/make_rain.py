@@ -45,6 +45,32 @@ json.dump({"cell_m": 100.0, "bounds": [W, S, E, N], "width": GX, "height": GY, "
            "params": ["walkers", "walk_dist_m", "stays", "turns", "modechanges"], "slots": times, "roles": ["baseline", "event"],
            "values": "event / baseline (ratio; NaN where the baseline is 0)", "files": gfiles}, open(GRID / "index.json", "w"), indent=1)
 print(f"grid/: {len(gfiles)} ratio rasters")
+
+# ---- grid_users/: the simple count (grid_users.py): distinct users per cell and 15-min bin, baseline / event / ratio ----
+GU = OUT / "grid_users"; GU.mkdir(exist_ok=True)
+UX, UY = 40, 30
+udx, udy = (E - W) / UX, (N - S) / UY
+ufiles = []
+rng_u = np.random.default_rng(5)
+yy, xx = np.mgrid[0:UY, 0:UX]
+for ti, tm in enumerate(times):
+    base = rng_u.integers(0, 12, (UY, UX)).astype(np.float32)
+    base[rng_u.random((UY, UX)) < 0.3] = 0                         # empty cells
+    base[UY // 2, UX // 2] = 8                                     # the centre cell always has a baseline (tests read it)
+    ev = np.round(base * rng_u.uniform(0.8, 1.2, (UY, UX))).astype(np.float32)
+    if 20 <= ti < 32:                                             # flood window: more people around the centre, fewer south of it
+        r = np.hypot(xx - UX * 0.5, (yy - UY * 0.5) * 1.3)
+        ev[r < 5] = np.round(base[r < 5] * 3); ev[(r >= 5) & (r < 9) & (yy > UY * 0.5)] = np.round(base[(r >= 5) & (r < 9) & (yy > UY * 0.5)] * 0.25)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratio = np.where(base > 0, ev / base, np.nan).astype(np.float32)
+    hhmm = tm.replace(":", "")
+    for name, arr, nd in ((f"users_baseline_{hhmm}.tif", base, -99.0), (f"users_event_{hhmm}.tif", ev, -99.0), (f"users_{hhmm}.tif", ratio, float("nan"))):
+        write_geotiff(GU / name, arr, W, N, udx, udy, nodata=nd); ufiles.append(name)
+json.dump({"cell_m": 250.0, "bounds": [W, S, E, N], "width": UX, "height": UY, "dx": udx, "dy": udy, "nodata": "nan", "count_nodata": -99.0,
+           "params": ["users"], "labels": {"users": "ユニーク ID 数"}, "units": {"users": "人"}, "window_min": 15, "slot_min": 15,
+           "slots": times, "roles": ["baseline", "event"], "days": {"baseline": 1, "event": 1},
+           "values": "users_<role>_<HHMM>: distinct user ids per cell and bin; users_<HHMM>: event / baseline", "files": ufiles}, open(GU / "index.json", "w"), indent=1)
+print(f"grid_users/: {len(ufiles)} rasters")
 DATE = None
 for i, tm in enumerate(times):
     DATE = DATES[i]

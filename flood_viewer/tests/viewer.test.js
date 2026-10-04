@@ -510,8 +510,10 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
 
 test("grid overlay in trajectory mode: parameter select, slot follows the slider, legend", async () => {
   const page = await openViewer();
-  assert.equal(await page.evaluate(() => S.grid ? S.grid.sources.size : 0), 48 * 5, "grid rasters registered from grid/index.json");
-  assert.deepEqual(await page.evaluate(() => S.grid.params.map(p => p[0])), ["walkers", "walk_dist_m", "stays", "turns", "modechanges"]);
+  assert.equal(await page.evaluate(() => S.grid ? S.grid.sources.size : 0), 48 * 5 + 48 * 3, "grid/ ratio rasters + grid_users/ count and ratio rasters registered");
+  assert.deepEqual(await page.evaluate(() => S.grid.params.map(p => p[0])), ["walkers", "walk_dist_m", "stays", "turns", "modechanges", "users", "users@baseline", "users@event"]);
+  assert.deepEqual(await page.evaluate(() => S.grid.params.filter(p => p[0].startsWith("users")).map(p => [p[1], p[2], p[4]])),
+    [["ユニーク ID 数（有事 ÷ 平時）", "ratio", 15], ["ユニーク ID 数 平時（人）", "count", 15], ["ユニーク ID 数 有事（人）", "count", 15]], "labels / kinds / window from grid_users/index.json");
   assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "hidden in traffic mode");
   await page.click("#modeTraj"); await page.waitForTimeout(300);
   await page.evaluate((t) => applyTime(t + 2), T_18);          // 00:30 = inside the flood window
@@ -533,6 +535,23 @@ test("grid overlay in trajectory mode: parameter select, slot follows the slider
   await page.click("#chkGrid"); await page.waitForTimeout(200);
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 14 }));
   assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "300 %", "ratio under the map centre (flood block)");
+  // the simple count layers (grid_users.py): a sequential ramp up to an editable maximum, thresholds hidden
+  await page.selectOption("#gridParam", "users@event");
+  await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users@event_00:30", null, { timeout: 15000 });
+  const u = await page.evaluate(() => ({ th: getComputedStyle(document.getElementById("gridThOpt")).display, mx: getComputedStyle(document.getElementById("gridMaxOpt")).display,
+    legend: document.getElementById("legendGrid").textContent, at: gridAt(map.getCenter()), max: S.grid.cur.max, url: S.grid.cur.url }));
+  assert.equal(u.th, "none"); assert.notEqual(u.mx, "none"); assert.equal(u.at, "24 人", "centre cell: baseline 8 x 3 in the flood window");
+  assert.match(u.legend, /ユニーク ID 数 有事（人）（直近 15 分）.*上限 \d+ 人、自動。0 は透明/); assert.ok(u.max >= 24, "auto limit = the slot's max");
+  await page.fill("#gridMax", "10"); await page.waitForTimeout(500);
+  const u2 = await page.evaluate(() => ({ legend: document.getElementById("legendGrid").textContent, url: S.grid.cur.url, mx: S.gridMax }));
+  assert.match(u2.legend, /上限 10 人、指定/); assert.equal(u2.mx, 10); assert.notEqual(u2.url, u.url, "repainted with the new limit");
+  await page.fill("#gridMax", ""); await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => S.gridMax), null, "empty = automatic again");
+  await page.selectOption("#gridParam", "users");
+  await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users_00:30", null, { timeout: 15000 });
+  assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "300 %", "ratio layer of the simple count");
+  assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("gridThOpt")).display), "none", "thresholds back for a ratio layer");
+  await page.selectOption("#gridParam", "walkers"); await page.waitForTimeout(300);
   await page.click("#modeTraffic"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "hidden again in traffic mode");
   await page.close();
