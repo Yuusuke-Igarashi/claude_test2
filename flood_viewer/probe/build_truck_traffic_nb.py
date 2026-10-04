@@ -18,7 +18,7 @@ md(r'''
 |---|---|---|
 | 1 | ネットワーク集約: 形状が同じリンクを 1 本にし、ノードと隣接表・近傍表を作る | `network_agg.csv` / `.shp` |
 | 2 | **1 回目の読み込み**: 全ファイルを走査し、指定エリアを通過した車両 ID を特定する | `vehicles_in_area.csv` |
-| 3 | **2 回目の読み込み**: 通過車両の点だけを抜き出し、1 つの軌跡ファイルにまとめる（車両・時刻順） | `trajectories.*` |
+| 3 | **2 回目の読み込み**: 通過車両の点だけを抜き出し、`POINT_STEP_S` 秒に 1 点に間引いて、1 つの軌跡ファイルにまとめる（車両・時刻順） | `trajectories.*` |
 | 4 | 軌跡ファイルを読み、車両ごとに点列を間引いて候補リンクを付ける（step 5-1） | – |
 | 5 | 動的計画法（Viterbi）で各点列の走行経路を決める（step 5-2, 5-3） | – |
 | 6 | 経路に沿った道のりで各点の位置を決め、1 秒毎の各点に「その時刻にいた道路リンク」を付ける。リンクごとの進入・退出時刻を前後の点から補間する | `matched_points.*`, `link_stays.*` |
@@ -37,7 +37,7 @@ Python の辞書・リストと numpy で書き、pandas は読み込み・結�
 | 項目 | 内容 |
 |---|---|
 | 通過判定 | 1 点でもエリアのポリゴン内にあれば通過車両。エリア指定が無ければ全車両 |
-| 抽出範囲 | 通過車両の点のうち、リンクの範囲（エリアの外接矩形 +1 km）内のもの |
+| 抽出範囲 | 通過車両の点のうち、リンクの範囲（エリアの外接矩形 +1 km）内のもの。`POINT_STEP_S`（10 秒）ごとの最初の点だけ残す。これより短い走行（`MIN_SEQ_POINTS` × 間隔 未満）は経路を決められず落ちる |
 | 点列の切れ目 | 車両が変わる所、`GAP_S`（120 秒）を超える欠測、候補リンクの無い点 |
 | 間引き | 軌跡に沿って `SAMPLE_M`（30 m）進むか `SAMPLE_MAX_S`（60 秒）経つごとに 1 点。速度の付与には間引く前の全点を使う |
 | 候補 | 点から `CAND_R_M`（50 m）以内で近い順に `CAND_MAX`（5）本。間引き後 `MIN_SEQ_POINTS`（3）点未満の区間は使わない |
@@ -66,6 +66,7 @@ OUT_DIR     = Path("./traffic_out")                             # 出力先
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 AREA_GEOJSON = None                                             # 通過判定に使う区域 GeoJSON（例 "./tokyo.geojson"）。None = 全車両
 CHUNK_ROWS = 2_000_000                                          # CSV を一度に読む行数（メモリに合わせて）
+POINT_STEP_S = 10                                               # 抽出する点の間隔 [秒]。1 秒毎の点を 10 秒に 1 点に間引く（1 = 間引かない）
 
 # ---- 入力 CSV の列名（サンプルに合わせてある） ---------------------------
 COL_ID, COL_TIME, COL_SPEED, COL_LAT, COL_LON = "serial_number", "record_time", "speed", "gps_latitude", "gps_longitude"
@@ -90,10 +91,10 @@ JUMP_SPEED_MS = 40.0          # [m/s]（144 km/h）
 SIGMA_M = 15.0                # 観測コスト = (点からリンクまでの距離 / SIGMA_M)^2  … GPS 誤差の想定幅
 C_SWITCH = 1.0                # 接続リンクへの乗り換え 1 本あたりのコスト
 LAMBDA = 2.0                  # |経路距離 − 直線距離| / 直線距離 に掛ける係数
-D_MAX_M = 250.0               # 網の距離でこれ以内のリンクを「接続」とみなす（間引き間隔で動ける距離より大きく）
+D_MAX_M = max(250.0, 60.0 * POINT_STEP_S)   # 網の距離でこれ以内のリンクを「接続」とみなす。点の間隔で走れる距離（40 m/s × 1.5）より大きくする
 
 # ---- step 8: 直近 1 時間の軌跡（15 分毎、任意） ----------------------------
-TRAJ_OUT = True               # traj/traj_YYYYMMDD_HHMM.geojson を書くか（HHMM = 窓の終端。窓は (T-60 分, T]）
+TRAJ_OUT = False              # traj/traj_YYYYMMDD_HHMM.geojson を書くか（HHMM = 窓の終端。窓は (T-60 分, T]）。時間が掛かるので既定は書かない
 TRAJ_WINDOW_MIN = 60          # 軌跡の窓 [分]
 TRAJ_GAP_MIN = 5.0            # この分数を超える欠測で軌跡を切る
 TRAJ_SIMPLIFY_M = 5.0         # 軌跡の間引き（Douglas-Peucker の許容誤差 [m]）
@@ -350,7 +351,9 @@ md(r'''
 
 もう一度全ファイルを読み、通過車両の行だけを残します。時刻の解釈と欠損の除去は、残した行に対してだけ行います
 （全行に対して行うより速い）。リンクの範囲 `LINK_BOUNDS` の外の点は、どのリンクにも付かないので落とします。
-同一車両・同一秒の重複は 1 行にし、車両・時刻順に並べて `trajectories.*` に書きます。
+点は `POINT_STEP_S` 秒ごとの区切り（時刻を `POINT_STEP_S` 秒で切り捨てた値）につき最初の 1 点だけ残します（同一秒の重複もここで消える）。
+車両が複数ファイルに分かれていても同じ区切りで判定するので、全ファイルをつないだ後にもう一度同じ間引きをすれば結果は一意です。
+車両・時刻順に並べて `trajectories.*` に書きます。
 以降の節はこのファイルだけを入力にするので、ここまで済んでいれば zip を再読込せずに続きから実行できます。
 ''')
 code(r'''
@@ -359,6 +362,11 @@ def parse_time(s):
         return pd.to_datetime(s, format="ISO8601", errors="coerce")   # "YYYY-MM-DD HH:MM:SS"（小数秒や T 区切りも可）
     except (TypeError, ValueError):                                    # 古い pandas
         return pd.to_datetime(s, errors="coerce")
+
+def thin(df):
+    """車両ごとに POINT_STEP_S 秒の区切りにつき最初の 1 点だけ残す（df は車両・時刻順でなくてもよい）。"""
+    bucket = df.t.dt.floor(f"{POINT_STEP_S}s")
+    return df[~pd.DataFrame({"v": df.vcode, "b": bucket}).duplicated()]
 
 t_all = time.perf_counter()
 VSET = set(VCODE)
@@ -381,16 +389,16 @@ for k, name in enumerate(members, 1):
             n_bad += int((~ok).sum()); df = df[ok]
             inb = (df.lon >= x0) & (df.lon <= x1) & (df.lat >= y0) & (df.lat <= y1)
             n_out += int((~inb).sum()); df = df[inb]
-            parts.append(df); n_file += len(df)
+            df = thin(df); parts.append(df); n_file += len(df)
         log(f"[{k}/{len(members)}] {name}: 通過車両の点 {n_file:,} ({time.perf_counter() - t0:.1f} s)")
     except Exception as e:
         log(f"[{k}/{len(members)}] {name}: skipped ({type(e).__name__}: {e})")
 
-traj = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame(columns=["vcode", "t", "lat", "lon", "speed"])
+traj = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame({"vcode": pd.Series(dtype=np.int32), "t": pd.Series(dtype="datetime64[ns]"), "lat": [], "lon": [], "speed": []})
 del parts
 n0 = len(traj)
-traj = traj.drop_duplicates(["vcode", "t"]).sort_values(["vcode", "t"], kind="stable").reset_index(drop=True)
-log(f"2 回目: 通過車両の行 {n_sel:,} → 欠損 {n_bad:,}、リンク範囲外 {n_out:,}、重複 {n0 - len(traj):,} を除いて {len(traj):,} 点 "
+traj = thin(traj.sort_values(["vcode", "t"], kind="stable")).reset_index(drop=True)      # ファイルをまたいだ重複をここで消す
+log(f"2 回目: 通過車両の行 {n_sel:,} → 欠損 {n_bad:,}、リンク範囲外 {n_out:,} を除き、{POINT_STEP_S} 秒に 1 点へ間引いて {len(traj):,} 点 "
     f"/ {traj.vcode.nunique():,} 台 / {traj.t.min()} – {traj.t.max()} ({time.perf_counter() - t_all:.0f} s)")
 write_table(traj.assign(serial_number=SERIAL[traj.vcode.to_numpy()])[["serial_number", "t", "lat", "lon", "speed"]], "trajectories")
 display(traj.head())
@@ -737,7 +745,7 @@ display(stats.sort_values(["window", "Hits"], ascending=[True, False]).head(12))
 ''')
 
 md(r'''
-## 8. 直近 1 時間の軌跡（15 分毎、任意）
+## 8. 直近 1 時間の軌跡（15 分毎、任意。既定では書かない）
 
 窓の終端 T（15 分刻み）ごとに、(T−60 分, T] の各車両の点をつないだ線を `traj/traj_YYYYMMDD_HHMM.geojson` に書きます
 （HHMM は T。人流の viewer と同じ「直近 1 時間」の定義）。入力は全車両・全時刻をまとめた `traj`（節 3 の表）なので、

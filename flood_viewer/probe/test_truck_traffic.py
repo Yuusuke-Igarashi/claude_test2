@@ -97,7 +97,7 @@ def make_data():
     return len(h12), len(h13)
 
 
-def run_notebook(out_dir, area=None):
+def run_notebook(out_dir, area=None, step=1, traj_out=True):
     nb = json.load(open(HERE / "truck_traffic.ipynb", encoding="utf-8"))
     g = {"display": lambda x: print(x.to_string() if hasattr(x, "to_string") else x)}
     for i, c in enumerate(nb["cells"]):
@@ -110,6 +110,8 @@ def run_notebook(out_dir, area=None):
                      .replace('Path("./traffic_out")', f'Path("{out_dir}")')
             if area:
                 src = src.replace("AREA_GEOJSON = None", f'AREA_GEOJSON = "{area}"')
+            src = src.replace("POINT_STEP_S = 10 ", f"POINT_STEP_S = {step} ").replace("TRAJ_OUT = False ", f"TRAJ_OUT = {traj_out} ")
+            assert f"POINT_STEP_S = {step} " in src and f"TRAJ_OUT = {traj_out} " in src
         print(f"\n---------------- cell {i} ----------------")
         exec(compile(src, f"cell{i}", "exec"), g)
     return g
@@ -192,6 +194,25 @@ def check(out_dir):
     print("\ntest_truck_traffic (area): OK")
 
 
+def check_step10(out_dir):
+    """POINT_STEP_S = 10 (the default): one point per 10 s bucket. Hits are unchanged except for trips shorter than
+    MIN_SEQ_POINTS x 10 s (H drives 8 s -> 1 point -> no route). No traj/ by default."""
+    O = Path(out_dir)
+    tr = table(O, "trajectories")
+    assert len(tr) < 220, len(tr)                                   # 1,816 one-second points -> about 190
+    assert tr.groupby(["serial_number", tr.t.dt.floor("10s")]).size().max() == 1, "at most one point per vehicle and 10 s bucket"
+    w, got = hits(O)
+    expect = {("12:00", 1): 3, ("12:00", 4): 1, ("12:00", 6): 1, ("12:15", 1): 2, ("12:15", 6): 1,
+              ("12:45", 1): 1, ("12:45", 7): 1, ("12:45", 13): 1, ("13:30", 1): 1, ("13:30", 6): 1}
+    assert got == expect, (got, expect)                               # same as the 1 s run minus H (8 s trip)
+    c = w.loc[(pd.Timestamp("2025-09-10 12:00"), 1)]
+    assert abs(c.AvgSp - (50 + 70 + 55) / 3) < 2.0 and c.n_points == 6 + 5 + 3, c.to_dict()   # A 58 s, C 42 s, E 30 s at one point per 10 s
+    assert not (O / "traj").exists() or not list((O / "traj").glob("*.geojson")), "no trajectories by default"
+    sm = json.load(open(O / "summary.json"))
+    assert sm["short_points"] >= 1 and sm["traj_slot_files"] == 0, sm   # H's single point is a too-short sequence
+    print("test_truck_traffic (step 10 s, default): OK")
+
+
 def check_noarea(out_dir):
     """Without AREA_GEOJSON every vehicle is kept: H is matched to link 9 (no speed-limit rule), G has no candidate links."""
     O = Path(out_dir)
@@ -216,3 +237,6 @@ if __name__ == "__main__":
     out2 = T / "out_noarea"
     run_notebook(out2)
     check_noarea(out2)
+    out3 = T / "out_step10"
+    run_notebook(out3, step=10, traj_out=False)
+    check_step10(out3)
