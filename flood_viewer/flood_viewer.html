@@ -73,7 +73,7 @@ button:hover{background:#f0efec}
 .seg button{border:0;border-radius:0;padding:4px 12px}
 .seg button.on{background:var(--ink);color:#fff}
 .seg button:disabled{color:var(--muted);cursor:not-allowed;background:var(--surface)}
-#trajOpts label, #truckOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
+#trajOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
 #trajStatus{flex-basis:100%;display:none;color:var(--ink2);font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:6px}
 #truckStatus{flex-basis:100%;display:none;color:var(--ink2);font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:6px}
 #tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:320px}
@@ -121,10 +121,6 @@ button:hover{background:#f0efec}
     <label id="lowlandOpt" style="display:none"><input type="checkbox" id="chkLowland" checked> 低位地帯</label>
     <label id="floodOpt" style="display:none"><input type="checkbox" id="chkFlood" checked> 浸水域 <b id="floodVal" class="stat"></b> <b id="floodHover" class="stat"></b></label>
   </span>
-  <span id="truckOpts" style="display:none">
-    <label><input type="checkbox" id="chkTruckTrajBase" checked> 軌跡 平時</label><label><input type="checkbox" id="chkTruckTrajEvent" checked> 軌跡 有事</label>
-    <b id="truckTrajVal" class="stat"></b>
-  </span>
   <span id="trajOpts" style="display:none">
     <label><input type="checkbox" id="chkBase" checked> 平時</label><label><input type="checkbox" id="chkEvent" checked> イベント時</label>
     <label><input type="checkbox" id="chkTraj" checked> 軌跡</label><label><input type="checkbox" id="chkDwell" checked> 滞留</label><label><input type="checkbox" id="chkMode" checked> 車→徒歩</label><label><input type="checkbox" id="chkTurn" checked> 方向転換</label>
@@ -143,8 +139,6 @@ button:hover{background:#f0efec}
   <span class="legend" id="legendTruck" style="display:none">
     <span style="--c:var(--road-black)">平時 2 台以上（それ以外は非表示）</span>
     <span style="--c:var(--road-red)" id="legTruckDrop">台数または速度が平時の 50 % 以下</span>
-    <span class="grp">｜</span>
-    <span style="--c:var(--series-1)">直近 1 時間の軌跡 平時</span><span style="--c:var(--series-2)">有事</span>
   </span>
   <span class="legend" id="legendTraj" style="display:none">
     <span style="--c:var(--series-1)">平時</span><span style="--c:var(--series-2)">イベント時</span>
@@ -216,7 +210,7 @@ button:hover{background:#f0efec}
       <p style="margin:6px 0 2px"><b>2. 人流（位置ログの前処理結果）のフォルダ（任意）:</b> <input id="probeInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">probe_out: viewer/（時刻別ファイル）と grid/（100 m メッシュ）。軌跡タブとグリッド重畳に使う</span></p>
       <p style="margin:6px 0 2px"><b>3. トラックプローブのフォルダ（任意）:</b> <input id="truckInput" type="file" webkitdirectory><br>
-      <span style="color:var(--muted)">yazaki_out: network_agg.shp / .dbf と traffic_yyyymmdd_hhmm.csv（平時と有事の両方の日付）。トラックタブに使う</span></p>
+      <span style="color:var(--muted)">yazaki_out: network_agg.shp / .dbf と traffic_yyyymmdd_hhmm.csv（平時と有事の両方の日付）。トラックタブに使う。traj/ は読まない</span></p>
       <p style="margin:6px 0 2px"><b>4. 浸水域（時刻付き shp）のフォルダ（任意）:</b> <input id="floodInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">S1_yyyymmddhhmm.shp / .dbf（/ .cpg）など、ファイル名の末尾に日付時刻を持つポリゴン shp。各時刻には、その時刻以前の最新のファイルを重ねる</span></p>
       <span style="display:none"><input id="rainInput" type="file" webkitdirectory><input id="lowlandInput" type="file" accept=".geojson,.json"></span>
@@ -471,7 +465,6 @@ function rainRegistry(sources, index){
 // truckList: the truck-probe output folder (network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv). Rain files and
 // lowland.geojson inside the data folder are also accepted (an all-in-one folder).
 const TRUCK_WINDOW = /^traffic_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})\.csv$/i;
-const TRUCK_TRAJ = /^traj_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})\.geojson$/i;
 const FLOOD_NAME = /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})\.(shp|dbf|cpg)$/i;
 function floodRegistry(floodList){
   const by = new Map();
@@ -494,11 +487,10 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
   let total = 0, rainIndexFile = null, viewerIndexFile = null; const gridIndexFiles = [];
   const gridFiles = new Map();
-  const truck = {shp: null, dbf: null, windows: [], traj: []};
+  const truck = {shp: null, dbf: null, windows: []};
   for(const fl of truckList){
-    const m = fl.name.match(TRUCK_WINDOW), tj = fl.name.match(TRUCK_TRAJ);
+    const m = fl.name.match(TRUCK_WINDOW);
     if(m) truck.windows.push([`${m[1]}-${m[2]}-${m[3]}`, `${m[4]}:${m[5]}`, fl]);
-    else if(tj) truck.traj.push([`${tj[1]}-${tj[2]}-${tj[3]}`, `${tj[4]}:${tj[5]}`, fl]);
     else if(/^network_agg\.shp$/i.test(fl.name)) truck.shp = fl;
     else if(/^network_agg\.dbf$/i.test(fl.name)) truck.dbf = fl;
   }
@@ -529,7 +521,7 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
   }
   if(sources.size) fileRow(want.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
   if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（GeoTIFF、表示時に読み込み）`);
-  if(truckList.length) fileRow("トラック", truckOk ? `network_agg.shp/.dbf + 時刻別 CSV ${truck.windows.length} 本` + (truck.traj.length ? ` + 軌跡 ${truck.traj.length} 本（表示時に読み込み）` : "") : `不足: ${[!truck.shp && "network_agg.shp", !truck.dbf && "network_agg.dbf", !truck.windows.length && "traffic_yyyymmdd_hhmm.csv"].filter(Boolean).join(", ")}`);
+  if(truckList.length) fileRow("トラック", truckOk ? `network_agg.shp/.dbf + 時刻別 CSV ${truck.windows.length} 本` : `不足: ${[!truck.shp && "network_agg.shp", !truck.dbf && "network_agg.dbf", !truck.windows.length && "traffic_yyyymmdd_hhmm.csv"].filter(Boolean).join(", ")}`);
   if(gridFiles.size) fileRow("grid*/", `グリッド ${gridFiles.size} ラスタ（GeoTIFF、表示時に読み込み）`);
   const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
     + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
@@ -552,7 +544,7 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const truckTxt = truckOk ? Promise.all([truck.shp.arrayBuffer(), truck.dbf.arrayBuffer(), ...truck.windows.map(w => readSource(w[2]))])
-      .then(([shp, dbf, ...texts]) => ({shp, dbf, windows: truck.windows.map((w, i) => [w[0], w[1], texts[i]]), traj: truck.traj})) : Promise.resolve(null);
+      .then(([shp, dbf, ...texts]) => ({shp, dbf, windows: truck.windows.map((w, i) => [w[0], w[1], texts[i]])})) : Promise.resolve(null);
   const gridIndex = Promise.all(gridIndexFiles.map(fl => readSource(fl).then(JSON.parse).catch(() => null)));
   return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex, truckTxt, gridIndex])
     .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx, truck, gridIdx]) => {
@@ -736,17 +728,11 @@ function assignTruckRoles(dates){
   if(!byPeriod) for(const d of dates) roleOf[d] = d === dates[dates.length - 1] ? "event" : "baseline";
   return {roleOf, byRole: {baseline: dates.filter(d => roleOf[d] === "baseline"), event: dates.filter(d => roleOf[d] === "event"), byPeriod}};
 }
-// Roles come from the dates of the window CSVs only. A trajectory slot file (traj_YYYYMMDD_HHMM, HHMM = window end)
-// takes the role of its date, except the 00:00 slot, which covers the last hour of the previous day and takes that
-// day's role (the notebook writes traj_<next day>_0000 for data that runs to midnight; that date must not be
-// mistaken for the latest = event day).
-function truckRoleMap(csvDates, traj){
+// Roles come from the dates of the window CSVs (traffic_YYYYMMDD_HHMM.csv) only.
+function truckRoleMap(csvDates){
   const dates = [...new Set(csvDates)].sort();
   const {roleOf, byRole} = assignTruckRoles(dates);
-  const prevDay = (d) => { const x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() - 1); return x.toISOString().slice(0, 10); };
-  const trajSources = new Map(); let trajNoRole = 0;
-  for(const [d, hhmm, fl] of traj || []){ const r = roleOf[hhmm === "00:00" ? prevDay(d) : d]; if(r) trajSources.set(`${r}_${hhmm}`, fl); else trajNoRole++; }
-  return {dates, roleOf, byRole, trajSources, trajNoRole};
+  return {dates, roleOf, byRole};
 }
 // raw = {shp: ArrayBuffer, dbf: ArrayBuffer, windows: [[date "YYYY-MM-DD", "HH:MM", csvText], ...]}
 // Values are stored per aggregated link (shapefile record index) x time step; links absent from a window's
@@ -778,7 +764,7 @@ function buildTruck(raw){
       rows.push([d, hhmm, norm(c[ci]), parseFloat(c[ch]), cs >= 0 ? parseFloat(c[cs]) : NaN]);
     }
   }
-  const {dates, roleOf, byRole, trajSources, trajNoRole} = truckRoleMap([...dateSet], raw.traj);
+  const {dates, roleOf, byRole} = truckRoleMap([...dateSet]);
   const T = S.T, n = NF * T;
   const R = {gj, bh: new Float32Array(n), eh: new Float32Array(n), bsp: new Float32Array(n).fill(NaN), esp: new Float32Array(n).fill(NaN),
              bn: new Uint16Array(n), en: new Uint16Array(n), nf: NF, dates: byRole, rows: rows.length, files: raw.windows.length, badFiles,
@@ -801,9 +787,8 @@ function buildTruck(raw){
     if(R.en[i]) R.esp[i] = ess[i] / R.en[i];
   }
   R.tcls = new Uint8Array(n); R.cur = new Uint8Array(NF);
-  R.traj = trajSources.size ? {sources: trajSources, cache: new Map(), loaded: null, loading: null} : null;
   let cb = 0, ce = 0; for(let i=0;i<n;i++){ if(R.bh[i] >= 1) cb++; if(R.eh[i] >= 1) ce++; }
-  R.cellsBase = cb; R.cellsEvent = ce; R.dateList = dates; R.roleOf = roleOf; R.trajNoRole = trajNoRole;
+  R.cellsBase = cb; R.cellsEvent = ce; R.dateList = dates; R.roleOf = roleOf;
   return R;
 }
 
@@ -832,7 +817,6 @@ function truckStatus(){
   el.textContent = `トラック統計: network_agg ${R.links.toLocaleString()} リンク、時刻別 CSV ${R.files} 本 ${R.rows.toLocaleString()} 行、日付 ${R.dateList.map(d => `${d}=${R.roleOf[d] === "event" ? "有事" : R.roleOf[d] === "baseline" ? "平時" : "対象外"}`).join(", ")}`
     + `（${R.dates.byPeriod ? "期間に合わせて判別" : "最新日を有事として判別"}）｜ network_agg に無い Id ${R.unmatched.toLocaleString()} 行、時刻軸に無い時刻 ${R.skipped.toLocaleString()} 行` + (R.badFiles ? `、列が読めない CSV ${R.badFiles} 本` : "")
     + `｜ 台数 1 以上のリンク×時刻: 平時 ${R.cellsBase.toLocaleString()}、有事 ${R.cellsEvent.toLocaleString()}`
-    + (R.traj ? `｜ 軌跡ファイル ${R.traj.sources.size} 本` + (R.trajNoRole ? `（日付が CSV に無い ${R.trajNoRole} 本は非表示）` : "") : "｜ 軌跡ファイルなし")
     + (R.cellsBase === 0 ? "　※平時のデータがありません: 平時の日付が無いか、Id がネットワークと一致していません" : "")
     + (R.cellsEvent === 0 ? "　※有事のデータがありません: 有事の日付が無いか、Id がネットワークと一致していません" : "");
 }
@@ -1183,11 +1167,6 @@ function initMap(gj){
               "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
               "line-opacity": ["case", ["==", tcls, 2], 1, 0] }
     });
-    for(const role of ["base", "event"]){
-      map.addSource(`truck-traj-${role}`, {type:"geojson", data: {type:"FeatureCollection", features:[]}});
-      map.addLayer({ id:`truck-traj-${role}`, type:"line", source:`truck-traj-${role}`, layout:{ "line-cap":"round", "line-join":"round", visibility:"none" },
-                     paint:{ "line-color": cssVar(role === "base" ? "--series-1" : "--series-2"), "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1, 14, 1.8, 17, 3], "line-opacity": 0.75 } });
-    }
     map.addLayer({ id:"truck-hit", type:"line", source:"truck-links", layout:{visibility:"none"}, paint:{ "line-width": 10, "line-opacity": 0 } });
     // wide invisible hit layer
     map.addLayer({
@@ -1282,40 +1261,14 @@ function setMode(m){
   $("statTraffic").style.display = traffic ? "" : "none";
   $("statTruck").style.display = truck ? "" : "none";
   for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traffic ? "visible" : "none");
-  for(const id of ["links-truck-base","links-truck-red","truck-hit","truck-traj-base","truck-traj-event"]) map.setLayoutProperty(id, "visibility", truck ? "visible" : "none");
-  $("truckOpts").style.display = truck && S.truck && S.truck.traj ? "inline" : "none";
+  for(const id of ["links-truck-base","links-truck-red","truck-hit"]) map.setLayoutProperty(id, "visibility", truck ? "visible" : "none");
   map.setLayoutProperty("links-context", "visibility", traj ? "visible" : "none");
   S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null);
   setTrajSel(null);
   updateTraj();
   updateGrid();
   truckStatus();
-  if(truck){ applyTruckTime(S.t, true); updateTruckTraj(); }
-}
-
-// ---- Truck trajectories of the last hour (traj/traj_YYYYMMDD_HHMM.geojson): one file per role and slot, read on demand ----
-const TRUCK_TRAJ_CACHE = 6;
-function updateTruckTraj(){
-  const R = S.truck, TR = R && R.traj;
-  if(!map || !TR || !map.getSource("truck-traj-base")) return;
-  const EMPTY = {type:"FeatureCollection", features:[]};
-  if(S.mode !== "truck"){ for(const role of ["base", "event"]) map.getSource(`truck-traj-${role}`).setData(EMPTY); TR.loaded = null; return; }
-  const tm = S.times[S.t], notes = [];
-  for(const [role, key, chk] of [["base", `baseline_${tm}`, "chkTruckTrajBase"], ["event", `event_${tm}`, "chkTruckTrajEvent"]]){
-    const src = map.getSource(`truck-traj-${role}`);
-    if(!$(chk).checked){ src.setData(EMPTY); continue; }
-    const fl = TR.sources.get(key);
-    if(!fl){ src.setData(EMPTY); notes.push(`${role === "base" ? "平時" : "有事"} ${tm} なし`); continue; }
-    if(TR.cache.has(key)){ const d = TR.cache.get(key); src.setData(d); notes.push(`${role === "base" ? "平時" : "有事"} ${d.features.length} 本`); continue; }
-    src.setData(EMPTY);
-    readSource(fl).then(txt => {
-      const d = JSON.parse(txt);
-      TR.cache.set(key, d); if(TR.cache.size > TRUCK_TRAJ_CACHE) TR.cache.delete(TR.cache.keys().next().value);
-      if(S.mode === "truck" && S.times[S.t] === tm && $(chk).checked){ src.setData(d); $("truckTrajVal").textContent = `${role === "base" ? "平時" : "有事"} ${d.features.length} 本`; }
-    }).catch(e => { console.error(e); $("truckTrajVal").textContent = `軌跡を読めません: ${e.message}`; });
-    notes.push(`${role === "base" ? "平時" : "有事"} 読み込み中`);
-  }
-  $("truckTrajVal").textContent = notes.join(" / ");
+  if(truck) applyTruckTime(S.t, true);
 }
 
 function windowLabel(t){
@@ -1867,7 +1820,7 @@ function applyTime(t, force=false){
       S.cur[r] = k;
     }
   }
-  if(S.mode === "truck"){ applyTruckTime(t, force); updateTruckTraj(); }
+  if(S.mode === "truck") applyTruckTime(t, force);
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
   updateTraj();
   updateRain();
@@ -1894,7 +1847,6 @@ function setupControls(){
   $("modeTraffic").addEventListener("click", () => setMode("traffic"));
   $("modeTraj").addEventListener("click", () => setMode("traj"));
   $("modeTruck").addEventListener("click", () => setMode("truck"));
-  for(const id of ["chkTruckTrajBase", "chkTruckTrajEvent"]) $(id).addEventListener("change", (e) => { e.target.blur(); updateTruckTraj(); });
   for(const [id, key] of [["chkBase","base"],["chkEvent","event"],["chkTraj","traj"],["chkDwell","dwell"],["chkMode","mode"],["chkTurn","turn"]])
     $(id).addEventListener("change", (e) => { S.show[key] = e.target.checked; e.target.blur(); updateTraj(); });
   $("nearestBtn").addEventListener("click", (e) => { e.target.blur(); flyToNearest(); });
@@ -2060,7 +2012,7 @@ function drawChart(svg, a, b, errMask, title){
       const probe = [...$("probeInput").files], nSlot = probe.filter(f => /^(baseline|event)_\d{4}\.geojson$/i.test(f.name)).length, nGrid = probe.filter(f => GRID_NAME.test(f.name)).length;
       const parts = [main ? `1: ${main} ファイル` : "1: 未選択",
                      `2: ${probe.length ? `時刻別 ${nSlot} 本・グリッド ${nGrid} 枚` : "なし"}`,
-                     `3: ${$("truckInput").files.length ? `時刻別 CSV ${[...$("truckInput").files].filter(f => TRUCK_WINDOW.test(f.name)).length} 本・network_agg ${[...$("truckInput").files].some(f => /^network_agg\.shp$/i.test(f.name)) && [...$("truckInput").files].some(f => /^network_agg\.dbf$/i.test(f.name)) ? "あり" : "なし"}・軌跡 ${[...$("truckInput").files].filter(f => TRUCK_TRAJ.test(f.name)).length} 本` : "なし"}`,
+                     `3: ${$("truckInput").files.length ? `時刻別 CSV ${[...$("truckInput").files].filter(f => TRUCK_WINDOW.test(f.name)).length} 本・network_agg ${[...$("truckInput").files].some(f => /^network_agg\.shp$/i.test(f.name)) && [...$("truckInput").files].some(f => /^network_agg\.dbf$/i.test(f.name)) ? "あり" : "なし"}` : "なし"}`,
                      `4: ${$("floodInput").files.length ? `浸水域 shp ${[...$("floodInput").files].filter(f => /\.shp$/i.test(f.name) && FLOOD_NAME.test(f.name)).length} 時点` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };

@@ -147,20 +147,6 @@ for r in truck_links:
         if he > 0: per_window.setdefault(f"traffic_{day_e}_{hhmm}.csv", []).append((ids[r], he, round(se, 2), round(se, 2), he * 30))
 for name, rows_ in per_window.items():
     pd.DataFrame(rows_, columns=["Id", "Hits", "AvgSp", "MedSp", "n_points"]).to_csv(TR / name, index=False); n_truck_rows += len(rows_)
-# traj/traj_YYYYMMDD_HHMM.geojson: last-hour trajectories per slot (window end), a few random polylines along the grid roads
-(TR / "traj").mkdir(exist_ok=True)
-n_traj_files = 0
-for ti, tm in enumerate(times):
-    for day in (("20240814", "20240821") if ti < 24 else ("20240815", "20240822")):
-        feats = []
-        for k in range(12):
-            r = truck_links[rng.integers(len(truck_links))]
-            c = features[r]["geometry"]["coordinates"]
-            feats.append({"type": "Feature", "properties": {"time": tm, "date": f"{day[:4]}-{day[4:6]}-{day[6:]}", "n_points": int(rng.integers(30, 600)),
-                                                             "v_mean": round(float(rng.uniform(15, 45)), 1), "v_max": round(float(rng.uniform(45, 70)), 1)},
-                          "geometry": {"type": "LineString", "coordinates": [c[0], c[1], [c[1][0] + dlon, c[1][1]]]}})
-        json.dump({"type": "FeatureCollection", "features": feats}, open(TR / "traj" / f"traj_{day}_{tm.replace(':', '')}.geojson", "w"))
-        n_traj_files += 1
 # flood/S1_YYYYMMDDHHMM.shp: flood-extent polygons (100 m mesh cells) at irregular observation times; dbf in cp932 with
 # the fields of the real files (meshcode, JIcode, 浸水深, 水位, 地盤高). Each snapshot grows around the flooded centre.
 FL = OUT / "flood"
@@ -204,7 +190,7 @@ for stamp, radius in [("202408212110", 1), ("202408212240", 2), ("202408212330",
             rows.append((f"5339{i + 50:02d}{j + 50:02d}", 13104, depth, round(5.0 + depth, 3), 5.0))
     write_polygon_shapefile(str(FL / f"S1_{stamp}"), rings, flood_fields, rows); n_flood_cells += len(rows)
 print("flood/: 4 snapshots,", n_flood_cells, "mesh cells")
-print("truck/: network_agg.shp", len(truck_links), "links,", len(per_window), "window files,", n_truck_rows, "rows,", n_traj_files, "trajectory slot files")
+print("truck/: network_agg.shp", len(truck_links), "links,", len(per_window), "window files,", n_truck_rows, "rows")
 
 print("links", len(features), "csv rows", N, "error links", int((link_level >= 1).sum()),
       "cells by level", {k: int((err == k).sum()) for k in (1, 2, 3)}, "links by max level", {k: int((link_level == k).sum()) for k in (1, 2, 3)})

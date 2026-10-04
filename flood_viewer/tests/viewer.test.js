@@ -431,7 +431,7 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));
   await page.setInputFiles("#truckInput", join(DATA, "truck"));
-  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり・軌跡 96 本 \/ 4: なし$/);
+  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, files: S.truck.files, links: S.truck.links, dates: S.truck.dates, unmatched: S.truck.unmatched, disabled: document.getElementById("modeTruck").disabled }));
@@ -441,12 +441,9 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
     const r = assignTruckRoles(["2024-08-14", "2024-08-15", "2024-08-21", "2024-08-22"]).byRole; S.period = p; return r; }),
     { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "roles by the period when the dates match it");
   assert.deepEqual(await page.evaluate(() => assignTruckRoles(["2025-09-10", "2025-09-11"]).byRole), { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false });
-  // roles come from the CSV dates only; the traj_<next day>_0000 slot (data running to midnight) belongs to the previous day
-  assert.deepEqual(await page.evaluate(() => { const p = S.period; S.period = null;
-    const r = truckRoleMap(["2025-09-11", "2025-09-10", "2025-09-11"], [["2025-09-12", "00:00", 1], ["2025-09-11", "23:45", 2], ["2025-09-11", "00:00", 3], ["2025-09-01", "12:00", 4]]);
-    S.period = p; return { dates: r.dates, byRole: r.byRole, keys: [...r.trajSources.keys()], noRole: r.trajNoRole }; }),
-    { dates: ["2025-09-10", "2025-09-11"], byRole: { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false }, keys: ["event_00:00", "event_23:45", "baseline_00:00"], noRole: 1 },
-    "a trajectory file dated the day after the last CSV must not become the event day");
+  // roles come from the CSV dates only (traj/ files are not read)
+  assert.deepEqual(await page.evaluate(() => { const p = S.period; S.period = null; const r = truckRoleMap(["2025-09-11", "2025-09-10", "2025-09-11"]); S.period = p; return { dates: r.dates, byRole: r.byRole }; }),
+    { dates: ["2025-09-10", "2025-09-11"], byRole: { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false } });
   assert.equal(info.disabled, false);
   await page.click("#modeTruck"); await page.waitForTimeout(300);
   await page.evaluate((t) => applyTime(t), T_18);
@@ -455,17 +452,8 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
     vis: map.getLayoutProperty("links-truck-red", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), legend: getComputedStyle(document.getElementById("legendTruck")).display,
     status: document.getElementById("truckStatus").textContent, src: map.querySourceFeatures("truck-links").length > 0 }));
   assert.equal(st.mode, "truck"); assert.equal(st.vis, "visible"); assert.equal(st.base, "none"); assert.notEqual(st.legend, "none"); assert.ok(st.src, "truck geometry rendered from the shapefile");
-  assert.match(st.status, /network_agg 1,560 リンク、時刻別 CSV 96 本.*軌跡ファイル 96 本/);
-  // last-hour trajectories of both roles for the slot, loaded on demand; toggles clear them
-  await page.waitForFunction(() => map.querySourceFeatures("truck-traj-event").length > 0 && map.querySourceFeatures("truck-traj-base").length > 0, null, { timeout: 15000 });
-  assert.ok(await page.evaluate(() => S.truck.traj.cache.has("baseline_00:00") && S.truck.traj.cache.has("event_00:00")), "baseline + event slot files parsed");
-  assert.match(await page.textContent("#truckTrajVal"), /平時 12 本|有事 12 本/);
-  await page.click("#chkTruckTrajBase"); await page.waitForTimeout(300);
-  assert.equal(await page.evaluate(() => map.querySourceFeatures("truck-traj-base").length), 0, "baseline trajectories hidden by the toggle");
-  await page.click("#chkTruckTrajBase"); await page.waitForTimeout(300);
-  await page.evaluate((t) => applyTime(t + 1), T_18);
-  await page.waitForFunction(() => S.truck.traj.cache.has("event_00:15"), null, { timeout: 15000 });
-  await page.evaluate((t) => applyTime(t), T_18);   // back to 00:00 for the counts below
+  assert.match(st.status, /network_agg 1,560 リンク、時刻別 CSV 96 本/);
+  assert.ok(!(await page.evaluate(() => map.getLayer("truck-traj-event") || map.getSource("truck-traj-event"))), "no truck trajectory layer any more");
   assert.ok(st.shown > 0 && st.drop > 0 && st.drop < st.shown, "some drawn links, some dropped: " + JSON.stringify(st));
   // independent recount from the window CSVs for 00:00 (baseline 2024-08-15, event 2024-08-22)
   const ref = (() => {
@@ -564,7 +552,7 @@ test("three folders: traffic (tomtom_out), probe (probe_out: viewer/ + grid/), t
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
   await page.setInputFiles("#truckInput", join(DATA, "truck"));                         // 3: the truck folder
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり・軌跡 96 本 \/ 4: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, truck: !!S.truck, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, truckOff: document.getElementById("modeTruck").disabled }));
