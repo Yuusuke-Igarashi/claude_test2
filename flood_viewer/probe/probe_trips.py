@@ -76,8 +76,9 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import struct
-from dataclasses import dataclass
+import time
 from pathlib import Path
 
 import numpy as np
@@ -109,6 +110,7 @@ PARAMS = {
     "MODE_MIN_MIN": 3.0,      # a walk / vehicle run (OS activity type) shorter than this becomes "other" (label flicker)
     "TURN_MIN_DEG": 120.0,    # direction change at or above this is a sharp turn ...
     "TURN_LEG_M": 50.0,       # ... measured over legs of at least this length
+    "TURN_MAX_OFFSET": 40,    # a leg may reach at most this many points back / forward (bounds the search)
     "WALK_MAX_KMH": 6.0,      # speed fill for "other" points: at or below this -> walk ...
     "VEHICLE_MIN_KMH": 12.0,  # ... at or above this -> vehicle; in between stays other
     "WALK_JUMP_KMH": 15.0,    # walk-only jump check: a segment between two walk points faster than this ...
@@ -200,19 +202,23 @@ def _local_xy(lon, lat, lon0, lat0):
 
 def detect_stays_circle(lon: np.ndarray, lat: np.ndarray, t: np.ndarray, radius_m: float, min_minutes: float):
     """Stay = maximal run i..j-1 whose minimum enclosing circle has radius <= radius_m, lasting
-    >= min_minutes. The circle is only recomputed when a new point falls outside the current one."""
+    >= min_minutes. The circle is only recomputed when a new point falls outside the current one.
+    The track is projected once around its mean position (one user's day spans well under a degree,
+    so the scale error of the local metres is below 1 %, i.e. under 0.5 m on a 50 m radius)."""
     n = len(lon)
     label = np.full(n, -1, dtype=np.int64)
+    if n == 0:
+        return label
     min_s = min_minutes * 60.0
+    x, y = _local_xy(lon, lat, float(lon.mean()), float(lat.mean()))
     k = 0
     i = 0
     while i < n:
-        x, y = _local_xy(lon[i:], lat[i:], lon[i], lat[i])
         pts = []
         c = (0.0, 0.0, 0.0)
         j = i
         while j < n:
-            p = (float(x[j - i]), float(y[j - i]))
+            p = (float(x[j]), float(y[j]))
             if pts and _inside(c, p):
                 pts.append(p); j += 1; continue
             pts.append(p)
@@ -257,9 +263,6 @@ def detect_stays_anchor(lon: np.ndarray, lat: np.ndarray, t: np.ndarray, radius_
     return label
 
 
-# ----------------------------------------------------------------------------------------------
-# 2. Trip ids
-# ----------------------------------------------------------------------------------------------
 def detect_stays(lon, lat, t, radius_m, min_minutes, method="circle"):
     if method == "anchor":
         return detect_stays_anchor(lon, lat, t, radius_m, min_minutes)
@@ -268,6 +271,9 @@ def detect_stays(lon, lat, t, radius_m, min_minutes, method="circle"):
     raise ValueError(f"unknown STAY_METHOD {method!r}")
 
 
+# ----------------------------------------------------------------------------------------------
+# 2. Trip ids and stay merging
+# ----------------------------------------------------------------------------------------------
 def assign_trips(stay_label: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np.ndarray,
                  time_gap_min: float, jump_speed_kmh: float, jump_min_dist_m: float):
     """Return (trip index per point, split reason per point).
@@ -301,10 +307,8 @@ def assign_trips(stay_label: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np
         elif is_stay[i] and not is_stay[i - 1]:
             # Move -> Stay: the previous trip ends; this stay opens the next trip
             new_reason = "stay"
-        elif is_stay[i] and is_stay[i - 1] and stay_label[i] != stay_label[i - 1]:
-            # two different stays back to back (drifted > radius without a Move point):
-            # they merge into the same origin, no new trip
-            new_reason = None
+        # (two different stays back to back, i.e. a drift > radius without a Move point, start no new trip:
+        #  they form the same origin)
         if new_reason:
             cur += 1
             reason[i] = new_reason
@@ -340,7 +344,7 @@ def merge_stays(sl: np.ndarray, lon: np.ndarray, lat: np.ndarray, t: np.ndarray,
 
 
 # ----------------------------------------------------------------------------------------------
-# 3. Travel mode (walk / vehicle / bike / unknown) on dense Move points, vectorised over the day
+# 3. Travel mode (walk / vehicle / other) on dense Move points, mode changes and sharp turns
 # ----------------------------------------------------------------------------------------------
 def _runs(mode, group, elig, extra_brk=None):
     """Run-length encode `mode` within `group` over eligible points. Returns (run id per point,
@@ -465,7 +469,7 @@ def bearing_deg(lon1, lat1, lon2, lat2):
     return (np.degrees(np.arctan2(y, x)) + 360.0) % 360.0
 
 
-def detect_turns(R, mode, group, P: dict, max_offset: int = 40):
+def detect_turns(R, mode, group, P: dict):
     """Indices of sharp turns and their angles. For each dense Move point the incoming leg ends at the
     point and starts at the last earlier point >= TURN_LEG_M away (same trip & dense run); the outgoing
     leg ends at the first later point >= TURN_LEG_M away. A turn found at i suppresses further turns
@@ -475,7 +479,7 @@ def detect_turns(R, mode, group, P: dict, max_offset: int = 40):
     if n < 3:
         return np.array([], dtype=np.int64), np.array([])
     elig = mode != MODE_NONE
-    L = float(P["TURN_LEG_M"])
+    L = float(P["TURN_LEG_M"]); max_offset = int(P["TURN_MAX_OFFSET"])
     fwd = np.zeros(n, dtype=np.int32); bwd = np.zeros(n, dtype=np.int32)
     for d in range(1, max_offset + 1):
         if d >= n:
@@ -505,12 +509,8 @@ def detect_turns(R, mode, group, P: dict, max_offset: int = 40):
 
 
 # ----------------------------------------------------------------------------------------------
-# I/O helpers
+# 4. I/O helpers
 # ----------------------------------------------------------------------------------------------
-import re
-import sys
-import time
-
 REASON_CODES = {0: "", 1: "start", 2: "stay", 3: "time_gap", 4: "jump"}
 REASON_IDX = {v: k for k, v in REASON_CODES.items()}
 
@@ -570,6 +570,9 @@ def read_points(path: Path, P: dict):
     for ch in pd.read_csv(path, usecols=cols, dtype={"userid": str, "activitytype": str}, chunksize=int(P["CHUNK_ROWS"])):
         n0 += len(ch)
         ch["recordedat"] = pd.to_datetime(ch["recordedat"], errors="coerce", format="ISO8601")
+        for c in ("lon", "lat"):
+            if ch[c].dtype == object:                 # a stray non-numeric value would otherwise fail later
+                ch[c] = pd.to_numeric(ch[c], errors="coerce")
         ch = ch.dropna(subset=["recordedat", "lon", "lat", "userid"])
         if bbox:
             ch = ch[(ch["lon"] >= bbox[0]) & (ch["lon"] <= bbox[2]) & (ch["lat"] >= bbox[1]) & (ch["lat"] <= bbox[3])]
@@ -734,10 +737,6 @@ def fmt_ts(sec):
     return pd.Timestamp(sec, unit="s").strftime("%Y-%m-%d %H:%M:%S")
 
 
-def ushort(uid):
-    return str(uid)[:12]
-
-
 class GeoJSONWriter:
     """Streams features to a FeatureCollection file without holding them all in memory."""
     def __init__(self, path: Path):
@@ -811,9 +810,9 @@ def write_points_csv(R, path: Path, P: dict, chunk=1_000_000):
     return n
 
 
-def write_stays_geojson(R, path: Path, P: dict):
-    w = GeoJSONWriter(path); uids = R["uids"]
-    for (u, k, trip, t_start, t_end, clon, clat, npts, rad) in R["stays"]:
+def write_stays_geojson(R, path: Path):
+    w = GeoJSONWriter(path)
+    for (_u, _k, _trip, t_start, t_end, clon, clat, npts, rad) in R["stays"]:
         w.add({"type": "Feature",
                "properties": {"start": fmt_ts(t_start), "end": fmt_ts(t_end), "duration_min": round((t_end - t_start) / 60, 1),
                               "n_points": int(npts), "radius_max_m": round(rad, 1)},
@@ -821,9 +820,9 @@ def write_stays_geojson(R, path: Path, P: dict):
     return w.close()
 
 
-def write_trips_geojson(R, path: Path, P: dict):
-    w = GeoJSONWriter(path); uids = R["uids"]; lon, lat = R["lon"], R["lat"]
-    for (u, k, rs, t_start, t_end, npts, nmove, ndense, length, origin, dest, mv) in R["trips"]:
+def write_trips_geojson(R, path: Path):
+    w = GeoJSONWriter(path); lon, lat = R["lon"], R["lat"]
+    for (_u, _k, rs, t_start, t_end, npts, nmove, ndense, length, origin, dest, mv) in R["trips"]:
         if len(mv) < 2:
             continue
         geom = _split_line(mv, lon, lat, R["wgroup"])
@@ -840,9 +839,9 @@ def write_trips_geojson(R, path: Path, P: dict):
     return w.close()
 
 
-def write_events_geojson(R, path: Path, P: dict):
+def write_events_geojson(R, path: Path):
     """Vehicle->walk changes and sharp turns as Points."""
-    w = GeoJSONWriter(path); uids = R["uids"]; lon, lat, tsec = R["lon"], R["lat"], R["tsec"]
+    w = GeoJSONWriter(path); lon, lat, tsec = R["lon"], R["lat"], R["tsec"]
     mc_idx, mc_v, mc_gap = R["modechanges"]; turn_idx, turn_ang = R["turns"]
     for i, vv, g in zip(mc_idx, mc_v, mc_gap):
         w.add({"type": "Feature",
@@ -871,7 +870,7 @@ def _split_line(idx, lon, lat, run):
 
 
 # ----------------------------------------------------------------------------------------------
-# 3. Viewer-ready windows (vectorised): per user x 15-min slot, the last hour's Move path and stays
+# 5. Viewer-ready windows: per user x 15-min slot, the last hour's walk path, stays and events
 # ----------------------------------------------------------------------------------------------
 def slot_frame(R, P: dict, t_start=None, hours=None):
     """Slot k (k_lo..k_hi) ends at day0 + k*SLOT_MIN where day0 = midnight of the file's date (one-file mode)
@@ -904,7 +903,6 @@ def explode_windows(mins, k_lo, k_hi, SLOT, W, n_win):
 def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hours=None):
     """Viewer slot files, see slot_frame() for the slot definition."""
     lon, lat, tsec, ucode = R["lon"], R["lat"], R["tsec"], R["ucode"]
-    uids = R["uids"]
     n = len(lon)
     if n == 0:
         return 0, 0, 0
@@ -920,34 +918,26 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hour
     # ---- trajectories: dense walk points exploded into the n_win windows they belong to ----
     mv = np.flatnonzero(keep & (R["seg"] == 0) & (R["dense"] == 1) & (R["mode"] == MODE_WALK) & (tsec >= day0 - W * 60.0))
     mins = (tsec[mv] - day0) / 60.0                             # may be slightly negative (the hour before the period)
-    k0 = np.ceil(mins / SLOT).astype(np.int64)                 # first window end >= point time
-    k0 = np.maximum(k0, k_lo)
-    rep = np.repeat(mv, n_win)
-    kk = np.repeat(k0, n_win) + np.tile(np.arange(n_win), len(mv))
-    ok = (kk <= k_hi) & (kk * SLOT - W < np.repeat(mins, n_win))   # window (T_k - W, T_k] must contain the point
-    rep, kk = rep[ok], kk[ok]
+    rep, kk = explode_windows(mins, k_lo, k_hi, SLOT, W, n_win)
+    rep = mv[rep]
     order = np.lexsort((tsec[rep], kk, ucode[rep]))
     rep, kk = rep[order], kk[order]
     key_u, key_k = ucode[rep], kk
     bounds = np.flatnonzero(np.r_[True, (np.diff(key_u) != 0) | (np.diff(key_k) != 0), True])
     trip_no = R["trip_no"]; drun = R["wgroup"]         # changes at trip, dense-run and walk-jump boundaries
+    # a line breaks where the trip / walk group changes or where points were skipped (vectorised, then split per feature)
+    cut = np.r_[True, (trip_no[rep[1:]] != trip_no[rep[:-1]]) | (drun[rep[1:]] != drun[rep[:-1]]) | (rep[1:] != rep[:-1] + 1)]
     n_traj = 0
     for a, b in zip(bounds[:-1], bounds[1:]):
         if b - a < 2:
             continue
         idx = rep[a:b]
-        parts, cur = [], [idx[0]]
-        for i in range(1, len(idx)):
-            if trip_no[idx[i]] != trip_no[idx[i - 1]] or drun[idx[i]] != drun[idx[i - 1]] or idx[i] != idx[i - 1] + 1:
-                parts.append(cur); cur = []
-            cur.append(idx[i])
-        parts.append(cur)
+        parts = np.split(idx, np.flatnonzero(cut[a + 1:b]) + 1)
         parts = [[[round(float(lon[i]), 6), round(float(lat[i]), 6)] for i in pp] for pp in parts if len(pp) >= 2]
         if not parts:
             continue
         k = int(key_k[a]); hhmm = lab(k)
         geom = {"type": "LineString", "coordinates": parts[0]} if len(parts) == 1 else {"type": "MultiLineString", "coordinates": parts}
-        u = int(key_u[a])
         writers.add(role, hhmm, "traj", {"type": "Feature",
                          "properties": {"time": hhmm, "date": fmt_ts(tsec[idx[-1]])[:10], "n_points": int(b - a),
                                         "mode": ",".join(sorted(set(MODE_NAMES[R["mode"][idx]]))),
@@ -973,7 +963,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hour
         key_u = su[rep]
         bounds = np.flatnonzero(np.r_[True, (np.diff(key_u) != 0) | (np.diff(kk) != 0), True]) if len(rep) else np.array([0])
         for a, b in zip(bounds[:-1], bounds[1:]):
-            k = int(kk[a]); u = int(key_u[a]); hhmm = lab(k)
+            k = int(kk[a]); hhmm = lab(k)
             pts = [[round(float(slon[i]), 6), round(float(slat[i]), 6)] for i in rep[a:b]]
             writers.add(role, hhmm, "dwell", {"type": "Feature",
                               "properties": {"time": hhmm, "date": fmt_ts(day0 + k * SLOT * 60.0)[:10], "n_points": len(pts)},
@@ -1001,7 +991,7 @@ def write_viewer(R, P: dict, role: str, writers: SlotWriters, t_start=None, hour
     return n_traj, n_dwell, n_ev
 
 # ----------------------------------------------------------------------------------------------
-# 4. Mesh grid: per 15-min slot, counts over the last hour per cell, baseline vs event
+# 6. Mesh grid: per 15-min slot, counts over the last hour per cell, baseline vs event
 # ----------------------------------------------------------------------------------------------
 GRID_PARAMS = ["walkers", "walk_dist_m", "stays", "turns", "modechanges"]
 GRID_NODATA = -99.0
@@ -1225,7 +1215,7 @@ def main():
             ap.add_argument(flag, default=None, help="GeoJSON whose extent is used as --bbox")
         elif k == "GRID_NETWORK":
             ap.add_argument(flag, default=None, help="GeoJSON (road network) whose extent is the grid extent")
-        elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS", "PERIOD_HOURS", "BASELINE_DAYS_BEFORE"):
+        elif k in ("CHUNK_ROWS", "SAMPLE_USERS", "DENSE_MIN_POINTS", "PERIOD_HOURS", "BASELINE_DAYS_BEFORE", "TURN_MAX_OFFSET"):
             ap.add_argument(flag, type=int, default=v)
         elif k == "PERIOD_START":
             ap.add_argument(flag, default=None, help='"YYYY-MM-DD HH:MM" start of the event period (crossing midnight is fine)')
@@ -1245,6 +1235,9 @@ def run(inputs, out, event_date="2024-08-21", **params):
     if isinstance(event_date, str):
         event_date = [d.strip() for d in event_date.split(",") if d.strip()]
     event_dates = {str(pd.Timestamp(d).date()) for d in event_date}
+    unknown = sorted(k.upper() for k in params if k.upper() not in PARAMS)
+    if unknown:
+        raise SystemExit(f"unknown parameter(s): {unknown}; known: {sorted(PARAMS)}")
     P = dict(PARAMS); P.update({k.upper(): v for k, v in params.items()})
     if P["MAX_ACCURACY_M"] is not None and isinstance(P["MAX_ACCURACY_M"], float) and math.isnan(P["MAX_ACCURACY_M"]):
         P["MAX_ACCURACY_M"] = None
@@ -1254,10 +1247,9 @@ def run(inputs, out, event_date="2024-08-21", **params):
     inputs = [Path(p) for p in (inputs if isinstance(inputs, (list, tuple)) else [inputs])]
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     log(f"params: {P}")
-    args = argparse.Namespace(inputs=inputs, out=out, event_dates=event_dates)
     log(f"event dates: {sorted(event_dates)}")
 
-    writers = None if P["NO_VIEWER"] else SlotWriters(args.out, bool(P["MERGED_VIEWER"]))
+    writers = None if P["NO_VIEWER"] else SlotWriters(out, bool(P["MERGED_VIEWER"]))
     grid = None
     if P["GRID_M"] and float(P["GRID_M"]) > 0:
         bb = grid_extent(P)
@@ -1270,14 +1262,14 @@ def run(inputs, out, event_date="2024-08-21", **params):
         ev0 = pd.Timestamp(P["PERIOD_START"]); hours = float(P["PERIOD_HOURS"])
         periods = {"event": ev0, "baseline": ev0 - pd.Timedelta(days=float(P["BASELINE_DAYS_BEFORE"]))}
         log(f"periods: " + ", ".join(f"{r} {t:%Y-%m-%d %H:%M} +{hours:g} h" for r, t in periods.items()))
-        jobs = [(f"{r}_{t:%Y%m%d_%H%M}", r, (lambda t=t: read_period(args.inputs, P, t, hours)), t, hours) for r, t in periods.items()]
+        jobs = [(f"{r}_{t:%Y%m%d_%H%M}", r, (lambda t=t: read_period(inputs, P, t, hours)), t, hours) for r, t in periods.items()]
         if writers is not None:
             writers.period = {r: {"start": f"{t:%Y-%m-%d %H:%M}", "hours": hours, "slot_min": P["SLOT_MIN"]} for r, t in periods.items()}
     else:
         def one_file(path):
             log(f"{path.name}: reading")
             return read_points(path, P)
-        jobs = [(path.name.split(".")[0], None, (lambda path=path: one_file(path)), None, None) for path in args.inputs]
+        jobs = [(path.name.split(".")[0], None, (lambda path=path: one_file(path)), None, None) for path in inputs]
 
     for stem, role, loader, t_start, hours in jobs:
         df, uids, dropped = loader()
@@ -1285,13 +1277,13 @@ def run(inputs, out, event_date="2024-08-21", **params):
         del df
         n = len(R["lon"])
         if role is None:
-            role = "event" if R["date"] in args.event_dates else "baseline"
+            role = "event" if R["date"] in event_dates else "baseline"
         if not P["NO_POINTS"]:
             log(f"  writing {stem}_points.csv ({n:,} rows)")
-            write_points_csv(R, args.out / f"{stem}_points.csv", P)
-        ns = write_stays_geojson(R, args.out / f"{stem}_stays.geojson", P)
-        nt = write_trips_geojson(R, args.out / f"{stem}_trips.geojson", P)
-        ne = write_events_geojson(R, args.out / f"{stem}_events.geojson", P)
+            write_points_csv(R, out / f"{stem}_points.csv", P)
+        ns = write_stays_geojson(R, out / f"{stem}_stays.geojson")
+        nt = write_trips_geojson(R, out / f"{stem}_trips.geojson")
+        ne = write_events_geojson(R, out / f"{stem}_events.geojson")
         n_traj = n_dwell = n_ev = 0
         if writers is not None:
             n_traj, n_dwell, n_ev = write_viewer(R, P, role, writers, t_start, hours)
@@ -1325,7 +1317,7 @@ def run(inputs, out, event_date="2024-08-21", **params):
         for k, v in merged_counts.items():
             print(f"merged {k}: {v:,} features")
     if grid is not None:
-        g = grid.close(args.out, P)
+        g = grid.close(out, P)
         if g["compared"]:
             print(f"grid/: {g['slots']} slots x {len(GRID_PARAMS)} params -> {g['files']} ratio rasters (event / baseline), cells with baseline > 0: "
                   + ", ".join(f"{p} {g['cells'][p]:,}" for p in GRID_PARAMS))
