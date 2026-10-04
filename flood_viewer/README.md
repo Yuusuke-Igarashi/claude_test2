@@ -106,11 +106,14 @@ TomTom 道路ネットワーク shp に動的計画法で割り付け、15 分�
 5. 動的計画法（step 5-2, 5-3）: 観測コスト (点からリンクまでの距離 / 15 m)^2。遷移コストは 同一リンク = 0、接続リンク =
    1 × 乗り換え本数 + 2 × |経路距離 − 直線距離| / 直線距離、それ以外 = 対象外。点ごとに各候補の最小総コストだけを残して
    次の点へ進み（点数 × 5 × 5 の評価）、最後の点の最小コストから逆にたどった列を経路にする。どの候補にも届かない点で区間を切って再開
-6. 各点にリンクを付ける（step 6）: 1 秒毎の各点を経路上の最近傍リンク（50 m 以内）に割り当て、点が落ちない通過リンクには 2 点の時刻を
-   等分した行（kind = via）を加える → `matched_points.parquet`（serial_number, t, lat, lon, speed, Id, kind, StreetName, FRC, SpeedLimit, Length。車両 ID を含む）
-7. 15 分 × リンクの統計: ウィンドウ内の最高速度 < 3 km/h の車両（駐停車）は数えない → `traffic_YYYYMMDD_HHMM.csv`（Id, Hits, AvgSp, MedSp, n_points）、`traffic_15min.csv`
+6. 各点にリンクを付け、リンクごとの進入・退出時刻を出す（step 6）: 区間の経路を 1 本の折れ線とみなして各 1 秒点の道のり（弧長）を求め（時間順に単調）、
+   弧長が含まれるリンクをその点のリンクにする。リンク境界をまたいだ時刻を前後の点から線形補間して進入・退出時刻にする（点の落ちない短いリンクも時刻を持つ）
+   → `matched_points.parquet`（serial_number, t, lat, lon, speed, Id, StreetName, FRC, SpeedLimit, Length）と
+   `link_stays.parquet`（serial_number, Id, t_enter, t_exit, n_points, v_mean, リンク属性）。どちらも車両 ID を含む
+7. 15 分 × リンクの統計: 滞在を進入した窓から退出した窓まで展開して Hits（その窓にいた車両数）を数え、速度はその窓・そのリンク上の点の平均。
+   ウィンドウ内の最高速度 < 3 km/h の車両（駐停車）は数えない → `traffic_YYYYMMDD_HHMM.csv`（Id, Hits, AvgSp, MedSp, n_points）、`traffic_15min.csv`
 8. 直近 1 時間の軌跡: 全車両の表から 15 分毎に `traj/traj_YYYYMMDD_HHMM.geojson` を 1 回だけ書く（HHMM = 窓の終端。5 分超の欠測で分割、5 m の Douglas-Peucker 間引き、10 m 未満は除外。車両 ID なし）
-9. `summary.json`（行数、通過車両数、点数、区間数、付かなかった点数、通過行数など）
+9. `summary.json`（行数、通過車両数、点数、区間数、付かなかった点数、滞在数、点の無い滞在数など）
 
 以前の版（ファイルごとに処理）は、同じ時刻の軌跡ファイルをファイルごとに上書きしていた（最後のファイルの車両しか残らない）。
 2 回読みにして全車両の表から書くことで、この問題は構造的に起きない。

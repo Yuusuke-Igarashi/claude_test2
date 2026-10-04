@@ -152,14 +152,24 @@ def check(out_dir):
     assert abs(c.AvgSp - (50 + 70 + 55) / 3) < 1.5 and c.n_points == 58 + 42 + 30, c.to_dict()   # A 58 s (50 km/h), C 42 s (70 km/h), E 30 s before 12:15
     v = w.loc[(pd.Timestamp("2025-09-10 12:45"), 7)]
     assert v.Hits == 1 and v.n_points == 0 and np.isnan(v.AvgSp), v.to_dict()                    # link 7: passed by I, no point -> no speed
-    # matched points: every vehicle x second with its link and the link attributes; via rows for through links
-    m = table(O, "matched_points")
-    assert list(m.columns) == ["serial_number", "t", "lat", "lon", "speed", "Id", "kind", "StreetName", "FRC", "SpeedLimit", "Length"], m.columns
-    via = m[m.kind == "via"]
-    assert len(via) == 1 and via.iloc[0].serial_number == "I" and via.iloc[0].Id == 7 and via.iloc[0].StreetName == "Branch" and np.isnan(via.iloc[0].speed), via
-    assert pd.Timestamp("2025-09-10 12:50:56") <= via.iloc[0].t <= pd.Timestamp("2025-09-10 12:51:03"), via.iloc[0].t   # between the points at 12:50:56 and 12:51:03
-    pts = m[m.kind == "point"]
+    # matched points: every vehicle x second with the link it was on, plus the link attributes
+    pts = table(O, "matched_points")
+    assert list(pts.columns) == ["serial_number", "t", "lat", "lon", "speed", "Id", "StreetName", "FRC", "SpeedLimit", "Length"], pts.columns
     assert len(pts) == len(tr), "every point got a link (all inside 50 m of a route link)"
+    # link stays: enter / exit time per vehicle and link; the 60 m link 7 has no point but still an interval between I's points at 12:50:56 and 12:51:03
+    st = pd.read_parquet(O / "link_stays.parquet") if (O / "link_stays.parquet").exists() else pd.read_csv(O / "link_stays.csv.gz", dtype={"serial_number": str}, parse_dates=["t_enter", "t_exit"])
+    assert list(st.columns) == ["serial_number", "Id", "t_enter", "t_exit", "n_points", "v_mean", "StreetName", "FRC", "SpeedLimit", "Length"], st.columns
+    i7 = st[(st.serial_number == "I") & (st.Id == 7)]
+    assert len(i7) == 1 and i7.iloc[0].n_points == 0 and np.isnan(i7.iloc[0].v_mean) and i7.iloc[0].StreetName == "Branch", i7
+    assert pd.Timestamp("2025-09-10 12:50:56") <= i7.iloc[0].t_enter < i7.iloc[0].t_exit <= pd.Timestamp("2025-09-10 12:51:03"), i7
+    assert 3.5 <= (i7.iloc[0].t_exit - i7.iloc[0].t_enter).total_seconds() <= 5.0, "60 m at 50 km/h is 4.3 s"
+    sI = st[st.serial_number == "I"].sort_values("t_enter")
+    assert sI.Id.tolist() == [1, 7, 13] and (sI.t_enter.to_numpy()[1:] == sI.t_exit.to_numpy()[:-1]).all(), "stays are contiguous: exit of one = entry of the next"
+    sA = st[st.serial_number == "A"].sort_values("t_enter")
+    assert sA.Id.tolist() == [1, 6, 1, 6], "A drives 1 -> 6 twice (12:03 and 13:40)"
+    assert abs((sA.iloc[0].t_exit - pd.Timestamp("2025-09-10 12:03:00")).total_seconds() - 800 / (50 / 3.6)) < 1.5, "A leaves link 1 after ~57.6 s"
+    assert sA.iloc[0].n_points == 58 and sA.iloc[1].n_points == 43 and abs(sA.iloc[0].v_mean - 50) < 1.5
+    assert (st[st.serial_number == "D"].Id == 1).all() and st[st.serial_number == "D"].n_points.sum() == 1200
     assert set(pts[pts.serial_number == "D"].Id) == {1} and set(pts[pts.serial_number == "A"].Id) == {1, 6} and set(pts[pts.serial_number == "I"].Id) == {1, 13}
     assert (pts[pts.serial_number == "C"].Id == 1).all() and (pts[pts.serial_number == "B"].Id == 4).all()
     files = sorted(p.name for p in O.glob("traffic_2025*.csv"))
@@ -178,7 +188,7 @@ def check(out_dir):
     assert a["geometry"]["type"] == "LineString" and len(a["geometry"]["coordinates"]) < 20, "simplified (a straight 1.4 km track needs only a few vertices)"
     idx = json.load(open(O / "traj" / "index.json")); assert idx["window_min"] == 60 and len(idx["files"]) == 7 and idx["files"]["traj_20250910_1215.geojson"] == 4
     sm = json.load(open(O / "summary.json"))
-    assert sm["vehicles_in_area"] == 7 and sm["via_rows"] == 1 and sm["short_points"] == 0 and sm["unmatched_points"] == 0 and sm["segments"] == 8, sm   # A x2 (gap), B, C, D, E, F, I
+    assert sm["vehicles_in_area"] == 7 and sm["stays_without_points"] == 1 and sm["short_points"] == 0 and sm["unmatched_points"] == 0 and sm["segments"] == 8, sm   # A x2 (gap), B, C, D, E, F, I
     print("\ntest_truck_traffic (area): OK")
 
 
