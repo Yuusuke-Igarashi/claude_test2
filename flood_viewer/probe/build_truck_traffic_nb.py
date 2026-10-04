@@ -9,35 +9,40 @@ def code(s): cells.append({"cell_type": "code", "metadata": {}, "execution_count
 md(r'''
 # トラックプローブ → 15 分・道路リンク別の交通量・速度
 
-1 秒毎のトラックプローブ（zip 内の 1 時間毎 CSV）を TomTom 道路ネットワークに経路として割り付け、
-15 分ウィンドウ × 道路リンク別の車両数（Hits）と平均速度（AvgSp）を出力します。
+1 秒毎のトラックプローブ（zip 内の CSV。ファイルは時間で分かれていなくてもよい）を TomTom 道路ネットワークに
+動的計画法で割り付け、15 分ウィンドウ × 道路リンク別の車両数（Hits）と平均速度（AvgSp）を出力します。
 
-処理の流れ
-1. **ネットワーク集約**: 形状が完全に一致するリンクを 1 本に統合し、リンクテーブルを作る。端点からノードとグラフを作る
-2. **ファイル読み込み**: zip を解凍せずに 1 時間分の CSV を読む
-3. **候補抽出**（step 5-1）: 15 分ウィンドウ × 車両の点列を間引き、各点から近い順に最大 5 本の候補リンクを取る
-4. **経路推定**（step 5-2, 5-3）: 最初の点の候補リンクにコストを置き、次の点の候補へ「同一リンク = 0、接続リンク = 定数 × 通過本数、
-   それ以外 = 対象外」のコストを積み上げ、各候補に最小コストだけを残していく（Viterbi）。最後に最小コストの候補から逆にたどった
-   リンク列が走行ルート
-5. **割り付け**（step 6）: ルート上の全リンクにその車両を割り付ける。速度は、1 秒毎の各点をルート上のリンクのうち最近傍のものに
-   割り当て、リンク × 車両で平均する
-6. **集計**: 15 分ウィンドウ × リンクの車両数・平均速度を集計し、ウィンドウ毎の CSV に書く
-7. **軌跡**: 15 分毎に、直近 1 時間の各車両の軌跡を GeoJSON に書く（ビューワーのトラックタブで重ねる）
+処理の流れ（それぞれ 1 節 = 1 ステップ。前の節の出力ファイルから再開できる）
 
-範囲を絞る場合は `AREA_GEOJSON` に区域ポリゴン（例: 新宿区の tokyo.geojson）を与えます。点はポリゴン内だけ、
-リンクはその外接矩形（+1 km）内だけを使うので、計算量が大きく減ります。
+| 節 | 処理 | 出力 |
+|---|---|---|
+| 1 | ネットワーク集約: 形状が同じリンクを 1 本にし、ノードと隣接表・近傍表を作る | `network_agg.csv` / `.shp` |
+| 2 | **1 回目の読み込み**: 全ファイルを走査し、指定エリアを通過した車両 ID を特定する | `vehicles_in_area.csv` |
+| 3 | **2 回目の読み込み**: 通過車両の点だけを抜き出し、1 つの軌跡ファイルにまとめる（車両・時刻順） | `trajectories.*` |
+| 4 | 軌跡ファイルを読み、車両ごとに点列を間引いて候補リンクを付ける（step 5-1） | – |
+| 5 | 動的計画法（Viterbi）で各点列の走行経路を決める（step 5-2, 5-3） | – |
+| 6 | 1 秒毎の各点に「その時刻にいた道路リンク」とリンク属性を付ける。点が落ちない通過リンクも時刻を補間して加える | `matched_points.*` |
+| 7 | 15 分ウィンドウ × リンクで車両数・速度を集計する | `traffic_YYYYMMDD_HHMM.csv`, `traffic_15min.csv` |
+| 8 | 直近 1 時間の軌跡を 15 分毎の GeoJSON に書く（ビューワー用、任意） | `traj/` |
 
-必要なライブラリ: geopandas, shapely 2.x, pyproj, pandas, numpy。
+`*` の拡張子は、pyarrow があれば `.parquet`、無ければ `.csv.gz` です。
 
-仕様に無い追加・解釈（すべてパラメータ化。詳細は各節）
+書き方の方針: 1 セル 1 ステップ、関数は短く、DataFrame は列の意味がわかる名前で持つ。速度が要る所（Viterbi、近傍表、ID の集計）は
+Python の辞書・リストと numpy で書き、pandas は読み込み・結合・集計に使う。
+
+必要なライブラリ: geopandas, shapely 2.x, pyproj, pandas, numpy（pyarrow は任意）。
+
+仕様に無い追加・解釈（すべてパラメータ化）
 
 | 項目 | 内容 |
 |---|---|
-| 間引き | 点列は軌跡に沿って `SAMPLE_M`（30 m）進むか `SAMPLE_MAX_S`（60 秒）経つごとに 1 点にする。速度の割り当てには間引く前の全点を使う |
-| 候補 | 点から `CAND_R_M`（50 m）以内で近い順に `CAND_MAX`（5）本。候補が無い点で点列を切り、間引き後 `MIN_SEQ_POINTS`（3）点未満の区間は使わない |
-| 接続 | ノードを共有する隣接だけでなく、網の距離 `D_MAX_M`（250 m）以内で届くリンクも接続扱い（短いリンクを飛び越えるため）。間のリンクも通過とみなす |
-| 停車 | ウィンドウ内の最高速度が `MOVING_KMH`（3 km/h）未満の車両は駐停車とみなし、車両数に数えない |
-| 速度 | 1 秒毎の各点を、その区間の経路上のリンクのうち最近傍（`CAND_R_M` 以内）のものに割り当てて、リンク × 車両で平均する。点が割り当たらない通過リンクは車両数だけ数える |
+| 通過判定 | 1 点でもエリアのポリゴン内にあれば通過車両。エリア指定が無ければ全車両 |
+| 抽出範囲 | 通過車両の点のうち、リンクの範囲（エリアの外接矩形 +1 km）内のもの |
+| 点列の切れ目 | 車両が変わる所、`GAP_S`（120 秒）を超える欠測、候補リンクの無い点 |
+| 間引き | 軌跡に沿って `SAMPLE_M`（30 m）進むか `SAMPLE_MAX_S`（60 秒）経つごとに 1 点。速度の付与には間引く前の全点を使う |
+| 候補 | 点から `CAND_R_M`（50 m）以内で近い順に `CAND_MAX`（5）本。間引き後 `MIN_SEQ_POINTS`（3）点未満の区間は使わない |
+| 接続 | ノードを共有する隣接だけでなく、網の距離 `D_MAX_M`（250 m）以内で届くリンクも接続扱い（短いリンクを飛び越えるため）。間のリンクは通過として時刻を補間して加える |
+| 停車 | ウィンドウ内の最高速度が `MOVING_KMH`（3 km/h）未満の車両は駐停車とみなし、そのウィンドウでは車両数に数えない |
 | 出力の Id | 集約後の代表 Id（メンバー中の最小 Id）。観測の無いリンクは行を持たない |
 ''')
 
@@ -55,11 +60,12 @@ from pyproj import Transformer
 
 # ---- 入出力 -------------------------------------------------------------
 NETWORK_SHP = Path("../data/Flooding_2025/post/network.shp")   # TomTom 道路ネットワーク（既出の shp）
-PROBE_ZIP   = Path("../data/truck_probe.zip")                   # 1 時間毎 CSV を格納した zip（解凍しない）
+PROBE_ZIP   = Path("../data/truck_probe.zip")                   # プローブ CSV を格納した zip（解凍しない。分割の単位は問わない）
 MEMBER_RE   = r"\.(csv|txt)(\.gz)?$"                            # zip 内で読む対象ファイル名（正規表現、大文字小文字無視）
 OUT_DIR     = Path("./traffic_out")                             # 出力先
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-AREA_GEOJSON = None                                             # 範囲を絞る GeoJSON（例 "./tokyo.geojson"）。None = 絞らない
+AREA_GEOJSON = None                                             # 通過判定に使う区域 GeoJSON（例 "./tokyo.geojson"）。None = 全車両
+CHUNK_ROWS = 2_000_000                                          # CSV を一度に読む行数（メモリに合わせて）
 
 # ---- 入力 CSV の列名（サンプルに合わせてある） ---------------------------
 COL_ID, COL_TIME, COL_SPEED, COL_LAT, COL_LON = "serial_number", "record_time", "speed", "gps_latitude", "gps_longitude"
@@ -68,12 +74,13 @@ COL_ID, COL_TIME, COL_SPEED, COL_LAT, COL_LON = "serial_number", "record_time", 
 WINDOW_MIN = 15               # 集計ウィンドウ [分]
 MOVING_KMH = 3.0              # ウィンドウ内の最高速度がこれ未満の車両は停車中（駐車）とみなし、交通として数えない
 
-# ---- step 5-1: 間引きと候補リンク ----------------------------------------
-SAMPLE_M = 30.0               # 前に残した点からこれだけ [m] 離れたら次の点を残す
+# ---- step 5-1: 点列・間引き・候補リンク ----------------------------------
+GAP_S = 120.0                 # これを超える欠測 [秒] で点列を切る
+SAMPLE_M = 30.0               # 前に残した点からこれだけ [m] 進んだら次の点を残す
 SAMPLE_MAX_S = 60.0           # 動かなくても、これだけ [秒] 経ったら点を残す（停車中の車両も列に残す）
 CAND_R_M = 50.0               # 候補リンクは点からこの距離 [m] 以内
 CAND_MAX = 5                  # 候補リンクは近い順にこの本数まで
-MIN_SEQ_POINTS = 3            # 間引き後の点がこれ未満の点列（区間）は使わない
+MIN_SEQ_POINTS = 3            # 間引き後の点がこれ未満の区間は使わない
 
 # ---- step 5-2, 5-3: コスト -----------------------------------------------
 SIGMA_M = 15.0                # 観測コスト = (点からリンクまでの距離 / SIGMA_M)^2  … GPS 誤差の想定幅
@@ -81,24 +88,45 @@ C_SWITCH = 1.0                # 接続リンクへの乗り換え 1 本あたり
 LAMBDA = 2.0                  # |経路距離 − 直線距離| / 直線距離 に掛ける係数
 D_MAX_M = 250.0               # 網の距離でこれ以内のリンクを「接続」とみなす（間引き間隔で動ける距離より大きく）
 
-# ---- step 7: 直近 1 時間の軌跡（15 分毎） ----------------------------------
+# ---- step 8: 直近 1 時間の軌跡（15 分毎、任意） ----------------------------
 TRAJ_OUT = True               # traj/traj_YYYYMMDD_HHMM.geojson を書くか（HHMM = 窓の終端。窓は (T-60 分, T]）
 TRAJ_WINDOW_MIN = 60          # 軌跡の窓 [分]
 TRAJ_GAP_MIN = 5.0            # この分数を超える欠測で軌跡を切る
 TRAJ_SIMPLIFY_M = 5.0         # 軌跡の間引き（Douglas-Peucker の許容誤差 [m]）
 TRAJ_MIN_LEN_M = 10.0         # これより短い軌跡（駐車中など）は書かない
 
-WRITE_GROUPS = True           # ウィンドウ × 車両 × リンクの割り付け表（groups.csv、車両 ID を含む診断用）も書くか
-
 def log(msg):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
+
+# 中間ファイルの読み書き（pyarrow があれば parquet、無ければ csv.gz）
+try:
+    import pyarrow  # noqa: F401
+    TABLE_EXT = ".parquet"
+except ImportError:
+    TABLE_EXT = ".csv.gz"
+
+def write_table(df, stem):
+    path = OUT_DIR / f"{stem}{TABLE_EXT}"
+    if TABLE_EXT == ".parquet":
+        df.to_parquet(path, index=False)
+    else:
+        df.to_csv(path, index=False)
+    log(f"wrote {path} ({len(df):,} rows)")
+    return path
+
+def read_table(stem):
+    path = OUT_DIR / f"{stem}{TABLE_EXT}"
+    df = pd.read_parquet(path) if TABLE_EXT == ".parquet" else pd.read_csv(path, dtype={"serial_number": str})
+    if "t" in df.columns:
+        df["t"] = pd.to_datetime(df["t"])
+    return df
 ''')
 
 md(r'''
 ## 0b. 範囲（任意）
 
-`AREA_GEOJSON` を与えると、その全ポリゴンの和集合を範囲にします。CRS が JGD2011（EPSG:6668）の場合も、経緯度としては
-WGS84 と実質同じなのでそのまま使います。以降、点はこの範囲内だけ、リンクは外接矩形（+1 km）内だけになります。
+`AREA_GEOJSON` を与えると、その全ポリゴンの和集合を「通過判定の区域」にします。CRS が JGD2011（EPSG:6668）の場合も、経緯度としては
+WGS84 と実質同じなのでそのまま使います。リンクは区域の外接矩形（+1 km）内だけを使い、軌跡の抽出もその範囲に限ります。
 ''')
 code(r'''
 AREA = None
@@ -110,7 +138,7 @@ if AREA_GEOJSON:
     print(f"範囲: {AREA_GEOJSON} ({len(a)} 地物, CRS {a.crs}) → 外接矩形 {tuple(round(v, 5) for v in AREA.bounds)}, "
           f"面積 {AREA.area * 111.0 * 111.0 * np.cos(np.radians(AREA.centroid.y)):.1f} km2")
 else:
-    print("範囲の指定なし（全点・全リンク）")
+    print("範囲の指定なし（全車両・全リンク）")
 ''')
 
 md(r'''
@@ -122,7 +150,6 @@ TomTom の shp には、形状が完全に同じリンクが複数のオブジ�
 その他の列（`Segment Id`, `NewSegId`, `StreetName` など）は先頭のメンバーの値を採用します。
 
 距離計算のため、以降はメートル単位の投影座標系（UTM、`estimate_utm_crs`）で扱います。
-MultiLineString があれば `line_merge` でつなぎ、つながらないものはそのまま扱います（最近傍検索は Multi でも動きます）。
 ''')
 code(r'''
 net = gpd.read_file(NETWORK_SHP)
@@ -163,10 +190,10 @@ display(links.drop(columns="geometry").head())
 ''')
 
 md(r'''
-### リンクテーブルの出力
+### リンクテーブルの出力と検索用の準備
 
 `network_agg.csv`（全属性 + `member_ids`）と `network_agg.shp`（形状付き。shp の文字列列は 254 文字までなので `member_ids` は
-含めず `n_members` のみ）を書きます。メンバー間で属性が食い違うグループ数も確認します。
+含めず `n_members` のみ）を書きます。点に付けるリンク属性は `LINK_ATTR` の列です。
 ''')
 code(r'''
 grp = net.groupby("shape_key")
@@ -178,12 +205,14 @@ links_out.drop(columns="geometry").to_csv(OUT_DIR / "network_agg.csv", index=Fal
 links_out.drop(columns=["member_ids"]).to_file(OUT_DIR / "network_agg.shp")
 print("wrote", OUT_DIR / "network_agg.csv", "and network_agg.shp")
 
-# 候補検索用の空間インデックス（投影座標）と座標変換
+# 候補検索用の空間インデックス（投影座標）、座標変換、点に付ける属性
 GEOM = links_m.geometry.values
 LEN = links_m.length.to_numpy()
 tree = STRtree(GEOM)
 to_m = Transformer.from_crs("EPSG:4326", CRS_M, always_xy=True)
 from_m = Transformer.from_crs(CRS_M, "EPSG:4326", always_xy=True)
+LINK_ATTR = links[["Id"] + [c for c in ["StreetName", "FRC", "SpeedLimit", "Length"] if c in links.columns]].copy()
+LINK_BOUNDS = links.total_bounds + np.array([-1, -1, 1, 1]) * 0.001   # 軌跡を抽出する範囲 (lon_min, lat_min, lon_max, lat_max) + 約 100 m（CAND_R_M の余裕）
 ''')
 
 md(r'''
@@ -194,7 +223,7 @@ md(r'''
 
 「接続リンク」は、ノードを共有する隣接だけでなく、網の距離 `D_MAX_M` 以内で届くリンクも含めます（短いリンクを点が飛び越えるため）。
 リンク L の近傍表 `neighbourhood(L)` は、L の両端から有界ダイクストラで求めた
-`{L2: (間のリンク長の合計, L から出る端 0/1, L2 に入る端 0/1, 間のリンク列)}` で、初回に計算してキャッシュします。
+`{L2: (間のリンク長の合計, L から出る端 0/1, L2 に入る端 0/1, 間のリンク列)}` で、初回に計算して辞書にキャッシュします。
 ''')
 code(r'''
 n_links = len(links_m)
@@ -245,16 +274,15 @@ def neighbourhood(L):
 
 nb0 = neighbourhood(0)
 print(f"例: リンク {int(links.Id[0])} の接続リンク {len(nb0)} 本（D_MAX_M = {D_MAX_M:g} m）:",
-      {int(links.Id[k]): (round(v[0], 1), len(v[3])) for k, v in list(nb0.items())[:6]})
+      {int(links.Id[k]): (round(float(v[0]), 1), len(v[3])) for k, v in list(nb0.items())[:6]})
 ''')
 
 md(r'''
-## 2. ファイル読み込み（step 2）
+## 2. 1 回目の読み込み: エリアを通過した車両 ID（step 2）
 
-zip を解凍せず、メンバーを 1 つずつ読みます（`__MACOSX/` や `._` で始まる Finder の付随ファイルは除外）。
-時刻は `record_time`、車両 ID は `serial_number`（先頭の 0 を保つため文字列）。
-緯度経度・時刻・速度が欠けた行は落とし、同一車両・同一秒の重複は 1 行にします。
-`window` 列（`WINDOW_MIN` 分で切り捨てた時刻）と投影座標 `x`, `y` はここで付けておきます。
+zip の全ファイルを `CHUNK_ROWS` 行ずつ読み、緯度経度が区域ポリゴンの中にある点を持つ車両を集めます。
+この段階で読むのは ID・緯度・経度の 3 列だけです。結果は `vehicles_in_area.csv`（車両 ID と区域内の点数。ID を含むので共有しない）に書きます。
+あわせて、行数と欠損（緯度経度が無い行）をファイルごとに数えます。区域の指定が無ければ、全車両が対象です。
 ''')
 code(r'''
 zf = zipfile.ZipFile(PROBE_ZIP)
@@ -266,61 +294,140 @@ for n in members[:5]:
 if len(members) > 5:
     print("   …")
 
+def chunks(name, cols):
+    """zip 内の 1 ファイルを cols の列だけ CHUNK_ROWS 行ずつ読む（解凍しない）。"""
+    comp = "gzip" if name.lower().endswith(".gz") else None
+    with zf.open(name) as f:
+        for ch in pd.read_csv(f, usecols=cols, dtype={COL_ID: str}, compression=comp, chunksize=CHUNK_ROWS):
+            yield ch
+
+def inside_area(lon, lat):
+    """各点が区域内か（numpy の bool 配列）。区域が無ければ全部 True。欠損は False。"""
+    ok = ~np.isnan(lon) & ~np.isnan(lat)
+    if AREA is None:
+        return ok
+    x0, y0, x1, y1 = AREA.bounds
+    ok &= (lon >= x0) & (lon <= x1) & (lat >= y0) & (lat <= y1)      # まず外接矩形で粗く
+    idx = np.flatnonzero(ok)
+    ok[idx] = shapely.contains_xy(AREA, lon[idx], lat[idx])         # 残りをポリゴンで厳密に
+    return ok
+
+t_all = time.perf_counter()
+points_in_area = {}            # 車両 ID → 区域内の点数（辞書で足し込む）
+scan = []                      # ファイルごとの行数・欠損
+for k, name in enumerate(members, 1):
+    t0 = time.perf_counter(); rows = n_na = n_in = 0
+    try:
+        for ch in chunks(name, [COL_ID, COL_LAT, COL_LON]):
+            lon = pd.to_numeric(ch[COL_LON], errors="coerce").to_numpy(dtype=float)
+            lat = pd.to_numeric(ch[COL_LAT], errors="coerce").to_numpy(dtype=float)
+            rows += len(ch); n_na += int((np.isnan(lon) | np.isnan(lat)).sum())
+            ok = inside_area(lon, lat)
+            n_in += int(ok.sum())
+            for vid, c in ch[COL_ID][ok].value_counts().items():                  # この塊の車両別の区域内点数を辞書に足す
+                points_in_area[vid] = points_in_area.get(vid, 0) + int(c)
+        scan.append({"file": name, "rows": rows, "no_latlon": n_na, "points_in_area": n_in, "error": ""})
+        log(f"[{k}/{len(members)}] {name}: {rows:,} rows, 緯度経度なし {n_na:,}, 区域内 {n_in:,} ({time.perf_counter() - t0:.1f} s)")
+    except Exception as e:
+        scan.append({"file": name, "error": f"{type(e).__name__}: {e}"})
+        log(f"[{k}/{len(members)}] {name}: skipped ({type(e).__name__}: {e})")
+
+vehicles = pd.DataFrame(sorted(points_in_area.items()), columns=["serial_number", "n_points_in_area"])
+vehicles.to_csv(OUT_DIR / "vehicles_in_area.csv", index=False)
+VCODE = {vid: i for i, vid in enumerate(vehicles.serial_number)}      # 車両 ID → 内部番号（以降は番号で持つ）
+SERIAL = vehicles.serial_number.to_numpy()                           # 内部番号 → 車両 ID
+scan = pd.DataFrame(scan)
+log(f"1 回目: {len(members)} ファイル、{int(scan.rows.sum()):,} 行、通過車両 {len(VCODE):,} 台 ({time.perf_counter() - t_all:.0f} s)")
+display(scan)
+''')
+
+md(r'''
+## 3. 2 回目の読み込み: 通過車両の軌跡を 1 ファイルに（step 3）
+
+もう一度全ファイルを読み、通過車両の行だけを残します。時刻の解釈と欠損の除去は、残した行に対してだけ行います
+（全行に対して行うより速い）。リンクの範囲 `LINK_BOUNDS` の外の点は、どのリンクにも付かないので落とします。
+同一車両・同一秒の重複は 1 行にし、車両・時刻順に並べて `trajectories.*` に書きます。
+以降の節はこのファイルだけを入力にするので、ここまで済んでいれば zip を再読込せずに続きから実行できます。
+''')
+code(r'''
 def parse_time(s):
     try:
         return pd.to_datetime(s, format="ISO8601", errors="coerce")   # "YYYY-MM-DD HH:MM:SS"（小数秒や T 区切りも可）
     except (TypeError, ValueError):                                    # 古い pandas
         return pd.to_datetime(s, errors="coerce")
 
-def read_member(name):
-    comp = "gzip" if name.lower().endswith(".gz") else None
-    with zf.open(name) as f:
-        df = pd.read_csv(f, usecols=[COL_ID, COL_TIME, COL_SPEED, COL_LAT, COL_LON], dtype={COL_ID: str}, compression=comp)
-    df = df.rename(columns={COL_ID: "vid", COL_TIME: "t", COL_SPEED: "speed", COL_LAT: "lat", COL_LON: "lon"})
-    n0 = len(df)
-    df["t"] = parse_time(df["t"])
-    df["speed"] = pd.to_numeric(df["speed"], errors="coerce")
-    df = df.dropna(subset=["t", "lat", "lon", "speed"])
-    n1 = len(df)
-    if AREA is not None:                                                   # 範囲内の点だけ（外接矩形で粗く → ポリゴンで厳密に）
-        x0, y0, x1, y1 = AREA.bounds
-        df = df[(df.lon >= x0) & (df.lon <= x1) & (df.lat >= y0) & (df.lat <= y1)]
-        df = df[shapely.contains_xy(AREA, df.lon.to_numpy(), df.lat.to_numpy())]
-    df = df.drop_duplicates(["vid", "t"]).sort_values(["vid", "t"]).reset_index(drop=True)
-    df["window"] = df["t"].dt.floor(f"{WINDOW_MIN}min")
-    df["x"], df["y"] = to_m.transform(df["lon"].to_numpy(), df["lat"].to_numpy())
-    df.attrs["dropped"] = n0 - len(df); df.attrs["outside"] = n1 - len(df)
-    return df
+t_all = time.perf_counter()
+VSET = set(VCODE)
+parts, n_sel, n_bad, n_out = [], 0, 0, 0
+x0, y0, x1, y1 = LINK_BOUNDS
+for k, name in enumerate(members, 1):
+    t0 = time.perf_counter(); n_file = 0
+    try:
+        for ch in chunks(name, [COL_ID, COL_TIME, COL_SPEED, COL_LAT, COL_LON]):
+            ch = ch[ch[COL_ID].isin(VSET)]
+            if ch.empty:
+                continue
+            n_sel += len(ch)
+            df = pd.DataFrame({"vcode": ch[COL_ID].map(VCODE).to_numpy(dtype=np.int32),
+                               "t": parse_time(ch[COL_TIME]),
+                               "lat": pd.to_numeric(ch[COL_LAT], errors="coerce"),
+                               "lon": pd.to_numeric(ch[COL_LON], errors="coerce"),
+                               "speed": pd.to_numeric(ch[COL_SPEED], errors="coerce")})
+            ok = df.t.notna() & df.lat.notna() & df.lon.notna() & df.speed.notna()
+            n_bad += int((~ok).sum()); df = df[ok]
+            inb = (df.lon >= x0) & (df.lon <= x1) & (df.lat >= y0) & (df.lat <= y1)
+            n_out += int((~inb).sum()); df = df[inb]
+            parts.append(df); n_file += len(df)
+        log(f"[{k}/{len(members)}] {name}: 通過車両の点 {n_file:,} ({time.perf_counter() - t0:.1f} s)")
+    except Exception as e:
+        log(f"[{k}/{len(members)}] {name}: skipped ({type(e).__name__}: {e})")
 
-df = read_member(members[0])
-print(f"{members[0]}: {len(df):,} rows / vehicles {df.vid.nunique():,} / {df.t.min()} – {df.t.max()} / dropped {df.attrs['dropped']}")
-display(df.head())
+traj = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame(columns=["vcode", "t", "lat", "lon", "speed"])
+del parts
+n0 = len(traj)
+traj = traj.drop_duplicates(["vcode", "t"]).sort_values(["vcode", "t"], kind="stable").reset_index(drop=True)
+log(f"2 回目: 通過車両の行 {n_sel:,} → 欠損 {n_bad:,}、リンク範囲外 {n_out:,}、重複 {n0 - len(traj):,} を除いて {len(traj):,} 点 "
+    f"/ {traj.vcode.nunique():,} 台 / {traj.t.min()} – {traj.t.max()} ({time.perf_counter() - t_all:.0f} s)")
+write_table(traj.assign(serial_number=SERIAL[traj.vcode.to_numpy()])[["serial_number", "t", "lat", "lon", "speed"]], "trajectories")
+display(traj.head())
 ''')
 
 md(r'''
-## 3. 間引きと候補リンク（step 5-1）
+## 4. 間引きと候補リンク（step 5-1）
 
-ウィンドウ × 車両ごとに点列を間引きます（軌跡に沿って `SAMPLE_M` 進むごと、または `SAMPLE_MAX_S` 経つごとに 1 点）。
-1 秒毎の点は情報がほぼ重複しているので、経路の推定には間引いた点で足り、計算量が 1/10 程度になります。
+ここからは軌跡ファイルだけを使います（セル 2・3 を飛ばして再開するときは、このセルが `trajectories.*` を読みます）。
 
-間引いた各点について、`CAND_R_M` 以内のリンクを STRtree で一括検索し、近い順に `CAND_MAX` 本を候補にします。
+車両ごとに点列を作り、`GAP_S` を超える欠測で切ります。点列は軌跡に沿って `SAMPLE_M` 進むごと、または `SAMPLE_MAX_S` 経つごとに
+1 点に間引きます（1 秒毎の点は情報がほぼ重複しているので、経路の推定には間引いた点で足ります）。
+
+間引いた各点について `CAND_R_M` 以内のリンクを STRtree で一括検索し、近い順に `CAND_MAX` 本を候補にします。
 候補ごとに、点からリンクまでの距離 `dist` と、リンク上の位置 `pos`（始点からの距離。経路距離の計算に使う）を持ちます。
-候補が 1 本も無い点（道路から `CAND_R_M` 以上離れた点）は経路の切れ目とし、その前後を別の点列（`seq`）として扱います。
+候補が 1 本も無い点（道路から `CAND_R_M` 以上離れた点）は点列の切れ目にします。
 ''')
 code(r'''
+if "traj" not in globals():                                      # セル 2・3 を飛ばして再開するとき
+    traj = read_table("trajectories")
+    vehicles = pd.DataFrame({"serial_number": sorted(traj.serial_number.unique())})
+    VCODE = {vid: i for i, vid in enumerate(vehicles.serial_number)}; SERIAL = vehicles.serial_number.to_numpy()
+    traj["vcode"] = traj.serial_number.map(VCODE).astype(np.int32)
+    traj = traj.drop(columns="serial_number").sort_values(["vcode", "t"], kind="stable").reset_index(drop=True)
+traj["x"], traj["y"] = to_m.transform(traj["lon"].to_numpy(), traj["lat"].to_numpy())
+
 def downsample(df):
-    """ウィンドウ × 車両ごとの間引き。残した点だけの DataFrame（連番 index）を返す。"""
+    """車両ごと（GAP_S を超える欠測で切る）の間引き。残した点だけの DataFrame（連番 index、列 seq0 = 点列番号）を返す。"""
     x, y = df.x.to_numpy(), df.y.to_numpy()
     t = df.t.to_numpy().astype("datetime64[s]").astype(np.int64)
-    vid, win = df.vid.to_numpy(), df.window.to_numpy()
-    new = np.r_[True, (vid[1:] != vid[:-1]) | (win[1:] != win[:-1])]         # 車両 × ウィンドウの先頭
+    v = df.vcode.to_numpy()
+    new = np.r_[True, (v[1:] != v[:-1]) | (np.diff(t) > GAP_S)]              # 点列の先頭
     grp = np.cumsum(new) - 1
     step = np.r_[0.0, np.hypot(np.diff(x), np.diff(y))]; step[new] = 0.0
-    cum = np.cumsum(step); cum = cum - cum[new][grp]                        # 軌跡に沿った累積距離（グループ内）
-    el = t - t[new][grp]                                                     # 経過秒（グループ内）
+    cum = np.cumsum(step); cum = cum - cum[new][grp]                        # 軌跡に沿った累積距離（点列内）
+    el = t - t[new][grp]                                                     # 経過秒（点列内）
     bd, bt = np.floor(cum / SAMPLE_M), np.floor(el / SAMPLE_MAX_S)
     keep = new | np.r_[False, (bd[1:] != bd[:-1]) | (bt[1:] != bt[:-1])]   # 30 m 刻み・60 秒刻みの境界を越えた最初の点
-    return df[keep].reset_index(drop=True)
+    s = df[keep].reset_index(drop=True)
+    s["seq0"] = grp[keep]
+    return s
 
 def candidates(s):
     """間引き後の各点の候補リンク。列: row（s の行番号）, link, dist, pos。点ごとに近い順、最大 CAND_MAX 本。"""
@@ -334,26 +441,27 @@ def candidates(s):
     return c
 
 def sequences(s, cand):
-    """点列番号 seq（車両 × ウィンドウ。候補の無い点で切る）と、1 つ前の点との直線距離 straight を s に付ける。"""
+    """点列番号 seq（seq0 をさらに候補の無い点で切る）と、1 つ前の点との直線距離 straight を s に付ける。"""
     has = np.zeros(len(s), dtype=bool); has[cand.row.unique()] = True
-    vid, win = s.vid.to_numpy(), s.window.to_numpy()
-    start = np.r_[True, (vid[1:] != vid[:-1]) | (win[1:] != win[:-1]) | ~has[:-1]]
+    seq0 = s.seq0.to_numpy()
+    start = np.r_[True, (seq0[1:] != seq0[:-1]) | ~has[:-1]]
     s["seq"] = np.cumsum(start)
     d = np.r_[0.0, np.hypot(np.diff(s.x.to_numpy()), np.diff(s.y.to_numpy()))]
     d[start] = 0.0
     s["straight"] = d
     return s
 
-s = downsample(df)
+t0 = time.perf_counter()
+s = downsample(traj)
 cand = candidates(s)
 s = sequences(s, cand)
-print(f"点 {len(df):,} → 間引き後 {len(s):,}（{len(df) / max(len(s), 1):.1f} 分の 1）/ 点列 {s.seq.nunique():,} / "
-      f"候補 {len(cand):,}（点あたり平均 {len(cand) / max(len(s), 1):.1f} 本、候補なし {int(len(s) - cand.row.nunique()):,} 点）")
+log(f"点 {len(traj):,} → 間引き後 {len(s):,}（{len(traj) / max(len(s), 1):.1f} 分の 1）/ 点列 {s.seq.nunique():,} / "
+    f"候補 {len(cand):,}（点あたり平均 {len(cand) / max(len(s), 1):.1f} 本、候補なし {int(len(s) - cand.row.nunique()):,} 点） in {time.perf_counter() - t0:.1f} s")
 display(cand.head(8))
 ''')
 
 md(r'''
-## 4. 経路推定（step 5-2, 5-3）
+## 5. 動的計画法で経路を決める（step 5-2, 5-3）
 
 点列ごとに、`cost[k][L]` = 「点 0 … k を見たとき、点 k がリンク L 上にあるという前提での最小総コスト」を順に計算します。
 
@@ -364,7 +472,7 @@ md(r'''
 - 点 k の候補がどの L' からも届かないときは、そこで点列を切り、点 k から新しい区間として再開する
 - 最後の点で最小の L から `back` を逆にたどった列が走行ルート。間に飛び越えたリンク（近傍表の path）も通過に含める
 
-計算量は 点数 × 候補数² で、候補 5 本なら 1 点あたり 25 回の評価です。
+計算量は 点数 × 候補数² で、候補 5 本なら 1 点あたり 25 回の評価です。内側のループは Python の辞書とリストで書いています。
 ''')
 code(r'''
 def route_distance(Lp, posp, L, pos):
@@ -430,15 +538,13 @@ def viterbi(seq):
     finish()
     return segments, n_short
 
-def match_sequences(s, cand):
-    """全点列に viterbi を適用。区間の一覧 [(vid, window, 点の行番号, 割当リンク, 通過リンク列), ...] と、捨てた短い区間の点数を返す。"""
-    c = cand.merge(s[["vid", "window", "seq", "straight"]], left_on="row", right_index=True, how="inner")
+def match_all(s, cand):
+    """全点列に viterbi を適用。区間の一覧 [(点の行番号, 割当リンク, 通過リンク列), ...] と、捨てた短い区間の点数を返す。"""
+    c = cand.merge(s[["seq", "straight"]], left_on="row", right_index=True, how="inner")
     out, n_short = [], 0
     for _, g in c.groupby("seq", sort=False):
         segs, k = viterbi(g)
-        n_short += k
-        for rows_, asg, via in segs:
-            out.append((g.vid.iat[0], g.window.iat[0], rows_, asg, via))
+        out.extend(segs); n_short += k
     return out, n_short
 
 def route_of(asg, via):
@@ -451,104 +557,128 @@ def route_of(asg, via):
     return list(dict.fromkeys(route))
 
 t0 = time.perf_counter()
-segments, n_short = match_sequences(s, cand)
-print(f"区間 {len(segments):,}（点列 {s.seq.nunique():,}、短くて捨てた点 {n_short:,}）in {time.perf_counter() - t0:.1f} s")
-for vid, w, rows_, asg, via in segments[:3]:
-    print(f"  {w:%H:%M} 点 {len(rows_)} → 経路 {[int(links.Id[L]) for L in route_of(asg, via)]}")
+segments, n_short = match_all(s, cand)
+log(f"区間 {len(segments):,}（点列 {s.seq.nunique():,}、短くて捨てた点 {n_short:,}）in {time.perf_counter() - t0:.1f} s")
+for rows_, asg, via in segments[:3]:
+    print(f"  {s.t.iat[rows_[0]]:%H:%M} 点 {len(rows_)} → 経路 {[int(links.Id[L]) for L in route_of(asg, via)]}")
 ''')
 
 md(r'''
-## 5. 割り付け（step 6）
+## 6. 各点にリンクを付ける（step 6）
 
-区間ごとに、経路上の全リンクにその車両を割り付けます（点が落ちない短いリンクも通過として車両数に数える）。
-速度は、1 秒毎の各点を、その点の時刻が属する区間の経路上のリンクのうち最近傍（`CAND_R_M` 以内）のものに割り当て、
-リンク × 車両で平均します。点が 1 つも割り当たらないリンク（`via`）は車両数には数えますが、速度の平均には入りません。
-ウィンドウ内の最高速度が `MOVING_KMH` 未満の車両（駐停車）は数えません。
+区間ごとに、その時間範囲の 1 秒毎の全点を、経路上のリンクのうち最近傍（`CAND_R_M` 以内）のものに割り当てます。
+間引いた点 k → k+1 の間に飛び越えたリンク（通過リンク）には点が無いので、2 点の時刻を等分した時刻の行（`kind = "via"`、
+座標・速度なし）を加えます。こうして **車両 × 時刻 → リンク** の表 `matched_points.*` ができます（列: serial_number, t, lat, lon, speed,
+Id, kind, リンク属性）。車両 ID を含むので共有しません。
 ''')
 code(r'''
-def assign_routes(df, s, segments):
-    """(window, vid, link) ごとの n_points, v_mean, via（点なしの通過）の表を返す。"""
-    by_vw = {}
-    for vid, w, srows, asg, via in segments:
-        by_vw.setdefault((vid, w), []).append((s.t.iat[srows[0]], route_of(asg, via)))
-    rows = []
-    for (vid, w), g in df.groupby(["vid", "window"], sort=False):
-        segs = by_vw.get((vid, w))
-        if not segs or g.speed.max() < MOVING_KMH:
+def assign_points(traj, s, segments):
+    """各 1 秒点のリンク（内部番号、無ければ -1）と、通過リンクの行 [(vcode, t, link), ...] を返す。"""
+    link_of = np.full(len(traj), -1, dtype=np.int64)
+    via_rows = []
+    by_v = {}                                                          # 車両 → [(開始時刻, 点の行番号, 割当, 通過), ...]
+    s_t, s_v = s.t.to_numpy(), s.vcode.to_numpy()
+    for rows_, asg, via in segments:
+        by_v.setdefault(int(s_v[rows_[0]]), []).append((s_t[rows_[0]], rows_, asg, via))
+    v, t = traj.vcode.to_numpy(), traj.t.to_numpy()
+    pts = shapely.points(traj.x.to_numpy(), traj.y.to_numpy())
+    starts = np.flatnonzero(np.r_[True, v[1:] != v[:-1]]); ends = np.r_[starts[1:], len(v)]
+    for a, b in zip(starts, ends):                                     # 車両ごと（traj は車両・時刻順）
+        segs = by_v.get(int(v[a]))
+        if not segs:
             continue
         segs.sort(key=lambda z: z[0])
-        t_start = np.array([z[0] for z in segs], dtype="datetime64[ns]")
-        which = np.maximum(np.searchsorted(t_start, g.t.to_numpy(), side="right") - 1, 0)   # 各 1 秒点が属する区間
-        pts = shapely.points(g.x.to_numpy(), g.y.to_numpy()); sp = g.speed.to_numpy()
-        for si, (_, route) in enumerate(segs):
-            m = which == si
-            pi, li = STRtree(GEOM[route]).query_nearest(pts[m], max_distance=CAND_R_M, all_matches=False)
-            n_pt = np.bincount(li, minlength=len(route))
-            v_sum = np.bincount(li, weights=sp[m][pi], minlength=len(route))
-            for j, L in enumerate(route):
-                rows.append((w, vid, L, int(n_pt[j]), float(v_sum[j] / n_pt[j]) if n_pt[j] else np.nan, bool(n_pt[j] == 0)))
-    return pd.DataFrame(rows, columns=["window", "vid", "link", "n_points", "v_mean", "via"])
+        which = np.maximum(np.searchsorted(np.array([z[0] for z in segs]), t[a:b], side="right") - 1, 0)   # 各点が属する区間
+        for si, (_, rows_, asg, via) in enumerate(segs):
+            route = route_of(asg, via)
+            idx = np.flatnonzero(which == si)
+            pi, li = STRtree(GEOM[route]).query_nearest(pts[a + idx], max_distance=CAND_R_M, all_matches=False)
+            link_of[a + idx[pi]] = np.asarray(route)[li]
+            for k, path in enumerate(via):                             # 通過リンク: 2 点の時刻を等分
+                if path:
+                    ta, tb = s_t[rows_[k]], s_t[rows_[k + 1]]
+                    for j, L in enumerate(path):
+                        via_rows.append((int(v[a]), ta + (tb - ta) * (j + 1) / (len(path) + 1), L))
+    return link_of, via_rows
 
-groups = assign_routes(df, s, segments)
-groups["Id"] = links.Id.to_numpy()[groups.link] if len(groups) else []
-print(f"割り付け {len(groups):,} 行（通過のみ {int(groups.via.sum()):,}）")
-display(groups.head(8))
+t0 = time.perf_counter()
+link_of, via_rows = assign_points(traj, s, segments)
+pts_m = traj.loc[link_of >= 0, ["vcode", "t", "lat", "lon", "speed"]].assign(link=link_of[link_of >= 0], kind="point")
+via_m = (pd.DataFrame(via_rows, columns=["vcode", "t", "link"]).astype({"vcode": np.int32, "link": np.int64, "t": "datetime64[ns]"})
+           .assign(lat=np.nan, lon=np.nan, speed=np.nan, kind="via"))
+matched = pd.concat([pts_m, via_m], ignore_index=True).sort_values(["vcode", "t"], kind="stable").reset_index(drop=True)
+matched["Id"] = links.Id.to_numpy()[matched.link.to_numpy()]
+log(f"リンクを付けた点 {len(pts_m):,} / {len(traj):,}（付かなかった点 {int((link_of < 0).sum()):,}）、通過リンクの行 {len(via_m):,} in {time.perf_counter() - t0:.1f} s")
+out = (matched.assign(serial_number=SERIAL[matched.vcode.to_numpy()])
+              .merge(LINK_ATTR, on="Id", how="left")[["serial_number", "t", "lat", "lon", "speed", "Id", "kind"] + [c for c in LINK_ATTR.columns if c != "Id"]])
+write_table(out, "matched_points")
+display(out.head(8))
 ''')
 
 md(r'''
-## 6. 15 分集計（step 6 の続き）
+## 7. 15 分 × リンクの統計（step 6 の続き）
 
-リンク × ウィンドウで **Hits = 車両数、AvgSp = 車両ごとの平均速度の平均（速度のある車両のみ）、MedSp = その中央値、n_points = 点数**
-を集計し、ウィンドウ毎に `traffic_YYYYMMDD_HHMM.csv` を書きます（`Id` は集約後の代表 Id。観測の無いリンクは行を持ちません。通過だけで点の無いリンクは AvgSp が空）。
+`matched_points` から、ウィンドウ × リンク × 車両の平均速度を出し、ウィンドウ × リンクで
+**Hits = 車両数、AvgSp = 車両ごとの平均速度の平均（速度のある車両のみ）、MedSp = その中央値、n_points = 点数** にまとめます。
+ウィンドウ内の最高速度が `MOVING_KMH` 未満の車両（駐停車）は、そのウィンドウでは数えません。
+ウィンドウ毎に `traffic_YYYYMMDD_HHMM.csv`（`Id` は集約後の代表 Id。観測の無いリンクは行を持たない。通過だけで点の無いリンクは AvgSp が空）、
+全体を `traffic_15min.csv` に書きます。
 ''')
 code(r'''
-def aggregate_windows(groups):
-    stats = (groups.groupby(["window", "Id"])
-                   .agg(Hits=("vid", "nunique"), AvgSp=("v_mean", "mean"), MedSp=("v_mean", "median"),
-                        n_points=("n_points", "sum"), n_sp=("v_mean", "count"))                  # n_sp = 速度のある車両数
-                   .reset_index())
+def window_stats(matched):
+    m = matched[["vcode", "t", "speed", "Id", "kind"]].copy()
+    m["window"] = m.t.dt.floor(f"{WINDOW_MIN}min")
+    vmax = m[m.kind == "point"].groupby(["vcode", "window"]).speed.max()          # 車両 × 窓の最高速度
+    moving = vmax[vmax >= MOVING_KMH].index
+    m = m[pd.MultiIndex.from_arrays([m.vcode, m.window]).isin(moving)]
+    m["is_point"] = (m.kind == "point").astype(int)
+    per_vehicle = m.groupby(["window", "Id", "vcode"]).agg(v=("speed", "mean"), n=("is_point", "sum")).reset_index()
+    stats = (per_vehicle.groupby(["window", "Id"])
+                        .agg(Hits=("vcode", "size"), AvgSp=("v", "mean"), MedSp=("v", "median"), n_points=("n", "sum"))
+                        .reset_index())
     stats["AvgSp"] = stats.AvgSp.round(2); stats["MedSp"] = stats.MedSp.round(2)
     return stats
 
-def write_windows(stats, out_dir=OUT_DIR):
+def write_windows(stats):
+    for old in OUT_DIR.glob("traffic_*.csv"):
+        old.unlink()
     written = []
     for w, g in stats.groupby("window"):
         name = f"traffic_{w:%Y%m%d_%H%M}.csv"
-        g[["Id", "Hits", "AvgSp", "MedSp", "n_points"]].sort_values("Id").to_csv(out_dir / name, index=False)
+        g[["Id", "Hits", "AvgSp", "MedSp", "n_points"]].sort_values("Id").to_csv(OUT_DIR / name, index=False)
         written.append(name)
+    stats.to_csv(OUT_DIR / "traffic_15min.csv", index=False)
     return written
 
-stats = aggregate_windows(groups)
-print(write_windows(stats))
+t0 = time.perf_counter()
+stats = window_stats(matched)
+written = write_windows(stats)
+log(f"{len(written)} ウィンドウ、ウィンドウ × リンク {len(stats):,} 行 in {time.perf_counter() - t0:.1f} s → {OUT_DIR}")
 display(stats.sort_values(["window", "Hits"], ascending=[True, False]).head(12))
 ''')
 
 md(r'''
-## 7. 直近 1 時間の軌跡（15 分毎、step 7）
+## 8. 直近 1 時間の軌跡（15 分毎、任意）
 
 窓の終端 T（15 分刻み）ごとに、(T−60 分, T] の各車両の点をつないだ線を `traj/traj_YYYYMMDD_HHMM.geojson` に書きます
-（HHMM は T。人流の viewer と同じ「直近 1 時間」の定義）。`TRAJ_GAP_MIN` を超える欠測で線を切り、投影座標で
-`TRAJ_SIMPLIFY_M` の Douglas-Peucker 間引きをして、`TRAJ_MIN_LEN_M` より短い線（駐車中など）は落とします。
-窓が前のファイルにまたがるので、前のファイルの末尾 1 時間分（`tail`）を引き継ぎます（ファイルは時刻順に処理する前提）。
-車両 ID は出力しません（properties: time, date, n_points, v_mean, v_max）。
+（HHMM は T。人流の viewer と同じ「直近 1 時間」の定義）。入力は全車両・全時刻をまとめた `traj`（節 3 の表）なので、
+各スロットのファイルは 1 回だけ書かれます。`TRAJ_GAP_MIN` を超える欠測で線を切り、投影座標で `TRAJ_SIMPLIFY_M` の
+Douglas-Peucker 間引きをして、`TRAJ_MIN_LEN_M` より短い線（駐車中など）は落とします。車両 ID は出力しません。
 ''')
 code(r'''
-TRAJ_DIR = OUT_DIR / "traj"; TRAJ_DIR.mkdir(exist_ok=True)
-
-def traj_slots(df, tail=None):
-    """df: 1 ファイル分の点、tail: 前のファイルの末尾 1 時間分。各スロットの GeoJSON を書き、
-    [(ファイル名, 地物数), ...] と次のファイルへ渡す tail を返す。"""
+def traj_slots(traj):
+    """全点から 15 分毎のスロットファイルを書き、[(ファイル名, 地物数), ...] を返す。"""
+    TRAJ_DIR = OUT_DIR / "traj"; TRAJ_DIR.mkdir(exist_ok=True)
+    for old in TRAJ_DIR.glob("*.geojson"):
+        old.unlink()
     step, win = pd.Timedelta(minutes=WINDOW_MIN), pd.Timedelta(minutes=TRAJ_WINDOW_MIN)
-    cols = ["vid", "t", "speed", "x", "y"]
-    both = pd.concat([tail[tail.t < df.t.min()], df[cols]], ignore_index=True) if tail is not None and len(tail) else df[cols]
-    t_first = df.t.min().floor(f"{WINDOW_MIN}min") + step
-    t_last = df.t.max().ceil(f"{WINDOW_MIN}min")
+    t_first = traj.t.min().floor(f"{WINDOW_MIN}min") + step
+    t_last = traj.t.max().ceil(f"{WINDOW_MIN}min")
     written = []
     for T in pd.date_range(t_first, t_last, freq=step):
-        w = both[(both.t > T - win) & (both.t <= T)]
+        w = traj[(traj.t > T - win) & (traj.t <= T)]
         feats = []
-        for vid, g in w.groupby("vid", sort=False):
-            g = g.sort_values("t")
+        for _, g in w.groupby("vcode", sort=False):
             gap = np.r_[True, np.diff(g.t.to_numpy()).astype("timedelta64[s]").astype(float) > TRAJ_GAP_MIN * 60]
             lines = []
             for _, gg in g.groupby(np.cumsum(gap)):
@@ -570,91 +700,36 @@ def traj_slots(df, tail=None):
         with open(TRAJ_DIR / name, "w", encoding="utf-8") as f:
             json.dump({"type": "FeatureCollection", "features": feats}, f, ensure_ascii=False, separators=(",", ":"))
         written.append((name, len(feats)))
-    return written, df[df.t > df.t.max() - win][cols]
-
-if TRAJ_OUT:
-    written, tail = traj_slots(df)
-    print("\n".join(f"{n}: {c} 本" for n, c in written), "/ tail", len(tail), "点")
-''')
-
-md(r'''
-## 8. 全ファイルの処理
-
-上の step 2 → 7 を zip 内の全ファイルに対して実行します。メモリに残すのはファイルごとの集計結果（小さい）だけで、
-割り付け表（`groups.csv`、`WRITE_GROUPS` のとき）はファイルごとに追記します。読めないファイルは記録して飛ばします。
-同じウィンドウが複数ファイルにまたがる場合（ファイル境界が 15 分境界と一致しない場合）は、最後に合算します。
-''')
-code(r'''
-t_all = time.perf_counter()
-all_stats, summary, traj_files = [], [], []
-tail = None
-(OUT_DIR / "groups.csv").unlink(missing_ok=True)
-for k, name in enumerate(members, 1):
-    t0 = time.perf_counter()
-    try:
-        df = read_member(name)
-        if df.empty:
-            log(f"[{k}/{len(members)}] {name}: 0 rows, skip"); continue
-        dropped, outside = df.attrs["dropped"], df.attrs.get("outside", 0)
-        if TRAJ_OUT:
-            tw, tail = traj_slots(df, tail); traj_files += tw
-        s = downsample(df)
-        cand = candidates(s)
-        s = sequences(s, cand)
-        segments, n_short = match_sequences(s, cand)
-        groups = assign_routes(df, s, segments)
-        groups["Id"] = links.Id.to_numpy()[groups.link] if len(groups) else []
-        stats = aggregate_windows(groups)
-        if WRITE_GROUPS and len(groups):
-            groups.assign(file=name).to_csv(OUT_DIR / "groups.csv", mode="a", header=not (OUT_DIR / "groups.csv").exists(), index=False)
-        all_stats.append(stats)
-        n_vw = df.groupby(["vid", "window"]).ngroups
-        summary.append({"file": name, "rows": len(df), "dropped": dropped, "outside_area": outside, "vehicles": df.vid.nunique(),
-                        "vehicle_windows": n_vw, "sampled_points": len(s), "no_candidate_points": int(len(s) - cand.row.nunique()),
-                        "short_points": n_short, "segments": len(segments), "assigned_rows": len(groups),
-                        "via_rows": int(groups.via.sum()) if len(groups) else 0,
-                        "windows": stats.window.nunique(), "links_hit": stats.Id.nunique(), "error": ""})
-        log(f"[{k}/{len(members)}] {name}: {len(df):,} pts, {df.vid.nunique():,} vehicles, {len(s):,} sampled, "
-            f"{len(segments):,} segments, {len(groups):,} link assignments ({time.perf_counter() - t0:.1f} s)")
-        del df, s, cand, groups
-    except Exception as e:
-        log(f"[{k}/{len(members)}] {name}: skipped ({type(e).__name__}: {e})")
-        summary.append({"file": name, "error": f"{type(e).__name__}: {e}"})
-
-summary = pd.DataFrame(summary)
-summary.to_csv(OUT_DIR / "summary.csv", index=False)
-display(summary)
-if all_stats and any(len(x) for x in all_stats):
-    stats_all = pd.concat(all_stats)
-    stats_all["sp_x"] = (stats_all.AvgSp * stats_all.n_sp).fillna(0.0)   # 同じウィンドウ × リンクが複数ファイルに分かれていれば合算
-    stats_all = (stats_all.groupby(["window", "Id"])
-                          .agg(Hits=("Hits", "sum"), sp_x=("sp_x", "sum"), n_sp=("n_sp", "sum"), MedSp=("MedSp", "median"), n_points=("n_points", "sum"))
-                          .reset_index())
-    stats_all["AvgSp"] = (stats_all.sp_x / stats_all.n_sp.where(stats_all.n_sp > 0)).round(2)   # 速度のある車両が無ければ NaN
-    stats_all = stats_all[["window", "Id", "Hits", "AvgSp", "MedSp", "n_points"]]
-    written = write_windows(stats_all)
-    stats_all.to_csv(OUT_DIR / "traffic_15min.csv", index=False)
-    log(f"done: {len(written)} window files, {len(stats_all):,} window×link rows, {time.perf_counter() - t_all:.1f} s → {OUT_DIR}")
-if traj_files:
     with open(TRAJ_DIR / "index.json", "w", encoding="utf-8") as f:
-        json.dump({"window_min": TRAJ_WINDOW_MIN, "slot_min": WINDOW_MIN, "files": {n: c for n, c in traj_files}}, f, ensure_ascii=False, indent=1)
-    log(f"traj/: {len(traj_files)} slot files, {sum(c for _, c in traj_files):,} trajectories")
+        json.dump({"window_min": TRAJ_WINDOW_MIN, "slot_min": WINDOW_MIN, "files": dict(written)}, f, ensure_ascii=False, indent=1)
+    return written
+
+traj_files = []
+if TRAJ_OUT and len(traj):
+    t0 = time.perf_counter()
+    traj_files = traj_slots(traj)
+    log(f"traj/: {len(traj_files)} slot files, {sum(c for _, c in traj_files):,} trajectories in {time.perf_counter() - t0:.1f} s")
+    print("\n".join(f"{n}: {c} 本" for n, c in traj_files[:6]), "…" if len(traj_files) > 6 else "")
 ''')
 
 md(r'''
 ## 9. 確認
 
-- ウィンドウ別のリンク数・総 Hits・平均速度
-- Hits 上位リンク
-- 割り付けの内訳（`summary.csv`）
+- 処理の内訳を `summary.json` に書く
+- ウィンドウ別のリンク数・総 Hits・平均速度、Hits 上位リンク
 ''')
 code(r'''
-if all_stats and any(len(x) for x in all_stats):
-    print(stats_all.groupby("window").agg(links=("Id", "size"), Hits=("Hits", "sum"), AvgSp=("AvgSp", "mean")).round(1))
-    top = stats_all.groupby("Id").Hits.sum().sort_values(ascending=False).head(10)
+summary = {"files": len(members), "rows_scanned": int(scan.rows.sum()) if "scan" in globals() and "rows" in scan else None,
+           "vehicles_in_area": len(VCODE), "trajectory_points": int(len(traj)), "sampled_points": int(len(s)),
+           "no_candidate_points": int(len(s) - cand.row.nunique()), "short_points": int(n_short), "segments": len(segments),
+           "matched_points": int((link_of >= 0).sum()), "unmatched_points": int((link_of < 0).sum()), "via_rows": int(len(via_m)),
+           "windows": int(stats.window.nunique()), "links_hit": int(stats.Id.nunique()), "traj_slot_files": len(traj_files)}
+json.dump(summary, open(OUT_DIR / "summary.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+print(json.dumps(summary, ensure_ascii=False, indent=1))
+if len(stats):
+    print(stats.groupby("window").agg(links=("Id", "size"), Hits=("Hits", "sum"), AvgSp=("AvgSp", "mean")).round(1))
+    top = stats.groupby("Id").Hits.sum().sort_values(ascending=False).head(10)
     display(links.set_index("Id").loc[top.index, [c for c in ["StreetName", "FRC", "SpeedLimit", "Length"] if c in links.columns]].assign(Hits=top.values))
-    cols = [c for c in ["vehicle_windows", "sampled_points", "no_candidate_points", "short_points", "segments", "assigned_rows", "via_rows"] if c in summary.columns]
-    print("合計:", summary[cols].sum().astype(int).to_dict())
 ''')
 
 nb = {"cells": cells, "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},

@@ -20,6 +20,9 @@ Probe (1 Hz, zip with one CSV per hour, same columns as the real sample):
   H  90 km/h between links 9 and 10 (4 m / 6 m away) -> matched to 9 (there is no speed-limit rule)
   I  drives 1 -> 7 -> 13 at 50 km/h with only every 7th point kept (7 s gaps): no point falls on the 60 m link 7,
      which is still counted as a through link (via) because the route passes it
+The probe zip is split into two files by TIME here (12:xx and 13:xx); the notebook no longer assumes that: pass 1 finds the
+vehicles that touch the area, pass 2 collects their points from all files into one trajectory table.
+The main run uses area.geojson (A-F and I inside; G and H south of it are excluded); the second run has no area.
 """
 import io, json, zipfile
 from pathlib import Path
@@ -117,75 +120,89 @@ def hits(out_dir):
     return w, {(f"{k[0]:%H:%M}", int(k[1])): int(v) for k, v in w.Hits.items()}
 
 
+def table(out_dir, stem):
+    O = Path(out_dir)
+    f = O / f"{stem}.parquet"
+    df = pd.read_parquet(f) if f.exists() else pd.read_csv(O / f"{stem}.csv.gz", dtype={"serial_number": str})
+    df["t"] = pd.to_datetime(df["t"])
+    return df
+
+
 def check(out_dir):
+    """Run with area.geojson."""
     O = Path(out_dir)
     links = pd.read_csv(O / "network_agg.csv").set_index("Id")
-    assert len(links) == 10 and links.loc[1, "member_ids"] == "1;2;3" and links.loc[4, "n_members"] == 2, links
+    assert len(links) == 9 and 8 not in links.index and links.loc[1, "member_ids"] == "1;2;3" and links.loc[4, "n_members"] == 2, links   # link 8 (3 km south) is outside the bbox + 1 km
     assert "NewSegId" in links.columns and "Segment Id" in links.columns
+    # pass 1: vehicles with at least one point inside the polygon (G at y=-500 and H at y=-104 are outside)
+    veh = pd.read_csv(O / "vehicles_in_area.csv", dtype={"serial_number": str})
+    assert veh.serial_number.tolist() == ["A", "B", "C", "D", "E", "F", "I"], veh
+    assert int(veh.set_index("serial_number").loc["D", "n_points_in_area"]) == 1200
+    # pass 2: one trajectory table for those vehicles, both files joined, sorted by vehicle and time
+    tr = table(O, "trajectories")
+    assert list(tr.columns) == ["serial_number", "t", "lat", "lon", "speed"]
+    assert set(tr.serial_number) == set("ABCDEFI") and tr.equals(tr.sort_values(["serial_number", "t"], kind="stable").reset_index(drop=True))
+    assert (tr.serial_number == "A").sum() == 101 + 106, "A: 12:03 track (file 12) + 13:40 track (file 13)"
+    # matching results
     w, got = hits(O)
-    expect = {("12:00", 1): 3, ("12:00", 4): 1, ("12:00", 6): 1, ("12:15", 1): 2, ("12:15", 6): 1, ("12:30", 9): 1,
+    expect = {("12:00", 1): 3, ("12:00", 4): 1, ("12:00", 6): 1, ("12:15", 1): 2, ("12:15", 6): 1,
               ("12:45", 1): 1, ("12:45", 7): 1, ("12:45", 13): 1, ("13:30", 1): 1, ("13:30", 6): 1}
-    assert got == expect, (got, expect)                      # exactly these window x link rows, with these vehicle counts
+    assert got == expect, (got, expect)                      # exactly these window x link rows, with these vehicle counts (D parked, no G/H)
     c = w.loc[(pd.Timestamp("2025-09-10 12:00"), 1)]
     assert abs(c.AvgSp - (50 + 70 + 55) / 3) < 1.5 and c.n_points == 58 + 42 + 30, c.to_dict()   # A 58 s (50 km/h), C 42 s (70 km/h), E 30 s before 12:15
     v = w.loc[(pd.Timestamp("2025-09-10 12:45"), 7)]
     assert v.Hits == 1 and v.n_points == 0 and np.isnan(v.AvgSp), v.to_dict()                    # link 7: passed by I, no point -> no speed
-    s = pd.read_csv(O / "summary.csv"); r12 = s[s.file.str.endswith("_12.csv")].iloc[0]
-    assert r12.dropped == 1 and r12.vehicles == 9 and r12.no_candidate_points > 0 and r12.short_points == 0, r12.to_dict()
-    assert r12.segments == 10 and r12.assigned_rows == 12 and r12.via_rows == 1, r12.to_dict()   # A2 B1 C1 E2 F2 H1 I3; D has segments but is parked
-    assert s[s.file.str.endswith("README.txt")].error.str.contains("ValueError").all()
-    g = pd.read_csv(O / "groups.csv")
-    assert "status" not in g.columns and {"window", "vid", "link", "n_points", "v_mean", "via", "Id", "file"} <= set(g.columns), g.columns
-    st = {(r.vid, int(r.Id)): bool(r.via) for r in g[g.file.str.endswith("_12.csv")].itertuples()}
-    assert st[("C", 1)] is False and ("C", 4) not in st and ("D", 1) not in st and ("G", 9) not in st, st
-    assert st[("H", 9)] is False and st[("I", 7)] is True and st[("I", 1)] is False and st[("I", 13)] is False, st
+    # matched points: every vehicle x second with its link and the link attributes; via rows for through links
+    m = table(O, "matched_points")
+    assert list(m.columns) == ["serial_number", "t", "lat", "lon", "speed", "Id", "kind", "StreetName", "FRC", "SpeedLimit", "Length"], m.columns
+    via = m[m.kind == "via"]
+    assert len(via) == 1 and via.iloc[0].serial_number == "I" and via.iloc[0].Id == 7 and via.iloc[0].StreetName == "Branch" and np.isnan(via.iloc[0].speed), via
+    assert pd.Timestamp("2025-09-10 12:50:56") <= via.iloc[0].t <= pd.Timestamp("2025-09-10 12:51:03"), via.iloc[0].t   # between the points at 12:50:56 and 12:51:03
+    pts = m[m.kind == "point"]
+    assert len(pts) == len(tr), "every point got a link (all inside 50 m of a route link)"
+    assert set(pts[pts.serial_number == "D"].Id) == {1} and set(pts[pts.serial_number == "A"].Id) == {1, 6} and set(pts[pts.serial_number == "I"].Id) == {1, 13}
+    assert (pts[pts.serial_number == "C"].Id == 1).all() and (pts[pts.serial_number == "B"].Id == 4).all()
     files = sorted(p.name for p in O.glob("traffic_2025*.csv"))
-    assert files == ["traffic_20250910_1200.csv", "traffic_20250910_1215.csv", "traffic_20250910_1230.csv",
-                     "traffic_20250910_1245.csv", "traffic_20250910_1330.csv"], files
+    assert files == ["traffic_20250910_1200.csv", "traffic_20250910_1215.csv", "traffic_20250910_1245.csv", "traffic_20250910_1330.csv"], files
     one = pd.read_csv(O / files[0]); assert list(one.columns) == ["Id", "Hits", "AvgSp", "MedSp", "n_points"]
-    # trajectories: window ends 12:15 .. 13:00 from file 12 (last point 12:51:45), 13:45 from file 13
+    # trajectories: one file per slot from 12:15 to 13:45, written once from the whole table (nothing overwritten)
     tf = sorted(p.name for p in (O / "traj").glob("traj_*.geojson"))
-    assert tf == ["traj_20250910_1215.geojson", "traj_20250910_1230.geojson", "traj_20250910_1245.geojson",
-                  "traj_20250910_1300.geojson", "traj_20250910_1345.geojson"], tf
+    assert tf == [f"traj_20250910_{h}.geojson" for h in ["1215", "1230", "1245", "1300", "1315", "1330", "1345"]], tf
     f15 = json.load(open(O / "traj" / "traj_20250910_1215.geojson"))["features"]
-    assert len(f15) == 4, [f["properties"] for f in f15]          # A, B, C, E (D is parked -> too short, F/G/H/I later)
+    assert len(f15) == 4, [f["properties"] for f in f15]          # A, B, C, E (D is parked -> too short; F, I later)
     assert all(set(f["properties"]) == {"time", "date", "n_points", "v_mean", "v_max"} and f["properties"]["time"] == "12:15" for f in f15)
-    assert "serial" not in open(O / "traj" / "traj_20250910_1215.geojson").read() and not any("A" == k for f in f15 for k in f["properties"].values())
-    f45 = json.load(open(O / "traj" / "traj_20250910_1245.geojson"))["features"]
-    assert len(f45) == 7, len(f45)                                 # A B C E F G H (window 11:45-12:45; D parked dropped)
-    f1300 = json.load(open(O / "traj" / "traj_20250910_1300.geojson"))["features"]
-    assert len(f1300) == 8, len(f1300)                             # + I
-    f1345 = json.load(open(O / "traj" / "traj_20250910_1345.geojson"))["features"]   # window 12:45-13:45: A (13:40, file 13) and I (12:50, carried over from file 12)
+    assert "serial" not in open(O / "traj" / "traj_20250910_1215.geojson").read()
+    f1345 = json.load(open(O / "traj" / "traj_20250910_1345.geojson"))["features"]   # window 12:45-13:45: A (13:40, from the second file) and I (12:50)
     assert sorted(f["properties"]["n_points"] for f in f1345) == [16, 106], [f["properties"] for f in f1345]
     a = next(f for f in f1345 if f["properties"]["n_points"] == 106)
     assert a["geometry"]["type"] == "LineString" and len(a["geometry"]["coordinates"]) < 20, "simplified (a straight 1.4 km track needs only a few vertices)"
-    idx = json.load(open(O / "traj" / "index.json")); assert idx["window_min"] == 60 and len(idx["files"]) == 5
-    print("\ntest_truck_traffic: OK")
+    idx = json.load(open(O / "traj" / "index.json")); assert idx["window_min"] == 60 and len(idx["files"]) == 7 and idx["files"]["traj_20250910_1215.geojson"] == 4
+    sm = json.load(open(O / "summary.json"))
+    assert sm["vehicles_in_area"] == 7 and sm["via_rows"] == 1 and sm["short_points"] == 0 and sm["unmatched_points"] == 0 and sm["segments"] == 8, sm   # A x2 (gap), B, C, D, E, F, I
+    print("\ntest_truck_traffic (area): OK")
 
 
-def check_area(out_dir):
-    """AREA_GEOJSON: only points inside the polygon and links near its bbox are used."""
+def check_noarea(out_dir):
+    """Without AREA_GEOJSON every vehicle is kept: H is matched to link 9 (no speed-limit rule), G has no candidate links."""
     O = Path(out_dir)
-    links = pd.read_csv(O / "network_agg.csv")
-    assert 8 not in links.Id.tolist() and 1 in links.Id.tolist(), links.Id.tolist()      # the far link (3 km south) is outside the bbox + 1 km
-    s = pd.read_csv(O / "summary.csv"); r12 = s[s.file.str.endswith("_12.csv")].iloc[0]
-    assert r12.outside_area > 0 and r12.no_candidate_points == 0 and r12.vehicles == 7, r12.to_dict()   # G and H are outside the area
+    veh = pd.read_csv(O / "vehicles_in_area.csv", dtype={"serial_number": str})
+    assert veh.serial_number.tolist() == list("ABCDEFGHI"), veh
     w, got = hits(O)
-    assert got[("12:00", 1)] == 3 and ("12:30", 9) not in got and got[("12:45", 7)] == 1, got     # A, C, E; no H; I still passes 7
-    f15 = json.load(open(O / "traj" / "traj_20250910_1215.geojson"))["features"]
-    assert len(f15) == 4, len(f15)                                  # A, B, C, E (D parked; G, H outside the area)
+    assert got[("12:30", 9)] == 1 and got[("12:00", 1)] == 3 and len(got) == 11, got
+    m = table(O, "matched_points")
+    assert (m.serial_number == "G").sum() == 0 and set(m[m.serial_number == "H"].Id) == {9}
+    sm = json.load(open(O / "summary.json"))
+    assert sm["vehicles_in_area"] == 9 and sm["unmatched_points"] == 65, sm      # G's 65 points are more than 50 m from any link
     f45 = json.load(open(O / "traj" / "traj_20250910_1245.geojson"))["features"]
-    assert len(f45) == 5, len(f45)                                  # A B C E F (G, H gone)
-    tf = sorted(p.name for p in (O / "traj").glob("traj_*.geojson"))
-    assert len(tf) == 5 and tf[-1] == "traj_20250910_1345.geojson", tf
-    print("test_truck_traffic (area): OK")
+    assert len(f45) == 7, len(f45)                                 # A B C E F G H (window 11:45-12:45; D parked dropped)
+    print("test_truck_traffic (no area): OK")
 
 
 if __name__ == "__main__":
     print("synthetic rows:", make_data())
     out = T / "out"
-    run_notebook(out)
+    run_notebook(out, area=str(T / "area.geojson"))
     check(out)
-    out2 = T / "out_area"
-    run_notebook(out2, area=str(T / "area.geojson"))
-    check_area(out2)
+    out2 = T / "out_noarea"
+    run_notebook(out2)
+    check_noarea(out2)
