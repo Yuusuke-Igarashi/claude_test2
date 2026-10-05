@@ -73,7 +73,7 @@ button:hover{background:#f0efec}
 .seg button{border:0;border-radius:0;padding:4px 12px}
 .seg button.on{background:var(--ink);color:#fff}
 .seg button:disabled{color:var(--muted);cursor:not-allowed;background:var(--surface)}
-#trajOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
+#trajOpts label, #gridOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
 #trajStatus{flex-basis:100%;display:none;color:var(--ink2);font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:6px}
 #truckStatus{flex-basis:100%;display:none;color:var(--ink2);font-variant-numeric:tabular-nums;border-top:1px solid var(--grid);padding-top:6px}
 #tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:320px}
@@ -124,7 +124,7 @@ button:hover{background:#f0efec}
   <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</span>
   <span class="stat" id="statTruck" style="display:none">トラック 表示 <b id="stTruckShown">-</b> 本 / 低下 <b id="stTruckDrop">-</b> 本</span>
   <span class="seg" title="M キーで切替">
-    <button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button><button id="modeTruck">トラック</button>
+    <button id="modeDefault" title="道路や統計を描かず、浸水域・SNS などの重ね合わせだけを表示">デフォルト</button><button id="modeTraffic" class="on">交通</button><button id="modeTraj">軌跡</button><button id="modeTruck">トラック</button><button id="modeGrid">グリッド</button>
   </span>
   <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
   <span id="overlayOpts" style="display:none">
@@ -137,6 +137,8 @@ button:hover{background:#f0efec}
     <label><input type="checkbox" id="chkBase" checked> 平時</label><label><input type="checkbox" id="chkEvent" checked> イベント時</label>
     <label><input type="checkbox" id="chkTraj" checked> 軌跡</label><label><input type="checkbox" id="chkDwell" checked> 滞留</label><label><input type="checkbox" id="chkMode" checked> 車→徒歩</label><label><input type="checkbox" id="chkTurn" checked> 方向転換</label>
     <button id="nearestBtn" title="現在の時刻のデータのうち、地図中心に最も近いものへ移動">最寄りの軌跡へ</button>
+  </span>
+  <span id="gridOpts" style="display:none">
     <label id="gridOpt" style="display:none"><input type="checkbox" id="chkGrid" checked> グリッド <select id="gridParam"></select>
       <span id="gridThOpt">比 ≥ <input type="number" id="gridUp" step="0.1" min="0" style="width:4em"> 赤 / ≤ <input type="number" id="gridDown" step="0.05" min="0" style="width:4em"> 青</span>
       <span id="gridMaxOpt" style="display:none">上限 <input type="number" id="gridMax" step="1" min="0" style="width:4.5em" placeholder="自動"></span> <b id="gridVal" class="stat"></b></label>
@@ -216,7 +218,7 @@ button:hover{background:#f0efec}
     <ul id="fileList"></ul>
     <div id="progress"></div>
     <div id="filePick">
-      <p>フォルダを選んで「読み込む」を押してください。1 だけが必須です。<br>
+      <p>フォルダ・ファイルを選んで「読み込む」を押してください。1 だけが必須です。<br>
       <span style="color:var(--muted)">HTML を出力フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
       <p style="margin:6px 0 2px"><b>1. 車流（TomTom 交通統計）のフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">tomtom_out: network.geojson、baseline_/event_ の speed・count CSV、error.csv。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
@@ -228,6 +230,8 @@ button:hover{background:#f0efec}
       <span style="color:var(--muted)">S1_yyyymmddhhmm.shp / .dbf（/ .cpg）など、ファイル名の末尾に日付時刻を持つポリゴン shp。各時刻には、その時刻以前の最新のファイルを重ねる</span></p>
       <p style="margin:6px 0 2px"><b>5. SNS 投稿の CSV（任意、複数可）:</b> <input id="snsInput" type="file" multiple accept=".csv,.txt"><br>
       <span style="color:var(--muted)">列: 投稿ID, 日時, 事象No., 事象区分, 事象名, 市区町村, 字・番地, 緯度, 経度, 範囲, 投稿文, 写真動画（UTF-8 / cp932）。緯度経度のある投稿を地点に表示し、クリックで本文を引き出す</span></p>
+      <p style="margin:6px 0 2px"><b>6. グリッドのフォルダ（任意）:</b> <input id="gridInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">grid_users.py の出力フォルダ（users_平時/有事/比率 の GeoTIFF と index.json）。probe_trips.py の grid/ でも可。グリッドタブに使う（人流フォルダ内の grid*/ も合わせて読む）</span></p>
       <span style="display:none"><input id="rainInput" type="file" webkitdirectory><input id="lowlandInput" type="file" accept=".geojson,.json"></span>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
@@ -545,14 +549,20 @@ function parseSns(files){
   const dates = [...new Set(posts.map(p => p.time.slice(0, 10)))].sort();
   return {posts, groups, noCoord, badTime, skipped, files: files.map(f => f.name), dates};
 }
-function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [], floodList = [], snsList = []){
+function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [], floodList = [], snsList = [], gridList = []){
   const want = CONFIG.files;
   const flood = floodRegistry(floodList);
   const snsTxt = snsList.length ? Promise.all([...snsList].map(readSnsFile)).then(parseSns) : Promise.resolve(null);
   if(floodList.length) fileRow("浸水域", flood ? `shp ${flood.sources.size} 時点（${flood.dates.join(", ")}、表示時に読み込み）` : "不足: 日付時刻付きの .shp と .dbf の組が見つかりません");
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
-  let total = 0, rainIndexFile = null, viewerIndexFile = null; const gridIndexFiles = [];
+  let total = 0, rainIndexFile = null, viewerIndexFile = null;
+  const gridIndexFiles = [];
   const gridFiles = new Map();
+  for(const fl of gridList){                       // input 6: a grid folder on its own (any folder name)
+    const g = fl.name.match(GRID_NAME);
+    if(g) gridFiles.set(gridLayerKey(g), fl);
+    else if(fl.name === "index.json") gridIndexFiles.push(fl);
+  }
   const truck = {shp: null, dbf: null, windows: []};
   for(const fl of truckList){
     const m = fl.name.match(TRUCK_WINDOW);
@@ -1307,6 +1317,7 @@ function initMap(gj){
       trajStatus(`軌跡モードは使えません。${S.loadInfo}`, true);
     }
     if(!S.truck){ $("modeTruck").disabled = true; $("modeTruck").title = "トラック統計（network_agg.shp/.dbf と traffic_yyyymmdd_hhmm.csv）が読み込まれていません"; }
+    if(!S.grid){ $("modeGrid").disabled = true; $("modeGrid").title = "グリッド（grid_users.py / probe_trips.py の GeoTIFF と index.json）が読み込まれていません"; }
   });
 }
 
@@ -1329,16 +1340,21 @@ const MODE_LABEL = {walk:"徒歩", vehicle:"車両", other:"その他"};
 // ============================================================
 // Mode & trajectory drawing
 // ============================================================
-const MODES = ["traffic", "traj", "truck"];
-const modeAvailable = (m) => m === "traffic" || (m === "traj" && hasTraj()) || (m === "truck" && !!S.truck);
+// Modes: default = nothing but the overlays (flood, SNS, rain); traffic / traj / truck as before; grid = the mesh rasters alone.
+const MODES = ["default", "traffic", "traj", "truck", "grid"];
+const modeAvailable = (m) => m === "default" || m === "traffic" || (m === "traj" && hasTraj()) || (m === "truck" && !!S.truck) || (m === "grid" && !!S.grid);
+const gridMode = () => S.mode === "traj" || S.mode === "grid";
 function setMode(m){
   if(!modeAvailable(m)) return;
   S.mode = m;
-  const traj = m === "traj", truck = m === "truck", traffic = m === "traffic";
+  const traj = m === "traj", truck = m === "truck", traffic = m === "traffic", grid = m === "grid";
+  $("modeDefault").classList.toggle("on", m === "default");
   $("modeTraffic").classList.toggle("on", traffic);
   $("modeTraj").classList.toggle("on", traj);
   $("modeTruck").classList.toggle("on", truck);
+  $("modeGrid").classList.toggle("on", grid);
   $("trajOpts").style.display = traj ? "inline" : "none";
+  $("gridOpts").style.display = (traj || grid) && S.grid ? "inline" : "none";
   $("legendTraffic").style.display = traffic ? "flex" : "none";
   $("legendTraj").style.display = traj ? "flex" : "none";
   $("legendTruck").style.display = truck ? "flex" : "none";
@@ -1528,7 +1544,7 @@ function setupOverlays(){
 // ---- Grid overlay (trajectory mode): one flag raster per parameter and slot ----
 function setupGrid(){
   const G = S.grid; if(!G) return;
-  $("gridOpt").style.display = "inline";
+  $("gridOpt").style.display = "inline"; $("gridOpts").style.display = gridMode() ? "inline" : "none";
   const sel = $("gridParam"); sel.innerHTML = "";
   for(const [p, label] of G.params){ const o = document.createElement("option"); o.value = p; o.textContent = label; sel.appendChild(o); }
   if(S.gridParam) sel.value = S.gridParam;
@@ -1546,11 +1562,11 @@ function setupGrid(){
     $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(th); readTh(); } e.stopPropagation(); });
   }
   let t = null;
-  map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; if(S.mode === "traj") $("gridVal").textContent = gridAt(e.lngLat); }, 100); });
+  map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; if(gridMode()) $("gridVal").textContent = gridAt(e.lngLat); }, 100); });
 }
 function gridLegend(){
   const lg = $("legendGrid"), G = S.grid;
-  if(!G || S.mode !== "traj" || !S.showGrid){ lg.style.display = "none"; return; }
+  if(!G || !gridMode() || !S.showGrid){ lg.style.display = "none"; return; }
   const L = gridLayer() || [S.gridParam, S.gridParam, "ratio", "", 60];
   const [, label, kind, unit, win] = L;
   if(kind === "count"){
@@ -1599,7 +1615,7 @@ function gridKey(){ return S.grid && S.gridParam ? `${S.gridParam}_${S.times[S.t
 function updateGrid(){
   gridLegend();
   if(!map || !S.grid || !map.getSource("grid")) return;
-  const G = S.grid, key = gridKey(), on = S.mode === "traj" && S.showGrid && !!key;
+  const G = S.grid, key = gridKey(), on = gridMode() && S.showGrid && !!key;
   map.setLayoutProperty("grid", "visibility", on ? "visible" : "none");
   if(!on) return;
   if(!G.sources.has(key)){ G.cur = null; map.getSource("grid").updateImage({url: BLANK_PNG}); $("gridVal").textContent = "（この時刻のグリッドなし）"; return; }
@@ -2009,6 +2025,8 @@ function setupControls(){
   $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
   for(const id of ["pL1Op","pL2Op","pL3Op","pTruckOp"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
   $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
+  $("modeDefault").addEventListener("click", () => setMode("default"));
+  $("modeGrid").addEventListener("click", () => setMode("grid"));
   $("modeTraffic").addEventListener("click", () => setMode("traffic"));
   $("modeTraj").addEventListener("click", () => setMode("traj"));
   $("modeTruck").addEventListener("click", () => setMode("truck"));
@@ -2179,15 +2197,16 @@ function drawChart(svg, a, b, errMask, title){
                      `2: ${probe.length ? `時刻別 ${nSlot} 本・グリッド ${nGrid} 枚` : "なし"}`,
                      `3: ${$("truckInput").files.length ? `時刻別 CSV ${[...$("truckInput").files].filter(f => TRUCK_WINDOW.test(f.name)).length} 本・network_agg ${[...$("truckInput").files].some(f => /^network_agg\.shp$/i.test(f.name)) && [...$("truckInput").files].some(f => /^network_agg\.dbf$/i.test(f.name)) ? "あり" : "なし"}` : "なし"}`,
                      `4: ${$("floodInput").files.length ? `浸水域 shp ${[...$("floodInput").files].filter(f => /\.shp$/i.test(f.name) && FLOOD_NAME.test(f.name)).length} 時点` : "なし"}`,
-                     `5: ${$("snsInput").files.length ? `SNS ${$("snsInput").files.length} ファイル` : "なし"}`];
+                     `5: ${$("snsInput").files.length ? `SNS ${$("snsInput").files.length} ファイル` : "なし"}`,
+                     `6: ${$("gridInput").files.length ? `グリッド ${[...$("gridInput").files].filter(f => GRID_NAME.test(f.name)).length} 枚` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
-    for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput","floodInput","snsInput"]) $(id).addEventListener("change", note);
+    for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput","floodInput","snsInput","gridInput"]) $(id).addEventListener("change", note);
     $("loadBtn").addEventListener("click", async () => {
       const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
       if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files, $("floodInput").files, $("snsInput").files)); }
+      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files, $("floodInput").files, $("snsInput").files, $("gridInput").files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }

@@ -278,8 +278,10 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.click("#nearestBtn"); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
-  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);   // traj -> traffic (no truck data over http: the truck tab is skipped)
-  assert.equal(await page.evaluate(() => S.mode), "traffic");
+  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);   // traj -> grid (truck has no data over http) -> default -> traffic
+  assert.equal(await page.evaluate(() => S.mode), "grid");
+  await page.keyboard.press("m"); await page.waitForTimeout(200); assert.equal(await page.evaluate(() => S.mode), "default");
+  await page.keyboard.press("m"); await page.waitForTimeout(500); assert.equal(await page.evaluate(() => S.mode), "traffic");
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared in traffic mode");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts back");
   await page.close();
@@ -378,7 +380,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
-  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
@@ -401,7 +403,7 @@ test("three separate inputs: data files, rain folder, lowland GeoJSON", async ()
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
   await page.setInputFiles("#rainInput", join(DATA, "rain"));
   await page.setInputFiles("#lowlandInput", join(DATA, "lowland.geojson"));
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
@@ -431,7 +433,7 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));
   await page.setInputFiles("#truckInput", join(DATA, "truck"));
-  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, files: S.truck.files, links: S.truck.links, dates: S.truck.dates, unmatched: S.truck.unmatched, disabled: document.getElementById("modeTruck").disabled }));
@@ -491,8 +493,9 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
   await page.click("#pDefault"); await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => +document.getElementById("stTruckShown").textContent.replace(/,/g, "")), st.shown);
   await page.screenshot({ path: join(SHOTS, "truck.png") });
-  // M key cycles traffic -> traj -> truck -> traffic
-  await page.mouse.move(700, 450); await page.keyboard.press("m"); assert.equal(await page.evaluate(() => S.mode), "traffic");
+  // M key cycles default -> traffic -> traj -> truck -> (grid: none here) -> default
+  await page.mouse.move(700, 450); await page.keyboard.press("m"); assert.equal(await page.evaluate(() => S.mode), "default");
+  await page.keyboard.press("m"); assert.equal(await page.evaluate(() => S.mode), "traffic");
   await page.close();
 });
 
@@ -552,7 +555,7 @@ test("three folders: traffic (tomtom_out), probe (probe_out: viewer/ + grid/), t
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
   await page.setInputFiles("#truckInput", join(DATA, "truck"));                         // 3: the truck folder
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, truck: !!S.truck, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, truckOff: document.getElementById("modeTruck").disabled }));
@@ -567,7 +570,7 @@ test("flood-extent shapefiles (input 4): latest file at or before the slot, cp93
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
   await page.setInputFiles("#floodInput", join(DATA, "flood"));
-  assert.match(await page.textContent("#pickNote"), /4: 浸水域 shp 4 時点 \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /4: 浸水域 shp 4 時点 \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const reg = await page.evaluate(() => ({ n: S.flood.sources.size, keys: S.flood.keys.map((k) => k.key), dates: S.flood.dates, opt: getComputedStyle(document.getElementById("floodOpt")).display, legend: document.getElementById("legendFlood").textContent }));
@@ -619,7 +622,7 @@ test("SNS posts (input 5): CSV parsing, time window, stacked posts, callout with
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
   await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
-  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル$/);
+  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ n: S.sns.posts.length, noCoord: S.sns.noCoord, groups: S.sns.groups.size, dates: S.sns.dates, opt: getComputedStyle(document.getElementById("snsOpt")).display,
@@ -654,6 +657,46 @@ test("SNS posts (input 5): CSV parsing, time window, stacked posts, callout with
   await page.click("#chkSns"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("sns", "visibility")), "visible");
   await page.screenshot({ path: join(SHOTS, "sns.png") });
+  await page.close();
+});
+
+test("default tab shows only the overlays; grid tab reads input 6 (grid_users folder) on its own", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));              // period only, no grid*/ inside
+  await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
+  await page.setInputFiles("#gridInput", join(DATA, "grid_users"));
+  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: グリッド 144 枚$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const reg = await page.evaluate(() => ({ params: S.grid.params.map((p) => p[0]), n: S.grid.sources.size, mode: S.mode, gridBtn: document.getElementById("modeGrid").disabled, trajOff: document.getElementById("modeTraj").disabled }));
+  assert.deepEqual(reg.params, ["users", "users@baseline", "users@event"]); assert.equal(reg.n, 144); assert.equal(reg.mode, "traffic"); assert.equal(reg.gridBtn, false);
+  // default: no roads, no stats, overlays stay
+  await page.click("#modeDefault"); await page.waitForTimeout(300);
+  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
+  const d = await page.evaluate(() => ({ mode: S.mode, base: map.getLayoutProperty("links-base", "visibility"), err: map.getLayoutProperty("links-error", "visibility"), ctx: map.getLayoutProperty("links-context", "visibility"),
+    grid: map.getLayoutProperty("grid", "visibility"), sns: map.getLayoutProperty("sns", "visibility"), stat: getComputedStyle(document.getElementById("statTraffic")).display,
+    gridOpts: getComputedStyle(document.getElementById("gridOpts")).display, snsOpt: getComputedStyle(document.getElementById("snsOpt")).display, snsVal: document.getElementById("snsVal").textContent }));
+  assert.equal(d.mode, "default"); assert.deepEqual([d.base, d.err, d.ctx, d.grid], ["none", "none", "none", "none"]); assert.equal(d.sns, "visible"); assert.equal(d.stat, "none"); assert.equal(d.gridOpts, "none"); assert.notEqual(d.snsOpt, "none");
+  assert.match(d.snsVal, /^10 件・5 地点/);
+  await page.click("#chkSns"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("sns", "visibility")), "none", "SNS toggle works in the default tab");
+  await page.click("#chkSns"); await page.waitForTimeout(200);
+  // grid: the rasters alone, with the parameter select and inputs
+  await page.click("#modeGrid"); await page.waitForTimeout(300);
+  await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users_00:30", null, { timeout: 15000 });
+  const g = await page.evaluate(() => ({ mode: S.mode, grid: map.getLayoutProperty("grid", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), ctx: map.getLayoutProperty("links-context", "visibility"),
+    gridOpts: getComputedStyle(document.getElementById("gridOpts")).display, legend: document.getElementById("legendGrid").textContent }));
+  assert.equal(g.mode, "grid"); assert.equal(g.grid, "visible"); assert.deepEqual([g.base, g.ctx], ["none", "none"]); assert.notEqual(g.gridOpts, "none"); assert.match(g.legend, /ユニーク ID 数/);
+  await page.selectOption("#gridParam", "users@event");
+  await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users@event_00:30", null, { timeout: 15000 });
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 14 }));
+  assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "24 人");
+  await page.click("#modeTraffic"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "grid hidden again in the traffic tab");
+  await page.screenshot({ path: join(SHOTS, "grid_tab.png") });
   await page.close();
 });
 
