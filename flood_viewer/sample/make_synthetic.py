@@ -147,6 +147,29 @@ for r in truck_links:
         if he > 0: per_window.setdefault(f"traffic_{day_e}_{hhmm}.csv", []).append((ids[r], he, round(se, 2), round(se, 2), he * 30))
 for name, rows_ in per_window.items():
     pd.DataFrame(rows_, columns=["Id", "Hits", "AvgSp", "MedSp", "n_points"]).to_csv(TR / name, index=False); n_truck_rows += len(rows_)
+# sns/FA_sample_20240821.csv: SNS posts in the FASTALERT-like layout (UTF-8 with BOM). 45 rows: 6 stacked at the centre
+# (23:50 .. 00:28), 34 spread over the grid every 15 min from 18:10 (4 of them fall into the window (23:30, 00:30]),
+# 5 without coordinates. Texts carry commas, quotes and the "¥n" line-break marker of the export.
+SN = OUT / "sns"; SN.mkdir(exist_ok=True)
+sns_rows = []
+cats = ["浸水・冠水", "大雨", "雨漏り", "鉄道トラブル", "交通事故", "停電"]
+def sns_row(pid, t, cat, lon, lat, text, rng_m="300", media="https://example.invalid/media.jpg"):
+    return {"投稿ID": pid, "日時": t.strftime("%Y-%m-%d %H:%M:%S"), "事象No.": 11600000 + pid % 97, "事象区分": cat, "事象名": f"東京都新宿区で{cat}",
+            "都道府県": "東京都", "市区町村": "新宿区", "行政区": "", "字・番地": "西新宿2丁目" if lon is not None else "",
+            "緯度": "" if lat is None else f"{lat:.6f}", "経度": "" if lon is None else f"{lon:.6f}", "範囲": rng_m if lon is not None else "",
+            "投稿文": text, "写真動画": media}
+t0 = pd.Timestamp("2024-08-21 18:10")
+for k in range(34):
+    t = t0 + pd.Timedelta(minutes=15 * k)
+    lon = lon0 + ((k * 7) % 40 + 0.5) * dlon; lat = lat0 + ((k * 11) % 30 + 0.5) * dlat
+    sns_rows.append(sns_row(340000000 + k, t, cats[k % len(cats)], lon, lat, f"投稿 {k}: 道路が冠水、車が通れない¥n#新宿区, 要注意"))
+for k, (hh, mm) in enumerate([(23, 50), (0, 5), (0, 10), (0, 20), (0, 25), (0, 28)]):
+    t = pd.Timestamp("2024-08-21") + pd.Timedelta(days=1 if hh == 0 else 0, hours=hh, minutes=mm)
+    sns_rows.append(sns_row(340100000 + k, t, "浸水・冠水", float(center[0]), float(center[1]), f'中心地点の投稿 {k + 1}。"膝まで水" と言っている人も、いる', "100"))
+for k in range(5):
+    sns_rows.append(sns_row(340200000 + k, t0 + pd.Timedelta(hours=k), "大雨", None, None, "座標のない投稿です", "", ""))
+pd.DataFrame(sns_rows).to_csv(SN / "FA_sample_20240821.csv", index=False, encoding="utf-8-sig")
+print("sns/: FA_sample_20240821.csv", len(sns_rows), "rows (40 with coordinates)")
 # flood/S1_YYYYMMDDHHMM.shp: flood-extent polygons (100 m mesh cells) at irregular observation times; dbf in cp932 with
 # the fields of the real files (meshcode, JIcode, 浸水深, 水位, 地盤高). Each snapshot grows around the flooded centre.
 FL = OUT / "flood"
