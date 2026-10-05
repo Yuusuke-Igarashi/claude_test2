@@ -88,7 +88,8 @@ PARAMS = {
     "STAY_RADIUS_M": 50.0,    # a stay's points all fit in a circle of this radius (minimum enclosing circle)
     "STAY_MIN_MIN": 20.0,     # minimum stay duration [minutes]
     "STAY_METHOD": "circle",  # "circle": minimum enclosing circle radius <= R; "anchor": all within R of the first point
-    "TIME_GAP_MIN": 5.0,      # a gap longer than this between consecutive points starts a new trip (same as the dense-run gap)
+    "TIME_GAP_MIN": 2.0,      # a gap longer than this between consecutive points starts a new trip (same as the dense-run gap;
+                              # points normally come every minute, so 2 min allows one missing record)
     "JUMP_SPEED_KMH": 150.0,  # implied speed above this ...
     "JUMP_MIN_DIST_M": 500.0, # ... over at least this distance is an unnatural position jump
     "WINDOW_MIN": 60,         # viewer trajectory window [minutes]
@@ -103,8 +104,8 @@ PARAMS = {
     "NO_VIEWER": False,       # skip the viewer GeoJSON outputs
     "NO_POINTS": False,       # skip the per-point CSV (largest output)
     "MERGED_VIEWER": False,   # also write the single-file baseline_/event_ trajectory+dwell GeoJSON (large)
-    "DENSE_MAX_GAP_MIN": 5.0, # dense run: consecutive points at most this many minutes apart ...
-    "DENSE_MIN_POINTS": 10,   # ... and at least this many points (0 = no density requirement)
+    "DENSE_MAX_GAP_MIN": 2.0, # dense run: consecutive points at most this many minutes apart (one missing minute allowed) ...
+    "DENSE_MIN_POINTS": 5,    # ... and at least this many points (0 = no density requirement)
     "DENSE_FOR_STAYS": False, # also require dense runs for Stay detection (default: stays use all points)
     "STAY_MERGE_GAP_MIN": 10.0,  # consecutive stays closer in time than this (and within 2 x STAY_RADIUS_M) are merged; 0 = never
     "MODE_MIN_MIN": 3.0,      # a walk / vehicle run (OS activity type) shorter than this becomes "other" (label flicker)
@@ -113,7 +114,7 @@ PARAMS = {
     "TURN_MAX_OFFSET": 40,    # a leg may reach at most this many points back / forward (bounds the search)
     "WALK_MAX_KMH": 6.0,      # speed fill for "other" points: at or below this -> walk ...
     "VEHICLE_MIN_KMH": 12.0,  # ... at or above this -> vehicle; in between stays other
-    "WALK_JUMP_KMH": 15.0,    # walk-only jump check: a segment between two walk points faster than this ...
+    "WALK_JUMP_KMH": 12.0,    # walk-only jump check: a segment between two walk points faster than this (a run is ~10 km/h) ...
     "WALK_JUMP_MIN_M": 100.0, # ... and longer than this is cut (not drawn, not crossed by events)
     "PERIOD_START": None,     # "YYYY-MM-DD HH:MM": start of the event period (e.g. 12:00 of the flood day). The period
                               # is PERIOD_HOURS long and may cross midnight; the baseline period starts
