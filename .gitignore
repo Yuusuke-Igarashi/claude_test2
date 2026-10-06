@@ -4,3 +4,9 @@ _site/
 npm-debug.log*
 .DS_Store
 *.log
+
+# postal_polygons: 取得データ・出力・Notebookのチェックポイント
+.ipynb_checkpoints/
+postal_polygons/*.pmtiles
+postal_polygons/*.geojson
+postal_polygons/*.report.json

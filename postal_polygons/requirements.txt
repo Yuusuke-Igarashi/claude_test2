@@ -1,0 +1,5 @@
+# extract_postal_polygons.ipynb / extract_postal_polygons.py の依存パッケージ
+# 動作確認済みの組み合わせ: mapbox-vector-tile 2.2.0 / pmtiles 3.8.1 / shapely 2.1.2 (Python 3.13)
+mapbox-vector-tile>=2.0
+pmtiles>=3.8
+shapely>=2.0
