@@ -24,7 +24,8 @@ md(r'''
 | 6 | 経路に沿った道のりで各点の位置を決め、1 秒毎の各点に「その時刻にいた道路リンク」を付ける。リンクごとの進入・退出時刻を前後の点から補間する | `matched_points.*`, `link_stays.*` |
 | 7 | 15 分ウィンドウ × リンクで車両数・速度を集計する | `traffic_YYYYMMDD_HHMM.csv`, `traffic_15min.csv` |
 | 8 | 処理の内訳と集計の確認 | `summary.json` |
-| 9 | 平時の出力と比べ、異常のあったリンクだけを 15 分窓 × レベル別の GeoJSON に書く（任意） | `error_geojson/`, `error_15min.csv` |
+
+平時の日と有事の日の出力の比較（異常リンクの GeoJSON）は `truck_compare.ipynb` で行います。
 
 `*` の拡張子は、pyarrow があれば `.parquet`、無ければ `.csv.gz` です。
 
@@ -93,16 +94,6 @@ SIGMA_M = 15.0                # 観測コスト = (点からリンクまでの�
 C_SWITCH = 1.0                # 接続リンクへの乗り換え 1 本あたりのコスト
 LAMBDA = 2.0                  # |経路距離 − 直線距離| / 直線距離 に掛ける係数
 D_MAX_M = max(250.0, 60.0 * POINT_STEP_S)   # 網の距離でこれ以内のリンクを「接続」とみなす。点の間隔で走れる距離（40 m/s × 1.5）より大きくする
-
-# ---- step 9: 異常リンクの GeoJSON（平時との比較、任意） --------------------
-BASELINE_DIRS = []            # 平時の出力フォルダ（この notebook を平時の zip で実行した OUT_DIR）。複数なら同時刻の平均。[] = 節 9 を飛ばす
-MIN_BASE_COUNT = 5.0          # 判定対象: 平時の Hits がこれ以上 [台/15 分] ...
-MIN_BASE_SPEED = 10.0         # ... かつ平時の AvgSp がこれ以上 [km/h]
-ERROR_LEVELS = {              # 比率 = 有事 / 平時。op = "or": 速度比 <= speed または台数比 <= count、"and": かつ。L3 ⊂ L2 ⊂ L1
-    1: {"speed": 0.50, "count": 0.50, "op": "or"},
-    2: {"speed": 0.50, "count": 0.50, "op": "and"},
-    3: {"speed": 0.25, "count": 0.25, "op": "and"},
-}
 
 def log(msg):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
@@ -767,103 +758,6 @@ if len(stats):
     print(stats.groupby("window").agg(links=("Id", "size"), Hits=("Hits", "sum"), AvgSp=("AvgSp", "mean")).round(1))
     top = stats.groupby("Id").Hits.sum().sort_values(ascending=False).head(10)
     display(links.set_index("Id").loc[top.index, [c for c in ["StreetName", "FRC", "SpeedLimit", "Length"] if c in links.columns]].assign(Hits=top.values))
-''')
-
-md(r'''
-## 9. 異常リンクの GeoJSON（15 分窓ごと・レベルごと、任意）
-
-平時の zip でこの notebook を実行した出力フォルダを `BASELINE_DIRS` に与えると、有事（この実行の `traffic_YYYYMMDD_HHMM.csv`）と
-平時の同じ時刻の窓を比べ、異常のあったリンクだけを `error_geojson/error_L{レベル}_{YYYYMMDD}_{HHMM}.geojson` に書きます（run2024.ipynb と同じ定義）。
-
-- 比率 = 有事 / 平時（平時が複数日なら、台数は日平均、速度は平均）。有事に観測の無いリンクは台数 0、速度は欠損
-- 判定対象 = 平時の Hits ≥ `MIN_BASE_COUNT` かつ平時の AvgSp ≥ `MIN_BASE_SPEED`
-- error1 = レベルごとの比率条件（`ERROR_LEVELS` の `op` で「または／かつ」）
-- error3 = 同じリンクが前または後の窓（15 分隣接）でも同じレベルの error1
-- 異常 = 判定対象 かつ error1 かつ error3。`error_level` は満たした最も厳しいレベル（0 = 異常なし）
-- 対向リンクの条件（run2024 の error2）は使いません。節 1 で向きの違う同形状リンクを 1 本に集約しているため、対向が別リンクになりません
-- 各ファイルは、その窓で `error_level` がちょうどそのレベルのリンクだけ（累積ではない）。該当が無い窓・レベルも空の FeatureCollection を書くので、ファイル数は常に 窓数 × 3
-
-この節だけを再実行することもできます（`traffic_*.csv` と `network_agg.shp` を読みます）。
-''')
-code(r'''
-def read_windows(out_dir):
-    """フォルダの traffic_YYYYMMDD_HHMM.csv をまとめて読む → DataFrame(window, Id, Hits, AvgSp)"""
-    parts = []
-    for f in sorted(Path(out_dir).glob("traffic_????????_????.csv")):
-        w = pd.to_datetime(f.stem[len("traffic_"):], format="%Y%m%d_%H%M")
-        parts.append(pd.read_csv(f, usecols=["Id", "Hits", "AvgSp"]).assign(window=w))
-    if not parts:
-        raise FileNotFoundError(f"traffic_YYYYMMDD_HHMM.csv が {out_dir} にありません")
-    return pd.concat(parts, ignore_index=True)
-
-def error_table(event, base, n_base_days):
-    """窓 × リンクの比率と異常レベル。行は平時に観測のあるリンク（run2024 と同じ）。"""
-    base = (base.assign(hhmm=base.window.dt.strftime("%H%M"))
-                .groupby(["hhmm", "Id"]).agg(hits_sum=("Hits", "sum"), baseline_speed=("AvgSp", "mean")).reset_index())
-    base["baseline_count"] = base.hits_sum / n_base_days                      # 日平均（観測の無い日は 0 台）
-    ev = event.rename(columns={"Hits": "event_count", "AvgSp": "event_speed"}).assign(hhmm=event.window.dt.strftime("%H%M"))
-    frames = []
-    for w in sorted(event.window.unique()):
-        b = base[base.hhmm == f"{pd.Timestamp(w):%H%M}"]
-        e = ev[ev.window == w].drop(columns=["window", "hhmm"])
-        frames.append(b.merge(e, on="Id", how="left").assign(window=w))
-    tr = pd.concat(frames, ignore_index=True).drop(columns=["hhmm", "hits_sum"])
-    tr["event_count"] = tr.event_count.fillna(0)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        tr["speed_ratio"] = np.where(tr.baseline_speed > 0, tr.event_speed / tr.baseline_speed, np.nan)
-        tr["count_ratio"] = np.where(tr.baseline_count > 0, tr.event_count / tr.baseline_count, np.nan)
-    tr["is_target"] = (tr.baseline_count >= MIN_BASE_COUNT) & (tr.baseline_speed >= MIN_BASE_SPEED)
-    tr = tr.sort_values(["Id", "window"]).reset_index(drop=True)
-    g = tr.groupby("Id").window
-    prev_adj = (tr.window - g.shift(1)) == pd.Timedelta(minutes=WINDOW_MIN)
-    next_adj = (g.shift(-1) - tr.window) == pd.Timedelta(minutes=WINDOW_MIN)
-    levels = sorted(ERROR_LEVELS)
-    for lv in levels:
-        th = ERROR_LEVELS[lv]
-        slow, few = tr.speed_ratio <= th["speed"], tr.count_ratio <= th["count"]
-        if th["op"] not in ("and", "or"):
-            raise ValueError(f"ERROR_LEVELS[{lv}]['op'] は 'and' か 'or'")
-        tr[f"error1_L{lv}"] = (slow & few) if th["op"] == "and" else (slow | few)
-        valid = tr.is_target & tr[f"error1_L{lv}"]
-        vg = valid.groupby(tr.Id)
-        tr[f"error3_L{lv}"] = (vg.shift(1, fill_value=False) & prev_adj) | (vg.shift(-1, fill_value=False) & next_adj)
-        tr[f"error_L{lv}"] = valid & tr[f"error3_L{lv}"]
-    for lo, hi in zip(levels[:-1], levels[1:]):
-        assert not (tr[f"error1_L{hi}"] & ~tr[f"error1_L{lo}"]).any(), f"レベル {hi} の条件がレベル {lo} より緩い"
-    def max_level(prefix):
-        return np.select([tr[f"{prefix}_L{lv}"] for lv in reversed(levels)], list(reversed(levels)), default=0).astype(int)
-    tr["error1_level"], tr["error3_level"], tr["error_level"] = max_level("error1"), max_level("error3"), max_level("error")
-    return tr.drop(columns=[c for c in tr.columns if c.startswith(("error1_L", "error3_L", "error_L"))])
-
-if BASELINE_DIRS:
-    if "links" not in globals():                                             # この節だけ再実行するとき
-        links = gpd.read_file(OUT_DIR / "network_agg.shp")
-    event = read_windows(OUT_DIR)
-    base = pd.concat([read_windows(d) for d in BASELINE_DIRS], ignore_index=True)
-    n_base_days = base.window.dt.normalize().nunique()
-    err = error_table(event, base, n_base_days)
-    log(f"有事 {event.window.nunique()} 窓 / 平時 {n_base_days} 日 {base.window.dt.strftime('%H%M').nunique()} 窓 → "
-        f"判定行 {len(err):,}（対象 {int(err.is_target.sum()):,}、異常 {int((err.error_level > 0).sum()):,}）")
-    ERROR_DIR = OUT_DIR / "error_geojson"; ERROR_DIR.mkdir(exist_ok=True)
-    for old in ERROR_DIR.glob("error_L?_*.geojson"):
-        old.unlink()
-    attrs = ["Id"] + [c for c in ["StreetName", "FRC", "SpeedLimit", "Length"] if c in links.columns] + ["geometry"]
-    cols = ["Id", "timestamp", "baseline_count", "event_count", "count_ratio", "baseline_speed", "event_speed", "speed_ratio",
-            "is_target", "error1_level", "error3_level", "error_level"]
-    err["timestamp"] = err.window.dt.strftime("%Y-%m-%dT%H:%M:%S")
-    counts = []
-    for w in sorted(event.window.unique()):
-        for lv in sorted(ERROR_LEVELS):
-            part = err[(err.window == w) & (err.error_level == lv)][cols].merge(links[attrs], on="Id", how="left")
-            part = gpd.GeoDataFrame(part, geometry="geometry", crs=links.crs)
-            part.to_file(ERROR_DIR / f"error_L{lv}_{pd.Timestamp(w):%Y%m%d_%H%M}.geojson", driver="GeoJSON")
-            counts.append({"window": w, "level": lv, "links": len(part)})
-    counts = pd.DataFrame(counts)
-    err.drop(columns="timestamp").to_csv(OUT_DIR / "error_15min.csv", index=False)
-    log(f"wrote {len(counts)} files to {ERROR_DIR}（{counts.links.sum():,} リンク・窓、空ファイル {int((counts.links == 0).sum())}）/ error_15min.csv")
-    display(counts.pivot(index="window", columns="level", values="links").add_prefix("level"))
-else:
-    print("BASELINE_DIRS が空なので節 9 は実行しません")
 ''')
 
 nb = {"cells": cells, "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},

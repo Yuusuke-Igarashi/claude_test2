@@ -214,10 +214,10 @@ def check_noarea(out_dir):
     print("test_truck_traffic (no area): OK")
 
 
-def check_error_geojson(out_dir):
-    """Section 9 on its own (parameter cell + last cell, fresh globals): two baseline folders made from the step-10 run's
-    window files (Hits x 10 and x 30 on other dates, same speeds) -> count ratio 0.05, speed ratio 1 -> level 1 only (op "or"),
-    and only where the same link is flagged in two adjacent windows (links 1 and 6 at 12:00 and 12:15)."""
+def check_compare(out_dir):
+    """truck_compare.ipynb on the step-10 run: two baseline folders made from its window files (Hits x 10 and x 30 on
+    other dates, same speeds) -> count ratio 0.05, speed ratio 1 -> level 1 only (op "or"), and only where the same link
+    is flagged in two adjacent windows (links 1 and 6 at 12:00 and 12:15)."""
     O = Path(out_dir)
     bases = []
     for day, k in (("20250903", 10), ("20250827", 30)):
@@ -225,16 +225,19 @@ def check_error_geojson(out_dir):
         for f in O.glob("traffic_2025*.csv"):
             df = pd.read_csv(f); df["Hits"] *= k
             df.to_csv(B / f.name.replace("20250910", day), index=False)
-    nb = json.load(open(HERE / "truck_traffic.ipynb", encoding="utf-8"))
-    codes = [c for c in nb["cells"] if c["cell_type"] == "code"]
+    C = T / "compare"
+    nb = json.load(open(HERE / "truck_compare.ipynb", encoding="utf-8"))
     g = {"display": lambda x: print(x.to_string() if hasattr(x, "to_string") else x)}
-    src = "".join(codes[0]["source"]).replace('Path("./traffic_out")', f'Path("{O}")').replace("BASELINE_DIRS = []", f"BASELINE_DIRS = {[str(b) for b in bases]}")
-    assert "BASELINE_DIRS = ['" in src
-    exec(compile(src, "params", "exec"), g)
-    exec(compile("".join(codes[-1]["source"]), "section9", "exec"), g)    # reads traffic_*.csv and network_agg.shp itself
-    files = sorted(p.name for p in (O / "error_geojson").glob("*.geojson"))
+    for i, c in enumerate(cc for cc in nb["cells"] if cc["cell_type"] == "code"):
+        src = "".join(c["source"])
+        if i == 0:
+            src = src.replace('Path("./traffic_out_20240821")', f'Path("{O}")').replace('[Path("./traffic_out_20240820")]', f"{[str(b) for b in bases]}") \
+                     .replace('Path("./compare_20240821")', f'Path("{C}")')
+            assert f'Path("{C}")' in src and "base_20250903" in src
+        exec(compile(src, f"compare{i}", "exec"), g)
+    files = sorted(p.name for p in (C / "error_geojson").glob("*.geojson"))
     assert files == sorted(f"error_L{lv}_20250910_{h}.geojson" for lv in (1, 2, 3) for h in ("1200", "1215", "1245", "1330")), files
-    feats = {f: json.load(open(O / "error_geojson" / f))["features"] for f in files}
+    feats = {f: json.load(open(C / "error_geojson" / f))["features"] for f in files}
     ids = {f: sorted(x["properties"]["Id"] for x in v) for f, v in feats.items()}
     assert ids["error_L1_20250910_1200.geojson"] == [1, 6] and ids["error_L1_20250910_1215.geojson"] == [1, 6], ids
     assert all(v == [] for f, v in ids.items() if not f.startswith("error_L1_20250910_12")), ids   # link 4 only at 12:00; 12:45 / 13:30 not adjacent
@@ -242,10 +245,10 @@ def check_error_geojson(out_dir):
     assert p["baseline_count"] == 60 and p["event_count"] == 3 and abs(p["count_ratio"] - 0.05) < 1e-9 and p["speed_ratio"] == 1.0, p   # (30 + 90) / 2 days
     assert p["error_level"] == 1 and p["error1_level"] == 1 and p["error3_level"] == 1 and p["is_target"] and p["timestamp"] == "2025-09-10T12:00:00", p
     assert "StreetName" in p and "serial" not in json.dumps(p)
-    err = pd.read_csv(O / "error_15min.csv")
+    err = pd.read_csv(C / "error_15min.csv")
     assert len(err) == 10 and set(err.columns) >= {"window", "Id", "baseline_count", "event_count", "count_ratio", "error_level"}, err.columns
     assert (err.error_level == 1).sum() == 4 and (err.error_level > 1).sum() == 0, err.error_level.value_counts()
-    print("test_truck_traffic (error geojson): OK")
+    print("test_truck_compare: OK")
 
 
 if __name__ == "__main__":
@@ -259,4 +262,4 @@ if __name__ == "__main__":
     out3 = T / "out_step10"
     run_notebook(out3, step=10)
     check_step10(out3)
-    check_error_geojson(out3)
+    check_compare(out3)
