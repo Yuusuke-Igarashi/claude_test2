@@ -476,9 +476,72 @@ def test_grid_users():
     print("ok: grid_users counts and ratios")
 
 
+def test_walk_mesh_nb():
+    """walk_mesh.ipynb on the test_grid data (per-file mode, points CSV kept): 25 m cells aligned to the run's grid/index.json,
+    path A (2 baseline / 5 event walkers) -> 2 / 5 / ratio 2.5 in the windows ending 13:15 .. 14:00; stay S is not a walk point."""
+    import tempfile, os, json, struct
+    import pandas as pd
+    from probe_trips import run
+    lon0, lat0 = 139.7, 35.68
+    kx = M_PER_DEG_LAT * np.cos(np.radians(lat0))
+    bbox = (lon0 - 2000 / kx, lat0 - 500 / M_PER_DEG_LAT, lon0 + 2000 / kx, lat0 + 2000 / M_PER_DEG_LAT)
+    def walk(rows, day, uid, x0, y0, dx, dy):
+        for i in range(15):
+            rows.append((pd.Timestamp(f"{day} 13:00") + pd.Timedelta(seconds=60 * i), lon0 + (x0 + dx * i) / kx, lat0 + (y0 + dy * i) / M_PER_DEG_LAT, uid, "on_foot"))
+    with tempfile.TemporaryDirectory() as d:
+        srcs = []
+        for day, nA in (("2024-08-06", 2), ("2024-08-13", 5)):
+            rows = []
+            for u in range(nA): walk(rows, day, f"A{u}" * 20, 100, 30, 70, 0)
+            for i in range(25):                                                           # a stay (not walk)
+                rows.append((pd.Timestamp(f"{day} 13:00") + pd.Timedelta(seconds=60 * i), lon0 + 1500 / kx, lat0 + 1500 / M_PER_DEG_LAT, "S" * 60, "still"))
+            df = pd.DataFrame(rows, columns=["recordedat", "lon", "lat", "userid", "activitytype"])
+            src = os.path.join(d, day.replace("-", "") + ".csv"); df.to_csv(src, index=False, date_format="%Y-%m-%d %H:%M:%S"); srcs.append(src)
+        out = os.path.join(d, "out")
+        run(srcs, out, "2024-08-13", NO_VIEWER=True, GRID_BBOX=",".join(map(str, bbox)))
+        nb = json.load(open(os.path.join(os.path.dirname(__file__), "walk_mesh.ipynb"), encoding="utf-8"))
+        g = {"display": print}
+        for i, c in enumerate(cc for cc in nb["cells"] if cc["cell_type"] == "code"):
+            src = "".join(c["source"])
+            if i == 0:
+                src = (src.replace('Path("./probe_out/2024").glob("*_points.csv")', f'Path("{out}").glob("*_points.csv")')
+                          .replace('EVENT_DATE   = "2024-08-21"', 'EVENT_DATE   = "2024-08-13"')
+                          .replace('Path("./probe_out/2024/grid_walk25")', f'Path("{out}/grid_walk25")')
+                          .replace('Path("./probe_out/2024/grid/index.json")', f'Path("{out}/grid/index.json")'))
+                assert src.count(out) == 3 and "2024-08-13" in src
+            exec(compile(src, f"walk_mesh{i}", "exec"), g)
+        G = os.path.join(out, "grid_walk25")
+        idx = json.load(open(os.path.join(G, "index.json")))
+        base = json.load(open(os.path.join(out, "grid", "index.json")))
+        assert idx["bounds"][0] == base["bounds"][0] and idx["bounds"][3] == base["bounds"][3] and idx["cell_m"] == 25.0, (idx["bounds"], base["bounds"])
+        assert 4 * base["width"] <= idx["width"] <= 4 * base["width"] + 1 and 4 * base["height"] <= idx["height"] <= 4 * base["height"] + 1, (idx["width"], base["width"])   # the 100 m grid's snapped extent, ceil
+        assert idx["params"] == ["walk25"] and idx["window_min"] == 60
+        assert len(idx["slots"]) == 96 and idx["slots"][0] == "00:15" and idx["days"] == {"baseline": 1, "event": 1}
+        assert len(idx["files"]) == 96 * 3 and "walk25_event_1315.tif" in idx["files"] and "walk25_1315.tif" in idx["files"]
+        n = idx["width"] * idx["height"]
+        def raster(name):
+            raw = open(os.path.join(G, name), "rb").read()
+            return np.frombuffer(raw[-4 * n:], dtype="<f4")
+        def cell(x, y):
+            col = int((lon0 + x / kx - idx["bounds"][0]) // idx["dx"]); row = int((idx["bounds"][3] - (lat0 + y / M_PER_DEG_LAT)) // idx["dy"])
+            return row * idx["width"] + col
+        cA = cell(100 + 70 * 5, 30)                                   # point i = 5 of path A (13:05)
+        cS = cell(1500, 1500)
+        for hhmm in ("1315", "1330", "1345", "1400"):
+            b, e, r = raster(f"walk25_baseline_{hhmm}.tif"), raster(f"walk25_event_{hhmm}.tif"), raster(f"walk25_{hhmm}.tif")
+            assert b[cA] == 2 and e[cA] == 5 and abs(r[cA] - 2.5) < 1e-6, (hhmm, b[cA], e[cA], r[cA])
+            assert b[cS] == 0 and e[cS] == 0 and np.isnan(r[cS]), "the stay is not a walk point"
+        assert raster("walk25_event_1300.tif")[cA] == 0 and raster("walk25_event_1415.tif")[cA] == 0, "13:05 is outside (12:00, 13:00] and (13:15, 14:15]"
+        assert raster("walk25_event_1315.tif").max() == 5 and (raster("walk25_event_1315.tif") > 0).sum() == 15, "15 cells on the path, 5 walkers each"
+        raw = open(os.path.join(G, "walk25_event_1315.tif"), "rb").read()
+        assert raw[:4] == b"II*\x00" and struct.unpack("<I", raw[4:8])[0] == 8
+    print("ok: walk_mesh.ipynb")
+
+
 if __name__ == "__main__":
     main()
     test_mode_quality()
     test_period_mode()
     test_grid()
     test_grid_users()
+    test_walk_mesh_nb()

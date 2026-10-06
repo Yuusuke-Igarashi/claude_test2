@@ -123,6 +123,16 @@ TomTom 道路ネットワーク shp に動的計画法で割り付け、15 分�
 8. `summary.json`（行数、通過車両数、点数、区間数、付かなかった点数、滞在数、点の無い滞在数など）
 9. 直近 1 時間の軌跡（旧節 8、`traj/`）は廃止。ビューワーも読まない
 
+### walk_mesh.ipynb: 直近 1 時間の徒歩ユニーク人数を 25 m メッシュで（`probe/build_walk_mesh_nb.py` が生成）
+
+probe_trips.py の `*_points.csv`（利用者 ID を含む唯一の出力）だけを読む独立のノートブック（probe_trips.py は import しない）。
+徒歩の点（segment = Move かつ dense = 1 かつ mode = walk。`WALK_ONLY = False` で全点）について、15 分スロットごとに窓 (T−60 分, T] に
+セル内の点を持つ利用者 ID の数を 25 m メッシュで数え、`grid_walk25/walk25_{baseline,event}_HHMM.tif`（日平均の人数、nodata −99）、
+`walk25_HHMM.tif`（有事/平時、平時 0 は NaN）、`index.json` を書く。役割はファイル名（期間モードの baseline_/event_、日別モードは EVENT_DATE）から、
+メッシュの範囲は GRID_BBOX、無ければ既存の grid/index.json の bounds（100 m グリッドと揃う）、無ければ点の範囲。
+出力フォルダ名が grid で始まるので、人流フォルダ（入力 2）の中に置けばビューワーのグリッド層に自動で加わる（入力 6 で直接指定してもよい）。
+テストは `test_probe_trips.py` の test_walk_mesh_nb。
+
 ### truck_compare.ipynb: 平時と有事の比較 → 異常リンクの GeoJSON（`probe/build_truck_compare_nb.py` が生成）
 
 truck_traffic.ipynb を平時の日（例 2024-08-20、2025-09-10）と有事の日（08-21、09-11）で実行した出力フォルダを比べる。
