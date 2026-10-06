@@ -500,17 +500,24 @@ def test_walk_mesh_nb():
         out = os.path.join(d, "out")
         run(srcs, out, "2024-08-13", NO_VIEWER=True, GRID_BBOX=",".join(map(str, bbox)))
         nb = json.load(open(os.path.join(os.path.dirname(__file__), "walk_mesh.ipynb"), encoding="utf-8"))
-        g = {"display": print}
-        for i, c in enumerate(cc for cc in nb["cells"] if cc["cell_type"] == "code"):
-            src = "".join(c["source"])
-            if i == 0:
-                src = (src.replace('Path("./probe_out/2024").glob("*_points.csv")', f'Path("{out}").glob("*_points.csv")')
-                          .replace('EVENT_DATE   = "2024-08-21"', 'EVENT_DATE   = "2024-08-13"')
-                          .replace('Path("./probe_out/2024/grid_walk25")', f'Path("{out}/grid_walk25")')
-                          .replace('Path("./probe_out/2024/grid/index.json")', f'Path("{out}/grid/index.json")'))
-                assert src.count(out) == 3 and "2024-08-13" in src
-            exec(compile(src, f"walk_mesh{i}", "exec"), g)
+        def run_nb(min_base):
+            g = {"display": print}
+            for i, c in enumerate(cc for cc in nb["cells"] if cc["cell_type"] == "code"):
+                src = "".join(c["source"])
+                if i == 0:
+                    src = (src.replace('Path("./probe_out/2024").glob("*_points.csv")', f'Path("{out}").glob("*_points.csv")')
+                              .replace('EVENT_DATE   = "2024-08-21"', 'EVENT_DATE   = "2024-08-13"')
+                              .replace('Path("./probe_out/2024/grid_walk25")', f'Path("{out}/grid_walk25")')
+                              .replace('Path("./probe_out/2024/grid/index.json")', f'Path("{out}/grid/index.json")')
+                              .replace("MIN_BASE_USERS = 5.0 ", f"MIN_BASE_USERS = {min_base} "))
+                    assert src.count(out) == 3 and "2024-08-13" in src and f"MIN_BASE_USERS = {min_base} " in src
+                exec(compile(src, f"walk_mesh{i}", "exec"), g)
         G = os.path.join(out, "grid_walk25")
+        run_nb(5.0)                                                   # default: baseline 2 < 5 -> no ratio anywhere
+        idx = json.load(open(os.path.join(G, "index.json"))); n = idx["width"] * idx["height"]
+        r = np.frombuffer(open(os.path.join(G, "walk25_1315.tif"), "rb").read()[-4 * n:], dtype="<f4")
+        assert np.isnan(r).all() and idx["min_base_users"] == 5.0, "ratio only where the baseline has >= MIN_BASE_USERS walkers"
+        run_nb(2.0)                                                   # threshold 2: path A (baseline 2) gets a ratio
         idx = json.load(open(os.path.join(G, "index.json")))
         base = json.load(open(os.path.join(out, "grid", "index.json")))
         assert idx["bounds"][0] == base["bounds"][0] and idx["bounds"][3] == base["bounds"][3] and idx["cell_m"] == 25.0, (idx["bounds"], base["bounds"])

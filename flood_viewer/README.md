@@ -128,7 +128,7 @@ TomTom 道路ネットワーク shp に動的計画法で割り付け、15 分�
 probe_trips.py の `*_points.csv`（利用者 ID を含む唯一の出力）だけを読む独立のノートブック（probe_trips.py は import しない）。
 徒歩の点（segment = Move かつ dense = 1 かつ mode = walk。`WALK_ONLY = False` で全点）について、15 分スロットごとに窓 (T−60 分, T] に
 セル内の点を持つ利用者 ID の数を 25 m メッシュで数え、`grid_walk25/walk25_{baseline,event}_HHMM.tif`（日平均の人数、nodata −99）、
-`walk25_HHMM.tif`（有事/平時、平時 0 は NaN）、`index.json` を書く。役割はファイル名（期間モードの baseline_/event_、日別モードは EVENT_DATE）から、
+`walk25_HHMM.tif`（有事/平時。平時が MIN_BASE_USERS（既定 5 人）未満のセルは NaN）、`index.json` を書く。役割はファイル名（期間モードの baseline_/event_、日別モードは EVENT_DATE）から、
 メッシュの範囲は GRID_BBOX、無ければ既存の grid/index.json の bounds（100 m グリッドと揃う）、無ければ点の範囲。
 出力フォルダ名が grid で始まるので、人流フォルダ（入力 2）の中に置けばビューワーのグリッド層に自動で加わる（入力 6 で直接指定してもよい）。
 テストは `test_probe_trips.py` の test_walk_mesh_nb。
