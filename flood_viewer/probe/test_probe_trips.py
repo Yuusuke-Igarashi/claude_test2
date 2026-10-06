@@ -500,7 +500,7 @@ def test_walk_mesh_nb():
         out = os.path.join(d, "out")
         run(srcs, out, "2024-08-13", NO_VIEWER=True, GRID_BBOX=",".join(map(str, bbox)))
         nb = json.load(open(os.path.join(os.path.dirname(__file__), "walk_mesh.ipynb"), encoding="utf-8"))
-        def run_nb(min_base):
+        def run_nb(min_base, trace=True):
             g = {"display": print}
             for i, c in enumerate(cc for cc in nb["cells"] if cc["cell_type"] == "code"):
                 src = "".join(c["source"])
@@ -509,8 +509,8 @@ def test_walk_mesh_nb():
                               .replace('EVENT_DATE   = "2024-08-21"', 'EVENT_DATE   = "2024-08-13"')
                               .replace('Path("./probe_out/2024/grid_walk25")', f'Path("{out}/grid_walk25")')
                               .replace('Path("./probe_out/2024/grid/index.json")', f'Path("{out}/grid/index.json")')
-                              .replace("MIN_BASE_USERS = 5.0 ", f"MIN_BASE_USERS = {min_base} "))
-                    assert src.count(out) == 3 and "2024-08-13" in src and f"MIN_BASE_USERS = {min_base} " in src
+                              .replace("MIN_BASE_USERS = 5.0 ", f"MIN_BASE_USERS = {min_base} ").replace("TRACE_SEGMENTS = True ", f"TRACE_SEGMENTS = {trace} "))
+                    assert src.count(out) == 3 and "2024-08-13" in src and f"MIN_BASE_USERS = {min_base} " in src and f"TRACE_SEGMENTS = {trace} " in src
                 exec(compile(src, f"walk_mesh{i}", "exec"), g)
         G = os.path.join(out, "grid_walk25")
         run_nb(5.0)                                                   # default: baseline 2 < 5 -> no ratio anywhere
@@ -539,7 +539,14 @@ def test_walk_mesh_nb():
             assert b[cA] == 2 and e[cA] == 5 and abs(r[cA] - 2.5) < 1e-6, (hhmm, b[cA], e[cA], r[cA])
             assert b[cS] == 0 and e[cS] == 0 and np.isnan(r[cS]), "the stay is not a walk point"
         assert raster("walk25_event_1300.tif")[cA] == 0 and raster("walk25_event_1415.tif")[cA] == 0, "13:05 is outside (12:00, 13:00] and (13:15, 14:15]"
-        assert raster("walk25_event_1315.tif").max() == 5 and (raster("walk25_event_1315.tif") > 0).sum() == 15, "15 cells on the path, 5 walkers each"
+        n_path = cell(100 + 70 * 14, 30) - cell(100, 30) + 1                 # every 25 m cell between the first and the last point (one row)
+        ev = raster("walk25_event_1315.tif")
+        assert ev.max() == 5 and (ev > 0).sum() == n_path and n_path > 35, ((ev > 0).sum(), n_path)   # the track's cells, 5 walkers each
+        assert all(ev[c] == 5 for c in range(cell(100, 30), cell(100 + 70 * 14, 30) + 1)), "cells crossed between points count too"
+        assert json.load(open(os.path.join(G, "index.json")))["trace_segments"] is True
+        run_nb(2.0, trace=False)                                              # points only: 15 cells
+        ev = raster("walk25_event_1315.tif")
+        assert ev.max() == 5 and (ev > 0).sum() == 15, (ev > 0).sum()
         raw = open(os.path.join(G, "walk25_event_1315.tif"), "rb").read()
         assert raw[:4] == b"II*\x00" and struct.unpack("<I", raw[4:8])[0] == 8
     print("ok: walk_mesh.ipynb")

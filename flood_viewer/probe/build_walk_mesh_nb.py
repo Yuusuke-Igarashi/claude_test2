@@ -17,14 +17,15 @@ md(r'''
 | 節 | 処理 | 出力 |
 |---|---|---|
 | 1 | 入力ファイルの役割（平時／有事）とスロット軸を決める | – |
-| 2 | 点を少しずつ読み、徒歩の点だけを残す | – |
-| 3 | メッシュを決め、スロット × セルの利用者 ID 数を数える | – |
+| 2 | 点を少しずつ読み、徒歩の点だけを残す（線分を結ぶための列も持つ） | – |
+| 3 | メッシュを決め、線分を刻んで、スロット × セルの利用者 ID 数を数える | – |
 | 4 | GeoTIFF と index.json を書く | `walk25_{baseline,event}_HHMM.tif`, `walk25_HHMM.tif`, `index.json` |
 
 数え方
 
 - 徒歩の点 = `segment == "Move"` かつ `dense == 1` かつ `mode == "walk"`（ビューワーの軌跡タブに描かれる点と同じ）。`WALK_ONLY = False` で全点
 - 窓は (T − `WINDOW_MIN`, T]、T は `SLOT_MIN` 刻み。同じ利用者がその窓・そのセルに何点あっても 1 と数える
+- 点だけでなく、軌跡が通過したセルにも利用者を割り付ける（`TRACE_SEGMENTS = True`）。同じ利用者の連続する徒歩の点（同じトリップ、間に別の点が無く、間隔 `LINK_MAX_GAP_MIN` 以内、歩行ジャンプで切れていない = ビューワーが線で結ぶ対）を結ぶ線分を `SAMPLE_M` ごとに刻み、刻んだ点の時刻は両端から線形補間する
 - 平時が複数日あれば日平均。比は平時の人数が `MIN_BASE_USERS`（既定 5 人）以上のセルだけ出し、未満は NaN
 - 入力の役割: ファイル名が `baseline_…` / `event_…`（probe_trips の期間モードの出力）ならその通り、`YYYYMMDD_points.csv`（日別モード）なら `EVENT_DATE` の日が有事、他が平時
 - スロットの並び: 期間モードの出力は期間の開始時刻から 15 分刻み（12:00, 12:15, …, 11:45）、日別モードは 00:15 … 24:00（窓の終端の時刻）
@@ -56,8 +57,11 @@ WINDOW_MIN = 60                             # 窓 [分]（直近 1 時間）
 MIN_BASE_USERS = 5.0                        # 比（有事 / 平時）は平時の人数（日平均）がこれ以上のセルだけ。未満は NaN
 PERIOD_HOURS = 24                           # 期間モードの出力のとき、期間の長さ [時間]（probe_trips の PERIOD_HOURS）
 
-# ---- 点の選び方 ----------------------------------------------------------
+# ---- 点の選び方と線分 ----------------------------------------------------
 WALK_ONLY  = True                           # True: Move かつ dense かつ walk の点だけ。False: 全点
+TRACE_SEGMENTS = True                       # True: 連続する点を結ぶ線分が通過したセルにも利用者を割り付ける。False: 点のセルだけ
+SAMPLE_M   = 5.0                            # 線分を刻む間隔 [m]（セルの一辺の 1/5 以下にする）
+LINK_MAX_GAP_MIN = 2.0                      # 連続する点をつなぐ最大時間差 [分]（probe_trips の DENSE_MAX_GAP_MIN と同じ値）
 CHUNK_ROWS = 1_000_000                      # CSV を一度に読む行数
 
 PARAM, LABEL, UNIT = "walk25", "徒歩ユニーク人数（25 m）", "人"   # ビューワーの層の名前・表示
@@ -99,26 +103,30 @@ N_WIN = int(round(WINDOW_MIN / SLOT_MIN))                          # 1 点が属
 md(r'''
 ## 2. 点を読む
 
-`CHUNK_ROWS` 行ずつ読み、徒歩の点だけを残して (利用者コード, 時刻, lon, lat) にします。利用者 ID はファイル内で整数コードに置き換え、出力には出しません。
+`CHUNK_ROWS` 行ずつ読み、徒歩の点だけを残して (利用者コード, 時刻, lon, lat, トリップ番号, 歩行ジャンプ, 行番号) にします。
+利用者 ID はファイル内で整数コードに置き換え、出力には出しません。行番号は「間に別の点が無い」ことを見るために持ちます。
 ''')
 code(r'''
 def read_walk_points(path):
-    """徒歩の点を (ucode, tsec, lon, lat) の numpy 配列で返す。ucode はこのファイル内の通し番号。"""
-    cols = ["userid", "recordedat", "lon", "lat"] + (["segment", "dense", "mode"] if WALK_ONLY else [])
-    uids, parts = {}, []
+    """徒歩の点を dict of numpy 配列で返す: ucode（ファイル内の通し番号）, t, lon, lat, trip, wbreak, row（元の行番号）。"""
+    cols = ["userid", "recordedat", "lon", "lat", "trip_no", "walk_break"] + (["segment", "dense", "mode"] if WALK_ONLY else [])
+    uids, parts, offset = {}, [], 0
     for ch in pd.read_csv(path, usecols=cols, chunksize=CHUNK_ROWS, dtype={"userid": str}):
+        row = np.arange(offset, offset + len(ch)); offset += len(ch)
         if WALK_ONLY:
-            ch = ch[(ch["segment"] == "Move") & (ch["dense"] == 1) & (ch["mode"] == "walk")]
+            keep = ((ch["segment"] == "Move") & (ch["dense"] == 1) & (ch["mode"] == "walk")).to_numpy()
+            ch, row = ch[keep], row[keep]
         if ch.empty:
             continue
         codes = np.fromiter((uids.setdefault(u, len(uids)) for u in ch["userid"]), dtype=np.int64, count=len(ch))
-        t = pd.to_datetime(ch["recordedat"]).to_numpy()
-        parts.append((codes, t, ch["lon"].to_numpy(float), ch["lat"].to_numpy(float)))
+        parts.append((codes, pd.to_datetime(ch["recordedat"]).to_numpy(), ch["lon"].to_numpy(float), ch["lat"].to_numpy(float),
+                      ch["trip_no"].to_numpy(np.int64), ch["walk_break"].to_numpy(np.int8), row))
+    names = ["ucode", "t", "lon", "lat", "trip", "wbreak", "row"]
     if not parts:
-        return np.zeros(0, np.int64), np.zeros(0, "datetime64[ns]"), np.zeros(0), np.zeros(0)
-    ucode, t, lon, lat = (np.concatenate(x) for x in zip(*parts))
-    log(f"  {path.name}: 徒歩の点 {len(ucode):,}、利用者 {len(uids):,}")
-    return ucode, t, lon, lat
+        return dict(zip(names, [np.zeros(0, np.int64), np.zeros(0, "datetime64[ns]"), np.zeros(0), np.zeros(0), np.zeros(0, np.int64), np.zeros(0, np.int8), np.zeros(0, np.int64)]))
+    P = dict(zip(names, (np.concatenate(x) for x in zip(*parts))))
+    log(f"  {path.name}: 徒歩の点 {len(P['ucode']):,}、利用者 {len(uids):,}")
+    return P
 
 points = {}
 for p, role, day0, k_lo, k_hi in jobs:
@@ -131,7 +139,9 @@ md(r'''
 ## 3. メッシュとスロット × セルの利用者数
 
 セルは経緯度の格子（中心緯度で一辺 `CELL_M` m）。行 0 が北端、セル番号 = 行 × 列数 + 列（GeoTIFF の並び）。
-各点を、それを含む `N_WIN` 個の窓（終端 T_k が点の時刻以上、T_k − WINDOW_MIN が点の時刻未満）に複製し、(窓, セル, 利用者) の重複を消してから数えます。
+`TRACE_SEGMENTS` なら、まず連続する点を結ぶ線分を `SAMPLE_M` ごとに刻んで点を増やします（時刻は線形補間）。
+次に各点を、それを含む `N_WIN` 個の窓（終端 T_k が点の時刻以上、T_k − WINDOW_MIN が点の時刻未満）に複製し、(窓, セル, 利用者) の重複を消してから数えます。
+メモリを抑えるため、利用者のブロックごとに処理して合計します（利用者はブロックをまたがないので、ユニーク数をそのまま足せます）。
 ''')
 code(r'''
 M_PER_DEG = 6371008.8 * math.pi / 180.0
@@ -155,7 +165,7 @@ def mesh_bbox():
         return tuple(GRID_BBOX), "GRID_BBOX"
     if GRID_INDEX and Path(GRID_INDEX).exists():
         return tuple(json.load(open(GRID_INDEX, encoding="utf-8"))["bounds"]), str(GRID_INDEX)
-    lons = np.concatenate([v[2] for v in points.values()]); lats = np.concatenate([v[3] for v in points.values()])
+    lons = np.concatenate([v["lon"] for v in points.values()]); lats = np.concatenate([v["lat"] for v in points.values()])
     if not len(lons):
         raise ValueError("徒歩の点がありません")
     return (lons.min(), lats.min(), lons.max(), lats.max()), "点の範囲"
@@ -164,22 +174,57 @@ bbox, src = mesh_bbox()
 mesh = Mesh(bbox, CELL_M)
 log(f"メッシュ: {mesh.ncol} x {mesh.nrow} セル（{CELL_M:g} m、範囲は {src}）")
 
-def count_users(ucode, t, lon, lat, day0, k_lo, k_hi):
-    """{k: Series(cell -> 利用者数)}: 窓 (T_k - WINDOW_MIN, T_k] にセル内の点を持つ利用者の数。"""
-    mins = (t - day0.to_datetime64()) / np.timedelta64(1, "m")
-    k0 = np.maximum(np.ceil(mins / SLOT_MIN).astype(np.int64), k_lo)           # 点の時刻以上の最初の窓終端
-    rep = np.repeat(np.arange(len(mins)), N_WIN)
-    kk = np.repeat(k0, N_WIN) + np.tile(np.arange(N_WIN), len(mins))
-    ok = (kk <= k_hi) & (kk * SLOT_MIN - WINDOW_MIN < np.repeat(mins, N_WIN))  # 窓が点を含む
-    rep, kk = rep[ok], kk[ok]
-    cells = mesh.cell(lon[rep], lat[rep]); m = cells >= 0
-    key = pd.DataFrame({"k": kk[m], "cell": cells[m], "u": ucode[rep][m]}).drop_duplicates()
-    return {int(k): g.groupby("cell").size().astype(np.float32) for k, g in key.groupby("k")}
+def trace_segments(P, sl):
+    """ブロック sl の点に、連続する点を結ぶ線分を SAMPLE_M ごとに刻んだ点を加えて (ucode, mins, lon, lat) を返す（mins は day0 からの分）。"""
+    u, mins, lon, lat = P["ucode"][sl], P["mins"][sl], P["lon"][sl], P["lat"][sl]
+    if not TRACE_SEGMENTS or len(u) < 2:
+        return u, mins, lon, lat
+    trip, wb, row = P["trip"][sl], P["wbreak"][sl], P["row"][sl]
+    link = ((u[1:] == u[:-1]) & (trip[1:] == trip[:-1]) & (row[1:] == row[:-1] + 1) & (wb[1:] == 0)   # ビューワーが線で結ぶ対
+            & ((mins[1:] - mins[:-1]) <= LINK_MAX_GAP_MIN) & ((mins[1:] - mins[:-1]) >= 0))
+    i = np.flatnonzero(link)                                                   # 線分 i: 点 i -> 点 i+1
+    kx = M_PER_DEG * math.cos(math.radians(mesh.north - (mesh.north - mesh.south) / 2))
+    seg_m = np.hypot((lon[i + 1] - lon[i]) * kx, (lat[i + 1] - lat[i]) * M_PER_DEG)
+    n_in = np.floor(seg_m / SAMPLE_M).astype(np.int64)                          # 内部の刻み点の数（両端は元の点）
+    n_in = np.where(n_in * SAMPLE_M >= seg_m, n_in - 1, n_in).clip(min=0)
+    tot = int(n_in.sum())
+    if tot == 0:
+        return u, mins, lon, lat
+    seg = np.repeat(i, n_in)
+    f = (np.arange(tot) - np.repeat(np.cumsum(n_in) - n_in, n_in) + 1) / np.repeat(n_in + 1, n_in)   # 0 < f < 1
+    return (np.concatenate([u, u[seg]]), np.concatenate([mins, mins[seg] + f * (mins[seg + 1] - mins[seg])]),
+            np.concatenate([lon, lon[seg] + f * (lon[seg + 1] - lon[seg])]), np.concatenate([lat, lat[seg] + f * (lat[seg + 1] - lat[seg])]))
+
+def count_users(P, day0, k_lo, k_hi, block_points=2_000_000):
+    """{k: Series(cell -> 利用者数)}: 窓 (T_k - WINDOW_MIN, T_k] にセル内の点（刻んだ点を含む）を持つ利用者の数。"""
+    P["mins"] = (P["t"] - day0.to_datetime64()) / np.timedelta64(1, "m")
+    n = len(P["ucode"]); out = {}; n_samples = 0
+    starts = [0]
+    while starts[-1] < n:                                                      # 利用者の境界でブロックを切る
+        e = min(starts[-1] + block_points, n)
+        while e < n and P["ucode"][e] == P["ucode"][e - 1]:
+            e += 1
+        starts.append(e)
+    for a, b in zip(starts[:-1], starts[1:]):
+        u, mins, lon, lat = trace_segments(P, slice(a, b)); n_samples += len(u) - (b - a)
+        k0 = np.maximum(np.ceil(mins / SLOT_MIN).astype(np.int64), k_lo)       # 点の時刻以上の最初の窓終端
+        cells = mesh.cell(lon, lat)
+        key = pd.DataFrame({"k0": k0, "cell": cells, "u": u})[cells >= 0].drop_duplicates()   # 同じ窓の組になる点をここで減らす
+        rep = np.repeat(np.arange(len(key)), N_WIN)
+        kk = np.repeat(key["k0"].to_numpy(), N_WIN) + np.tile(np.arange(N_WIN), len(key))
+        ok = (kk <= k_hi) & (kk * SLOT_MIN - WINDOW_MIN < np.repeat(mins[key.index.to_numpy()], N_WIN))   # 窓が点を含む
+        kc = pd.DataFrame({"k": kk[ok], "cell": key["cell"].to_numpy()[rep[ok]], "u": key["u"].to_numpy()[rep[ok]]}).drop_duplicates()
+        for k, g in kc.groupby("k"):
+            c = g.groupby("cell").size().astype(np.float32)
+            out[int(k)] = c if int(k) not in out else out[int(k)].add(c, fill_value=0.0)
+    if TRACE_SEGMENTS:
+        log(f"  線分を刻んだ点 {n_samples:,}（元の点 {n:,}）")
+    return out
 
 acc, days, labels = {}, {}, []                                     # (role, label) -> Series(cell -> 日合計), role -> 日数, ラベルの並び
 for p, role, day0, k_lo, k_hi in jobs:
     t0 = time.perf_counter()
-    counts = count_users(*points[p], day0, k_lo, k_hi)
+    counts = count_users(points[p], day0, k_lo, k_hi)
     for k in range(k_lo, k_hi + 1):
         lab = label_of(day0, k)
         if lab not in labels:
@@ -258,8 +303,9 @@ for lab in labels:
 index = {"cell_m": CELL_M, "bounds": [mesh.west, mesh.south, mesh.east, mesh.north], "width": mesh.ncol, "height": mesh.nrow,
          "dx": mesh.dx, "dy": mesh.dy, "nodata": "nan", "count_nodata": NODATA, "params": [PARAM],
          "labels": {PARAM: LABEL}, "units": {PARAM: UNIT}, "window_min": WINDOW_MIN, "slot_min": SLOT_MIN,
-         "slots": labels, "roles": sorted(days), "days": days, "walk_only": WALK_ONLY, "min_base_users": MIN_BASE_USERS,
-         "values": f"{PARAM}_<role>_<HHMM>: 窓 (T - {WINDOW_MIN} 分, T] にセル内の徒歩の点を持つ利用者 ID の数（日平均）; "
+         "slots": labels, "roles": sorted(days), "days": days, "walk_only": WALK_ONLY, "trace_segments": TRACE_SEGMENTS,
+         "sample_m": SAMPLE_M, "min_base_users": MIN_BASE_USERS,
+         "values": f"{PARAM}_<role>_<HHMM>: 窓 (T - {WINDOW_MIN} 分, T] にセル内の徒歩の点{'（軌跡が通過したセルを含む）' if TRACE_SEGMENTS else ''}を持つ利用者 ID の数（日平均）; "
                    f"{PARAM}_<HHMM>: 有事 / 平時（平時 {MIN_BASE_USERS:g} 人未満は NaN）", "files": files}
 with open(OUT_DIR / "index.json", "w", encoding="utf-8") as f:
     json.dump(index, f, ensure_ascii=False, indent=1)
