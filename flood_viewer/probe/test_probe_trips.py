@@ -500,7 +500,7 @@ def test_walk_mesh_nb():
         out = os.path.join(d, "out")
         run(srcs, out, "2024-08-13", NO_VIEWER=True, GRID_BBOX=",".join(map(str, bbox)))
         nb = json.load(open(os.path.join(os.path.dirname(__file__), "walk_mesh.ipynb"), encoding="utf-8"))
-        def run_nb(min_base, trace=True):
+        def run_nb(min_base, trace=True, ratio_high=3.0):
             g = {"display": print}
             for i, c in enumerate(cc for cc in nb["cells"] if cc["cell_type"] == "code"):
                 src = "".join(c["source"])
@@ -509,7 +509,7 @@ def test_walk_mesh_nb():
                               .replace('EVENT_DATE   = "2024-08-21"', 'EVENT_DATE   = "2024-08-13"')
                               .replace('Path("./probe_out/2024/grid_walk25")', f'Path("{out}/grid_walk25")')
                               .replace('Path("./probe_out/2024/grid/index.json")', f'Path("{out}/grid/index.json")')
-                              .replace("MIN_BASE_USERS = 5.0 ", f"MIN_BASE_USERS = {min_base} ").replace("TRACE_SEGMENTS = True ", f"TRACE_SEGMENTS = {trace} "))
+                              .replace("MIN_BASE_USERS = 5.0 ", f"MIN_BASE_USERS = {min_base} ").replace("TRACE_SEGMENTS = True ", f"TRACE_SEGMENTS = {trace} ").replace("RATIO_HIGH = 3.0 ", f"RATIO_HIGH = {ratio_high} "))
                     assert src.count(out) == 3 and "2024-08-13" in src and f"MIN_BASE_USERS = {min_base} " in src and f"TRACE_SEGMENTS = {trace} " in src
                 exec(compile(src, f"walk_mesh{i}", "exec"), g)
         G = os.path.join(out, "grid_walk25")
@@ -544,9 +544,20 @@ def test_walk_mesh_nb():
         assert ev.max() == 5 and (ev > 0).sum() == n_path and n_path > 35, ((ev > 0).sum(), n_path)   # the track's cells, 5 walkers each
         assert all(ev[c] == 5 for c in range(cell(100, 30), cell(100 + 70 * 14, 30) + 1)), "cells crossed between points count too"
         assert json.load(open(os.path.join(G, "index.json")))["trace_segments"] is True
-        run_nb(2.0, trace=False)                                              # points only: 15 cells
+        A = os.path.join(G, "anomaly")
+        files = sorted(os.listdir(A)); assert len(files) == 96 and files[:2] == ["walk25_anomaly_0000.geojson", "walk25_anomaly_0015.geojson"], files[:3]   # 24:00 is labelled 00:00
+        gj = json.load(open(os.path.join(A, "walk25_anomaly_1315.geojson")))
+        assert gj["type"] == "FeatureCollection" and gj["features"] == [] and gj["properties"]["ratio_high"] == 3.0, "2.5 < 3: nothing"
+        run_nb(2.0, trace=False, ratio_high=2.0)                              # points only: 15 cells; ratio 2.5 >= 2 -> anomaly cells
         ev = raster("walk25_event_1315.tif")
         assert ev.max() == 5 and (ev > 0).sum() == 15, (ev > 0).sum()
+        gj = json.load(open(os.path.join(A, "walk25_anomaly_1315.geojson")))
+        assert len(gj["features"]) == 15 and all(f["properties"]["kind"] == "high" and f["properties"]["ratio"] == 2.5 and f["properties"]["baseline"] == 2 for f in gj["features"]), gj["features"][:1]
+        f0 = gj["features"][0]; ring = f0["geometry"]["coordinates"][0]
+        assert f0["geometry"]["type"] == "Polygon" and len(ring) == 5 and ring[0] == ring[-1] and abs((ring[1][0] - ring[0][0]) - idx["dx"]) < 2e-7
+        assert f0["properties"]["cell"] in range(cell(100, 30), cell(100 + 70 * 14, 30) + 1) and f0["properties"]["time"] == "13:15"
+        g13 = json.load(open(os.path.join(A, "walk25_anomaly_1300.geojson")))["features"]
+        assert len(g13) == 1 and g13[0]["properties"]["cell"] == cell(100, 30), "only the 13:00:00 point lies in (12:00, 13:00]"
         raw = open(os.path.join(G, "walk25_event_1315.tif"), "rb").read()
         assert raw[:4] == b"II*\x00" and struct.unpack("<I", raw[4:8])[0] == 8
     print("ok: walk_mesh.ipynb")

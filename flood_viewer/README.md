@@ -132,6 +132,7 @@ probe_trips.py の `*_points.csv`（利用者 ID を含む唯一の出力）だ�
 `walk25_HHMM.tif`（有事/平時。平時が MIN_BASE_USERS（既定 5 人）未満のセルは NaN）、`index.json` を書く。役割はファイル名（期間モードの baseline_/event_、日別モードは EVENT_DATE）から、
 メッシュの範囲は GRID_BBOX、無ければ既存の grid/index.json の bounds（100 m グリッドと揃う）、無ければ点の範囲。
 出力フォルダ名が grid で始まるので、人流フォルダ（入力 2）の中に置けばビューワーのグリッド層に自動で加わる（入力 6 で直接指定してもよい）。
+さらに、比が RATIO_LOW（1/3）以下または RATIO_HIGH（3 倍）以上のセルを、窓ごとに `anomaly/walk25_anomaly_HHMM.geojson`（セルの四角形。属性 cell, row, col, time, baseline, event, ratio, kind = low/high。該当なしでも空ファイル）に書く。
 テストは `test_probe_trips.py` の test_walk_mesh_nb。
 
 ### truck_compare.ipynb: 平時と有事の比較 → 異常リンクの GeoJSON（`probe/build_truck_compare_nb.py` が生成）

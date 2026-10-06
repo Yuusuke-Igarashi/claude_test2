@@ -20,6 +20,7 @@ md(r'''
 | 2 | 点を少しずつ読み、徒歩の点だけを残す（線分を結ぶための列も持つ） | – |
 | 3 | メッシュを決め、線分を刻んで、スロット × セルの利用者 ID 数を数える | – |
 | 4 | GeoTIFF と index.json を書く | `walk25_{baseline,event}_HHMM.tif`, `walk25_HHMM.tif`, `index.json` |
+| 5 | 比が平時の 1/3 以下または 3 倍以上のセルを、窓ごとに GeoJSON（セルの四角形）に書く | `anomaly/walk25_anomaly_HHMM.geojson` |
 
 数え方
 
@@ -55,6 +56,8 @@ GRID_INDEX = Path("./probe_out/2024/grid/index.json")   # 範囲を揃えたい�
 SLOT_MIN   = 15                             # スロット [分]
 WINDOW_MIN = 60                             # 窓 [分]（直近 1 時間）
 MIN_BASE_USERS = 5.0                        # 比（有事 / 平時）は平時の人数（日平均）がこれ以上のセルだけ。未満は NaN
+RATIO_LOW  = 1 / 3                          # 比がこれ以下のセルを「減少」として GeoJSON に出す
+RATIO_HIGH = 3.0                            # 比がこれ以上のセルを「増加」として GeoJSON に出す
 PERIOD_HOURS = 24                           # 期間モードの出力のとき、期間の長さ [時間]（probe_trips の PERIOD_HOURS）
 
 # ---- 点の選び方と線分 ----------------------------------------------------
@@ -310,6 +313,55 @@ index = {"cell_m": CELL_M, "bounds": [mesh.west, mesh.south, mesh.east, mesh.nor
 with open(OUT_DIR / "index.json", "w", encoding="utf-8") as f:
     json.dump(index, f, ensure_ascii=False, indent=1)
 log(f"wrote {len(files)} rasters to {OUT_DIR}（{len(labels)} スロット、{mesh.ncol * mesh.nrow:,} セル、役割 {sorted(days)}）")
+''')
+
+md(r'''
+## 5. 比が大きく変わったセルの GeoJSON（窓ごと）
+
+比（有事 / 平時。平時 `MIN_BASE_USERS` 人以上のセルだけ）が `RATIO_LOW`（1/3）以下か `RATIO_HIGH`（3 倍）以上のセルを、
+窓ごとに `anomaly/walk25_anomaly_HHMM.geojson` に書きます。地物はセルの四角形（Polygon）で、属性は
+cell（セル番号）, row, col, time（窓の終端 "HH:MM"）, baseline, event（人数、日平均）, ratio, kind（"low" = 減少 / "high" = 増加）。
+該当が無い窓も空の FeatureCollection を書くので、ファイル数は常にスロット数と同じです。平時・有事の両方が無いときは書きません。
+''')
+code(r'''
+ANOM_DIR = OUT_DIR / "anomaly"; ANOM_DIR.mkdir(exist_ok=True)
+for old in ANOM_DIR.glob(f"{PARAM}_anomaly_*.geojson"):
+    old.unlink()
+
+def cell_polygon(cells):
+    """セル番号 -> [[lon, lat] x 5]（左下から反時計回り）"""
+    row, col = cells // mesh.ncol, cells % mesh.ncol
+    x0 = mesh.west + col * mesh.dx; x1 = x0 + mesh.dx
+    y1 = mesh.north - row * mesh.dy; y0 = y1 - mesh.dy
+    return [[[round(float(a), 7), round(float(b), 7)] for a, b in ((x0[i], y0[i]), (x1[i], y0[i]), (x1[i], y1[i]), (x0[i], y1[i]), (x0[i], y0[i]))]
+            for i in range(len(cells))]
+
+anom_counts = []
+if both:
+    for lab in labels:
+        hhmm = lab.replace(":", "")
+        b, e = dense("baseline", lab).ravel(), dense("event", lab).ravel()
+        with np.errstate(divide="ignore", invalid="ignore"):
+            ratio = np.where(b >= MIN_BASE_USERS, e / b, np.nan)
+        hit = np.flatnonzero((ratio <= RATIO_LOW) | (ratio >= RATIO_HIGH))
+        polys = cell_polygon(hit)
+        feats = [{"type": "Feature",
+                  "properties": {"cell": int(c), "row": int(c // mesh.ncol), "col": int(c % mesh.ncol), "time": lab,
+                                 "baseline": round(float(b[c]), 3), "event": round(float(e[c]), 3), "ratio": round(float(ratio[c]), 4),
+                                 "kind": "low" if ratio[c] <= RATIO_LOW else "high"},
+                  "geometry": {"type": "Polygon", "coordinates": [polys[i]]}}
+                 for i, c in enumerate(hit)]
+        with open(ANOM_DIR / f"{PARAM}_anomaly_{hhmm}.geojson", "w", encoding="utf-8") as f:
+            json.dump({"type": "FeatureCollection", "name": f"{PARAM}_anomaly_{hhmm}",
+                       "properties": {"time": lab, "window_min": WINDOW_MIN, "cell_m": CELL_M, "min_base_users": MIN_BASE_USERS,
+                                      "ratio_low": RATIO_LOW, "ratio_high": RATIO_HIGH},
+                       "features": feats}, f, ensure_ascii=False)
+        anom_counts.append({"time": lab, "low": int((ratio[hit] <= RATIO_LOW).sum()), "high": int((ratio[hit] >= RATIO_HIGH).sum())})
+    anom_counts = pd.DataFrame(anom_counts).set_index("time")
+    log(f"wrote {len(anom_counts)} files to {ANOM_DIR}（減少 {int(anom_counts.low.sum()):,} セル、増加 {int(anom_counts.high.sum()):,} セル）")
+    display(anom_counts[(anom_counts.low > 0) | (anom_counts.high > 0)])
+else:
+    print("平時・有事の両方が無いので比の GeoJSON は書きません")
 ''')
 
 nb = {"cells": cells, "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
