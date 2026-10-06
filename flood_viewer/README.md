@@ -120,8 +120,11 @@ TomTom 道路ネットワーク shp に動的計画法で割り付け、15 分�
    `link_stays.parquet`（serial_number, Id, t_enter, t_exit, n_points, v_mean, リンク属性）。どちらも車両 ID を含む
 7. 15 分 × リンクの統計: 滞在を進入した窓から退出した窓まで展開して Hits（その窓にいた車両数）を数え、速度はその窓・そのリンク上の点の平均。
    ウィンドウ内の最高速度 < 3 km/h の車両（駐停車）は数えない → `traffic_YYYYMMDD_HHMM.csv`（Id, Hits, AvgSp, MedSp, n_points）、`traffic_15min.csv`
-8. 直近 1 時間の軌跡（任意、既定 `TRAJ_OUT = False`）: 全車両の表から 15 分毎に `traj/traj_YYYYMMDD_HHMM.geojson` を 1 回だけ書く（HHMM = 窓の終端。5 分超の欠測で分割、5 m の Douglas-Peucker 間引き、10 m 未満は除外。車両 ID なし）
-9. `summary.json`（行数、通過車両数、点数、区間数、付かなかった点数、滞在数、点の無い滞在数など）
+8. `summary.json`（行数、通過車両数、点数、区間数、付かなかった点数、滞在数、点の無い滞在数など）
+9. 異常リンクの GeoJSON（任意、`BASELINE_DIRS` に平時の実行の出力フォルダを与えたとき）: 有事の `traffic_YYYYMMDD_HHMM.csv` と平時の同時刻の窓を比べ、
+   run2024.ipynb と同じ定義（比率 = 有事/平時、判定対象 = 平時 Hits ≥ 5 かつ AvgSp ≥ 10、L1 = 速度比 ≤ 0.5 または台数比 ≤ 0.5、L2 = 両方 ≤ 0.5、L3 = 両方 ≤ 0.25、
+   さらに同じリンクが隣接する窓でも同レベル）で判定し、`error_geojson/error_L{レベル}_{YYYYMMDD}_{HHMM}.geojson`（その窓でちょうどそのレベルのリンクだけ。該当なしでも空ファイル）と `error_15min.csv` を書く。
+   対向リンクの条件は、節 1 で向きの違う同形状リンクを 1 本にしているため使わない。直近 1 時間の軌跡（旧節 8、`traj/`）は廃止
 
 以前の版（ファイルごとに処理）は、同じ時刻の軌跡ファイルをファイルごとに上書きしていた（最後のファイルの車両しか残らない）。
 2 回読みにして全車両の表から書くことで、この問題は構造的に起きない。

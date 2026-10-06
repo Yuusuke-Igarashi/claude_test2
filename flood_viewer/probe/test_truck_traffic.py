@@ -97,7 +97,7 @@ def make_data():
     return len(h12), len(h13)
 
 
-def run_notebook(out_dir, area=None, step=1, traj_out=True):
+def run_notebook(out_dir, area=None, step=1):
     nb = json.load(open(HERE / "truck_traffic.ipynb", encoding="utf-8"))
     g = {"display": lambda x: print(x.to_string() if hasattr(x, "to_string") else x)}
     for i, c in enumerate(nb["cells"]):
@@ -110,8 +110,8 @@ def run_notebook(out_dir, area=None, step=1, traj_out=True):
                      .replace('Path("./traffic_out")', f'Path("{out_dir}")')
             if area:
                 src = src.replace("AREA_GEOJSON = None", f'AREA_GEOJSON = "{area}"')
-            src = src.replace("POINT_STEP_S = 10 ", f"POINT_STEP_S = {step} ").replace("TRAJ_OUT = False ", f"TRAJ_OUT = {traj_out} ")
-            assert f"POINT_STEP_S = {step} " in src and f"TRAJ_OUT = {traj_out} " in src
+            src = src.replace("POINT_STEP_S = 10 ", f"POINT_STEP_S = {step} ")
+            assert f"POINT_STEP_S = {step} " in src
         print(f"\n---------------- cell {i} ----------------")
         exec(compile(src, f"cell{i}", "exec"), g)
     return g
@@ -177,18 +177,6 @@ def check(out_dir):
     files = sorted(p.name for p in O.glob("traffic_2025*.csv"))
     assert files == ["traffic_20250910_1200.csv", "traffic_20250910_1215.csv", "traffic_20250910_1245.csv", "traffic_20250910_1330.csv"], files
     one = pd.read_csv(O / files[0]); assert list(one.columns) == ["Id", "Hits", "AvgSp", "MedSp", "n_points"]
-    # trajectories: one file per slot from 12:15 to 13:45, written once from the whole table (nothing overwritten)
-    tf = sorted(p.name for p in (O / "traj").glob("traj_*.geojson"))
-    assert tf == [f"traj_20250910_{h}.geojson" for h in ["1215", "1230", "1245", "1300", "1315", "1330", "1345"]], tf
-    f15 = json.load(open(O / "traj" / "traj_20250910_1215.geojson"))["features"]
-    assert len(f15) == 4, [f["properties"] for f in f15]          # A, B, C, E (D is parked -> too short; F, I later)
-    assert all(set(f["properties"]) == {"time", "date", "n_points", "v_mean", "v_max"} and f["properties"]["time"] == "12:15" for f in f15)
-    assert "serial" not in open(O / "traj" / "traj_20250910_1215.geojson").read()
-    f1345 = json.load(open(O / "traj" / "traj_20250910_1345.geojson"))["features"]   # window 12:45-13:45: A (13:40, from the second file) and I (12:50)
-    assert sorted(f["properties"]["n_points"] for f in f1345) == [16, 106], [f["properties"] for f in f1345]
-    a = next(f for f in f1345 if f["properties"]["n_points"] == 106)
-    assert a["geometry"]["type"] == "LineString" and len(a["geometry"]["coordinates"]) < 20, "simplified (a straight 1.4 km track needs only a few vertices)"
-    idx = json.load(open(O / "traj" / "index.json")); assert idx["window_min"] == 60 and len(idx["files"]) == 7 and idx["files"]["traj_20250910_1215.geojson"] == 4
     sm = json.load(open(O / "summary.json"))
     assert sm["vehicles_in_area"] == 7 and sm["stays_without_points"] == 1 and sm["short_points"] == 0 and sm["unmatched_points"] == 0 and sm["segments"] == 8, sm   # A x2 (gap), B, C, D, E, F, I
     print("\ntest_truck_traffic (area): OK")
@@ -196,7 +184,7 @@ def check(out_dir):
 
 def check_step10(out_dir):
     """POINT_STEP_S = 10 (the default): one point per 10 s bucket. Hits are unchanged except for trips shorter than
-    MIN_SEQ_POINTS x 10 s (H drives 8 s -> 1 point -> no route). No traj/ by default."""
+    MIN_SEQ_POINTS x 10 s (H drives 8 s -> 1 point -> no route)."""
     O = Path(out_dir)
     tr = table(O, "trajectories")
     assert len(tr) < 220, len(tr)                                   # 1,816 one-second points -> about 190
@@ -207,9 +195,8 @@ def check_step10(out_dir):
     assert got == expect, (got, expect)                               # same as the 1 s run minus H (8 s trip)
     c = w.loc[(pd.Timestamp("2025-09-10 12:00"), 1)]
     assert abs(c.AvgSp - (50 + 70 + 55) / 3) < 2.0 and c.n_points == 6 + 5 + 3, c.to_dict()   # A 58 s, C 42 s, E 30 s at one point per 10 s
-    assert not (O / "traj").exists() or not list((O / "traj").glob("*.geojson")), "no trajectories by default"
     sm = json.load(open(O / "summary.json"))
-    assert sm["short_points"] >= 1 and sm["traj_slot_files"] == 0, sm   # H's single point is a too-short sequence
+    assert sm["short_points"] >= 1, sm                                # H's single point is a too-short sequence
     print("test_truck_traffic (step 10 s, default): OK")
 
 
@@ -224,9 +211,41 @@ def check_noarea(out_dir):
     assert (m.serial_number == "G").sum() == 0 and set(m[m.serial_number == "H"].Id) == {9}
     sm = json.load(open(O / "summary.json"))
     assert sm["vehicles_in_area"] == 9 and sm["unmatched_points"] == 65, sm      # G's 65 points are more than 50 m from any link
-    f45 = json.load(open(O / "traj" / "traj_20250910_1245.geojson"))["features"]
-    assert len(f45) == 7, len(f45)                                 # A B C E F G H (window 11:45-12:45; D parked dropped)
     print("test_truck_traffic (no area): OK")
+
+
+def check_error_geojson(out_dir):
+    """Section 9 on its own (parameter cell + last cell, fresh globals): two baseline folders made from the step-10 run's
+    window files (Hits x 10 and x 30 on other dates, same speeds) -> count ratio 0.05, speed ratio 1 -> level 1 only (op "or"),
+    and only where the same link is flagged in two adjacent windows (links 1 and 6 at 12:00 and 12:15)."""
+    O = Path(out_dir)
+    bases = []
+    for day, k in (("20250903", 10), ("20250827", 30)):
+        B = T / f"base_{day}"; B.mkdir(exist_ok=True); bases.append(B)
+        for f in O.glob("traffic_2025*.csv"):
+            df = pd.read_csv(f); df["Hits"] *= k
+            df.to_csv(B / f.name.replace("20250910", day), index=False)
+    nb = json.load(open(HERE / "truck_traffic.ipynb", encoding="utf-8"))
+    codes = [c for c in nb["cells"] if c["cell_type"] == "code"]
+    g = {"display": lambda x: print(x.to_string() if hasattr(x, "to_string") else x)}
+    src = "".join(codes[0]["source"]).replace('Path("./traffic_out")', f'Path("{O}")').replace("BASELINE_DIRS = []", f"BASELINE_DIRS = {[str(b) for b in bases]}")
+    assert "BASELINE_DIRS = ['" in src
+    exec(compile(src, "params", "exec"), g)
+    exec(compile("".join(codes[-1]["source"]), "section9", "exec"), g)    # reads traffic_*.csv and network_agg.shp itself
+    files = sorted(p.name for p in (O / "error_geojson").glob("*.geojson"))
+    assert files == sorted(f"error_L{lv}_20250910_{h}.geojson" for lv in (1, 2, 3) for h in ("1200", "1215", "1245", "1330")), files
+    feats = {f: json.load(open(O / "error_geojson" / f))["features"] for f in files}
+    ids = {f: sorted(x["properties"]["Id"] for x in v) for f, v in feats.items()}
+    assert ids["error_L1_20250910_1200.geojson"] == [1, 6] and ids["error_L1_20250910_1215.geojson"] == [1, 6], ids
+    assert all(v == [] for f, v in ids.items() if not f.startswith("error_L1_20250910_12")), ids   # link 4 only at 12:00; 12:45 / 13:30 not adjacent
+    p = next(x["properties"] for x in feats["error_L1_20250910_1200.geojson"] if x["properties"]["Id"] == 1)
+    assert p["baseline_count"] == 60 and p["event_count"] == 3 and abs(p["count_ratio"] - 0.05) < 1e-9 and p["speed_ratio"] == 1.0, p   # (30 + 90) / 2 days
+    assert p["error_level"] == 1 and p["error1_level"] == 1 and p["error3_level"] == 1 and p["is_target"] and p["timestamp"] == "2025-09-10T12:00:00", p
+    assert "StreetName" in p and "serial" not in json.dumps(p)
+    err = pd.read_csv(O / "error_15min.csv")
+    assert len(err) == 10 and set(err.columns) >= {"window", "Id", "baseline_count", "event_count", "count_ratio", "error_level"}, err.columns
+    assert (err.error_level == 1).sum() == 4 and (err.error_level > 1).sum() == 0, err.error_level.value_counts()
+    print("test_truck_traffic (error geojson): OK")
 
 
 if __name__ == "__main__":
@@ -238,5 +257,6 @@ if __name__ == "__main__":
     run_notebook(out2)
     check_noarea(out2)
     out3 = T / "out_step10"
-    run_notebook(out3, step=10, traj_out=False)
+    run_notebook(out3, step=10)
     check_step10(out3)
+    check_error_geojson(out3)
