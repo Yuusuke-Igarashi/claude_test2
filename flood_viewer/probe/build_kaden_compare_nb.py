@@ -10,7 +10,7 @@ md(r'''
 # 家電データ（シャープ）: 郵便番号別の接続家電数を平時と比べる
 
 15 分ごとの家電データ（`YYYYMMDDHHMM_15M_*.csv`。郵便番号 × 家電種別ごとの接続台数 `count`）を読み、郵便番号を代表点（緯度経度）に変えて、
-有事の日と平時の日の同じ時刻の窓を比べます。平時に対して台数が大きく減った（停電・浸水で家電がつながらなくなった）／増えた郵便番号を
+発災日と平時の日（既定は前日）の同じ時刻の窓を比べます。平時に対して台数が大きく減った（停電・浸水で家電がつながらなくなった）／増えた郵便番号を
 窓ごとに GeoJSON（点）に書き、ビューワーのグリッドタブで見られるラスタも書きます。必要なライブラリは numpy と pandas だけです。
 
 | 節 | 処理 | 出力 |
@@ -18,8 +18,9 @@ md(r'''
 | 1 | 郵便番号 → 緯度経度の表を読み、対象範囲の郵便番号に絞る | – |
 | 2 | 15 分ファイルを読み、窓 × 郵便番号の台数にまとめる（有事・平時） | – |
 | 3 | 同じ時刻の窓で比を出し、減少／増加を判定する | `kaden_15min.csv` |
-| 4 | 窓ごとに、異常の郵便番号だけの GeoJSON（点）を書く | `anomaly/kaden_anomaly_YYYYMMDD_HHMM.geojson` |
-| 5 | 郵便番号の代表点をセルに集計したラスタと index.json を書く（ビューワーのグリッドタブ用、任意） | `grid_kaden/kaden_{baseline,event}_HHMM.tif`, `kaden_HHMM.tif`, `index.json` |
+| 4 | 郵便番号ごとの 15 分時系列（発災日と前日を横に並べた表）と、郵便番号ごとのまとめ | `kaden_event_ts.csv`, `kaden_baseline_ts.csv`, `kaden_ratio_ts.csv`, `kaden_zips.csv` / `.geojson` |
+| 5 | 窓ごとに、異常の郵便番号だけの GeoJSON（点）を書く | `anomaly/kaden_anomaly_YYYYMMDD_HHMM.geojson` |
+| 6 | 郵便番号の代表点をセルに集計したラスタと index.json を書く（ビューワーのグリッドタブ用、任意） | `grid_kaden/kaden_{baseline,event}_HHMM.tif`, `kaden_HHMM.tif`, `index.json` |
 
 データの読み方（仕様書が無いので、サンプルからの解釈。違っていればパラメータか節 2 を直す）
 
@@ -45,7 +46,7 @@ import pandas as pd
 
 # ---- 入出力 -------------------------------------------------------------
 EVENT_DIRS    = [Path("../data/Sharp_Kaden/20250813")]        # 有事の日のフォルダ（YYYYMMDDHHMM_15M_*.csv）。日をまたぐなら複数
-BASELINE_DIRS = [Path("../data/Sharp_Kaden/20250806")]        # 平時の日のフォルダ（複数なら同じ時刻の窓の日平均）
+BASELINE_DIRS = [Path("../data/Sharp_Kaden/20250812")]        # 平時の日のフォルダ（既定は前日。複数なら同じ時刻の窓の日平均）
 POSTAL_FILE   = Path("../data/postal/JP.txt")                 # 郵便番号 → 緯度経度（GeoNames 形式、タブ区切り、ヘッダ無し）
 OUT_DIR       = Path("./kaden_out/20250813")                  # 出力先
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -66,7 +67,7 @@ RATIO_LOW  = 1 / 3                   # 比がこれ以下 → 減少（kind = "l
 RATIO_HIGH = 3.0                     # 比がこれ以上 → 増加（kind = "high"）
 REQUIRE_ADJACENT = True              # True: 前または後の窓でも同じ判定のときだけ異常とする
 
-# ---- ビューワー用ラスタ（節 5） ---------------------------------------------
+# ---- ビューワー用ラスタ（節 6） ---------------------------------------------
 CELL_M = 250.0                       # 郵便番号の代表点を集計するセルの一辺 [m]。0 = ラスタを書かない
 GRID_BBOX = None                     # ラスタの範囲。None = 対象範囲（BBOX / AREA_GEOJSON）、それも無ければ代表点の範囲
 PARAM, LABEL, UNIT = "kaden", "接続家電数（郵便番号集計）", "台"
@@ -211,7 +212,53 @@ display(summary)
 ''')
 
 md(r'''
-## 4. 窓ごとの異常 GeoJSON（点）
+## 4. 郵便番号ごとの 15 分時系列
+
+節 3 の表を「行 = 郵便番号、列 = 時刻」に並べ替えます。発災日（`kaden_event_ts.csv`）、前日などの平時（`kaden_baseline_ts.csv`）、
+その比（`kaden_ratio_ts.csv`）を同じ行・列の並びで書くので、1 つの郵便番号の 2 本の時系列を横に並べて比べられます（列は窓の開始時刻 "HH:MM"。
+発災日が日をまたぐときは "MM-DD HH:MM"）。先頭の列は city, place, lat, lon。
+あわせて郵便番号ごとのまとめ `kaden_zips.csv` / `kaden_zips.geojson`（点）を書きます: 平時・発災日の 1 日の台数の平均、比の最小値、
+減少／増加と判定された窓の数、最初と最後の減少の時刻。
+''')
+code(r'''
+multi_day = pd.DatetimeIndex(windows).normalize().nunique() > 1
+col_of = (lambda w: f"{pd.Timestamp(w):%m-%d %H:%M}") if multi_day else (lambda w: f"{pd.Timestamp(w):%H:%M}")
+err["col"] = err.window.map(col_of)
+head = postal.set_index("zip")[["city", "place", "lat", "lon"]]
+cols = [col_of(w) for w in windows]
+ts = {}
+for name, val in (("event", "event"), ("baseline", "baseline"), ("ratio", "ratio")):
+    wide = err.pivot(index="zip", columns="col", values=val).reindex(columns=cols)
+    wide = head.join(wide, how="inner")
+    wide.index.name = "zip"
+    wide.to_csv(OUT_DIR / f"{PARAM}_{name}_ts.csv", float_format="%.4g")
+    ts[name] = wide
+log(f"時系列の表: {len(ts['event']):,} 郵便番号 × {len(cols)} 窓 → {PARAM}_event_ts.csv / _baseline_ts.csv / _ratio_ts.csv")
+
+low_rows = err[err.kind == "low"]
+zips = (err.groupby("zip").agg(baseline_mean=("baseline", "mean"), event_mean=("event", "mean"), ratio_min=("ratio", "min"),
+                               n_target=("is_target", "sum"), n_low=("kind", lambda s: int((s == "low").sum())), n_high=("kind", lambda s: int((s == "high").sum())))
+          .join(low_rows.groupby("zip").window.agg(first_low="min", last_low="max"))
+          .join(head, how="inner"))
+zips["ratio_min"] = zips.ratio_min.round(4); zips[["baseline_mean", "event_mean"]] = zips[["baseline_mean", "event_mean"]].round(2)
+for c in ("first_low", "last_low"):
+    zips[c] = zips[c].dt.strftime("%Y-%m-%dT%H:%M:%S")
+zips.index.name = "zip"
+zips.to_csv(OUT_DIR / f"{PARAM}_zips.csv")
+feats = [{"type": "Feature",
+          "properties": {"zip": f"{z[:3]}-{z[3:]}", "city": r.city, "place": r.place, "baseline_mean": float(r.baseline_mean), "event_mean": float(r.event_mean),
+                         "ratio_min": None if pd.isna(r.ratio_min) else float(r.ratio_min), "n_target": int(r.n_target), "n_low": int(r.n_low), "n_high": int(r.n_high),
+                         "first_low": None if pd.isna(r.first_low) else r.first_low, "last_low": None if pd.isna(r.last_low) else r.last_low},
+          "geometry": {"type": "Point", "coordinates": [round(float(r.lon), 6), round(float(r.lat), 6)]}}
+         for z, r in zips.iterrows()]
+with open(OUT_DIR / f"{PARAM}_zips.geojson", "w", encoding="utf-8") as f:
+    json.dump({"type": "FeatureCollection", "name": f"{PARAM}_zips", "features": feats}, f, ensure_ascii=False)
+log(f"郵便番号のまとめ: {len(zips):,} 件（減少の窓がある郵便番号 {int((zips.n_low > 0).sum()):,}、増加 {int((zips.n_high > 0).sum()):,}）→ {PARAM}_zips.csv / .geojson")
+display(zips.sort_values(["n_low", "ratio_min"], ascending=[False, True]).head(10))
+''')
+
+md(r'''
+## 5. 窓ごとの異常 GeoJSON（点）
 
 `anomaly/kaden_anomaly_YYYYMMDD_HHMM.geojson`（YYYYMMDD_HHMM = 窓の開始時刻）。地物は郵便番号の代表点（Point）で、属性は
 zip（123-4567 の形）, city, place, timestamp, baseline, event, ratio, kind（"low" / "high"）。該当が無い窓も空の FeatureCollection を書きます。
@@ -240,7 +287,7 @@ display(counts[(counts.low > 0) | (counts.high > 0)])
 ''')
 
 md(r'''
-## 5. ビューワー用ラスタ（任意）
+## 6. ビューワー用ラスタ（任意）
 
 郵便番号の代表点を `CELL_M` のセルに集計し（同じセルに複数の郵便番号が入れば台数の合計）、
 `grid_kaden/kaden_baseline_HHMM.tif` / `kaden_event_HHMM.tif`（台数、nodata −99）と `kaden_HHMM.tif`（有事 ÷ 平時。平時 `MIN_BASE_COUNT` 未満は NaN）、

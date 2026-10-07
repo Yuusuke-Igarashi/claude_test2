@@ -142,6 +142,7 @@ probe_trips.py の `*_points.csv`（利用者 ID を含む唯一の出力）だ�
 対象は BBOX か AREA_GEOJSON の外接矩形の中の郵便番号。家電種別（echonet_object の先頭 4 桁）とメーカーで絞れる（既定は全種別の合計）。
 比 = 有事/平時（平時複数日は日平均、有事に行が無ければ 0）、平時 MIN_BASE_COUNT（5 台）以上だけ判定、減少 = 比 ≤ 1/3、増加 = 比 ≥ 3、
 REQUIRE_ADJACENT なら前後の窓でも同じ判定のときだけ異常。出力は `kaden_15min.csv`（窓 × 郵便番号の表、緯度経度付き）、
+`kaden_event_ts.csv` / `kaden_baseline_ts.csv` / `kaden_ratio_ts.csv`（行 = 郵便番号、列 = 15 分の窓。発災日と前日の時系列を同じ並びで）、`kaden_zips.csv` / `.geojson`（郵便番号ごとのまとめ）、
 `anomaly/kaden_anomaly_YYYYMMDD_HHMM.geojson`（異常の郵便番号の点。該当なしでも空ファイル）、
 `grid_kaden/kaden_{baseline,event}_HHMM.tif` + `kaden_HHMM.tif` + `index.json`（代表点を CELL_M = 250 m のセルに集計。ビューワーの入力 6 で読める）。
 データの意味（count = その 15 分に接続していた台数、窓の時刻 = ファイル名）はサンプルからの解釈で、仕様書は未入手。テストは `test_kaden_compare.py`。
