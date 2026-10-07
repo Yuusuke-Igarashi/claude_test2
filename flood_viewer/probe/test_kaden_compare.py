@@ -30,7 +30,7 @@ def postal_rows():
 
 def counts(day, hhmm):
     """rows (zip, echonet_object, count) of one file."""
-    ev = day == "20250813"
+    ev = day in ("20250813", "20250814")
     rows = [("A", "013001", 12), ("A", "03B701", 8), ("D", "013001", 2), ("G", "013001", 9), ("E", "013001", 50)]
     rows.append(("B", "013001", 5 if ev and hhmm in ("1215", "1230") else 30))
     if not (ev and hhmm == "1215"):
@@ -42,7 +42,7 @@ def counts(day, hhmm):
 
 
 def make_data(root):
-    for day in ("20250813", "20250806", "20250730"):
+    for day in ("20250813", "20250814", "20250806", "20250730"):
         d = root / day; d.mkdir()
         (d / "README.txt").write_text("not a data file")
         for hhmm in WINDOWS:
@@ -55,13 +55,13 @@ def make_data(root):
             f.write("\t".join(r) + "\n")
 
 
-def run_nb(root, out, require_adjacent=True, echonet=None):
+def run_nb(root, out, require_adjacent=True, echonet=None, two_days=False):
     nb = json.load(open(HERE / "kaden_compare.ipynb", encoding="utf-8"))
     g = {"display": lambda x: print(x.to_string() if hasattr(x, "to_string") else x)}
     for i, c in enumerate(cc for cc in nb["cells"] if cc["cell_type"] == "code"):
         src = "".join(c["source"])
         if i == 0:
-            src = (src.replace('[Path("../data/Sharp_Kaden/20250813")]', f'[Path("{root / "20250813"}")]')
+            src = (src.replace('[Path("../data/Sharp_Kaden/20250813"), Path("../data/Sharp_Kaden/20250814")]', f'[Path("{root / "20250813"}")' + (f', Path("{root / "20250814"}")]' if two_days else ']'))
                       .replace('[Path("../data/Sharp_Kaden/20250812")]', f'[Path("{root / "20250806"}"), Path("{root / "20250730"}")]')
                       .replace('Path("../data/postal/JP.txt")', f'Path("{root / "JP.txt"}")')
                       .replace('Path("./kaden_out/20250813")', f'Path("{out}")')
@@ -69,7 +69,7 @@ def run_nb(root, out, require_adjacent=True, echonet=None):
                       .replace("BBOX = None ", f"BBOX = {BBOX} ")
                       .replace("REQUIRE_ADJACENT = True ", f"REQUIRE_ADJACENT = {require_adjacent} ")
                       .replace("ECHONET_OBJECTS = None ", f"ECHONET_OBJECTS = {echonet} "))
-            assert src.count(str(root)) == 5 and f"BBOX = {BBOX} " in src and f"REQUIRE_ADJACENT = {require_adjacent} " in src and f"ECHONET_OBJECTS = {echonet} " in src
+            assert src.count(str(root)) == (6 if two_days else 5) and f"BBOX = {BBOX} " in src and f"REQUIRE_ADJACENT = {require_adjacent} " in src and f"ECHONET_OBJECTS = {echonet} " in src
         exec(compile(src, f"kaden{i}", "exec"), g)
     return g
 
@@ -137,6 +137,18 @@ def test_kaden():
         g3 = run_nb(root, root / "out3", echonet=["0130"])
         e3 = g3["err"].set_index(["zip", g3["err"].window.dt.strftime("%H%M")])
         assert e3.loc[(ZIP["A"], "1200"), "baseline"] == 12 and e3.loc[(ZIP["A"], "1200"), "event"] == 12
+        # two event days in one run: one time series, anomaly files for both days, one grid folder per day
+        g4 = run_nb(root, root / "out4", two_days=True)
+        o4 = root / "out4"
+        tse = pd.read_csv(o4 / "kaden_event_ts.csv", dtype={"zip": str}).set_index("zip")
+        assert list(tse.columns)[4:] == [f"08-{d} {w[:2]}:{w[2:]}" for d in ("13", "14") for w in WINDOWS], tse.columns
+        assert tse.loc[ZIP["B"]].iloc[4:].tolist() == [30, 5, 5, 30, 30, 5, 5, 30]
+        assert sorted(os.listdir(o4 / "anomaly")) == [f"kaden_anomaly_202508{d}_{w}.geojson" for d in ("13", "14") for w in WINDOWS]
+        assert len(g4["err"]) == 8 * 6 and not (o4 / "grid_kaden").exists()
+        for d in ("13", "14"):
+            idx = json.load(open(o4 / f"grid_kaden_202508{d}" / "index.json", encoding="utf-8"))
+            assert idx["params"] == [f"kaden08{d}"] and idx["slots"] == ["12:00", "12:15", "12:30", "12:45"] and idx["event_date"] == f"2025-08-{d}", idx["params"]
+            assert f"kaden08{d}_event_1215.tif" in idx["files"] and (o4 / f"grid_kaden_202508{d}" / f"kaden08{d}_1215.tif").exists()
     print("ok: kaden_compare.ipynb")
 
 

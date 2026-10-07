@@ -20,7 +20,7 @@ md(r'''
 | 3 | 同じ時刻の窓で比を出し、減少／増加を判定する | `kaden_15min.csv` |
 | 4 | 郵便番号ごとの 15 分時系列（発災日と前日を横に並べた表）と、郵便番号ごとのまとめ | `kaden_event_ts.csv`, `kaden_baseline_ts.csv`, `kaden_ratio_ts.csv`, `kaden_zips.csv` / `.geojson` |
 | 5 | 窓ごとに、異常の郵便番号だけの GeoJSON（点）を書く | `anomaly/kaden_anomaly_YYYYMMDD_HHMM.geojson` |
-| 6 | 郵便番号の代表点をセルに集計したラスタと index.json を書く（ビューワーのグリッドタブ用、任意） | `grid_kaden/kaden_{baseline,event}_HHMM.tif`, `kaden_HHMM.tif`, `index.json` |
+| 6 | 郵便番号の代表点をセルに集計したラスタと index.json を書く（ビューワーのグリッドタブ用、任意） | `grid_kaden/kaden_{baseline,event}_HHMM.tif`, `kaden_HHMM.tif`, `index.json`（発災日が複数日なら日ごとに `grid_kaden_YYYYMMDD/`） |
 
 データの読み方（仕様書が無いので、サンプルからの解釈。違っていればパラメータか節 2 を直す）
 
@@ -45,8 +45,8 @@ import numpy as np
 import pandas as pd
 
 # ---- 入出力 -------------------------------------------------------------
-EVENT_DIRS    = [Path("../data/Sharp_Kaden/20250813")]        # 有事の日のフォルダ（YYYYMMDDHHMM_15M_*.csv）。日をまたぐなら複数
-BASELINE_DIRS = [Path("../data/Sharp_Kaden/20250812")]        # 平時の日のフォルダ（既定は前日。複数なら同じ時刻の窓の日平均）
+EVENT_DIRS    = [Path("../data/Sharp_Kaden/20250813"), Path("../data/Sharp_Kaden/20250814")]   # 発災日のフォルダ（YYYYMMDDHHMM_15M_*.csv）。複数日はまとめて 1 本の時系列になる
+BASELINE_DIRS = [Path("../data/Sharp_Kaden/20250812")]        # 平時の日のフォルダ（既定は前日。複数なら同じ時刻の窓の日平均。発災日の各日はこの同じ時刻と比べる）
 POSTAL_FILE   = Path("../data/postal/JP.txt")                 # 郵便番号 → 緯度経度（GeoNames 形式、タブ区切り、ヘッダ無し）
 OUT_DIR       = Path("./kaden_out/20250813")                  # 出力先
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -292,7 +292,8 @@ md(r'''
 郵便番号の代表点を `CELL_M` のセルに集計し（同じセルに複数の郵便番号が入れば台数の合計）、
 `grid_kaden/kaden_baseline_HHMM.tif` / `kaden_event_HHMM.tif`（台数、nodata −99）と `kaden_HHMM.tif`（有事 ÷ 平時。平時 `MIN_BASE_COUNT` 未満は NaN）、
 `index.json` を書きます。ビューワーのグリッドタブで入力 6 にこのフォルダを選ぶと、スライダーの時刻のラスタが表示されます。
-ラスタの名前は時刻（HHMM）だけなので、有事の窓は 24 時間以内に収めてください（超えると同じ名前が 2 回出るので止まります）。
+ラスタの名前は時刻（HHMM）だけなので、発災日が複数日のときは日ごとに `grid_kaden_YYYYMMDD/` に分け、層の名前も `kaden0813` のように日付を付けます
+（ビューワーでは層のプルダウンで日を選ぶ）。
 ''')
 code(r'''
 M_PER_DEG = 6371008.8 * math.pi / 180.0
@@ -345,40 +346,45 @@ def write_geotiff(path, arr, west, north, dx, dy, nodata):
         f.write(data)
 
 if CELL_M and CELL_M > 0:
-    labels = [f"{pd.Timestamp(w):%H:%M}" for w in windows]
-    if len(set(labels)) < len(labels):
-        raise ValueError("有事の窓が 24 時間を超えていて同じ時刻が 2 回出ます。EVENT_FROM / EVENT_TO で 24 時間以内に絞ってください")
     gb = tuple(GRID_BBOX) if GRID_BBOX else (bbox or (postal.lon.min(), postal.lat.min(), postal.lon.max(), postal.lat.max()))
     mesh = Mesh(gb, CELL_M)
     zip_cell = pd.Series(mesh.cell(postal.lon.to_numpy(), postal.lat.to_numpy()), index=postal.zip)
-    GRID_DIR = OUT_DIR / f"grid_{PARAM}"; GRID_DIR.mkdir(exist_ok=True)
-    for old in GRID_DIR.glob(f"{PARAM}_*.tif"):
-        old.unlink()
-    files = []
-    for w, lab in zip(windows, labels):
-        part = err[err.window == w]
-        c = part.zip.map(zip_cell).to_numpy(); m = c >= 0
-        b = np.zeros(mesh.nrow * mesh.ncol, dtype=np.float64); e = np.zeros_like(b)
-        np.add.at(b, c[m], part.baseline.to_numpy()[m]); np.add.at(e, c[m], part.event.to_numpy()[m])
-        hhmm = lab.replace(":", "")
-        for role, arr in (("baseline", b), ("event", e)):
-            name = f"{PARAM}_{role}_{hhmm}.tif"
-            write_geotiff(GRID_DIR / name, arr.reshape(mesh.nrow, mesh.ncol).astype(np.float32), mesh.west, mesh.north, mesh.dx, mesh.dy, NODATA); files.append(name)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            ratio = np.where(b >= MIN_BASE_COUNT, e / b, np.nan).astype(np.float32)
-        name = f"{PARAM}_{hhmm}.tif"
-        write_geotiff(GRID_DIR / name, ratio.reshape(mesh.nrow, mesh.ncol), mesh.west, mesh.north, mesh.dx, mesh.dy, float("nan")); files.append(name)
-    n_base_days = int(base.window.dt.normalize().nunique()); n_event_days = int(pd.DatetimeIndex(windows).normalize().nunique())
-    index = {"cell_m": CELL_M, "bounds": [mesh.west, mesh.south, mesh.east, mesh.north], "width": mesh.ncol, "height": mesh.nrow,
-             "dx": mesh.dx, "dy": mesh.dy, "nodata": "nan", "count_nodata": NODATA, "params": [PARAM],
-             "labels": {PARAM: LABEL}, "units": {PARAM: UNIT}, "window_min": WINDOW_MIN, "slot_min": WINDOW_MIN,
-             "slots": labels, "roles": ["baseline", "event"], "days": {"baseline": n_base_days, "event": n_event_days},
-             "min_base_count": MIN_BASE_COUNT, "echonet_objects": ECHONET_OBJECTS, "maker_codes": MAKER_CODES,
-             "values": f"{PARAM}_<role>_<HHMM>: 郵便番号の代表点をセルに集計した接続家電数（平時は日平均）; {PARAM}_<HHMM>: 有事 / 平時（平時 {MIN_BASE_COUNT:g} 台未満は NaN）",
-             "files": files}
-    with open(GRID_DIR / "index.json", "w", encoding="utf-8") as f:
-        json.dump(index, f, ensure_ascii=False, indent=1)
-    log(f"wrote {len(files)} rasters to {GRID_DIR}（{mesh.ncol} x {mesh.nrow} セルの {CELL_M:g} m、{len(labels)} スロット）")
+    n_base_days = int(base.window.dt.normalize().nunique())
+    event_days = sorted(pd.DatetimeIndex(windows).normalize().unique())
+    for day in event_days:
+        day_windows = [w for w in windows if pd.Timestamp(w).normalize() == day]
+        labels = [f"{pd.Timestamp(w):%H:%M}" for w in day_windows]
+        if len(event_days) == 1:
+            param, label, GRID_DIR = PARAM, LABEL, OUT_DIR / f"grid_{PARAM}"
+        else:
+            param, label, GRID_DIR = f"{PARAM}{day:%m%d}", f"{LABEL} {day:%m/%d}", OUT_DIR / f"grid_{PARAM}_{day:%Y%m%d}"
+        GRID_DIR.mkdir(exist_ok=True)
+        for old in GRID_DIR.glob(f"{param}_*.tif"):
+            old.unlink()
+        files = []
+        for w, lab in zip(day_windows, labels):
+            part = err[err.window == w]
+            c = part.zip.map(zip_cell).to_numpy(); m = c >= 0
+            b = np.zeros(mesh.nrow * mesh.ncol, dtype=np.float64); e = np.zeros_like(b)
+            np.add.at(b, c[m], part.baseline.to_numpy()[m]); np.add.at(e, c[m], part.event.to_numpy()[m])
+            hhmm = lab.replace(":", "")
+            for role, arr in (("baseline", b), ("event", e)):
+                name = f"{param}_{role}_{hhmm}.tif"
+                write_geotiff(GRID_DIR / name, arr.reshape(mesh.nrow, mesh.ncol).astype(np.float32), mesh.west, mesh.north, mesh.dx, mesh.dy, NODATA); files.append(name)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                ratio = np.where(b >= MIN_BASE_COUNT, e / b, np.nan).astype(np.float32)
+            name = f"{param}_{hhmm}.tif"
+            write_geotiff(GRID_DIR / name, ratio.reshape(mesh.nrow, mesh.ncol), mesh.west, mesh.north, mesh.dx, mesh.dy, float("nan")); files.append(name)
+        index = {"cell_m": CELL_M, "bounds": [mesh.west, mesh.south, mesh.east, mesh.north], "width": mesh.ncol, "height": mesh.nrow,
+                 "dx": mesh.dx, "dy": mesh.dy, "nodata": "nan", "count_nodata": NODATA, "params": [param],
+                 "labels": {param: label}, "units": {param: UNIT}, "window_min": WINDOW_MIN, "slot_min": WINDOW_MIN,
+                 "slots": labels, "roles": ["baseline", "event"], "days": {"baseline": n_base_days, "event": 1}, "event_date": f"{day:%Y-%m-%d}",
+                 "min_base_count": MIN_BASE_COUNT, "echonet_objects": ECHONET_OBJECTS, "maker_codes": MAKER_CODES,
+                 "values": f"{param}_<role>_<HHMM>: 郵便番号の代表点をセルに集計した接続家電数（平時は日平均）; {param}_<HHMM>: 有事 / 平時（平時 {MIN_BASE_COUNT:g} 台未満は NaN）",
+                 "files": files}
+        with open(GRID_DIR / "index.json", "w", encoding="utf-8") as f:
+            json.dump(index, f, ensure_ascii=False, indent=1)
+        log(f"wrote {len(files)} rasters to {GRID_DIR}（{mesh.ncol} x {mesh.nrow} セルの {CELL_M:g} m、{len(labels)} スロット、層 {param}）")
 else:
     print("CELL_M = 0 なのでラスタは書きません")
 ''')

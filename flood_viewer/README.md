@@ -145,6 +145,7 @@ REQUIRE_ADJACENT なら前後の窓でも同じ判定のときだけ異常。出
 `kaden_event_ts.csv` / `kaden_baseline_ts.csv` / `kaden_ratio_ts.csv`（行 = 郵便番号、列 = 15 分の窓。発災日と前日の時系列を同じ並びで）、`kaden_zips.csv` / `.geojson`（郵便番号ごとのまとめ）、
 `anomaly/kaden_anomaly_YYYYMMDD_HHMM.geojson`（異常の郵便番号の点。該当なしでも空ファイル）、
 `grid_kaden/kaden_{baseline,event}_HHMM.tif` + `kaden_HHMM.tif` + `index.json`（代表点を CELL_M = 250 m のセルに集計。ビューワーの入力 6 で読める）。
+発災日は EVENT_DIRS に複数日を並べれば 1 本の時系列として扱い（列名は MM-DD HH:MM）、ラスタだけ日ごとの `grid_kaden_YYYYMMDD/`（層名 kaden0813 など）に分ける。
 データの意味（count = その 15 分に接続していた台数、窓の時刻 = ファイル名）はサンプルからの解釈で、仕様書は未入手。テストは `test_kaden_compare.py`。
 
 ### truck_compare.ipynb: 平時と有事の比較 → 異常リンクの GeoJSON（`probe/build_truck_compare_nb.py` が生成）
