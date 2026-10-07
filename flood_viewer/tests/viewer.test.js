@@ -380,7 +380,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
-  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
@@ -403,7 +403,7 @@ test("three separate inputs: data files, rain folder, lowland GeoJSON", async ()
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
   await page.setInputFiles("#rainInput", join(DATA, "rain"));
   await page.setInputFiles("#lowlandInput", join(DATA, "lowland.geojson"));
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
@@ -433,7 +433,7 @@ test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with ba
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));
   await page.setInputFiles("#truckInput", join(DATA, "truck"));
-  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, files: S.truck.files, links: S.truck.links, dates: S.truck.dates, unmatched: S.truck.unmatched, disabled: document.getElementById("modeTruck").disabled }));
@@ -555,7 +555,7 @@ test("three folders: traffic (tomtom_out), probe (probe_out: viewer/ + grid/), t
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
   await page.setInputFiles("#truckInput", join(DATA, "truck"));                         // 3: the truck folder
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, truck: !!S.truck, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, truckOff: document.getElementById("modeTruck").disabled }));
@@ -570,7 +570,7 @@ test("flood-extent shapefiles (input 4): latest file at or before the slot, cp93
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
   await page.setInputFiles("#floodInput", join(DATA, "flood"));
-  assert.match(await page.textContent("#pickNote"), /4: 浸水域 shp 4 時点 \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /4: 浸水域 shp 4 時点 \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const reg = await page.evaluate(() => ({ n: S.flood.sources.size, keys: S.flood.keys.map((k) => k.key), dates: S.flood.dates, opt: getComputedStyle(document.getElementById("floodOpt")).display, legend: document.getElementById("legendFlood").textContent }));
@@ -622,7 +622,7 @@ test("SNS posts (input 5): CSV parsing, time window, stacked posts, callout with
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
   await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
-  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ n: S.sns.posts.length, noCoord: S.sns.noCoord, groups: S.sns.groups.size, dates: S.sns.dates, opt: getComputedStyle(document.getElementById("snsOpt")).display,
@@ -668,7 +668,7 @@ test("default tab shows only the overlays; grid tab reads input 6 (grid_users fo
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));              // period only, no grid*/ inside
   await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
   await page.setInputFiles("#gridInput", join(DATA, "grid_users"));
-  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: グリッド 144 枚$/);
+  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: グリッド 144 枚 \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const reg = await page.evaluate(() => ({ params: S.grid.params.map((p) => p[0]), n: S.grid.sources.size, mode: S.mode, gridBtn: document.getElementById("modeGrid").disabled, trajOff: document.getElementById("modeTraj").disabled }));
@@ -702,4 +702,49 @@ test("default tab shows only the overlays; grid tab reads input 6 (grid_users fo
 
 test("no JavaScript errors were raised", () => {
   assert.deepEqual(errors, []);
+});
+
+test("appliance points (input 7): time-series CSVs, classes per slot, always visible, hover chart, toggle", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));
+  await page.setInputFiles("#kadenInput", join(DATA, "kaden"));
+  assert.match(await page.textContent("#pickNote"), /7: 家電 時系列 2 本/);
+  await page.click("#loadBtn");
+  await page.waitForFunction(() => typeof S !== "undefined" && S.kaden && typeof map !== "undefined" && map && map.getSource("kaden") && S.kadenFeats, null, { timeout: 60000 });
+  const info = await page.evaluate(() => ({ n: S.kaden.n, matched: S.kaden.matched, cols: S.kaden.cols, zip: S.kaden.zip[0], opt: getComputedStyle(document.getElementById("kadenOpt")).display,
+                                            vis: map.getLayoutProperty("kaden", "visibility"), feats: S.kadenFeats.length }));
+  assert.equal(info.n, 40); assert.equal(info.matched, 48); assert.equal(info.cols, 48); assert.equal(info.zip, "150-0000"); assert.notEqual(info.opt, "none");
+  assert.equal(info.vis, "visible"); assert.equal(info.feats, 40);
+  // 20:30: two surge points (x3.5) are "high"; 00:00: the six points around the flood centre are at 10 % -> "low"
+  await page.evaluate(() => applyTime(S.times.indexOf("20:30")));
+  let cls = await page.evaluate(() => S.kadenFeats.map((f) => f.properties.cls));
+  assert.equal(cls.filter((c) => c === 4).length, 2); assert.equal(cls.filter((c) => c === 3).length, 0);
+  await page.evaluate(() => applyTime(S.times.indexOf("00:00")));
+  cls = await page.evaluate(() => S.kadenFeats.map((f) => f.properties.cls));
+  assert.equal(cls.filter((c) => c === 3).length, 6); assert.ok(cls.filter((c) => c === 0).length >= 3, "baseline below 5 is not judged");
+  assert.match(await page.textContent("#kadenVal"), /^40 地点（減少 6 \/ 増加 0）$/);
+  assert.match(await page.textContent("#legendKaden"), /減少（平時の 1\/3 以下） 6/);
+  // the layer stays visible in every tab; the chart panel shows the point's series
+  for (const m of ["default", "traj", "grid", "traffic"]) {
+    await page.evaluate((mm) => setMode(mm), m);
+    assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "visible", m);
+  }
+  const low = cls.indexOf(3);
+  const chart = await page.evaluate((i) => { showKadenChart(i); return { shown: document.getElementById("chartPanel").style.display, title: document.getElementById("cpTitle").textContent,
+    status: document.getElementById("cpStatus").textContent, l1: document.getElementById("roL1").textContent, bc: document.getElementById("roBC").textContent, ec: document.getElementById("roEC").textContent,
+    es: document.getElementById("roES").textContent, paths: document.querySelectorAll("#chartCount path.l2").length, idx: S.kadenChartIdx }; }, low);
+  assert.equal(chart.shown, "block"); assert.match(chart.title, /^〒150-\d{4} Shibuya Ku Sample\d+$/); assert.equal(chart.status, "減少（平時の 1/3 以下）");
+  assert.equal(chart.l1, "比 (発災日/平時)"); assert.ok(+chart.ec < +chart.bc / 3); assert.equal(chart.es, (Math.round(+chart.ec / +chart.bc * 100) / 100).toFixed(2)); assert.equal(chart.paths, 1); assert.equal(chart.idx, low);
+  await page.evaluate(() => applyTime(S.times.indexOf("18:00")));                           // the panel follows the slider
+  assert.equal(await page.textContent("#cpStatus"), "平時並み");
+  await page.evaluate(() => { showChart({ id: 0, properties: { id: "x", _row: -1 } }); });  // a link chart restores the labels
+  assert.equal(await page.textContent("#roL1"), "速度 km/h"); assert.equal(await page.evaluate(() => S.kadenChartIdx), null);
+  await page.click("#chkKaden");
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "none"); assert.equal(await page.textContent("#kadenVal"), "");
+  await page.click("#chkKaden");
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "visible");
+  await page.close();
 });

@@ -131,6 +131,7 @@ button:hover{background:#f0efec}
     <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <select id="rainDate"></select> <b id="rainVal" class="stat"></b></label>
     <label id="lowlandOpt" style="display:none"><input type="checkbox" id="chkLowland" checked> 低位地帯</label>
     <label id="floodOpt" style="display:none"><input type="checkbox" id="chkFlood" checked> 浸水域 <b id="floodVal" class="stat"></b> <b id="floodHover" class="stat"></b></label>
+    <label id="kadenOpt" style="display:none"><input type="checkbox" id="chkKaden" checked> 家電 <b id="kadenVal" class="stat"></b></label>
     <label id="snsOpt" style="display:none"><input type="checkbox" id="chkSns" checked> SNS <select id="snsWin"><option value="60">直近 1 時間</option><option value="180">直近 3 時間</option><option value="day">当日 0 時から</option><option value="all">すべて</option></select> <b id="snsVal" class="stat"></b></label>
   </span>
   <span id="trajOpts" style="display:none">
@@ -167,6 +168,7 @@ button:hover{background:#f0efec}
   <div id="legendRain"></div>
   <div id="legendFlood"></div>
   <div id="legendSns"></div>
+  <div id="legendKaden"></div>
   <div id="legendGrid"></div>
 </div>
 <div id="tip"></div>
@@ -199,8 +201,8 @@ button:hover{background:#f0efec}
   </header>
   <div class="readout">
     <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
-    <span>速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
-    <span>台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
+    <span id="roL1">速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
+    <span id="roL2">台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
   </div>
   <svg id="chartSpeed" class="chart"></svg>
   <svg id="chartCount" class="chart"></svg>
@@ -232,6 +234,8 @@ button:hover{background:#f0efec}
       <span style="color:var(--muted)">列: 投稿ID, 日時, 事象No., 事象区分, 事象名, 市区町村, 字・番地, 緯度, 経度, 範囲, 投稿文, 写真動画（UTF-8 / cp932）。緯度経度のある投稿を地点に表示し、クリックで本文を引き出す</span></p>
       <p style="margin:6px 0 2px"><b>6. グリッドのフォルダ（任意）:</b> <input id="gridInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">grid_users.py の出力フォルダ（users_平時/有事/比率 の GeoTIFF と index.json）。probe_trips.py の grid/ でも可。グリッドタブに使う（人流フォルダ内の grid*/ も合わせて読む）</span></p>
+      <p style="margin:6px 0 2px"><b>7. 家電データのフォルダ（任意）:</b> <input id="kadenInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">kaden_out: kaden_event_ts.csv と kaden_baseline_ts.csv（kaden_compare.ipynb の出力）。郵便番号の点として全タブで表示、ホバーで時系列</span></p>
       <span style="display:none"><input id="rainInput" type="file" webkitdirectory><input id="lowlandInput" type="file" accept=".geojson,.json"></span>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
@@ -304,6 +308,7 @@ const CONFIG = {
     maxzoom: 18
   },
   // basemap: { tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors", maxzoom: 19 },
+  KADEN: { minBase: 5, low: 1/3, mild: 2/3, high: 3 },   // appliance points: ratio classes (event / baseline), baseline below minBase is not judged
   playIntervalMs: 600,
   lineWidth: { gray: 1.0, black: 1.6, red: 3.0 }
 };
@@ -313,6 +318,7 @@ const CONFIG = {
 // ============================================================
 const S = {
   times: [],            // ["12:00", ...]
+  kaden: null, showKaden: true, kadenFeats: null, kadenChartIdx: null,   // appliance points (input 7)
   ids: [],              // link ids (string) in CSV row order
   idx: new Map(),       // id -> row index
   T: 0,                 // number of time steps
@@ -549,10 +555,55 @@ function parseSns(files){
   const dates = [...new Set(posts.map(p => p.time.slice(0, 10)))].sort();
   return {posts, groups, noCoord, badTime, skipped, files: files.map(f => f.name), dates};
 }
-function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [], floodList = [], snsList = [], gridList = []){
+
+// ---- appliance points (input 7): kaden_compare.ipynb's row = postal code, column = window tables ----
+const KADEN_TS = /^([a-z0-9]+)_(event|baseline)_ts\.csv$/i;
+function readKadenFiles(list){
+  const found = {};
+  for(const fl of list || []){ const m = fl.name.match(KADEN_TS); if(m) found[m[2].toLowerCase()] = {fl, name: m[1]}; }
+  if(!found.event || !found.baseline) return Promise.resolve(null);
+  return Promise.all([found.event.fl.text(), found.baseline.fl.text()]).then(([event, baseline]) => ({event, baseline, name: found.event.name}));
+}
+// Map the CSV time columns onto the viewer's axis: "HH:MM" by clock time, "MM-DD HH:MM" by the slot's absolute date.
+function kadenColumnIndex(header){
+  const dated = S.times.map((_, t) => { const d = new Date(slotAbsTime(t, null)); return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${S.times[t]}`; });
+  return header.map(h => { h = h.trim(); if(/^\d{2}:\d{2}$/.test(h)) return S.times.indexOf(h); if(/^\d{2}-\d{2} \d{2}:\d{2}$/.test(h)) return dated.indexOf(h); return -1; });
+}
+function parseKaden(txt){
+  const T = S.T, tables = {};
+  for(const role of ["event", "baseline"]){
+    const rows = parseCsvRows(txt[role]).filter(r => r.length > 1);
+    const header = rows[0], col = header.map(h => h.trim().toLowerCase());
+    const iz = col.indexOf("zip"), ila = col.indexOf("lat"), ilo = col.indexOf("lon"), ic = col.indexOf("city"), ip = col.indexOf("place");
+    if(iz < 0 || ila < 0 || ilo < 0) throw new Error(`kaden_${role}_ts.csv に zip / lat / lon の列がありません`);
+    const first = Math.max(iz, ila, ilo, ic, ip) + 1, tIdx = kadenColumnIndex(header.slice(first));
+    tables[role] = {rows: rows.slice(1), iz, ila, ilo, ic, ip, first, tIdx, matched: tIdx.filter(i => i >= 0).length, cols: tIdx.length};
+  }
+  const E = tables.event, B = tables.baseline;
+  const zips = E.rows.map(r => r[E.iz].trim()), n = zips.length, pos = new Map(zips.map((z, i) => [z, i]));
+  const K = {n, zip: zips.map(z => z.length === 7 ? `${z.slice(0, 3)}-${z.slice(3)}` : z), city: E.rows.map(r => E.ic >= 0 ? r[E.ic] : ""), place: E.rows.map(r => E.ip >= 0 ? r[E.ip] : ""),
+             lat: Float64Array.from(E.rows, r => +r[E.ila]), lon: Float64Array.from(E.rows, r => +r[E.ilo]),
+             base: new Float32Array(n * T).fill(NaN), ev: new Float32Array(n * T).fill(NaN), matched: E.matched, cols: E.cols, name: txt.name, onlyBaseline: 0};
+  const fill = (tab, arr, rowIndex) => {
+    for(let i=0;i<tab.rows.length;i++){ const r = tab.rows[i], k = rowIndex(r, i); if(k < 0) continue;
+      for(let c=0;c<tab.tIdx.length;c++){ const t = tab.tIdx[c]; if(t < 0) continue; const v = r[tab.first + c]; if(v !== undefined && v !== "") arr[k*T + t] = +v; } } };
+  fill(E, K.ev, (r, i) => i);
+  fill(B, K.base, (r) => { const k = pos.get(r[B.iz].trim()); if(k === undefined) K.onlyBaseline++; return k === undefined ? -1 : k; });
+  return K;
+}
+function kadenCls(base, ev){
+  if(!(base >= CONFIG.KADEN.minBase) || Number.isNaN(ev)) return 0;
+  const r = ev / base;
+  return r <= CONFIG.KADEN.low ? 3 : r <= CONFIG.KADEN.mild ? 2 : r >= CONFIG.KADEN.high ? 4 : 1;
+}
+const KADEN_LABEL = {0:"平時の台数が少ない / データなし", 1:"平時並み", 2:"減少（平時の 2/3 以下）", 3:"減少（平時の 1/3 以下）", 4:"増加（平時の 3 倍以上）"};
+const KADEN_COLOR = {0:"#9aa3ad", 1:"#4b5563", 2:"#f59e0b", 3:"#dc2626", 4:"#2563eb"};
+
+function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [], floodList = [], snsList = [], gridList = [], kadenList = []){
   const want = CONFIG.files;
   const flood = floodRegistry(floodList);
   const snsTxt = snsList.length ? Promise.all([...snsList].map(readSnsFile)).then(parseSns) : Promise.resolve(null);
+  const kadenTxt = readKadenFiles(kadenList);
   if(floodList.length) fileRow("浸水域", flood ? `shp ${flood.sources.size} 時点（${flood.dates.join(", ")}、表示時に読み込み）` : "不足: 日付時刻付きの .shp と .dbf の組が見つかりません");
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
   let total = 0, rainIndexFile = null, viewerIndexFile = null;
@@ -622,13 +673,14 @@ function loadViaFiles(fileList, rainList = [], lowlandFile = null, truckList = [
   const truckTxt = truckOk ? Promise.all([truck.shp.arrayBuffer(), truck.dbf.arrayBuffer(), ...truck.windows.map(w => readSource(w[2]))])
       .then(([shp, dbf, ...texts]) => ({shp, dbf, windows: truck.windows.map((w, i) => [w[0], w[1], texts[i]])})) : Promise.resolve(null);
   const gridIndex = Promise.all(gridIndexFiles.map(fl => readSource(fl).then(JSON.parse).catch(() => null)));
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex, truckTxt, gridIndex, snsTxt])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx, truck, gridIdx, sns]) => {
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, read("lowland", true), rainIndex, viewerIndex, truckTxt, gridIndex, snsTxt, kadenTxt])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, lowlandTxt, rainIdx, viewerIdx, truck, gridIdx, sns, kaden]) => {
+      if(kadenList.length) fileRow("家電", kaden ? `kaden_event_ts.csv / kaden_baseline_ts.csv（${kaden.name}）` : "不足: *_event_ts.csv と *_baseline_ts.csv の組が見つかりません");
       if(snsList.length) fileRow("SNS", sns ? `${sns.posts.length.toLocaleString()} 件（座標なし ${sns.noCoord.toLocaleString()} 件は非表示、${sns.dates.join(", ")}）` : "読める投稿がありません（列名を確認）");
       S.period = (viewerIdx && viewerIdx.period) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
       const grid = gridRegistry(gridFiles, gridIdx);   // gridIdx: one index per grid folder
-      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, truck, grid, flood, sns, loadInfo};
+      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, lowland: lowlandTxt ? JSON.parse(lowlandTxt) : null, truck, grid, flood, sns, kaden, loadInfo};
     });
 }
 
@@ -1058,6 +1110,7 @@ async function boot(loaderFn){
   S.lowland = raw.lowland || null;
   S.flood = raw.flood || null;
   S.sns = raw.sns || null;
+  S.kaden = raw.kaden ? parseKaden(raw.kaden) : null;
   S.grid = raw.grid || null;
   if(S.sns){ setProgress(`SNS: ${S.sns.posts.length.toLocaleString()} 件、${S.sns.groups.size.toLocaleString()} 地点（${S.sns.dates.join(", ")}）`); await tick(); }
   if(S.flood){ setProgress(`浸水域: ${S.flood.sources.size} 時点（${S.flood.dates.join(", ")}）`); await tick(); }
@@ -1281,6 +1334,15 @@ function initMap(gj){
     });
     map.getCanvas().addEventListener("mouseleave", () => { if(S.mode === "traj"){ map.getCanvas().style.cursor = ""; hideTip(); } });
     map.on("click", (e) => {
+      if(S.kaden && S.showKaden && map.getLayer("kaden")){
+        const hit = map.queryRenderedFeatures(e.point, {layers: ["kaden"]});
+        if(hit.length){
+          const i = hit[0].properties.i, key = "k" + i;
+          if(S.pinnedId === key){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
+          else { S.pinnedId = key; $("chartPanel").classList.add("pinned"); }
+          placePanel(e.point); showKadenChart(i); return;
+        }
+      }
       if(S.sns && map.getLayer("sns")){
         const hit = S.showSns ? map.queryRenderedFeatures(e.point, {layers: ["sns"]}) : [];
         if(hit.length){ openSnsCallout(hit[0].properties.key, 0); return; }
@@ -1307,9 +1369,23 @@ function initMap(gj){
       map.on("mouseleave", "sns", () => { map.getCanvas().style.cursor = ""; });
       map.on("move", placeSnsCallout);
     }
+    if(S.kaden){
+      map.addSource("kaden", {type:"geojson", data: EMPTY_FC});
+      map.addLayer({ id:"kaden", type:"circle", source:"kaden",
+                     paint:{ "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "base"]], 0, 3, 3, 5, 10, 9, 30, 14],
+                             "circle-color": ["match", ["get", "cls"], 0, KADEN_COLOR[0], 1, KADEN_COLOR[1], 2, KADEN_COLOR[2], 3, KADEN_COLOR[3], 4, KADEN_COLOR[4], KADEN_COLOR[0]],
+                             "circle-opacity": ["case", ["==", ["get", "cls"], 0], 0.35, 0.85], "circle-stroke-color": "#ffffff", "circle-stroke-width": 1 } });
+      map.on("mousemove", "kaden", (e) => {
+        if(!e.features.length) return;
+        map.getCanvas().style.cursor = "pointer";
+        if(S.pinnedId === null){ placePanel(e.point); showKadenChart(e.features[0].properties.i); }
+      });
+      map.on("mouseleave", "kaden", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null && S.kadenChartIdx !== null) hideChart(); });
+    }
     setupOverlays();
     setupGrid();
     updateRain();
+    updateKaden();
     updateGrid();
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
     if(!hasTraj()){
@@ -1494,8 +1570,12 @@ const BLANK_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA
 const RAIN_CACHE = 8;
 
 function setupOverlays(){
-  const any = !!(S.rain || S.lowland || S.flood || S.sns);
+  const any = !!(S.rain || S.lowland || S.flood || S.sns || S.kaden);
   $("overlayOpts").style.display = any ? "inline" : "none";
+  if(S.kaden){
+    $("kadenOpt").style.display = "inline";
+    $("chkKaden").addEventListener("change", (e) => { S.showKaden = e.target.checked; e.target.blur(); updateKaden(); });
+  }
   if(S.sns){
     $("snsOpt").style.display = "inline";
     $("snsWin").value = S.snsWin;
@@ -1979,7 +2059,7 @@ function onClick(e){
   else { S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); }
   showChart(ft);
 }
-function hideChart(){ $("chartPanel").style.display = "none"; }
+function hideChart(){ $("chartPanel").style.display = "none"; S.kadenChartIdx = null; }
 
 // ============================================================
 // Time
@@ -2006,6 +2086,7 @@ function applyTime(t, force=false){
   updateRain();
   updateFlood();
   updateSns();
+  updateKaden();
   updateGrid();
 }
 
@@ -2058,6 +2139,47 @@ const STATUS_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--lv1)
 
 function fmt(v, d=1){ return Number.isNaN(v) || v === undefined ? "–" : v.toFixed(d); }
 
+function updateKaden(){
+  if(!map || !S.kaden || !map.getSource("kaden")) return;
+  map.setLayoutProperty("kaden", "visibility", S.showKaden ? "visible" : "none");
+  const K = S.kaden, T = S.T, t = S.t, n = K.n, cnt = [0, 0, 0, 0, 0], feats = new Array(n);
+  for(let i=0;i<n;i++){
+    const base = K.base[i*T + t], ev = K.ev[i*T + t], k = kadenCls(base, ev); cnt[k]++;
+    feats[i] = {type:"Feature", properties:{i, cls:k, base: Number.isNaN(base) ? 0 : base}, geometry:{type:"Point", coordinates:[K.lon[i], K.lat[i]]}};
+  }
+  S.kadenFeats = feats;
+  map.getSource("kaden").setData({type:"FeatureCollection", features: feats});
+  $("kadenVal").textContent = S.showKaden ? `${n.toLocaleString()} 地点（減少 ${(cnt[2] + cnt[3]).toLocaleString()} / 増加 ${cnt[4].toLocaleString()}）` : "";
+  const lg = $("legendKaden");
+  if(S.showKaden){
+    lg.innerHTML = `<span class="lab">家電の接続台数（郵便番号。丸の大きさ = 平時の台数、色 = 発災日 / 平時）</span>` +
+      [3, 2, 1, 4, 0].map(k => `<span class="dot" style="background:${KADEN_COLOR[k]}"></span><span class="lab">${KADEN_LABEL[k]} ${cnt[k]}</span>`).join("");
+    lg.style.display = "flex";
+  } else lg.style.display = "none";
+  if(S.kadenChartIdx !== null && $("chartPanel").style.display !== "none") showKadenChart(S.kadenChartIdx);
+}
+function showKadenChart(i){
+  const K = S.kaden; if(!K) return;
+  const T = S.T, t = S.t, b = i*T;
+  lastFeature = null; S.kadenChartIdx = i;
+  $("chartPanel").style.display = "block";
+  $("cpTitle").textContent = `〒${K.zip[i]} ${K.city[i]} ${K.place[i]}`.trim();
+  $("cpSub").textContent = "家電の接続台数（郵便番号）";
+  const k = kadenCls(K.base[b+t], K.ev[b+t]);
+  $("cpStatus").textContent = KADEN_LABEL[k]; $("cpStatus").style.background = KADEN_COLOR[k];
+  $("roL1").textContent = "比 (発災日/平時)"; $("roL2").textContent = "台数 /15分";
+  const ratio = K.base[b+t] >= CONFIG.KADEN.minBase ? K.ev[b+t] / K.base[b+t] : NaN;
+  $("roBS").textContent = "–"; $("roES").textContent = fmt(ratio, 2);
+  $("roBC").textContent = fmt(K.base[b+t]); $("roEC").textContent = fmt(K.ev[b+t]);
+  const mask = new Uint8Array(T), ratios = new Float32Array(T), none = new Float32Array(T).fill(NaN);
+  for(let c=0;c<T;c++){
+    const kc = kadenCls(K.base[b+c], K.ev[b+c]); mask[c] = kc === 3 ? 3 : kc === 2 ? 1 : kc === 4 ? 2 : 0;
+    ratios[c] = K.base[b+c] >= CONFIG.KADEN.minBase ? K.ev[b+c] / K.base[b+c] : NaN;
+  }
+  drawChart($("chartSpeed"), ratios, none, mask, "比（発災日 / 平時）");
+  drawChart($("chartCount"), K.base.subarray(b, b+T), K.ev.subarray(b, b+T), mask, "接続台数 /15分");
+}
+
 const TRUCK_LABEL = {0:"平時の台数が少ない（非表示）", 1:"表示", 2:"低下（平時の 50 % 以下）"};
 const TRUCK_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--road-red)"};
 function showTruckChart(ft){
@@ -2074,7 +2196,8 @@ function showTruckChart(ft){
 }
 
 function showChart(ft){
-  lastFeature = ft;
+  lastFeature = ft; S.kadenChartIdx = null;
+  $("roL1").textContent = "速度 km/h"; $("roL2").textContent = "台数 /15分";
   if(S.mode === "truck" && S.truck) return showTruckChart(ft);
   const p = ft.properties;
   const r = p._row;
@@ -2198,15 +2321,16 @@ function drawChart(svg, a, b, errMask, title){
                      `3: ${$("truckInput").files.length ? `時刻別 CSV ${[...$("truckInput").files].filter(f => TRUCK_WINDOW.test(f.name)).length} 本・network_agg ${[...$("truckInput").files].some(f => /^network_agg\.shp$/i.test(f.name)) && [...$("truckInput").files].some(f => /^network_agg\.dbf$/i.test(f.name)) ? "あり" : "なし"}` : "なし"}`,
                      `4: ${$("floodInput").files.length ? `浸水域 shp ${[...$("floodInput").files].filter(f => /\.shp$/i.test(f.name) && FLOOD_NAME.test(f.name)).length} 時点` : "なし"}`,
                      `5: ${$("snsInput").files.length ? `SNS ${$("snsInput").files.length} ファイル` : "なし"}`,
-                     `6: ${$("gridInput").files.length ? `グリッド ${[...$("gridInput").files].filter(f => GRID_NAME.test(f.name)).length} 枚` : "なし"}`];
+                     `6: ${$("gridInput").files.length ? `グリッド ${[...$("gridInput").files].filter(f => GRID_NAME.test(f.name)).length} 枚` : "なし"}`,
+                     `7: ${$("kadenInput").files.length ? `家電 時系列 ${[...$("kadenInput").files].filter(f => KADEN_TS.test(f.name)).length} 本` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
-    for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput","floodInput","snsInput","gridInput"]) $(id).addEventListener("change", note);
+    for(const id of ["fileInput","dirInput","probeInput","rainInput","lowlandInput","truckInput","floodInput","snsInput","gridInput","kadenInput"]) $(id).addEventListener("change", note);
     $("loadBtn").addEventListener("click", async () => {
       const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
       if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files, $("floodInput").files, $("snsInput").files, $("gridInput").files)); }
+      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("lowlandInput").files[0] || null, $("truckInput").files, $("floodInput").files, $("snsInput").files, $("gridInput").files, $("kadenInput").files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }
