@@ -135,6 +135,17 @@ probe_trips.py の `*_points.csv`（利用者 ID を含む唯一の出力）だ�
 さらに、比が RATIO_LOW（1/3）以下または RATIO_HIGH（3 倍）以上のセルを、窓ごとに `anomaly/walk25_anomaly_HHMM.geojson`（セルの四角形。属性 cell, row, col, time, baseline, event, ratio, kind = low/high。該当なしでも空ファイル）に書く。
 テストは `test_probe_trips.py` の test_walk_mesh_nb。
 
+### kaden_compare.ipynb: 家電データ（シャープ）の郵便番号別接続台数を平時と比べる（`probe/build_kaden_compare_nb.py` が生成）
+
+15 分ごとの全国スナップショット `YYYYMMDDHHMM_15M_*.csv`（郵便番号 × メーカー × 家電種別の接続台数 count）を有事の日・平時の日のフォルダから読み、
+郵便番号を GeoNames 形式の表（タブ区切り、490-1401 の形）で代表点に変えて、同じ時刻の窓で比較する。numpy と pandas だけで動く。
+対象は BBOX か AREA_GEOJSON の外接矩形の中の郵便番号。家電種別（echonet_object の先頭 4 桁）とメーカーで絞れる（既定は全種別の合計）。
+比 = 有事/平時（平時複数日は日平均、有事に行が無ければ 0）、平時 MIN_BASE_COUNT（5 台）以上だけ判定、減少 = 比 ≤ 1/3、増加 = 比 ≥ 3、
+REQUIRE_ADJACENT なら前後の窓でも同じ判定のときだけ異常。出力は `kaden_15min.csv`（窓 × 郵便番号の表、緯度経度付き）、
+`anomaly/kaden_anomaly_YYYYMMDD_HHMM.geojson`（異常の郵便番号の点。該当なしでも空ファイル）、
+`grid_kaden/kaden_{baseline,event}_HHMM.tif` + `kaden_HHMM.tif` + `index.json`（代表点を CELL_M = 250 m のセルに集計。ビューワーの入力 6 で読める）。
+データの意味（count = その 15 分に接続していた台数、窓の時刻 = ファイル名）はサンプルからの解釈で、仕様書は未入手。テストは `test_kaden_compare.py`。
+
 ### truck_compare.ipynb: 平時と有事の比較 → 異常リンクの GeoJSON（`probe/build_truck_compare_nb.py` が生成）
 
 truck_traffic.ipynb を平時の日（例 2024-08-20、2025-09-10）と有事の日（08-21、09-11）で実行した出力フォルダを比べる。
