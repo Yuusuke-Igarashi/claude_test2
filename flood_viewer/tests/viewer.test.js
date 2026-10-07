@@ -278,19 +278,18 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.click("#nearestBtn"); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
-  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);   // traj -> grid (truck has no data over http) -> default -> traffic
+  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);   // traj -> grid -> traffic
   assert.equal(await page.evaluate(() => S.mode), "grid");
-  await page.keyboard.press("m"); await page.waitForTimeout(200); assert.equal(await page.evaluate(() => S.mode), "default");
   await page.keyboard.press("m"); await page.waitForTimeout(500); assert.equal(await page.evaluate(() => S.mode), "traffic");
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared in traffic mode");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts back");
   await page.close();
 });
 
-test("rain slots and low-lying areas follow the time slider, toggles and date select", async () => {
+test("rain slots follow the time slider, toggle and date select", async () => {
   const page = await openViewer();
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "48 rain GeoTIFF slots registered from rain/index.json");
-  assert.ok(await page.evaluate(() => !!S.lowland && map.getLayer("lowland") && map.getLayer("rain")), "rain and lowland layers exist");
+  assert.ok(await page.evaluate(() => !!map.getLayer("rain") && !map.getLayer("lowland")), "rain layer exists, no lowland layer any more");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none", "overlay controls shown");
   assert.match(await page.textContent("#legendRain"), /降雨 mm\/h/);
   assert.deepEqual(await page.evaluate(() => S.period), { event: { start: "2024-08-21 18:00", hours: 12, slot_min: 15 }, baseline: { start: "2024-08-14 18:00", hours: 12, slot_min: 15 } }, "period read from viewer/index.json");
@@ -346,9 +345,6 @@ test("rain slots and low-lying areas follow the time slider, toggles and date se
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "none");
   await page.click("#chkRain"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
-  await page.click("#chkLowland"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("lowland", "visibility")), "none");
-  await page.click("#chkLowland");
   // rain stays available in trajectory mode
   await page.click("#modeTraj"); await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
@@ -380,12 +376,11 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
-  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain slots found in the folder (rain_*.tif)");
-  assert.ok(await page.evaluate(() => !!S.lowland), "lowland.geojson found in the folder");
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from a File object");
@@ -395,19 +390,17 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.close();
 });
 
-test("three separate inputs: data files, rain folder, lowland GeoJSON", async () => {
+test("two separate inputs: data files and the rain folder", async () => {
   const page = await newPage();
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   assert.ok(await page.evaluate(() => document.getElementById("loadBtn").disabled), "load button disabled until input 1 is chosen");
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
   await page.setInputFiles("#rainInput", join(DATA, "rain"));
-  await page.setInputFiles("#lowlandInput", join(DATA, "lowland.geojson"));
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
-  assert.ok(await page.evaluate(() => !!S.lowland && !!map.getLayer("lowland")), "lowland from input 3");
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from the separate folder");
@@ -423,79 +416,6 @@ test("single-file trajectory GeoJSON (no viewer/ folder) still loads whole-day d
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy), null);
   assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 4);
-  await page.close();
-});
-
-test("truck tab: network_agg.shp/.dbf + traffic_YYYYMMDD_HHMM.csv, links with baseline Hits >= 2, red at <= 50 %, hover chart", async () => {
-  const page = await newPage();
-  await page.goto("file://" + join(DIST, HTML));
-  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
-  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
-  await page.setInputFiles("#probeInput", join(DATA, "viewer"));
-  await page.setInputFiles("#truckInput", join(DATA, "truck"));
-  assert.match(await page.textContent("#pickNote"), /3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
-  await page.click("#loadBtn");
-  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const info = await page.evaluate(() => ({ rows: S.truck && S.truck.rows, files: S.truck.files, links: S.truck.links, dates: S.truck.dates, unmatched: S.truck.unmatched, disabled: document.getElementById("modeTruck").disabled }));
-  assert.ok(info.rows > 1000 && info.files === 96 && info.links === 1560 && info.unmatched === 0, "shapefile + window CSVs parsed: " + JSON.stringify(info));
-  assert.deepEqual(info.dates, { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "roles by the period of viewer/index.json (folder 2)");
-  assert.deepEqual(await page.evaluate(() => { const p = S.period; S.period = { event: { start: "2024-08-21 18:00", hours: 12 }, baseline: { start: "2024-08-14 18:00", hours: 12 } };
-    const r = assignTruckRoles(["2024-08-14", "2024-08-15", "2024-08-21", "2024-08-22"]).byRole; S.period = p; return r; }),
-    { baseline: ["2024-08-14", "2024-08-15"], event: ["2024-08-21", "2024-08-22"], byPeriod: true }, "roles by the period when the dates match it");
-  assert.deepEqual(await page.evaluate(() => assignTruckRoles(["2025-09-10", "2025-09-11"]).byRole), { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false });
-  // roles come from the CSV dates only (traj/ files are not read)
-  assert.deepEqual(await page.evaluate(() => { const p = S.period; S.period = null; const r = truckRoleMap(["2025-09-11", "2025-09-10", "2025-09-11"]); S.period = p; return { dates: r.dates, byRole: r.byRole }; }),
-    { dates: ["2025-09-10", "2025-09-11"], byRole: { baseline: ["2025-09-10"], event: ["2025-09-11"], byPeriod: false } });
-  assert.equal(info.disabled, false);
-  await page.click("#modeTruck"); await page.waitForTimeout(300);
-  await page.evaluate((t) => applyTime(t), T_18);
-  await page.waitForFunction(() => map.querySourceFeatures("truck-links").length > 0, null, { timeout: 15000 });   // tiles of the truck source rendered
-  const st = await page.evaluate(() => ({ mode: S.mode, shown: +document.getElementById("stTruckShown").textContent.replace(/,/g, ""), drop: +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""),
-    vis: map.getLayoutProperty("links-truck-red", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), legend: getComputedStyle(document.getElementById("legendTruck")).display,
-    status: document.getElementById("truckStatus").textContent, src: map.querySourceFeatures("truck-links").length > 0 }));
-  assert.equal(st.mode, "truck"); assert.equal(st.vis, "visible"); assert.equal(st.base, "none"); assert.notEqual(st.legend, "none"); assert.ok(st.src, "truck geometry rendered from the shapefile");
-  assert.match(st.status, /network_agg 1,560 リンク、時刻別 CSV 96 本/);
-  assert.ok(!(await page.evaluate(() => map.getLayer("truck-traj-event") || map.getSource("truck-traj-event"))), "no truck trajectory layer any more");
-  assert.ok(st.shown > 0 && st.drop > 0 && st.drop < st.shown, "some drawn links, some dropped: " + JSON.stringify(st));
-  // independent recount from the window CSVs for 00:00 (baseline 2024-08-15, event 2024-08-22)
-  const ref = (() => {
-    const read = (name) => { const m = new Map(); for (const l of readFileSync(join(DATA, "truck", name), "utf8").trim().split(/\r?\n/).slice(1)) { const [id, h, s] = l.split(","); m.set(id, [+h, +s]); } return m; };
-    const b = read("traffic_20240815_0000.csv"), e = read("traffic_20240822_0000.csv");
-    let shown = 0, drop = 0;
-    for (const [id, [bh, bs]] of b) { if (bh < 2) continue; shown++; const ev = e.get(id) || [0, NaN]; if (ev[0] / bh <= 0.5 || (Number.isNaN(ev[1]) ? 0 : ev[1] / bs) <= 0.5) drop++; }
-    return { shown, drop };
-  })();
-  assert.deepEqual({ shown: st.shown, drop: st.drop }, ref, "counts match an independent recount of the CSVs");
-  // hover a red link: chart panel with truck statistics
-  const pt = await page.evaluate((t) => {
-    const T = S.T, c0 = map.getCenter(); let best = null;
-    for (const f of S.truck.gj.features) { if (S.truck.tcls[f.id * T + t] !== 2) continue; const c = f.geometry.coordinates; const mid = [(c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2];
-      if (!map.getBounds().contains(mid)) continue; const d = Math.hypot(mid[0] - c0.lng, mid[1] - c0.lat); if (!best || d < best.d) { const p = map.project(mid); best = { d, x: p.x, y: p.y }; } }
-    return best;
-  }, T_18);
-  assert.ok(pt, "a red truck link is visible");
-  await hover(page, pt);
-  const cp = await page.evaluate(() => ({ shown: document.getElementById("chartPanel").style.display, status: document.getElementById("cpStatus").textContent, title: document.getElementById("cpTitle").textContent, bc: document.getElementById("roBC").textContent, rects: document.querySelectorAll("#chartCount rect.err").length }));
-  assert.equal(cp.shown, "block"); assert.match(cp.status, /低下/); assert.match(cp.title, /トラック/); assert.notEqual(cp.bc, "–"); assert.ok(cp.rects >= 1, "drop band drawn");
-  // AND: both Hits and AvgSp must be <= 50 % -> fewer red links; legend follows
-  await page.click("#settingsBtn"); await page.selectOption("#pTruckOp", "and"); await page.waitForTimeout(500);
-  const stAnd = await page.evaluate(() => +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""));
-  assert.ok(stAnd < st.drop, "AND -> fewer red links than OR");
-  assert.match(await page.textContent("#legTruckDrop"), /台数と速度/);
-  await page.selectOption("#pTruckOp", "or"); await page.waitForTimeout(500);
-  assert.equal(await page.evaluate(() => +document.getElementById("stTruckDrop").textContent.replace(/,/g, "")), st.drop);
-  // thresholds: ratio 0 -> only links with no event traffic stay red
-  await page.fill("#pTruckRatio", "0"); await page.waitForTimeout(500);
-  const st2 = await page.evaluate(() => +document.getElementById("stTruckDrop").textContent.replace(/,/g, ""));
-  assert.ok(st2 < st.drop, "lower ratio -> fewer red links");
-  await page.fill("#pTruckMinHits", "100"); await page.waitForTimeout(500);
-  assert.equal(await page.evaluate(() => +document.getElementById("stTruckShown").textContent.replace(/,/g, "")), 0, "min Hits 100 hides everything");
-  await page.click("#pDefault"); await page.waitForTimeout(500);
-  assert.equal(await page.evaluate(() => +document.getElementById("stTruckShown").textContent.replace(/,/g, "")), st.shown);
-  await page.screenshot({ path: join(SHOTS, "truck.png") });
-  // M key cycles default -> traffic -> traj -> truck -> (grid: none here) -> default
-  await page.mouse.move(700, 450); await page.keyboard.press("m"); assert.equal(await page.evaluate(() => S.mode), "default");
-  await page.keyboard.press("m"); assert.equal(await page.evaluate(() => S.mode), "traffic");
   await page.close();
 });
 
@@ -548,142 +468,34 @@ test("grid overlay in trajectory mode: parameter select, slot follows the slider
   await page.close();
 });
 
-test("three folders: traffic (tomtom_out), probe (probe_out: viewer/ + grid/), truck (yazaki_out)", async () => {
+test("two folders: traffic (tomtom_out) and probe (probe_out: viewer/ + grid/)", async () => {
   const page = await newPage();
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
-  await page.setInputFiles("#truckInput", join(DATA, "truck"));                         // 3: the truck folder
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・グリッド 0 枚 \/ 3: 時刻別 CSV 96 本・network_agg あり \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・メッシュ 0 枚 \/ 3: なし \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, truck: !!S.truck, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, truckOff: document.getElementById("modeTruck").disabled }));
-  assert.deepEqual(st, { lazy: SLOT_FILES, truck: true, rain: null, grid: null, trajOff: false, truckOff: false });
+  const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, gridOff: document.getElementById("modeGrid").disabled }));
+  assert.deepEqual(st, { lazy: SLOT_FILES, rain: null, grid: null, trajOff: false, gridOff: true });
   await page.close();
 });
 
-test("flood-extent shapefiles (input 4): latest file at or before the slot, cp932 attributes, depth colours, max age, toggle", async () => {
-  const page = await newPage();
-  await page.goto("file://" + join(DIST, HTML));
-  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
-  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
-  await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
-  await page.setInputFiles("#floodInput", join(DATA, "flood"));
-  assert.match(await page.textContent("#pickNote"), /4: 浸水域 shp 4 時点 \/ 5: なし \/ 6: なし \/ 7: なし$/);
-  await page.click("#loadBtn");
-  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const reg = await page.evaluate(() => ({ n: S.flood.sources.size, keys: S.flood.keys.map((k) => k.key), dates: S.flood.dates, opt: getComputedStyle(document.getElementById("floodOpt")).display, legend: document.getElementById("legendFlood").textContent }));
-  assert.deepEqual(reg.keys, ["20240821_2110", "20240821_2240", "20240821_2330", "20240822_0050"]); assert.deepEqual(reg.dates, ["20240821", "20240822"]);
-  assert.notEqual(reg.opt, "none"); assert.match(reg.legend, /浸水深 m.*2\+/);
-  // 19:00: nothing before the first snapshot
-  await page.evaluate(() => applyTime(S.times.indexOf("19:00")));
-  assert.equal(await page.evaluate(() => floodKeyFor(S.t)), null);
-  assert.match(await page.textContent("#floodVal"), /以前の浸水域なし/);
-  // 00:30 (next day): the 23:30 snapshot, 60 minutes old
-  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
-  assert.deepEqual(await page.evaluate(() => floodKeyFor(S.t)), { key: "20240821_2330", age: 60 });
-  await page.waitForFunction(() => S.flood.cur === "20240821_2330", null, { timeout: 15000 });
-  // without a period the date of slot 0 comes from the network file name; the clock wrap at 00:00 adds a day
-  assert.deepEqual(await page.evaluate(() => { const p = S.period, dd = S.dataDate; S.period = null; S.dataDate = "20240821";
-    const r = [floodKeyFor(S.times.indexOf("00:30")), floodKeyFor(S.times.indexOf("18:00")), floodKeyFor(S.times.indexOf("22:45"))];
-    S.dataDate = "20240820"; r.push(floodKeyFor(S.times.indexOf("00:30"))); S.period = p; S.dataDate = dd; return r; }),
-    [{ key: "20240821_2330", age: 60 }, null, { key: "20240821_2240", age: 5 }, null], "slot dates without a period");
-  const d = await page.evaluate(() => { const gj = S.flood.cache.get("20240821_2330").gj; return { n: gj.features.length, depthField: S.flood.depthField, props: Object.keys(gj.features[0].properties), depth: gj.features.map((f) => f.properties.depth), type: gj.features[0].geometry.type, text: document.getElementById("floodVal").textContent }; });
-  assert.equal(d.n, 29, "cells within radius 3"); assert.equal(d.depthField, "浸水深"); assert.deepEqual(d.props, ["meshcode", "JIcode", "浸水深", "水位", "地盤高", "depth"], "cp932 field names decoded");
-  assert.ok(Math.max(...d.depth) > 2 && Math.min(...d.depth) >= 0.1, "depths parsed: " + d.depth.slice(0, 5)); assert.equal(d.type, "Polygon");
-  assert.match(d.text, /08\/21 23:30 時点（60 分前）、29 区画/);
-  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 14 }));
-  await page.waitForFunction(() => map.queryRenderedFeatures({ layers: ["flood"] }).length > 0, null, { timeout: 15000 });
-  const hover = await page.evaluate(() => floodAt(map.project([139.7505, 35.6805])));
-  assert.match(hover, /浸水深 2\.\d+ \/ 水位 7\.\d+ \/ 地盤高 5\.000 \/ meshcode 53395050/, "attributes under the cursor: " + hover);
-  // 01:00: the 00:50 snapshot (10 minutes old); max age 30 min at 00:30 hides the 23:30 one
-  await page.evaluate(() => applyTime(S.times.indexOf("01:00")));
-  assert.deepEqual(await page.evaluate(() => floodKeyFor(S.t)), { key: "20240822_0050", age: 10 });
-  await page.waitForFunction(() => S.flood.cur === "20240822_0050", null, { timeout: 15000 });
-  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
-  await page.click("#settingsBtn"); await page.fill("#pFloodMaxAge", "30"); await page.waitForTimeout(500);
-  assert.equal(await page.evaluate(() => floodKeyFor(S.t)), null, "older than the max age -> hidden");
-  assert.match(await page.textContent("#floodVal"), /以前の浸水域なし/);
-  await page.click("#pDefault"); await page.waitForTimeout(500);
-  assert.equal(await page.evaluate(() => S.flood.cur), "20240821_2330");
-  await page.click("#chkFlood"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("flood", "visibility")), "none");
-  await page.click("#chkFlood"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("flood", "visibility")), "visible");
-  await page.screenshot({ path: join(SHOTS, "flood.png") });
-  await page.close();
-});
-
-test("SNS posts (input 5): CSV parsing, time window, stacked posts, callout with a leader line, toggle", async () => {
-  const page = await newPage();
-  await page.goto("file://" + join(DIST, HTML));
-  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
-  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
-  await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
-  await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
-  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: なし \/ 7: なし$/);
-  await page.click("#loadBtn");
-  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const info = await page.evaluate(() => ({ n: S.sns.posts.length, noCoord: S.sns.noCoord, groups: S.sns.groups.size, dates: S.sns.dates, opt: getComputedStyle(document.getElementById("snsOpt")).display,
-    text: S.sns.posts.find((p) => p.id === "340100000").text, quoted: S.sns.posts.find((p) => p.id === "340000000").text }));
-  assert.equal(info.n, 40); assert.equal(info.noCoord, 5); assert.equal(info.groups, 35); assert.deepEqual(info.dates, ["2024-08-21", "2024-08-22"]); assert.notEqual(info.opt, "none");
-  assert.equal(info.text, '中心地点の投稿 1。"膝まで水" と言っている人も、いる', "quotes and commas inside a quoted field");
-  assert.equal(info.quoted, "投稿 0: 道路が冠水、車が通れない\n#新宿区, 要注意", "¥n becomes a line break");
-  // window (23:30, 00:30] at the 00:30 slot: 6 stacked posts at the centre + 4 singles
-  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
-  const w = await page.evaluate(() => ({ feats: S.snsFeats.map((f) => f.properties), val: document.getElementById("snsVal").textContent, legend: document.getElementById("legendSns").textContent }));
-  assert.equal(w.feats.length, 5); assert.equal(w.feats.reduce((a, f) => a + f.n, 0), 10); assert.ok(w.feats.some((f) => f.n === 6 && f.cat === "浸水・冠水"));
-  assert.match(w.val, /^10 件・5 地点（直近 1 時間）$/); assert.match(w.legend, /浸水・冠水 \d+.*座標なし 5 件/);
-  await page.selectOption("#snsWin", "all"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => S.snsFeats.length), 35, "all posts regardless of time");
-  await page.selectOption("#snsWin", "60"); await page.waitForTimeout(200);
-  // click the centre stack: callout with the latest post first, 次 cycles, leader line drawn from the marker
-  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 15 }));
-  await page.waitForFunction(() => map.queryRenderedFeatures({ layers: ["sns"] }).length > 0, null, { timeout: 15000 });
-  const box = await page.locator("#map").boundingBox();
-  const px = await page.evaluate(() => map.project([139.75, 35.68]));
-  await page.mouse.click(box.x + px.x, box.y + px.y); await page.waitForTimeout(300);
-  const c = await page.evaluate(() => ({ shown: document.getElementById("snsCallout").style.display, html: document.getElementById("snsCallout").textContent, lead: document.getElementById("snsLead").style.display,
-    x1: +document.getElementById("snsLeadLine").getAttribute("x1"), x2: +document.getElementById("snsLeadLine").getAttribute("x2"), sel: S.snsSel }));
-  assert.equal(c.shown, "block"); assert.match(c.html, /浸水・冠水.*2024-08-22 00:28:00.*中心地点の投稿 6.*1 \/ 6 件/); assert.equal(c.lead, "block"); assert.notEqual(c.x1, c.x2, "leader line spans from the marker to the box");
-  await page.click("#snsCallout button[data-d='1']"); await page.waitForTimeout(100);
-  assert.match(await page.textContent("#snsCallout"), /00:25:00.*2 \/ 6 件/);
-  await page.click("#snsCallout .close"); await page.waitForTimeout(100);
-  assert.equal(await page.evaluate(() => document.getElementById("snsCallout").style.display), "none");
-  // toggle hides the layer and the status
-  await page.click("#chkSns"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("sns", "visibility")), "none"); assert.equal(await page.textContent("#snsVal"), "");
-  await page.click("#chkSns"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("sns", "visibility")), "visible");
-  await page.screenshot({ path: join(SHOTS, "sns.png") });
-  await page.close();
-});
-
-test("default tab shows only the overlays; grid tab reads input 6 (grid_users folder) on its own", async () => {
+test("walker-change tab reads a mesh folder (input 3) on its own", async () => {
   const page = await newPage();
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));              // period only, no grid*/ inside
-  await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
   await page.setInputFiles("#gridInput", join(DATA, "grid_users"));
-  assert.match(await page.textContent("#pickNote"), /5: SNS 1 ファイル \/ 6: グリッド 144 枚 \/ 7: なし$/);
+  assert.match(await page.textContent("#pickNote"), /3: メッシュ 144 枚 \/ 4: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const reg = await page.evaluate(() => ({ params: S.grid.params.map((p) => p[0]), n: S.grid.sources.size, mode: S.mode, gridBtn: document.getElementById("modeGrid").disabled, trajOff: document.getElementById("modeTraj").disabled }));
   assert.deepEqual(reg.params, ["users", "users@baseline", "users@event"]); assert.equal(reg.n, 144); assert.equal(reg.mode, "traffic"); assert.equal(reg.gridBtn, false);
-  // default: no roads, no stats, overlays stay
-  await page.click("#modeDefault"); await page.waitForTimeout(300);
   await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
-  const d = await page.evaluate(() => ({ mode: S.mode, base: map.getLayoutProperty("links-base", "visibility"), err: map.getLayoutProperty("links-error", "visibility"), ctx: map.getLayoutProperty("links-context", "visibility"),
-    grid: map.getLayoutProperty("grid", "visibility"), sns: map.getLayoutProperty("sns", "visibility"), stat: getComputedStyle(document.getElementById("statTraffic")).display,
-    gridOpts: getComputedStyle(document.getElementById("gridOpts")).display, snsOpt: getComputedStyle(document.getElementById("snsOpt")).display, snsVal: document.getElementById("snsVal").textContent }));
-  assert.equal(d.mode, "default"); assert.deepEqual([d.base, d.err, d.ctx, d.grid], ["none", "none", "none", "none"]); assert.equal(d.sns, "visible"); assert.equal(d.stat, "none"); assert.equal(d.gridOpts, "none"); assert.notEqual(d.snsOpt, "none");
-  assert.match(d.snsVal, /^10 件・5 地点/);
-  await page.click("#chkSns"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("sns", "visibility")), "none", "SNS toggle works in the default tab");
-  await page.click("#chkSns"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayer("sns") || map.getLayer("flood") || map.getLayer("links-truck-base") || document.getElementById("modeDefault") || document.getElementById("modeTruck")), null, "dropped layers and tabs are gone");
   // grid: the rasters alone, with the parameter select and inputs
   await page.click("#modeGrid"); await page.waitForTimeout(300);
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users_00:30", null, { timeout: 15000 });
@@ -704,14 +516,14 @@ test("no JavaScript errors were raised", () => {
   assert.deepEqual(errors, []);
 });
 
-test("appliance points (input 7): time-series CSVs, classes per slot, always visible, hover chart, toggle", async () => {
+test("appliance points (input 4): time-series CSVs, classes per slot, always visible, hover chart, toggle", async () => {
   const page = await newPage();
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));
   await page.setInputFiles("#kadenInput", join(DATA, "kaden"));
-  assert.match(await page.textContent("#pickNote"), /7: 家電 時系列 2 本/);
+  assert.match(await page.textContent("#pickNote"), /4: 家電 時系列 2 本/);
   await page.click("#loadBtn");
   await page.waitForFunction(() => typeof S !== "undefined" && S.kaden && typeof map !== "undefined" && map && map.getSource("kaden") && S.kadenFeats, null, { timeout: 60000 });
   const info = await page.evaluate(() => ({ n: S.kaden.n, matched: S.kaden.matched, cols: S.kaden.cols, zip: S.kaden.zip[0], opt: getComputedStyle(document.getElementById("kadenOpt")).display,
@@ -728,7 +540,7 @@ test("appliance points (input 7): time-series CSVs, classes per slot, always vis
   assert.match(await page.textContent("#kadenVal"), /^40 地点（減少 6 \/ 増加 0）$/);
   assert.match(await page.textContent("#legendKaden"), /減少（平時の 1\/3 以下） 6/);
   // the layer stays visible in every tab; the chart panel shows the point's series
-  for (const m of ["default", "traj", "grid", "traffic"]) {
+  for (const m of ["traj", "grid", "traffic"]) {
     await page.evaluate((mm) => setMode(mm), m);
     assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "visible", m);
   }
