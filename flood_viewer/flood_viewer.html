@@ -201,7 +201,8 @@ button:hover{background:#f0efec}
       <span style="color:var(--muted)">walk_mesh.ipynb の grid_walk25（walk25_平時/有事/比率 の GeoTIFF と index.json）。grid_users.py や probe_trips.py の grid/ でも可。徒歩変化タブに使う（人流フォルダ内の grid*/ も合わせて読む）</span></p>
       <p style="margin:6px 0 2px"><b>4. 家電データのフォルダ（任意）:</b> <input id="kadenInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">kaden_out: kaden_event_ts.csv と kaden_baseline_ts.csv（kaden_compare.ipynb の出力）。郵便番号の点として全タブで表示、ホバーで時系列</span></p>
-      <span style="display:none"><input id="rainInput" type="file" webkitdirectory></span>
+      <p style="margin:6px 0 2px"><b>5. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">xrain_to_geotiff.py の出力（rain_YYYYMMDD_HHMM.tif。index.json は無くてよい）。車流フォルダの中の rain/ でも可。全タブで道路の下に半透明で重ねる</span></p>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
   </div>
@@ -1765,7 +1766,8 @@ function drawChart(svg, a, b, errMask, title){
       const parts = [main ? `1: ${main} ファイル` : "1: 未選択",
                      `2: ${probe.length ? `時刻別 ${nSlot} 本・メッシュ ${nGrid} 枚` : "なし"}`,
                      `3: ${$("gridInput").files.length ? `メッシュ ${[...$("gridInput").files].filter(f => GRID_NAME.test(f.name)).length} 枚` : "なし"}`,
-                     `4: ${$("kadenInput").files.length ? `家電 時系列 ${[...$("kadenInput").files].filter(f => KADEN_TS.test(f.name)).length} 本` : "なし"}`];
+                     `4: ${$("kadenInput").files.length ? `家電 時系列 ${[...$("kadenInput").files].filter(f => KADEN_TS.test(f.name)).length} 本` : "なし"}`,
+                     `5: ${$("rainInput").files.length ? `降雨 ${[...$("rainInput").files].filter(f => RAIN_NAME.test(f.name)).length} 枚` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
     for(const id of ["fileInput","dirInput","probeInput","rainInput","gridInput","kadenInput"]) $(id).addEventListener("change", note);
