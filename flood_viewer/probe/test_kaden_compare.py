@@ -100,6 +100,9 @@ def test_kaden():
         assert list(tse.columns) == ["city", "place", "lat", "lon", "12:00", "12:15", "12:30", "12:45"] and len(tse) == 6, tse.columns
         assert tse.loc[ZIP["B"], ["12:00", "12:15", "12:30", "12:45"]].tolist() == [30, 5, 5, 30] and (tsb.loc[ZIP["B"], ["12:00", "12:15"]] == 30).all()
         assert abs(tsr.loc[ZIP["B"], "12:15"] - 1 / 6) < 1e-3 and tsr.loc[ZIP["D"]].iloc[4:].isna().all() and tse.loc[ZIP["F"]].iloc[4:].eq(0).all()
+        assert tse.loc[ZIP["B"], "lon"] == LON0 + 0.01 and tse.loc[ZIP["B"], "lat"] == LAT0, "coordinates are written unrounded"
+        txt = open(out / "kaden_event_ts.csv", encoding="utf-8").read(); assert "e+" not in txt and "E+" not in txt, "no scientific notation"
+        assert abs(tsr.loc[ZIP["B"], "12:15"] - 1 / 6) < 1e-12, "ratios keep full precision"
         zs = pd.read_csv(out / "kaden_zips.csv", dtype={"zip": str}).set_index("zip")
         assert zs.loc[ZIP["F"], "n_low"] == 4 and zs.loc[ZIP["F"], "first_low"] == "2025-08-13T12:00:00" and zs.loc[ZIP["F"], "last_low"] == "2025-08-13T12:45:00"
         assert zs.loc[ZIP["B"], "n_low"] == 2 and abs(zs.loc[ZIP["B"], "ratio_min"] - 1 / 6) < 1e-3 and zs.loc[ZIP["H"], "n_high"] == 4 and zs.loc[ZIP["D"], "n_target"] == 0
@@ -113,7 +116,8 @@ def test_kaden():
         assert set(zips) == {"100-0002", "100-0006", "100-0007"}, set(zips)
         fb = zips["100-0002"]
         assert fb["properties"]["kind"] == "low" and fb["properties"]["city"] == "CityB" and fb["properties"]["timestamp"] == "2025-08-13T12:15:00"
-        assert fb["geometry"] == {"type": "Point", "coordinates": [round(LON0 + 0.01, 6), LAT0]} and gj["properties"]["require_adjacent"] is True
+        assert fb["geometry"] == {"type": "Point", "coordinates": [LON0 + 0.01, LAT0]} and gj["properties"]["require_adjacent"] is True
+        assert abs(fb["properties"]["ratio"] - 1 / 6) < 1e-12 and fb["properties"]["baseline"] == 30
         gj0 = json.load(open(out / "anomaly" / "kaden_anomaly_20250813_1200.geojson", encoding="utf-8"))
         assert {ft["properties"]["zip"] for ft in gj0["features"]} == {"100-0006", "100-0007"}
         assert (out / "kaden_15min.csv").exists() and len(pd.read_csv(out / "kaden_15min.csv", dtype={"zip": str})) == 24

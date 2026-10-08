@@ -215,7 +215,7 @@ md(r'''
 ## 4. 郵便番号ごとの 15 分時系列
 
 節 3 の表を「行 = 郵便番号、列 = 時刻」に並べ替えます。発災日（`kaden_event_ts.csv`）、前日などの平時（`kaden_baseline_ts.csv`）、
-その比（`kaden_ratio_ts.csv`）を同じ行・列の並びで書くので、1 つの郵便番号の 2 本の時系列を横に並べて比べられます（列は窓の開始時刻 "HH:MM"。
+その比（`kaden_ratio_ts.csv`）を同じ行・列の並びで書くので、1 つの郵便番号の 2 本の時系列を横に並べて比べられます（値は丸めずそのまま。列は窓の開始時刻 "HH:MM"。
 発災日が日をまたぐときは "MM-DD HH:MM"）。先頭の列は city, place, lat, lon。
 あわせて郵便番号ごとのまとめ `kaden_zips.csv` / `kaden_zips.geojson`（点）を書きます: 平時・発災日の 1 日の台数の平均、比の最小値、
 減少／増加と判定された窓の数、最初と最後の減少の時刻。
@@ -231,7 +231,7 @@ for name, val in (("event", "event"), ("baseline", "baseline"), ("ratio", "ratio
     wide = err.pivot(index="zip", columns="col", values=val).reindex(columns=cols)
     wide = head.join(wide, how="inner")
     wide.index.name = "zip"
-    wide.to_csv(OUT_DIR / f"{PARAM}_{name}_ts.csv", float_format="%.4g")
+    wide.to_csv(OUT_DIR / f"{PARAM}_{name}_ts.csv")
     ts[name] = wide
 log(f"時系列の表: {len(ts['event']):,} 郵便番号 × {len(cols)} 窓 → {PARAM}_event_ts.csv / _baseline_ts.csv / _ratio_ts.csv")
 
@@ -240,7 +240,6 @@ zips = (err.groupby("zip").agg(baseline_mean=("baseline", "mean"), event_mean=("
                                n_target=("is_target", "sum"), n_low=("kind", lambda s: int((s == "low").sum())), n_high=("kind", lambda s: int((s == "high").sum())))
           .join(low_rows.groupby("zip").window.agg(first_low="min", last_low="max"))
           .join(head, how="inner"))
-zips["ratio_min"] = zips.ratio_min.round(4); zips[["baseline_mean", "event_mean"]] = zips[["baseline_mean", "event_mean"]].round(2)
 for c in ("first_low", "last_low"):
     zips[c] = zips[c].dt.strftime("%Y-%m-%dT%H:%M:%S")
 zips.index.name = "zip"
@@ -249,7 +248,7 @@ feats = [{"type": "Feature",
           "properties": {"zip": f"{z[:3]}-{z[3:]}", "city": r.city, "place": r.place, "baseline_mean": float(r.baseline_mean), "event_mean": float(r.event_mean),
                          "ratio_min": None if pd.isna(r.ratio_min) else float(r.ratio_min), "n_target": int(r.n_target), "n_low": int(r.n_low), "n_high": int(r.n_high),
                          "first_low": None if pd.isna(r.first_low) else r.first_low, "last_low": None if pd.isna(r.last_low) else r.last_low},
-          "geometry": {"type": "Point", "coordinates": [round(float(r.lon), 6), round(float(r.lat), 6)]}}
+          "geometry": {"type": "Point", "coordinates": [float(r.lon), float(r.lat)]}}
          for z, r in zips.iterrows()]
 with open(OUT_DIR / f"{PARAM}_zips.geojson", "w", encoding="utf-8") as f:
     json.dump({"type": "FeatureCollection", "name": f"{PARAM}_zips", "features": feats}, f, ensure_ascii=False)
@@ -272,8 +271,8 @@ for w in windows:
     part = err[(err.window == w) & err.anomaly]
     feats = [{"type": "Feature",
               "properties": {"zip": f"{r.zip[:3]}-{r.zip[3:]}", "city": r.city, "place": r.place, "timestamp": f"{pd.Timestamp(w):%Y-%m-%dT%H:%M:%S}",
-                             "baseline": round(float(r.baseline), 2), "event": round(float(r.event), 2), "ratio": round(float(r.ratio), 4), "kind": r.kind},
-              "geometry": {"type": "Point", "coordinates": [round(float(r.lon), 6), round(float(r.lat), 6)]}}
+                             "baseline": float(r.baseline), "event": float(r.event), "ratio": float(r.ratio), "kind": r.kind},
+              "geometry": {"type": "Point", "coordinates": [float(r.lon), float(r.lat)]}}
              for r in part.itertuples()]
     with open(ANOM_DIR / f"{PARAM}_anomaly_{pd.Timestamp(w):%Y%m%d_%H%M}.geojson", "w", encoding="utf-8") as f:
         json.dump({"type": "FeatureCollection", "name": f"{PARAM}_anomaly_{pd.Timestamp(w):%Y%m%d_%H%M}",
