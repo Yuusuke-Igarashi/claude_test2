@@ -376,7 +376,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
-  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
@@ -397,7 +397,7 @@ test("two separate inputs: data files and the rain folder", async () => {
   assert.ok(await page.evaluate(() => document.getElementById("loadBtn").disabled), "load button disabled until input 1 is chosen");
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
   await page.setInputFiles("#rainInput", join(DATA, "rain"));
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: 降雨 48 枚$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: 降雨 48 枚 \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
@@ -474,7 +474,7 @@ test("two folders: traffic (tomtom_out) and probe (probe_out: viewer/ + grid/)",
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・メッシュ 0 枚 \/ 3: なし \/ 4: なし \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・メッシュ 0 枚 \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, gridOff: document.getElementById("modeGrid").disabled }));
@@ -489,7 +489,7 @@ test("walker-change tab reads a mesh folder (input 3) on its own", async () => {
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));              // period only, no grid*/ inside
   await page.setInputFiles("#gridInput", join(DATA, "grid_users"));
-  assert.match(await page.textContent("#pickNote"), /3: メッシュ 144 枚 \/ 4: なし \/ 5: なし$/);
+  assert.match(await page.textContent("#pickNote"), /3: メッシュ 144 枚 \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const reg = await page.evaluate(() => ({ params: S.grid.params.map((p) => p[0]), n: S.grid.sources.size, mode: S.mode, gridBtn: document.getElementById("modeGrid").disabled, trajOff: document.getElementById("modeTraj").disabled }));
@@ -506,6 +506,13 @@ test("walker-change tab reads a mesh folder (input 3) on its own", async () => {
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users@event_00:30", null, { timeout: 15000 });
   await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 14 }));
   assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "24 人");
+  const mb = await page.locator("#map").boundingBox();                       // hovering a cell shows its value in a tooltip
+  await page.mouse.move(mb.x + mb.width / 2 + 10, mb.y + mb.height / 2 + 10); await page.waitForTimeout(400);   // the centre sits on a cell corner: step into the cell
+  const tip = await page.evaluate(() => ({ shown: document.getElementById("tip").style.display, text: document.getElementById("tip").textContent }));
+  assert.equal(tip.shown, "block"); assert.match(tip.text, /ユニーク ID 数.*直近 15 分（00:30 まで）.*24 人/);
+  const outside = await page.evaluate(() => map.project([139.69, 35.68]));                        // west of the mesh (bbox starts at 139.70): no tooltip
+  await page.mouse.move(mb.x + outside.x, mb.y + outside.y); await page.waitForTimeout(400);
+  assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "none");
   await page.click("#modeTraffic"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "grid hidden again in the traffic tab");
   await page.screenshot({ path: join(SHOTS, "grid_tab.png") });
@@ -558,5 +565,84 @@ test("appliance points (input 4): time-series CSVs, classes per slot, always vis
   assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "none"); assert.equal(await page.textContent("#kadenVal"), "");
   await page.click("#chkKaden");
   assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "visible");
+  await page.close();
+});
+
+test("SNS posts (input 6, FASTALERT layout): CSV parsing, time window, stacked posts, callout with a leader line, toggle", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
+  await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
+  assert.match(await page.textContent("#pickNote"), /5: なし \/ 6: SNS 1 ファイル$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const info = await page.evaluate(() => ({ n: S.sns.posts.length, noCoord: S.sns.noCoord, groups: S.sns.groups.size, dates: S.sns.dates, formats: S.sns.formats, opt: getComputedStyle(document.getElementById("snsOpt")).display,
+    text: S.sns.posts.find((p) => p.id === "340100000").text, quoted: S.sns.posts.find((p) => p.id === "340000000").text }));
+  assert.equal(info.n, 40); assert.equal(info.noCoord, 5); assert.equal(info.groups, 35); assert.deepEqual(info.dates, ["2024-08-21", "2024-08-22"]); assert.deepEqual(info.formats, ["FASTALERT"]); assert.notEqual(info.opt, "none");
+  assert.equal(info.text, '中心地点の投稿 1。"膝まで水" と言っている人も、いる', "quotes and commas inside a quoted field");
+  assert.equal(info.quoted, "投稿 0: 道路が冠水、車が通れない\n#新宿区, 要注意", "¥n becomes a line break");
+  // window (23:30, 00:30] at the 00:30 slot: 6 stacked posts at the centre + 4 singles
+  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
+  const w = await page.evaluate(() => ({ feats: S.snsFeats.map((f) => f.properties), val: document.getElementById("snsVal").textContent, legend: document.getElementById("legendSns").textContent }));
+  assert.equal(w.feats.length, 5); assert.equal(w.feats.reduce((a, f) => a + f.n, 0), 10); assert.ok(w.feats.some((f) => f.n === 6 && f.cat === "浸水・冠水"));
+  assert.match(w.val, /^10 件・5 地点（直近 1 時間）$/); assert.match(w.legend, /浸水・冠水 \d+.*座標なし 5 件/);
+  await page.selectOption("#snsWin", "all"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => S.snsFeats.length), 35, "all posts regardless of time");
+  await page.selectOption("#snsWin", "60"); await page.waitForTimeout(200);
+  // click the centre stack: callout with the latest post first, 次 cycles, leader line drawn from the marker
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 15 }));
+  await page.waitForFunction(() => map.queryRenderedFeatures({ layers: ["sns"] }).length > 0, null, { timeout: 15000 });
+  const box = await page.locator("#map").boundingBox();
+  const px = await page.evaluate(() => map.project([139.75, 35.68]));
+  await page.mouse.click(box.x + px.x, box.y + px.y); await page.waitForTimeout(300);
+  const c = await page.evaluate(() => ({ shown: document.getElementById("snsCallout").style.display, html: document.getElementById("snsCallout").textContent, lead: document.getElementById("snsLead").style.display,
+    x1: +document.getElementById("snsLeadLine").getAttribute("x1"), x2: +document.getElementById("snsLeadLine").getAttribute("x2"), sel: S.snsSel }));
+  assert.equal(c.shown, "block"); assert.match(c.html, /浸水・冠水.*2024-08-22 00:28:00.*中心地点の投稿 6.*1 \/ 6 件/); assert.equal(c.lead, "block"); assert.notEqual(c.x1, c.x2, "leader line spans from the marker to the box");
+  await page.click("#snsCallout button[data-d='1']"); await page.waitForTimeout(100);
+  assert.match(await page.textContent("#snsCallout"), /00:25:00.*2 \/ 6 件/);
+  await page.click("#snsCallout .close"); await page.waitForTimeout(100);
+  assert.equal(await page.evaluate(() => document.getElementById("snsCallout").style.display), "none");
+  await page.click("#chkSns"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("sns", "visibility")), "none"); assert.equal(await page.textContent("#snsVal"), "");
+  await page.click("#chkSns"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("sns", "visibility")), "visible");
+  await page.screenshot({ path: join(SHOTS, "sns.png") });
+  await page.close();
+});
+
+test("SNS posts (input 6, posts layout): ISO times with +09:00, source_category colours, post link in the callout, both files together", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));
+  await page.setInputFiles("#snsInput", [join(DATA, "sns", "chiba_sample_posts.csv"), join(DATA, "sns", "FA_sample_20240821.csv")]);
+  assert.match(await page.textContent("#pickNote"), /6: SNS 2 ファイル$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const info = await page.evaluate(() => { const p = S.sns.posts.filter((q) => q.file === "chiba_sample_posts.csv");
+    return { n: S.sns.posts.length, mine: p.length, noCoord: S.sns.noCoord, formats: S.sns.formats, cats: [...new Set(p.map((q) => q.cat))].sort(), first: p[0],
+             stack: S.sns.groups.get("35.685000,139.760000").posts.length }; });
+  assert.equal(info.n, 52); assert.equal(info.mine, 12); assert.equal(info.noCoord, 7); assert.deepEqual(info.formats.sort(), ["FASTALERT", "posts"]);
+  assert.deepEqual(info.cats, ["河川", "浸水・冠水", "追加の現地浸水投稿", "追加報道SNS"]); assert.equal(info.stack, 3);
+  assert.equal(info.first.time, "2024-08-21 18:40:00", "ISO +09:00 taken as wall-clock"); assert.equal(info.first.url, "https://x.com/user0/status/20877" + "0".padStart(14, "0"));
+  assert.equal(info.first.place, "新宿区 冠水 新宿区付近"); assert.equal(info.first.platform, "YouTube"); assert.equal(info.first.author, "user0");
+  // (23:30, 00:30] at the 00:30 slot: the three stacked posts + two singles from this file, plus the FASTALERT ones
+  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
+  const w = await page.evaluate(() => ({ feats: S.snsFeats.map((f) => f.properties), legend: document.getElementById("legendSns").textContent }));
+  const stack = w.feats.find((f) => f.key === "35.685000,139.760000");
+  assert.ok(stack && stack.n === 3 && stack.cat === "浸水・冠水", JSON.stringify(stack)); assert.match(w.legend, /河川 \d+/);
+  await page.evaluate(() => map.jumpTo({ center: [139.76, 35.685], zoom: 15 }));
+  await page.waitForFunction(() => map.queryRenderedFeatures({ layers: ["sns"] }).length > 0, null, { timeout: 15000 });
+  const box = await page.locator("#map").boundingBox();
+  const px = await page.evaluate(() => map.project([139.76, 35.685]));
+  await page.mouse.click(box.x + px.x, box.y + px.y); await page.waitForTimeout(300);
+  const c = await page.evaluate(() => ({ html: document.getElementById("snsCallout").innerHTML, text: document.getElementById("snsCallout").textContent }));
+  assert.match(c.text, /追加の現地浸水投稿.*2024-08-22 00:20:00.*新宿区における浸水・冠水関連の報告.*X @user6.*消防が来ている.*1 \/ 3 件/);
+  assert.match(c.html, /href="https:\/\/x\.com\/user6\/status\/\d+" target="_blank"[^>]*>投稿を開く</); assert.match(c.html, /写真・動画を開く/);
+  await page.click("#snsCallout button[data-d='1']"); await page.waitForTimeout(100);
+  assert.match(await page.textContent("#snsCallout"), /00:05:00.*"膝まで水" です|00:05:00.*車が動けない/);
   await page.close();
 });

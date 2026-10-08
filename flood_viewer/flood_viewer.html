@@ -83,10 +83,16 @@ button:hover{background:#f0efec}
 .legend .grp{color:var(--muted);margin-left:4px}
 #overlayOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
 #rainDate{font:inherit;font-size:12px;padding:1px 2px}
-#legendRain,#legendKaden{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
-#legendRain .sw,#legendKaden .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
-#legendRain .lab,#legendKaden .lab{margin-right:6px}
-#legendKaden .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#legendRain,#legendKaden,#legendSns{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
+#legendRain .sw,#legendKaden .sw,#legendSns .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
+#legendRain .lab,#legendKaden .lab,#legendSns .lab{margin-right:6px}
+#legendKaden .dot,#legendSns .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#snsCallout h3{margin:0 18px 4px 0;font-size:13px;line-height:1.3}
+#snsCallout .meta{color:var(--ink2);font-size:11px;margin-bottom:4px}
+#snsCallout .txt{white-space:pre-wrap;line-height:1.45;word-break:break-word}
+#snsCallout .nav{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:11px;color:var(--ink2)}
+#snsCallout button{font:inherit;font-size:11px;padding:1px 6px;cursor:pointer}
+#snsCallout .close{position:absolute;right:6px;top:4px;border:0;background:none;font-size:15px;line-height:1;color:var(--ink2)}
 #legendGrid{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
 #legendGrid .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
 #legendGrid .lab{margin-right:6px}
@@ -103,6 +109,10 @@ button:hover{background:#f0efec}
 </head>
 <body>
 <div id="map"></div>
+<svg id="snsLead" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;display:none">
+  <line id="snsLeadLine" x1="0" y1="0" x2="0" y2="0" stroke="#222" stroke-width="1.5"/><circle id="snsLeadDot" cx="0" cy="0" r="3.5" fill="#222"/>
+</svg>
+<div id="snsCallout" class="panel" style="display:none;width:330px;max-height:60vh;overflow:auto;font-size:12px;z-index:6"></div>
 <div id="topbar" class="panel">
   <h1>Tokyo 2024-08-21 Flood Candidates</h1>
   <button id="playBtn" title="Space">▶ 再生</button>
@@ -116,6 +126,7 @@ button:hover{background:#f0efec}
   <span id="overlayOpts" style="display:none">
     <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <select id="rainDate"></select> <b id="rainVal" class="stat"></b></label>
     <label id="kadenOpt" style="display:none"><input type="checkbox" id="chkKaden" checked> 家電 <b id="kadenVal" class="stat"></b></label>
+    <label id="snsOpt" style="display:none"><input type="checkbox" id="chkSns" checked> SNS <select id="snsWin"><option value="60">直近 1 時間</option><option value="180">直近 3 時間</option><option value="day">当日 0 時から</option><option value="all">すべて</option></select> <b id="snsVal" class="stat"></b></label>
   </span>
   <span id="trajOpts" style="display:none">
     <label><input type="checkbox" id="chkBase" checked> 平時</label><label><input type="checkbox" id="chkEvent" checked> イベント時</label>
@@ -145,6 +156,7 @@ button:hover{background:#f0efec}
   <div id="trajStatus"></div>
   <div id="legendRain"></div>
   <div id="legendKaden"></div>
+  <div id="legendSns"></div>
   <div id="legendGrid"></div>
 </div>
 <div id="tip"></div>
@@ -203,6 +215,8 @@ button:hover{background:#f0efec}
       <span style="color:var(--muted)">kaden_out: kaden_event_ts.csv と kaden_baseline_ts.csv（kaden_compare.ipynb の出力）。郵便番号の点として全タブで表示、ホバーで時系列</span></p>
       <p style="margin:6px 0 2px"><b>5. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">xrain_to_geotiff.py の出力（rain_YYYYMMDD_HHMM.tif。index.json は無くてよい）。車流フォルダの中の rain/ でも可。全タブで道路の下に半透明で重ねる</span></p>
+      <p style="margin:6px 0 2px"><b>6. SNS 投稿の CSV（任意、複数可）:</b> <input id="snsInput" type="file" multiple accept=".csv,.txt"><br>
+      <span style="color:var(--muted)">FASTALERT 形式（投稿ID, 日時, 事象区分, …, 緯度, 経度, 投稿文）か、post_id, post_datetime_jst, latitude, longitude, message, source_category … の形式（UTF-8 / cp932）。緯度経度のある投稿を地点に表示し、クリックで本文と投稿リンク</span></p>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
   </div>
@@ -261,7 +275,11 @@ const CONFIG = {
     maxzoom: 18
   },
   // basemap: { tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors", maxzoom: 19 },
-  KADEN: { minBase: 5, low: 1/3, mild: 2/3, high: 3 },   // appliance points: ratio classes (event / baseline), baseline below minBase is not judged
+  KADEN: { minBase: 5, low: 1/3, mild: 2/3, high: 3 },
+  // SNS posts (input 6): colour by category (FASTALERT 事象区分 or source_category); unknown categories grey. Marker radius grows with the number of posts at the spot.
+  SNS_COLORS: {"浸水・冠水": "#2a78d6", "氾濫": "#1346a0", "河川": "#1346a0", "河川増水": "#4b9bd8", "追加の現地浸水投稿": "#4b9bd8", "追加報道SNS": "#7b52ab", "大雨": "#6fb0e6", "雨漏り": "#8dc3e6", "落雷": "#d9a400",
+               "降雹・降霰": "#b58900", "停電": "#8d6e63", "交通事故": "#e07b2a", "鉄道トラブル": "#9c6ad6", "混雑情報": "#9c9c9c", "火災": "#d03b3b", "緊急車両出動": "#c2185b"},
+  SNS_DEFAULT_COLOR: "#6e6e6e",   // appliance points: ratio classes (event / baseline), baseline below minBase is not judged
   playIntervalMs: 600,
   lineWidth: { gray: 1.0, black: 1.6, red: 3.0 }
 };
@@ -272,6 +290,8 @@ const CONFIG = {
 const S = {
   times: [],            // ["12:00", ...]
   kaden: null, showKaden: true, kadenFeats: null, kadenChartIdx: null,   // appliance points (input 4)
+  sns: null,            // {posts: [...], groups: Map("lat,lon" -> {lon, lat, posts}), noCoord, files, formats} from input 6
+  showSns: true, snsWin: "60", snsSel: null, snsFeats: null, snsNow: null,   // snsWin: "60" | "180" | "day" | "all"; snsSel: {key, idx} of the open callout
   ids: [],              // link ids (string) in CSV row order
   idx: new Map(),       // id -> row index
   T: 0,                 // number of time steps
@@ -451,6 +471,54 @@ function parseCsvRows(text){   // RFC 4180: quoted fields may hold commas, quote
   if(field.length || row.length){ row.push(field); rows.push(row); }
   return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ""));
 }
+// ---- SNS posts (input 6): two CSV layouts, told apart by the header ----
+const SNS_FORMATS = [
+  {name: "FASTALERT", cols: {id: "投稿ID", time: "日時", evno: "事象No.", cat: "事象区分", ev: "事象名", city: "市区町村", addr: "字・番地", lat: "緯度", lon: "経度", range: "範囲", text: "投稿文", media: "写真動画"}},
+  {name: "posts", cols: {id: "post_id", time: "post_datetime_jst", cat: "source_category", ev: "message_summary", city: "municipality", addr: "location_text", lat: "latitude", lon: "longitude",
+                         text: "message", media: "media_page_url", photo: "photo_url", video: "video_url", url: "post_url", platform: "platform", author: "author_handle",
+                         level: "location_level", conf: "coordinate_confidence", status: "inclusion_status", flags: "review_flags", notes: "notes", evidence: "flood_evidence"}},
+];
+function readSnsFile(fl){   // UTF-8 (BOM allowed) first, cp932 when that fails
+  return fl.arrayBuffer().then(buf => {
+    try{ return new TextDecoder("utf-8", {fatal: true}).decode(buf); }catch(e){ return new TextDecoder("shift_jis").decode(buf); }
+  }).then(txt => ({name: fl.name, txt: txt.replace(/^﻿/, "")}));
+}
+// "2024/08/21 23:50:00", "2024-08-21 23:50" or ISO 8601 with an offset ("2026-08-13T10:24:27+09:00"): the clock time is taken as
+// JST wall-clock, like the slider. Returns [ms, "YYYY-MM-DD HH:MM:SS"].
+function snsTime(str){
+  const w = str.trim().replace(/\s*(?:[+-]\d{2}:?\d{2}|Z)$/i, "").replace(/\//g, "-").replace(" ", "T");
+  return [new Date(w).getTime(), w.replace("T", " ")];
+}
+function parseSns(files){
+  const posts = []; let noCoord = 0, badTime = 0; const skipped = [], formats = new Set();
+  for(const {name, txt} of files){
+    const rows = parseCsvRows(txt); if(!rows.length){ skipped.push(name); continue; }
+    const head = rows[0].map(x => x.trim());
+    let fmt = null, ix = null;
+    for(const f of SNS_FORMATS){ const m = {}; for(const [k, col] of Object.entries(f.cols)) m[k] = head.indexOf(col); if(m.lat >= 0 && m.lon >= 0 && m.time >= 0){ fmt = f; ix = m; break; } }
+    if(!fmt){ skipped.push(name); continue; }
+    formats.add(fmt.name);
+    const get = (r, k) => ix[k] !== undefined && ix[k] >= 0 && r[ix[k]] !== undefined ? String(r[ix[k]]).trim() : "";
+    for(const r of rows.slice(1)){
+      const lat = parseFloat(get(r, "lat")), lon = parseFloat(get(r, "lon"));
+      if(!Number.isFinite(lat) || !Number.isFinite(lon)){ noCoord++; continue; }
+      const [t, time] = snsTime(get(r, "time"));
+      if(Number.isNaN(t)){ badTime++; continue; }
+      posts.push({id: get(r, "id"), t, time, evno: get(r, "evno"), cat: get(r, "cat") || "不明", ev: get(r, "ev"),
+                  place: [get(r, "city"), get(r, "addr")].filter(Boolean).join(" "), range: get(r, "range"),
+                  text: get(r, "text").replace(/¥n|\\n/g, "\n"), media: get(r, "media") || get(r, "photo") || get(r, "video"), url: get(r, "url"),
+                  platform: get(r, "platform"), author: get(r, "author"), level: get(r, "level"), conf: get(r, "conf"), status: get(r, "status"),
+                  flags: get(r, "flags"), notes: get(r, "notes"), evidence: get(r, "evidence"), lon, lat, file: name});
+    }
+  }
+  if(!posts.length && !noCoord) return null;
+  posts.sort((a, b) => a.t - b.t);
+  const groups = new Map();   // posts at the same coordinates (one event location can hold dozens of posts)
+  for(const p of posts){ const key = `${p.lat.toFixed(6)},${p.lon.toFixed(6)}`; let g = groups.get(key); if(!g){ g = {key, lon: p.lon, lat: p.lat, posts: []}; groups.set(key, g); } g.posts.push(p); }
+  const dates = [...new Set(posts.map(p => p.time.slice(0, 10)))].sort();
+  return {posts, groups, noCoord, badTime, skipped, files: files.map(f => f.name), formats: [...formats], dates};
+}
+
 // ---- appliance points (input 4): kaden_compare.ipynb's row = postal code, column = window tables ----
 const KADEN_TS = /^([a-z0-9]+)_(event|baseline)_ts\.csv$/i;
 function readKadenFiles(list){
@@ -494,9 +562,10 @@ function kadenCls(base, ev){
 const KADEN_LABEL = {0:"平時の台数が少ない / データなし", 1:"平時並み", 2:"減少（平時の 2/3 以下）", 3:"減少（平時の 1/3 以下）", 4:"増加（平時の 3 倍以上）"};
 const KADEN_COLOR = {0:"#9aa3ad", 1:"#4b5563", 2:"#f59e0b", 3:"#dc2626", 4:"#2563eb"};
 
-function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = []){
+function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], snsList = []){
   const want = CONFIG.files;
   const kadenTxt = readKadenFiles(kadenList);
+  const snsTxt = snsList.length ? Promise.all([...snsList].map(readSnsFile)).then(parseSns) : Promise.resolve(null);
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
   let total = 0, rainIndexFile = null, viewerIndexFile = null;
   const gridIndexFiles = [];
@@ -552,13 +621,14 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = []){
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const gridIndex = Promise.all(gridIndexFiles.map(fl => readSource(fl).then(JSON.parse).catch(() => null)));
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, rainIdx, viewerIdx, gridIdx, kaden]) => {
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt, snsTxt])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, rainIdx, viewerIdx, gridIdx, kaden, sns]) => {
+      if(snsList.length) fileRow("SNS", sns ? `${sns.posts.length.toLocaleString()} 件（座標なし ${sns.noCoord.toLocaleString()} 件は非表示、${sns.dates.join(", ")}、形式 ${sns.formats.join("/")}）` : "読める投稿がありません（列名を確認）");
       if(kadenList.length) fileRow("家電", kaden ? `kaden_event_ts.csv / kaden_baseline_ts.csv（${kaden.name}）` : "不足: *_event_ts.csv と *_baseline_ts.csv の組が見つかりません");
       S.period = (viewerIdx && viewerIdx.period) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
       const grid = gridRegistry(gridFiles, gridIdx);   // gridIdx: one index per grid folder
-      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, grid, kaden, loadInfo};
+      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, grid, kaden, sns, loadInfo};
     });
 }
 
@@ -790,6 +860,8 @@ async function boot(loaderFn){
   await tick();
   S.rain = raw.rain || null;
   S.kaden = raw.kaden ? parseKaden(raw.kaden) : null;
+  S.sns = raw.sns || null;
+  if(S.sns){ setProgress(`SNS: ${S.sns.posts.length.toLocaleString()} 件、${S.sns.groups.size.toLocaleString()} 地点（${S.sns.dates.join(", ")}）`); await tick(); }
   S.grid = raw.grid || null;
   if(S.grid){ S.gridParam = S.grid.params.length ? S.grid.params[0][0] : null; setProgress(`グリッド: ${S.grid.sources.size} ラスタ（${S.grid.params.map(p => p[1]).join(", ")}）`); await tick(); }
   if(S.rain) { setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick(); }
@@ -965,18 +1037,20 @@ function initMap(gj){
     // one feature under the cursor (feature-state, no re-filtering of layers).
     const trajHit = (pt) => { const fts = map.queryRenderedFeatures(pt, {layers: TRAJ_LAYERS}); return fts.length ? fts[0] : null; };
     let moveTimer = null, lastMove = null;
+    // In the walker-change tab (and the trajectory tab with a mesh shown) the cell under the cursor is shown in a tooltip.
     map.on("mousemove", (e) => {
-      if(S.mode !== "traj") return;
+      if(!gridMode()) return;
       lastMove = e;
       if(moveTimer) return;
       moveTimer = setTimeout(() => {
         moveTimer = null;
-        const ev = lastMove, ft = trajHit(ev.point);
-        if(ft){ map.getCanvas().style.cursor = "pointer"; showTip(ev, ft); }
-        else { map.getCanvas().style.cursor = ""; hideTip(); }
+        const ev = lastMove, ft = S.mode === "traj" ? trajHit(ev.point) : null;
+        if(ft){ map.getCanvas().style.cursor = "pointer"; showTip(ev, ft); return; }
+        if(S.mode === "traj") map.getCanvas().style.cursor = "";
+        if(!showGridTip(ev)) hideTip();
       }, 80);
     });
-    map.getCanvas().addEventListener("mouseleave", () => { if(S.mode === "traj"){ map.getCanvas().style.cursor = ""; hideTip(); } });
+    map.getCanvas().addEventListener("mouseleave", () => { if(gridMode()){ if(S.mode === "traj") map.getCanvas().style.cursor = ""; hideTip(); } });
     map.on("click", (e) => {
       if(S.kaden && S.showKaden && map.getLayer("kaden")){
         const hit = map.queryRenderedFeatures(e.point, {layers: ["kaden"]});
@@ -986,6 +1060,11 @@ function initMap(gj){
           else { S.pinnedId = key; $("chartPanel").classList.add("pinned"); }
           placePanel(e.point); showKadenChart(i); return;
         }
+      }
+      if(S.sns && map.getLayer("sns")){
+        const hit = S.showSns ? map.queryRenderedFeatures(e.point, {layers: ["sns"]}) : [];
+        if(hit.length){ openSnsCallout(hit[0].properties.key, 0); return; }
+        if(S.snsSel) closeSnsCallout();
       }
       if(S.mode === "traj"){
         const ft = trajHit(e.point);
@@ -997,6 +1076,17 @@ function initMap(gj){
       if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
     });
     map.on("moveend", updateTraj);
+    if(S.sns){
+      const pairs = Object.entries(CONFIG.SNS_COLORS).flat();
+      map.addSource("sns", {type:"geojson", data: EMPTY_FC});
+      map.addLayer({ id:"sns", type:"circle", source:"sns",
+                     paint:{ "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 5.5, 3, 9, 8, 15],
+                             "circle-color": ["match", ["get", "cat"], ...pairs, CONFIG.SNS_DEFAULT_COLOR],
+                             "circle-opacity": 0.85, "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.5 } });
+      map.on("mouseenter", "sns", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "sns", () => { map.getCanvas().style.cursor = ""; });
+      map.on("move", placeSnsCallout);
+    }
     if(S.kaden){
       map.addSource("kaden", {type:"geojson", data: EMPTY_FC});
       map.addLayer({ id:"kaden", type:"circle", source:"kaden",
@@ -1014,6 +1104,7 @@ function initMap(gj){
     setupGrid();
     updateRain();
     updateKaden();
+    updateSns();
     updateGrid();
     map.on("zoom", () => { if(S.mode === "traj" && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
     if(!hasTraj()){
@@ -1063,7 +1154,7 @@ function setMode(m){
   $("statTraffic").style.display = traffic ? "" : "none";
   for(const id of ["links-base","links-error"]) map.setLayoutProperty(id, "visibility", traffic ? "visible" : "none");
   map.setLayoutProperty("links-context", "visibility", traj ? "visible" : "none");
-  S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null);
+  S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); setHover(null); hideTip();
   setTrajSel(null);
   updateTraj();
   updateGrid();
@@ -1191,11 +1282,17 @@ const BLANK_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA
 const RAIN_CACHE = 8;
 
 function setupOverlays(){
-  const any = !!(S.rain || S.kaden);
+  const any = !!(S.rain || S.kaden || S.sns);
   $("overlayOpts").style.display = any ? "inline" : "none";
   if(S.kaden){
     $("kadenOpt").style.display = "inline";
     $("chkKaden").addEventListener("change", (e) => { S.showKaden = e.target.checked; e.target.blur(); updateKaden(); });
+  }
+  if(S.sns){
+    $("snsOpt").style.display = "inline";
+    $("snsWin").value = S.snsWin;
+    $("chkSns").addEventListener("change", (e) => { S.showSns = e.target.checked; e.target.blur(); updateSns(); });
+    $("snsWin").addEventListener("change", (e) => { S.snsWin = e.target.value; e.target.blur(); updateSns(); });
   }
   if(S.rain){
     $("rainOpt").style.display = "inline";
@@ -1428,6 +1525,81 @@ function slotAbsTime(t, fallbackYmd){
   d.setDate(d.getDate() + days);
   return d.getTime();
 }
+// ---- SNS posts: markers for the posts inside the window ending at the slot time, callout with a leader line on click ----
+function snsWindow(){
+  const T = slotAbsTime(S.t, S.sns && S.sns.dates.length ? S.sns.dates[0].replace(/-/g, "") : null);
+  if(S.snsWin === "all") return [-Infinity, Infinity, "すべて"];
+  if(S.snsWin === "day"){ const d = new Date(T); d.setHours(0, 0, 0, 0); return [d.getTime(), T, "当日 0 時から"]; }
+  const m = +S.snsWin; return [T - m * 60e3, T, `直近 ${m >= 60 ? `${m / 60} 時間` : `${m} 分`}`];
+}
+function snsVisible(){   // groups with their posts inside the current window
+  const [lo, hi] = snsWindow(), out = [];
+  for(const g of S.sns.groups.values()){
+    const posts = g.posts.filter(p => p.t > lo && p.t <= hi);
+    if(posts.length) out.push({key: g.key, lon: g.lon, lat: g.lat, posts: posts.slice().reverse()});   // latest first
+  }
+  return out;
+}
+function updateSns(){
+  if(!map || !S.sns || !map.getSource("sns")) return;
+  map.setLayoutProperty("sns", "visibility", S.showSns ? "visible" : "none");
+  const vis = S.showSns ? snsVisible() : [];
+  S.snsNow = new Map(vis.map(g => [g.key, g]));
+  const cats = new Map();
+  const feats = vis.map(g => {
+    const by = new Map(); for(const p of g.posts){ by.set(p.cat, (by.get(p.cat) || 0) + 1); cats.set(p.cat, (cats.get(p.cat) || 0) + 1); }
+    const cat = [...by.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    return {type:"Feature", properties: {key: g.key, n: g.posts.length, cat}, geometry: {type:"Point", coordinates: [g.lon, g.lat]}};
+  });
+  S.snsFeats = feats;
+  map.getSource("sns").setData({type:"FeatureCollection", features: feats});
+  const nPosts = vis.reduce((a, g) => a + g.posts.length, 0), label = snsWindow()[2];
+  $("snsVal").textContent = S.showSns ? `${nPosts.toLocaleString()} 件・${vis.length.toLocaleString()} 地点（${label}）` : "";
+  const lg = $("legendSns");
+  if(S.showSns && cats.size){
+    const top = [...cats.entries()].sort((a, b) => b[1] - a[1]);
+    lg.innerHTML = `<span class="lab">SNS 投稿（区分、丸の大きさ = 同じ地点の件数。クリックで本文）</span>` + top.slice(0, 8).map(([c, n]) =>
+      `<span class="dot" style="background:${CONFIG.SNS_COLORS[c] || CONFIG.SNS_DEFAULT_COLOR}"></span><span class="lab">${esc(c)} ${n}</span>`).join("")
+      + (top.length > 8 ? `<span class="lab">他 ${top.length - 8} 区分</span>` : "") + (S.sns.noCoord ? `<span class="lab">（座標なし ${S.sns.noCoord} 件は非表示）</span>` : "");
+    lg.style.display = "flex";
+  } else lg.style.display = "none";
+  if(S.snsSel){ const g = S.snsNow.get(S.snsSel.key); if(!g) closeSnsCallout(); else openSnsCallout(S.snsSel.key, Math.min(S.snsSel.idx, g.posts.length - 1)); }
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function openSnsCallout(key, idx){
+  const g = S.snsNow && S.snsNow.get(key); if(!g) return;
+  idx = Math.max(0, Math.min(idx, g.posts.length - 1));
+  S.snsSel = {key, idx};
+  const p = g.posts[idx], box = $("snsCallout");
+  const who = [p.platform, p.author ? "@" + p.author : ""].filter(Boolean).join(" ");
+  const meta = [p.ev, p.place, p.range && p.range !== "0" ? `範囲 ${p.range} m` : "", who, p.id ? `投稿ID ${p.id}` : ""].filter(Boolean);
+  const note = [p.evidence, p.level, p.conf, p.status, p.flags, p.notes].filter(Boolean);
+  const links = [p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">投稿を開く</a>` : "", p.media ? `<a href="${esc(p.media)}" target="_blank" rel="noopener">写真・動画を開く</a>` : ""].filter(Boolean);
+  box.innerHTML = `<button class="close" title="閉じる">×</button><h3>${esc(p.cat)}　<span style="font-weight:normal;color:var(--ink2)">${esc(p.time)}</span></h3>`
+    + `<div class="meta">${meta.map(esc).join(" ／ ")}</div><div class="txt">${esc(p.text)}</div>`
+    + (note.length ? `<div class="meta" style="margin-top:4px">${note.map(esc).join(" ／ ")}</div>` : "")
+    + (links.length ? `<div class="meta" style="margin-top:4px">${links.join(" ｜ ")}</div>` : "")
+    + `<div class="nav">${g.posts.length > 1 ? `<button data-d="-1">前</button><span>${idx + 1} / ${g.posts.length} 件（この地点）</span><button data-d="1">次</button>` : `<span>この地点の投稿 1 件</span>`}</div>`;
+  box.querySelector(".close").onclick = closeSnsCallout;
+  for(const b of box.querySelectorAll("button[data-d]")) b.onclick = () => openSnsCallout(key, (S.snsSel.idx + +b.dataset.d + g.posts.length) % g.posts.length);
+  box.style.display = "block"; $("snsLead").style.display = "block";
+  placeSnsCallout();
+}
+function closeSnsCallout(){ S.snsSel = null; $("snsCallout").style.display = "none"; $("snsLead").style.display = "none"; }
+function placeSnsCallout(){
+  if(!S.snsSel || !map) return;
+  const g = S.snsNow && S.snsNow.get(S.snsSel.key); if(!g) return;
+  const box = $("snsCallout"), rect = map.getContainer().getBoundingClientRect(), pt = map.project([g.lon, g.lat]);
+  const W = rect.width, H = rect.height, bw = box.offsetWidth || 330, bh = box.offsetHeight || 120, gap = 70;
+  const right = pt.x + gap + bw <= W - 10 || pt.x < W / 2;
+  let left = right ? pt.x + gap : pt.x - gap - bw, top = pt.y - 30;
+  left = Math.max(10, Math.min(left, W - bw - 10)); top = Math.max(10, Math.min(top, H - bh - 10));
+  box.style.left = `${rect.left + left}px`; box.style.top = `${rect.top + top}px`;
+  const ax = right ? left : left + bw, ay = Math.max(top + 12, Math.min(pt.y, top + bh - 12));   // anchor on the box edge facing the point
+  const L = $("snsLeadLine"); L.setAttribute("x1", rect.left + pt.x); L.setAttribute("y1", rect.top + pt.y); L.setAttribute("x2", rect.left + ax); L.setAttribute("y2", rect.top + ay);
+  const D = $("snsLeadDot"); D.setAttribute("cx", rect.left + pt.x); D.setAttribute("cy", rect.top + pt.y);
+}
+
 function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null; }
 
 function updateRain(){
@@ -1472,8 +1644,20 @@ function showTip(e, ft){
   const lid = ft.layer.id, p = ft.properties;
   const val = (k) => k === "mode" ? String(p[k]).split(",").map(m => MODE_LABEL[m] || m).join(",") : (String(p[k]).length > 40 ? String(p[k]).slice(0, 40) + "…" : p[k]);
   const extra = Object.keys(p).filter(k => !["time","kind"].includes(k) && p[k] !== null && p[k] !== "null").map(k => `<span class="k">${PROP_LABEL[k] || k}</span> ${val(k)}`).join(" · ");
+  placeTip(e, `<b>${TRAJ_KIND[lid]}</b><br><span class="k">${windowLabel(S.t)}</span>${extra ? "<br>" + extra : ""}`);
+}
+// Mesh cell under the cursor: layer name, window and the cell's value (count or event / baseline ratio). False when there is nothing to show.
+function showGridTip(e){
+  const G = S.grid; if(!G || !S.showGrid || !G.cur || !G.cur.bounds) return false;
+  const v = gridAt(e.lngLat); if(!v) return false;
+  const L = gridLayer() || [S.gridParam, S.gridParam, "ratio", "", 60];
+  const what = L[2] === "count" ? "" : "有事 ÷ 平時、";
+  placeTip(e, `<b>${esc(L[1])}</b><br><span class="k">${what}直近 ${L[4]} 分（${S.times[S.t]} まで）</span><br>${esc(v)}`);
+  return true;
+}
+function placeTip(e, html){
   const tip = $("tip");
-  tip.innerHTML = `<b>${TRAJ_KIND[lid]}</b><br><span class="k">${windowLabel(S.t)}</span>${extra ? "<br>" + extra : ""}`;
+  tip.innerHTML = html;
   tip.style.display = "block";
   const mapRect = $("map").getBoundingClientRect();
   let x = e.point.x + 14, y = e.point.y + 14;
@@ -1552,6 +1736,7 @@ function applyTime(t, force=false){
   updateTraj();
   updateRain();
   updateKaden();
+  updateSns();
   updateGrid();
 }
 
@@ -1767,15 +1952,16 @@ function drawChart(svg, a, b, errMask, title){
                      `2: ${probe.length ? `時刻別 ${nSlot} 本・メッシュ ${nGrid} 枚` : "なし"}`,
                      `3: ${$("gridInput").files.length ? `メッシュ ${[...$("gridInput").files].filter(f => GRID_NAME.test(f.name)).length} 枚` : "なし"}`,
                      `4: ${$("kadenInput").files.length ? `家電 時系列 ${[...$("kadenInput").files].filter(f => KADEN_TS.test(f.name)).length} 本` : "なし"}`,
-                     `5: ${$("rainInput").files.length ? `降雨 ${[...$("rainInput").files].filter(f => RAIN_NAME.test(f.name)).length} 枚` : "なし"}`];
+                     `5: ${$("rainInput").files.length ? `降雨 ${[...$("rainInput").files].filter(f => RAIN_NAME.test(f.name)).length} 枚` : "なし"}`,
+                     `6: ${$("snsInput").files.length ? `SNS ${$("snsInput").files.length} ファイル` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
-    for(const id of ["fileInput","dirInput","probeInput","rainInput","gridInput","kadenInput"]) $(id).addEventListener("change", note);
+    for(const id of ["fileInput","dirInput","probeInput","rainInput","gridInput","kadenInput","snsInput"]) $(id).addEventListener("change", note);
     $("loadBtn").addEventListener("click", async () => {
       const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
       if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("gridInput").files, $("kadenInput").files)); }
+      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("gridInput").files, $("kadenInput").files, $("snsInput").files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }

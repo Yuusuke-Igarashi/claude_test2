@@ -9,12 +9,14 @@
 - **徒歩変化タブ（入力 3、または人流フォルダ内の grid*/）**: 道路を描かず、選んだ層のラスタだけを重ねる。walk_mesh.ipynb の grid_walk25（25 m メッシュの徒歩ユニーク人数、平時・有事・比）、grid_users.py、probe_trips.py の grid/ を読む。比率の層（有事 ÷ 平時）は閾値で塗り分け（既定: 200 % 以上 = 赤、50 % 以下 = 青、その間 = 薄い灰、平時 0 = 透明）、件数の層は 0 を透明にして上限までの 5 段階の青。時刻に連動し、カーソル位置の値を表示。層の名前と単位は各フォルダの index.json の labels / units から取る。
 - **家電（入力 4、全タブ）**: kaden_compare.ipynb の kaden_event_ts.csv / kaden_baseline_ts.csv（行 = 郵便番号、列 = 15 分の窓）を読み、郵便番号の代表点を常に描く。丸の大きさ = 平時の台数、色 = 発災日/平時の比（1/3 以下 赤、2/3 以下 橙、平時並み 灰、3 倍以上 青。平時 5 台未満は判定せず薄く）。ホバーで比と台数の時系列（平時・発災日）をグラフに、クリックで固定。チェックで表示切替。列名は "HH:MM"（当日）か "MM-DD HH:MM"（複数日）で、スライダーの時刻と日付で突き合わせる。
 - **降雨（XRAIN、入力 5）**: xrain_to_geotiff.py の出力フォルダ（rain_YYYYMMDD_HHMM.tif。index.json は無くてよい）を入力 5 で選ぶか、車流フォルダの中の rain/ に置くと、全タブ共通で道路の下に半透明で重ねる。時刻スライダーに連動して 15 分スロットの GeoTIFF を読み、気象庁の降水強度凡例と同じ 8 段階で着色（1 mm/h 未満は透明）。カーソル位置の値を上部に表示。チェックで表示切替。
-- 2026-10-07 に、トラックタブ・デフォルトタブ・浸水域 shp・SNS 投稿・低位地帯の重ね合わせを削除した（git 履歴にあり。必要なら戻せる）。
+- **SNS 投稿（入力 6、全タブ）**: CSV を複数読み、緯度経度のある投稿を地点に描く。2 つの列構成をヘッダで判別する: FASTALERT 形式（投稿ID, 日時, 事象区分, 事象名, 市区町村, 字・番地, 緯度, 経度, 範囲, 投稿文, 写真動画）と、post_id, post_datetime_jst（ISO、+09:00 は JST の壁時計として読む）, source_category, message_summary, municipality, location_text, latitude, longitude, message, post_url, media_page_url / photo_url / video_url, platform, author_handle, location_level, coordinate_confidence, inclusion_status, review_flags, notes, flood_evidence の形式（UTF-8 / cp932）。スライダーの時刻に終わる窓（直近 1 時間 / 3 時間 / 当日 0 時から / すべて）の投稿だけを表示し、同じ地点の投稿は 1 つの丸にまとめて件数で大きさを変える。クリックで引き出し線付きの枠に本文・時刻・区分・場所・投稿者・位置の確からしさ・投稿と写真動画のリンクが出て、同地点の投稿を前後に送れる。色は区分。
+- **メッシュのツールチップ**: 徒歩変化タブ（と軌跡タブでメッシュを重ねたとき）は、カーソルの下のセルの層名・窓・値を吹き出しで表示する。
+- 2026-10-07 に、トラックタブ・デフォルトタブ・浸水域 shp・低位地帯の重ね合わせを削除した（git 履歴にあり。必要なら戻せる）。SNS 投稿は 10-08 に入力 6 として戻した。
 
 ## 使い方
 
 配布物は `dist/flood_viewer_standalone.html` 1 ファイル（MapLibre GL JS 同梱、約 1.1 MB）。
-ダブルクリックで開き、フォルダ（1: 車流 = tomtom_out（必須）、2: 人流 = probe_out（viewer/ と grid*/）、3: 徒歩変化のメッシュ = grid_walk25 など、4: 家電 = kaden_out、5: 降雨 = xrain_to_geotiff.py の出力）を選んで「読み込む」を押す（時刻別ファイルは表示時に必要な分だけ読む）。rain/ が 1 のフォルダに入っていれば 5 は省略できる。
+ダブルクリックで開き、フォルダ（1: 車流 = tomtom_out（必須）、2: 人流 = probe_out（viewer/ と grid*/）、3: 徒歩変化のメッシュ = grid_walk25 など、4: 家電 = kaden_out、5: 降雨 = xrain_to_geotiff.py の出力、6: SNS 投稿の CSV）を選んで「読み込む」を押す（時刻別ファイルは表示時に必要な分だけ読む）。rain/ が 1 のフォルダに入っていれば 5 は省略できる。
 1 のフォルダは probe_out のような出力フォルダそのままでよく、対象外のファイル（stays / trips / events の GeoJSON、gpkg など）は無視する。
 期間モード（viewer/index.json に period がある）では時刻軸を期間そのもの（開始時刻から slot_min 刻みで hours 時間）とし、交通 CSV の列は "HH:MM" で照合する。1 日分 00:00〜23:45 の CSV は 12:00 開始に並べ直され、CSV にない時刻は空欄になる（状態行に注記）。
 ページ見出しは viewer/index.json の期間（例 「冠水候補 2026-08-13 12:00〜08-14 12:00（平時 08-06 12:00〜08-07 12:00）」）から付け、期間がないときはネットワークファイル名の日付を使う。
