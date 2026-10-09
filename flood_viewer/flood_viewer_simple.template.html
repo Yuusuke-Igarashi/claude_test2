@@ -217,16 +217,16 @@ function setTitle(t){ document.title = t; document.querySelector("#topbar h1").t
 
 async function loadViaFetch(){
   const f = CONFIG.files;
-  S.networkName = f.network; setTitleFrom(f.network);
+  const vj = await fetchText("viewer.json", true), tomtom = vj ? parseViewerJson(vj) : null;   // tomtom_run.ipynb: file names, period, thresholds
+  S.networkName = (tomtom && tomtom.files && tomtom.files.network) || f.network; setTitleFrom(S.networkName);
   const [network, bs, es, bc, ec, err] = await Promise.all([
-    fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
+    fetchText(S.networkName), fetchText(f.baseline_speed), fetchText(f.event_speed),
     fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
   ]);
   const rainIdx = await fetchText(f.rain_dir + "/index.json", true);
   const rain = rainIdx ? rainFromIndex(JSON.parse(rainIdx), (name) => `${f.rain_dir}/${name}`) : null;
   if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
-  const vj = await fetchText("viewer.json", true);   // tomtom_run.ipynb: period + thresholds
-  return {network, bs, es, bc, ec, err, rain, tomtom: vj ? parseViewerJson(vj) : null};
+  return {network, bs, es, bc, ec, err, rain, tomtom};
 }
 
 // @from flood_viewer.html: RAIN_NAME, rainSlotKey, rainFromIndex, rainRegistry, readSource
@@ -264,10 +264,11 @@ function loadViaFiles(fileList, rainList = []){
     byName[fl.name] = fl;
   }
   if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（GeoTIFF、表示時に読み込み）`);
-  const read = (key, optional=false) => new Promise((res, rej) => {
+  const read = (key, optional=false, netName=null) => new Promise((res, rej) => {
     let name = want[key];
     let fl = byName[name];
-    if(!fl && key === "network"){   // any *_network.geojson (other dates / areas) stands in for the default name
+    if(key === "network" && netName && byName[netName]){ name = netName; fl = byName[name]; }   // the name viewer.json gives
+    else if(!fl && key === "network"){   // any *_network.geojson (other dates / areas) stands in for the default name
       const alt = Object.keys(byName).filter(n => /network\.geojson$/i.test(n));
       if(alt.length === 1){ name = alt[0]; fl = byName[name]; }
     }
@@ -280,7 +281,7 @@ function loadViaFiles(fileList, rainList = []){
   });
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const tomtomJson = tomtomFile ? readSource(tomtomFile).then(parseViewerJson).catch(() => null) : Promise.resolve(null);
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), rainIndex, tomtomJson])
+  return tomtomJson.then(tomtom => Promise.all([read("network", false, tomtom && tomtom.files && tomtom.files.network), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), rainIndex, Promise.resolve(tomtom)]))
     .then(([network, bs, es, bc, ec, err, rainIdx, tomtom]) => {
       if(tomtomFile) fileRow("viewer.json", tomtom ? `${tomtom.period ? "期間 " + tomtom.period.event.start + " から " + tomtom.period.event.hours + " 時間（" + tomtom.period.event.slot_min + " 分窓）" : "期間なし"} / ${tomtom.nbParams ? "閾値を既定値に" : "閾値なし"}` : "読めません");
       return {network, bs, es, bc, ec, err, rain: rainRegistry(rainFiles, rainIdx), period: periodFromNames(periodNames), tomtom};   // the file names alone define the rain slots
@@ -501,7 +502,7 @@ function setupOverlays(){
   lg.style.display = "flex";
   // value under the cursor
   let t = null;
-  map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; $("rainVal").textContent = rainAt(e.lngLat); }, 100); });
+  map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; const v = rainAt(e.lngLat); if(v || S.rain.cur) $("rainVal").textContent = v; }, 100); });   // keep "（この時刻の降雨なし）" etc. while no slot is shown
 }
 
 // @from flood_viewer.html: parseGeoTiff, decodeRain, paintRain

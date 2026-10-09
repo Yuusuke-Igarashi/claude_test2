@@ -18,9 +18,10 @@ mkdirSync(join(here, "dist"), { recursive: true });
 for (const [name, outName] of [["flood_viewer.html", "flood_viewer_standalone.html"], ["flood_viewer_simple.html", "flood_viewer_simple_standalone.html"]]) {
   const src = readFileSync(join(here, name), "utf8");
   if (!link.test(src) || !script.test(src)) throw new Error(`CDN tags not found in ${name}`);
+  // function replacers: a "$&" / "$'" inside the bundle must be inserted literally, not expanded as a replacement pattern
   const out = src
-    .replace(link, `<style>\n/* MapLibre GL JS ${pkg.version} CSS (inlined) */\n${css}\n</style>`)
-    .replace(script, `<script>\n/* MapLibre GL JS ${pkg.version} (inlined, BSD-3-Clause; see https://github.com/maplibre/maplibre-gl-js/blob/main/LICENSE.txt) */\n${js}\n</script>`);
+    .replace(link, () => `<style>\n/* MapLibre GL JS ${pkg.version} CSS (inlined) */\n${css}\n</style>`)
+    .replace(script, () => `<script>\n/* MapLibre GL JS ${pkg.version} (inlined, BSD-3-Clause; see https://github.com/maplibre/maplibre-gl-js/blob/main/LICENSE.txt) */\n${js}\n</script>`);
   const target = join(here, "dist", outName);
   writeFileSync(target, out);
   console.log(`built ${target} (${(statSync(target).size / 1048576).toFixed(2)} MB, maplibre-gl ${pkg.version})`);

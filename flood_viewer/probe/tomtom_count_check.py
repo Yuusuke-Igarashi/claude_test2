@@ -90,9 +90,9 @@ def compare(fine_dir, coarse_dir):
         both = fine_sum.notna() & coarse.notna()
         fs, cs = fine_sum.where(both), coarse.where(both)
         ratio = np.nansum(cs.values) / np.nansum(fs.values) if np.nansum(fs.values) else np.nan
-        cell = (cs / fs.replace(0, np.nan)).stack()
+        cell = (cs / fs.replace(0, np.nan)).stack().dropna()   # pandas 3 keeps NaN in stack()
         print(f"  {label}: total {cstep}-min {np.nansum(cs.values):,.0f} vs summed {fstep}-min {np.nansum(fs.values):,.0f} -> ratio {ratio:.3f}; "
-              f"per-cell median {cell.median():.3f} (IQR {cell.quantile(.25):.2f}-{cell.quantile(.75):.2f}, {len(cell):,} cells)")
+              f"per-cell median {cell.median():.3f} (IQR {cell.quantile(.25):.2f}-{cell.quantile(.75):.2f}, {int(both.values.sum()):,} cells compared)")
         hr = pd.DataFrame({"fine_sum": hourly(fs).sum(), "coarse": hourly(cs).sum()})
         hr["ratio"] = (hr["coarse"] / hr["fine_sum"].replace(0, np.nan)).round(3)
         print("  per clock hour:"); print(hr.T.round(0).to_string())

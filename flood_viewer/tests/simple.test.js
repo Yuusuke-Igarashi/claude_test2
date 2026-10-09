@@ -3,7 +3,7 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { readFileSync, existsSync, mkdirSync, createReadStream, statSync } from "node:fs";
+import { readFileSync, existsSync, mkdirSync, createReadStream, statSync, copyFileSync, writeFileSync } from "node:fs";
 import { dirname, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
@@ -23,7 +23,7 @@ const WET = [139.70 + 0.1 * (0.2 + 0.6 * 26 / 47), 35.71 - 0.06 * (0.5 + 0.15 * 
 let server, base, browser;
 const errors = [];
 // expected noise: basemap tiles offline, optional files absent (404), file:// fetch fallback (CORS or "URL scheme not supported")
-const NOISE = /gsi\.go\.jp|ERR_TUNNEL|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|404|CORS|ERR_FAILED|fetch failed|Fetch API cannot load|URL scheme "file"|is_target/;
+const NOISE = /gsi\.go\.jp|ERR_TUNNEL|ERR_INTERNET_DISCONNECTED|ERR_NAME_NOT_RESOLVED|404|CORS|ERR_FAILED|fetch failed|Fetch API cannot load|URL scheme "file"|is_target|が選択されていません/;   // the last one: the expected load error of the two-network-files test
 
 // Independent reference: count error cells per time column straight from error.csv (values = level 0..3,
 // only links with an error). level 0 = any level; 1..3 = exactly that level.
@@ -208,6 +208,12 @@ test("time axis: the start column rotates the CSV columns, the date gives the sl
   });
   assert.deepEqual(det, { date: "20260813", time: "12:00", windows: 96, first: "20260813 12:00", last: "20260814 11:45" });
   assert.equal(await page.evaluate(() => periodFromNames(["error.csv", "error_level1.csv"])), null);
+  // the last column as the start: slot 0 -> slot 1 jumps 12 h, but the window length stays the common 15-minute gap
+  await page.selectOption("#axisStart", "05:45"); await page.waitForTimeout(300);
+  const late = await page.evaluate(() => ({ t: [S.times[0], S.times[1]], slot: slotMin(), minCount: defaultParams().minCount, labels: [$("pSlot1").textContent, $("pSlot2").textContent], title: document.title }));
+  assert.deepEqual(late, { t: ["05:45", "18:00"], slot: 15, minCount: 2.5, labels: ["15", "15"], title: "冠水候補 2024-08-22 05:45〜08-22 17:45" });   // the date is still 08-22 from above
+  await page.selectOption("#axisStart", "18:00"); await page.waitForTimeout(300);
+  await page.fill("#axisDate", "2024-08-21"); await page.waitForTimeout(300);
   // a 30-minute CSV: the count threshold is per hour (10) scaled to the window, the labels say 30
   const thirty = await page.evaluate(() => {
     const keep = { times: S.times, T: S.T, nb: S.nbParams };
@@ -221,9 +227,13 @@ test("time axis: the start column rotates the CSV columns, the date gives the sl
   assert.deepEqual(thirty, { minCount: 5, slot: 30, labels: ["30", "30"], back: ["15", 15] });
   const vj = await page.evaluate(() => parseViewerJson(JSON.stringify({ period: { start: "2026-08-13 12:00", hours: 24, slot_min: 30 },
     thresholds: { min_base_count: 5, min_base_speed: 10, require_corroboration: true, error_levels: [{ speed: 0.4, count: 0.4, op: "or" }, { speed: 0.4, count: 0.4, op: "and" }, { speed: 0.2, count: 0.2, op: "and" }] } })));
-  assert.deepEqual(vj, { period: { event: { start: "2026-08-13 12:00", hours: 24, slot_min: 30 } },
+  assert.deepEqual(vj, { period: { event: { start: "2026-08-13 12:00", hours: 24, slot_min: 30 } }, files: null,
     nbParams: { minCount: 5, minSpeed: 10, corrob: true, levels: [{ speed: 0.4, count: 0.4, op: "or" }, { speed: 0.4, count: 0.4, op: "and" }, { speed: 0.2, count: 0.2, op: "and" }] } });
-  assert.deepEqual(await page.evaluate(() => parseViewerJson("{\"thresholds\": {\"error_levels\": [{\"speed\": 1}]}}")), { period: null, nbParams: null }, "an incomplete thresholds block is ignored");
+  assert.deepEqual(await page.evaluate(() => parseViewerJson(JSON.stringify({ files: { network: "20260813_network.geojson" } })).files), { network: "20260813_network.geojson" }, "the network file name of viewer.json");
+  assert.equal(await page.evaluate(() => parseViewerJson(JSON.stringify({ files: { network: "../x.geojson" } })).files), null, "only a plain file name is accepted");
+  assert.deepEqual(await page.evaluate(() => parseViewerJson("{\"thresholds\": {\"error_levels\": [{\"speed\": 1}]}}")), { period: null, nbParams: null, files: null }, "an incomplete thresholds block is ignored");
+  assert.deepEqual(await page.evaluate(() => parseViewerJson("{\"thresholds\": {\"error_levels\": [null, null, null]}}")), { period: null, nbParams: null, files: null }, "null levels do not throw");
+  assert.deepEqual(await page.evaluate(() => parseViewerJson(JSON.stringify({ thresholds: { min_base_count: null, min_base_speed: 10, error_levels: [{ speed: 0.4, count: 0.4 }, { speed: 0.4, count: 0.4 }, { speed: 0.2, count: 0.2 }] } }))), { period: null, nbParams: null, files: null }, "a null threshold is not taken as 0");
   assert.equal(await page.evaluate(() => parseViewerJson("not json")), null);
   await page.close();
 });
@@ -332,6 +342,8 @@ test("rain over http: slots follow the slider and the axis date, readout, toggle
   await page.fill("#axisDate", "2024-08-22"); await page.waitForTimeout(300);
   const moved = await page.evaluate(() => ({ key: rainDateFor(24), cur: S.rain.cur, val: $("rainVal").textContent }));
   assert.deepEqual(moved, { key: "20240823", cur: null, val: "（この時刻の降雨なし）" });
+  await page.mouse.move(box.x + px.x + 20, box.y + px.y + 20); await page.waitForTimeout(400);
+  assert.equal(await page.textContent("#rainVal"), "（この時刻の降雨なし）", "the status is kept while the mouse moves over the map");
   await page.fill("#axisDate", "2024-08-21");
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:00", null, { timeout: 15000 });
   await page.close();
@@ -376,6 +388,28 @@ test("standalone file:// with the folder picker: rain/ inside the traffic folder
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80));
+  await page.close();
+});
+
+test("folder picker with two network files: viewer.json names the one to use, without it the load stops with a message", async () => {
+  const dir = join(SHOTS, "two_networks");
+  mkdirSync(dir, { recursive: true });
+  for (const f of REQUIRED) copyFileSync(join(DATA, f), join(dir, f === REQUIRED[0] ? "chiba_20260813_network.geojson" : f));   // another area's name
+  writeFileSync(join(dir, "other_network.geojson"), JSON.stringify({ type: "FeatureCollection", features: [{ type: "Feature", properties: { id: "1", pair_id: null }, geometry: { type: "LineString", coordinates: [[139.7, 35.65], [139.71, 35.66]] } }] }));
+  let page = await openPicker();
+  await page.setInputFiles("#dirInput", dir);
+  await page.click("#loadBtn");
+  await page.waitForFunction(() => /読み込みエラー/.test(document.getElementById("progress").textContent), null, { timeout: 60000 });
+  assert.match(await page.textContent("#progress"), /tokyo_20240821_network\.geojson が選択されていません/, "two candidates, no viewer.json: the configured name is required");
+  await page.close();
+  writeFileSync(join(dir, "viewer.json"), JSON.stringify({ files: { network: "chiba_20260813_network.geojson" }, period: { start: "2024-08-21 18:00", hours: 12, slot_min: 15 } }));
+  page = await openPicker();
+  await page.setInputFiles("#dirInput", dir);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const info = await page.evaluate(() => ({ links: S.gj.features.length, title: document.title, axis: S.axisSource, nb: S.nbParams }));
+  assert.ok(info.links > 1000, "the network named in viewer.json was read, not the decoy");
+  assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00", "the axis date comes from viewer.json, not from the file name's 20260813"); assert.equal(info.axis, "viewer.json"); assert.equal(info.nb, null, "no thresholds block: CONFIG defaults");
   await page.close();
 });
 

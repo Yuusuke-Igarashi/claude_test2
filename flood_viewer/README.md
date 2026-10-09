@@ -112,8 +112,9 @@ tomtom_run.ipynb（利用者の notebook。リポジトリ外）に 2026-10-09 �
 窓の開始・終了時刻は TomTom の DBF ファイル名（`..._12_00-12_30...`）から読み、日付はファイル名に YYYYMMDD / YYYY-MM-DD があればそれを使う。
 無ければ `EVENT_DATE` と `PERIOD_START`（例 "12:00"）から決め、`PERIOD_START` より前の時刻の窓は翌日にする（12:00〜翌 12:00 の 24 時間）。
 `TIME_INTERVAL_MIN` は None なら ファイル名の 開始-終了（無ければ窓の間隔）から自動。CSV の時刻列は期間の順（12:00 … 23:30, 00:00 … 11:30）で書き、
-`viewer.json`（period: start / hours / slot_min、thresholds: min_base_count / min_base_speed / require_corroboration / error_levels）を出力フォルダに書く。
-ビューアはこれで開始日時・窓の長さ・閾値を自動設定する。
+`viewer.json`（files: network = ネットワーク GeoJSON の名前、period: start / hours / slot_min、thresholds: min_base_count / min_base_speed / require_corroboration / error_levels）を出力フォルダに書く。
+ビューアはこれで開始日時・窓の長さ・閾値を自動設定し、http 経由では files.network の名前でネットワークを読む（フォルダ選択では *_network.geojson を探す）。
+当日の走行が無いリンクは post に行が無く台数 0・速度 NaN になるので、「かつ」のレベル（L2・L3）には届かず L1 止まりになる（notebook の定義どおり。ビューアも同じ）。
 
 `probe/tomtom_count_check.py OUT15 OUT30` は、窓の長さが違う 2 つの出力の台数を突き合わせる（30 分窓 = 15 分窓 2 つの和 のはずなので比が約 1。約 0.5 なら 30 分版が 15 分と同じ数え方、約 0.25 ならさらに平時の 4 分の 1 割り）。
 引数 1 つなら、そのフォルダの平時／有事の時間帯別合計と比を出す（平時は 4 週平均なので通常時間帯で比が約 1。約 0.25 なら 4 で割る必要が無かった、約 4 なら割っていない）。

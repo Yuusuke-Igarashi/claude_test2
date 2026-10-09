@@ -377,15 +377,17 @@ async function fetchText(name, optional=false){
 
 async function loadViaFetch(){
   const f = CONFIG.files;
+  const vj = await fetchText("viewer.json", true), tomtom = vj ? parseViewerJson(vj) : null;   // tomtom_run.ipynb: file names, period, thresholds
+  S.period = (tomtom && tomtom.period) || null; S.nbParams = (tomtom && tomtom.nbParams) || null;
+  const networkName = (tomtom && tomtom.files && tomtom.files.network) || f.network;
   const [network, bs, es, bc, ec, err] = await Promise.all([
-    fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
+    fetchText(networkName), fetchText(f.baseline_speed), fetchText(f.event_speed),
     fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
   ]);
+  setTitleFrom(networkName);
   const rainIdx = await fetchText(f.rain_dir + "/index.json", true);
   const rain = rainIdx ? rainFromIndex(JSON.parse(rainIdx), (name) => `${f.rain_dir}/${name}`) : null;
   if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
-  const vj = await fetchText("viewer.json", true), tomtom = vj ? parseViewerJson(vj) : null;   // tomtom_run.ipynb: period + thresholds
-  S.period = (tomtom && tomtom.period) || null; S.nbParams = (tomtom && tomtom.nbParams) || null;
   const gridFound = [];
   for(const dir of f.grid_dirs){ const txt = await fetchText(dir + "/index.json", true); if(txt) gridFound.push([JSON.parse(txt), (name) => `${dir}/${name}`]); }
   const grid = gridFromIndexes(gridFound);
@@ -605,10 +607,11 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
   if(gridFiles.size) fileRow("grid*/", `グリッド ${gridFiles.size} ラスタ（GeoTIFF、表示時に読み込み）`);
   const loadInfo = `選択 ${total} ファイル: 時刻別ファイル（baseline_HHMM.geojson / event_HHMM.geojson）${sources.size ? sources.size + " 本" : "なし"}`
     + (other.length ? `。その他: ${other.join(", ")}${total > other.length + 5 + sources.size ? " …" : ""}` : "");
-  const read = (key, optional=false) => new Promise((res, rej) => {
+  const read = (key, optional=false, netName=null) => new Promise((res, rej) => {
     let name = want[key];
     let fl = byName[name];
-    if(!fl && key === "network"){   // any *_network.geojson (other dates / areas) stands in for the default name
+    if(key === "network" && netName && byName[netName]){ name = netName; fl = byName[name]; }   // the name viewer.json gives
+    else if(!fl && key === "network"){   // any *_network.geojson (other dates / areas) stands in for the default name
       const alt = Object.keys(byName).filter(n => /network\.geojson$/i.test(n));
       if(alt.length === 1){ name = alt[0]; fl = byName[name]; }
     }
@@ -625,7 +628,7 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const tomtomJson = tomtomFile ? readSource(tomtomFile).then(parseViewerJson).catch(() => null) : Promise.resolve(null);
   const gridIndex = Promise.all(gridIndexFiles.map(fl => readSource(fl).then(JSON.parse).catch(() => null)));
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt, snsTxt, tomtomJson])
+  return tomtomJson.then(tomtom => Promise.all([read("network", false, tomtom && tomtom.files && tomtom.files.network), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt, snsTxt, Promise.resolve(tomtom)]))
     .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, rainIdx, viewerIdx, gridIdx, kaden, sns, tomtom]) => {
       if(tomtomFile) fileRow("viewer.json", tomtom ? `${tomtom.period ? "期間 " + tomtom.period.event.start + " から " + tomtom.period.event.hours + " 時間（" + tomtom.period.event.slot_min + " 分窓）" : "期間なし"} / ${tomtom.nbParams ? "閾値を既定値に" : "閾値なし"}` : "読めません");
       if(snsList.length) fileRow("SNS", sns ? `${sns.posts.length.toLocaleString()} 件（座標なし ${sns.noCoord.toLocaleString()} 件は非表示、${sns.dates.join(", ")}、形式 ${sns.formats.join("/")}）` : "読める投稿がありません（列名を確認）");
@@ -743,11 +746,15 @@ function defaultParams(){
   return { minCount: CONFIG.MIN_BASE_COUNT_PER_HOUR * slotMin() / 60, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
            levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count, op: CONFIG.ERROR_LEVEL_OP})) };
 }
-// Minutes between consecutive time columns of the traffic CSV (15 for run2024.ipynb, 30 for tomtom_run.ipynb with 30-minute sets).
+// Minutes between consecutive time columns of the traffic CSV (15 for run2024.ipynb, 30 for tomtom_run.ipynb with 30-minute sets):
+// the most frequent positive gap, so an axis whose first two columns are not consecutive (simple viewer, 開始 = a late column) still gives the window.
 function slotMin(){
-  if(S.T < 2) return 15;
   const m = (t) => { const [h, mm] = t.split(":").map(Number); return h * 60 + mm; };
-  return ((m(S.times[1]) - m(S.times[0])) % 1440 + 1440) % 1440 || 15;
+  const n = new Map();
+  for(let c = 1; c < S.T; c++){ const g = ((m(S.times[c]) - m(S.times[c - 1])) % 1440 + 1440) % 1440; if(g) n.set(g, (n.get(g) || 0) + 1); }
+  let best = 0, cnt = 0;
+  for(const [g, k] of n) if(k > cnt || (k === cnt && g < best)){ best = g; cnt = k; }
+  return best || 15;
 }
 // viewer.json written by tomtom_run.ipynb next to the CSVs:
 //   {"period": {"start": "2026-08-13 12:00", "hours": 24, "slot_min": 30},
@@ -756,18 +763,21 @@ function slotMin(){
 // The period is used when the probe folder gives none (viewer/index.json); the thresholds become the ⚙ panel's defaults.
 // Returns {period, nbParams} (either may be null).
 function parseViewerJson(txt){
-  let j; try{ j = JSON.parse(txt); }catch(e){ console.warn("viewer.json: " + e.message); return null; }
-  const out = {period: null, nbParams: null};
-  const pd = j && j.period;
-  if(pd && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(String(pd.start || ""))) out.period = {event: {start: String(pd.start).slice(0, 16).replace("T", " "), hours: +pd.hours || 24, slot_min: +pd.slot_min || 15}};
-  const th = j && j.thresholds, lv = th && th.error_levels;
-  if(th && Array.isArray(lv) && lv.length === 3){
-    const P = { minCount: +th.min_base_count, minSpeed: +th.min_base_speed, corrob: th.require_corroboration !== false,
-                levels: lv.map(l => ({speed: +l.speed, count: +l.count, op: l.op === "and" ? "and" : "or"})) };
-    if([P.minCount, P.minSpeed, ...P.levels.flatMap(l => [l.speed, l.count])].every(Number.isFinite)) out.nbParams = P;
-    else console.warn("viewer.json: thresholds ignored (not numeric)");
-  } else if(th) console.warn("viewer.json: thresholds ignored (error_levels must list 3 levels)");
-  return out;
+  try{
+    const j = JSON.parse(txt), out = {period: null, nbParams: null, files: null};
+    if(j && j.files && typeof j.files.network === "string" && /^[\w.-]+\.geojson$/i.test(j.files.network)) out.files = {network: j.files.network};   // a plain file name next to viewer.json
+    const num = (v) => typeof v === "number" && Number.isFinite(v) ? v : NaN;   // null / strings are not thresholds
+    const pd = j && j.period;
+    if(pd && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(String(pd.start || ""))) out.period = {event: {start: String(pd.start).slice(0, 16).replace("T", " "), hours: num(pd.hours) > 0 ? pd.hours : 24, slot_min: num(pd.slot_min) > 0 ? pd.slot_min : 15}};
+    const th = j && j.thresholds, lv = th && th.error_levels;
+    if(th && Array.isArray(lv) && lv.length === 3 && lv.every(l => l && typeof l === "object")){
+      const P = { minCount: num(th.min_base_count), minSpeed: num(th.min_base_speed), corrob: th.require_corroboration !== false,
+                  levels: lv.map(l => ({speed: num(l.speed), count: num(l.count), op: l.op === "and" ? "and" : "or"})) };
+      if([P.minCount, P.minSpeed, ...P.levels.flatMap(l => [l.speed, l.count])].every(Number.isFinite)) out.nbParams = P;
+      else console.warn("viewer.json: thresholds ignored (not numeric)");
+    } else if(th) console.warn("viewer.json: thresholds ignored (error_levels must list 3 levels)");
+    return out;
+  }catch(e){ console.warn("viewer.json: " + e.message); return null; }
 }
 
 function recompute(){
@@ -1348,7 +1358,7 @@ function setupOverlays(){
     lg.style.display = "flex";
     // value under the cursor
     let t = null;
-    map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; $("rainVal").textContent = rainAt(e.lngLat); }, 100); });
+    map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; const v = rainAt(e.lngLat); if(v || (S.rain && S.rain.cur)) $("rainVal").textContent = v; }, 100); });
   }
 }
 

@@ -36,6 +36,8 @@ jobs:
         run: npm run data
       - name: Build standalone HTML
         run: npm run build
+      - name: Generated flood_viewer_simple.html must be committed up to date
+        run: git diff --exit-code -- flood_viewer/flood_viewer_simple.html
       - name: Run browser tests
         run: npm test
       - name: Upload standalone HTML and screenshots

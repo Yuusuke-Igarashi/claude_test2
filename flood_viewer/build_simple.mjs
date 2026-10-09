@@ -85,7 +85,7 @@ export function buildSimple(full = readFileSync(SOURCE, "utf8"), tpl = readFileS
       if (tags.length !== 2) throw new Error("MapLibre CDN tags not found in flood_viewer.html");
       return tags.join("\n");
     })
-    .replace(/^<!-- @generated -->$/m, "<!-- GENERATED FILE: built by build_simple.mjs from flood_viewer_simple.template.html plus the shared functions of flood_viewer.html. Edit those and run `npm run build`. -->");
+    .replace(/^<!-- @generated -->$/m, () => "<!-- GENERATED FILE: built by build_simple.mjs from flood_viewer_simple.template.html plus the shared functions of flood_viewer.html. Edit those and run `npm run build`. -->");
   const left = out.match(/@(from|config|maplibre|generated)\b/);
   if (left) throw new Error(`marker not replaced: ${left[0]}`);
 
