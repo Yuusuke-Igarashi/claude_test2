@@ -109,8 +109,9 @@ standalone HTML とスクリーンショットをアーティファクトとし�
 ## TomTom 交通統計の notebook（tomtom_run.ipynb、2026-08-13 版）と台数の点検
 
 tomtom_run.ipynb（利用者の notebook。リポジトリ外）に 2026-10-09 に入れた変更:
-窓の開始・終了時刻は TomTom の DBF ファイル名（`..._12_00-12_30...`）から読み、日付はファイル名に YYYYMMDD / YYYY-MM-DD があればそれを使う。
-無ければ `EVENT_DATE` と `PERIOD_START`（例 "12:00"）から決め、`PERIOD_START` より前の時刻の窓は翌日にする（12:00〜翌 12:00 の 24 時間）。
+窓の開始・終了時刻は TomTom の DBF ファイル名（`..._12_00-12_30...`）から読む。期間の開始（どの窓が最初か）は手入力せず、次の順で TomTom ファイルから決める:
+ファイル名の日付（YYYYMMDD / YYYY-MM-DD）、時間セットの番号（DBF 列名の接頭辞 `CS12_Hits` の 12、またはファイル名の set12 / ts12）で並べて最初の窓を `EVENT_DATE` の開始とし時計が戻る所で翌日、
+どちらも無いときだけ `PERIOD_START`（例 "12:00"。None なら `EVENT_DATE` の 00:00）。番号順に並べて窓が等間隔にならないときは番号を使わない。決め方は実行時に表示する。
 `TIME_INTERVAL_MIN` は None なら ファイル名の 開始-終了（無ければ窓の間隔）から自動。CSV の時刻列は期間の順（12:00 … 23:30, 00:00 … 11:30）で書き、
 `viewer.json`（files: network = ネットワーク GeoJSON の名前、period: start / hours / slot_min、thresholds: min_base_count / min_base_speed / require_corroboration / error_levels）を出力フォルダに書く。
 ビューアはこれで開始日時・窓の長さ・閾値を自動設定し、http 経由では files.network の名前でネットワークを読む（フォルダ選択では *_network.geojson を探す）。
