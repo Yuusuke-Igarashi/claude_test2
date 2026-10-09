@@ -61,6 +61,7 @@ error_level = 満たした最も厳しい k（0 = 異常なし）。リンクは
 `flood_viewer.html` の共通関数（CSV / GeoTIFF の解析、異常判定、グラフ、降雨の描画など。テンプレートの `// @from flood_viewer.html: 名前, …` 行）と
 CONFIG の必要な項目（`// @config from flood_viewer.html: …` 行）、MapLibre のタグをそのまま埋め込んで作る。本体を直せばシンプル版にも `npm run build` で反映される。
 直すときはテンプレートか本体を編集して `npm run build` し、生成された `flood_viewer_simple.html` も一緒にコミットする（テストが生成結果との一致を確かめる）。
+配布先向けの使い方は `README_simple_viewer.txt`（単独で読める 1 枚もの。本体やビルドには触れない）。
 
 ## 開発・テスト
 
