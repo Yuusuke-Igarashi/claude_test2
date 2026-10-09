@@ -45,5 +45,6 @@ jobs:
           name: flood-viewer
           path: |
             flood_viewer/dist/flood_viewer_standalone.html
+            flood_viewer/dist/flood_viewer_simple_standalone.html
             flood_viewer/tests/shots/
           if-no-files-found: warn

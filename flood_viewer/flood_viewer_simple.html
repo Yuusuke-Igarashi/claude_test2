@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<!-- GENERATED FILE: built by build_simple.mjs from flood_viewer_simple.template.html plus the shared functions of flood_viewer.html. Edit those and run `npm run build`. -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tokyo 2024-08-21 Flood Candidates</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<style>
+:root{
+  color-scheme: light;
+  --surface:#fcfcfb; --page:#f9f9f7;
+  --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --series-1:#2a78d6;   /* baseline */
+  --series-2:#eb6834;   /* event    */
+  --road-gray:#b4b2ab; --road-black:#1a1a19; --road-red:#d03b3b;
+  --lv1:#f0a23a; --lv2:#d03b3b; --lv3:#7a0f3d;   /* error level 1 / 2 / 3 (3 = strongest drop) */
+  --font:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+}
+html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);background:var(--page);font-size:13px}
+#map{position:absolute;inset:0}
+.panel{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.10);padding:10px 12px;z-index:5}
+#topbar{top:10px;left:10px;right:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+#topbar h1{font-size:14px;font-weight:600;margin:0 6px 0 0;white-space:nowrap}
+#timeLabel{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.2em}
+#slider{flex:1;min-width:200px;accent-color:var(--ink)}
+button{font:inherit;padding:4px 10px;border:1px solid var(--axis);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{background:#f0efec}
+.stat{color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stat b{color:var(--ink);font-weight:600}
+.legend{display:flex;gap:12px;align-items:center;color:var(--ink2);white-space:nowrap}
+.legend span::before{content:"";display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px;background:var(--c)}
+#chartPanel{bottom:24px;left:10px;width:440px;display:none}
+#chartPanel.pinned{border-color:var(--ink)}
+#chartPanel header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+#chartPanel header .title{font-weight:600;font-size:14px}
+#chartPanel header .sub{color:var(--muted)}
+#chartPanel .status{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;color:#fff;margin-left:6px;vertical-align:middle}
+.readout{display:grid;grid-template-columns:auto 1fr 1fr;gap:2px 12px;color:var(--ink2);font-variant-numeric:tabular-nums;margin:4px 0 6px}
+.readout .h{color:var(--muted);font-size:11px}
+.readout .v{color:var(--ink);text-align:right}
+.chart{display:block;width:100%;height:150px}
+.chart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
+.chart .ttl{fill:var(--ink2);font-size:12px;font-weight:600}
+.chart .grid{stroke:var(--grid);stroke-width:1}
+.chart .axis{stroke:var(--axis);stroke-width:1}
+.chart .l1{stroke:var(--series-1);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chart .l2{stroke:var(--series-2);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chart .now{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
+.chart .err{fill:var(--road-red);opacity:.16}
+.chart .err.l1{fill:var(--lv1)} .chart .err.l2{fill:var(--lv2)} .chart .err.l3{fill:var(--lv3)}
+.chart .cross{stroke:var(--muted);stroke-width:1}
+.chart .dot{stroke:var(--surface);stroke-width:2}
+.chart .tip{fill:var(--ink);font-size:11px}
+.chart .tipbg{fill:var(--surface);stroke:var(--border)}
+.clegend{display:flex;gap:14px;color:var(--ink2);margin-top:2px}
+.clegend span::before{content:"";display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px;background:var(--c)}
+.hint{color:var(--muted);font-size:11px;margin-top:6px}
+#settings{top:64px;right:10px;width:400px;display:none;z-index:6}
+#settings h2{font-size:13px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+#settings h2 button{font-size:12px;padding:2px 8px}
+#settings .grp{margin:8px 0 4px;color:var(--muted);font-size:11px;letter-spacing:.02em}
+#settings .row{display:flex;align-items:center;gap:6px;margin:4px 0;color:var(--ink2);flex-wrap:wrap}
+#settings select{font:inherit;padding:2px 4px;border:1px solid var(--axis);border-radius:5px;background:var(--panel-bg,transparent);color:inherit}
+#settings input[type=number]{width:70px;font:inherit;padding:3px 6px;border:1px solid var(--axis);border-radius:5px;text-align:right;font-variant-numeric:tabular-nums}
+#settings .note{color:var(--muted);font-size:11px;margin-top:8px;line-height:1.5}
+#settings .check{margin-top:8px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#settings .check.ok{color:#006300}
+#settings .check.ng{color:var(--road-red)}
+#settings .foot{display:flex;gap:8px;margin-top:10px}
+#overlayOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
+#rainDate{font:inherit;font-size:12px;padding:1px 2px}
+#legendRain{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
+#legendRain .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
+#legendRain .lab{margin-right:6px}
+#loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
+#loader .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:520px;max-width:90vw}
+#loader h2{margin:0 0 8px;font-size:15px}
+#loader ul{margin:6px 0;padding-left:18px;color:var(--ink2)}
+#loader .err{color:var(--road-red)}
+#progress{color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
+#filePick{display:none;margin-top:10px}
+.maplibregl-ctrl-attrib{font-size:10px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="topbar" class="panel">
+  <h1>Tokyo 2024-08-21 Flood Candidates</h1>
+  <button id="playBtn" title="Space">▶ 再生</button>
+  <span id="timeLabel">--:--</span>
+  <input id="slider" type="range" min="0" max="0" value="0" step="1">
+  <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</span>
+  <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
+  <span id="overlayOpts" style="display:none">
+    <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <select id="rainDate" title="最初の時刻（スライダー左端）の日付。日付をまたぐ時刻は翌日のファイルを使う"></select> <b id="rainVal" class="stat"></b></label>
+  </span>
+  <span class="legend" id="legendTraffic">
+    <span style="--c:var(--road-gray)">対象外</span>
+    <span style="--c:var(--road-black)">対象</span>
+    <span style="--c:var(--lv1)">異常 L1</span>
+    <span style="--c:var(--lv2)">L2</span>
+    <span style="--c:var(--lv3)">L3</span>
+  </span>
+  <div id="legendRain"></div>
+</div>
+
+<div id="settings" class="panel">
+  <h2>判定閾値 <button id="settingsClose">閉じる</button></h2>
+  <div class="grp">対象リンク（is_target）: 両方を満たす</div>
+  <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="1" min="0"> 台/15分</div>
+  <div class="row">平時速度 ≥ <input type="number" id="pMinSpeed" step="1" min="0"> km/h</div>
+  <div class="grp">異常レベル（error1）: 対象リンクで、速度比 ≤ 値 と 台数比 ≤ 値 を「または」（どちらか）か「かつ」（両方）で組み合わせる。番号が大きいほど厳しい（L3 ⊂ L2 ⊂ L1 になるよう設定する）</div>
+  <div class="row">L1: 速度比 ≤ <input type="number" id="pL1Speed" step="0.05" min="0" max="2"> <select id="pL1Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL1Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L2: 速度比 ≤ <input type="number" id="pL2Speed" step="0.05" min="0" max="2"> <select id="pL2Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL2Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> <select id="pL3Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
+  <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
+  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 15 分も同レベル以上であることを要求する</label></div>
+  <div class="check" id="pCheck"></div>
+  <div class="foot"><button id="pDefault">既定値に戻す</button></div>
+  <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
+</div>
+
+<div id="chartPanel" class="panel">
+  <header>
+    <span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
+    <span class="sub" id="cpSub"></span>
+  </header>
+  <div class="readout">
+    <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
+    <span id="roL1">速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
+    <span id="roL2">台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
+  </div>
+  <svg id="chartSpeed" class="chart"></svg>
+  <svg id="chartCount" class="chart"></svg>
+  <div class="clegend">
+    <span style="--c:var(--series-1)">平時 (baseline)</span>
+    <span style="--c:var(--series-2)">イベント時 (event)</span>
+    <span style="--c:var(--lv1)">異常 L1</span><span style="--c:var(--lv2)">L2</span><span style="--c:var(--lv3)">L3</span>
+  </div>
+  <div class="hint" id="cpHint">クリックで固定 / もう一度クリックで解除</div>
+</div>
+
+<div id="loader">
+  <div class="box">
+    <h2>データ読み込み中</h2>
+    <ul id="fileList"></ul>
+    <div id="progress"></div>
+    <div id="filePick">
+      <p>フォルダ・ファイルを選んで「読み込む」を押してください。1 だけが必須です。<br>
+      <span style="color:var(--muted)">HTML を出力フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
+      <p style="margin:6px 0 2px"><b>1. 車流（TomTom 交通統計）のフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">tomtom_out: network.geojson、baseline_/event_ の speed・count CSV、error.csv。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
+      <p style="margin:6px 0 2px"><b>2. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">xrain_to_geotiff.py の出力（rain_YYYYMMDD_HHMM.tif。index.json は無くてよい）。車流フォルダの中の rain/ でも可。道路の下に半透明で重ねる</span></p>
+      <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Config: the file names, thresholds, rain colours and basemap are copied from flood_viewer.html at build time.
+//   is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
+//   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed <op> count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest; op = ERROR_LEVEL_OP: "or" / "and")
+//   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)   (when REQUIRE_CORROBORATION)
+//   error_level = highest k with error_k (0 = none). Editable in the ⚙ panel.
+// ============================================================
+const CONFIG = {
+  files: {
+    network: "tokyo_20240821_network.geojson",
+    baseline_speed: "baseline_speed.csv",
+    event_speed: "event_speed.csv",
+    baseline_count: "baseline_count.csv",
+    event_count: "event_count.csv",
+    error: "error.csv",
+    rain_dir: "rain"
+  },
+  RAIN_SCALE: [[1, "#a0d2ff"], [5, "#218cff"], [10, "#0041ff"], [20, "#faf500"], [30, "#ff9900"], [50, "#ff2800"], [80, "#b40068"]],
+  RAIN_OPACITY: 0.55,
+  MIN_BASE_COUNT: 2.5,
+  MIN_BASE_SPEED: 10,
+  ERROR_LEVELS: [{speed: 0.75, count: 0.75}, {speed: 0.6, count: 0.6}, {speed: 0.5, count: 0.5}],
+  ERROR_LEVEL_OP: "or",
+  REQUIRE_CORROBORATION: true,
+  basemap: {
+    tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
+    attribution: "<a href=\"https://maps.gsi.go.jp/development/ichiran.html\" target=\"_blank\">地理院タイル</a>",
+    maxzoom: 18
+  },
+  playIntervalMs: 600,
+  lineWidth: {
+    gray: 1,
+    black: 1.6,
+    red: 3
+  }
+};
+
+// ============================================================
+// State
+// ============================================================
+const S = {
+  times: [],            // ["12:00", ...]
+  ids: [],              // link ids (string) in CSV row order
+  idx: new Map(),       // id -> row index
+  T: 0,                 // number of time steps
+  bs: null, es: null, bc: null, ec: null,   // Float32Array[N*T]
+  err: null,            // Uint8Array[N*T]  final error (computed in page)
+  e1: null,             // Uint8Array[N*T]  valid error1 (is_target & error1)
+  errRef: null,         // Uint8Array[N*T]  error.csv from the notebook, for cross-checking (optional)
+  tgt: null,            // Uint8Array[N*T]
+  pairRow: null,        // Int32Array[N] row index of the opposing link, -1 if none
+  adjPrev: null,        // Uint8Array[T] 1 if times[c-1] is exactly one interval before times[c]
+  params: null,         // current thresholds
+  cls: null,            // Uint8Array[N*T]  0 gray / 1 black / 2.. error level + 1
+  cur: null,            // Uint8Array[N] current class applied to map
+  fids: null,           // Int32Array[N] feature id (numeric) or -1 if not in network
+  hasData: null,        // Uint8Array[N] any finite baseline value
+  countsTarget: [], countsError: [], countsLevel: [[], [], []],
+  t: 0,
+  rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, dates, date, cur: {key, vals, w, h, nodata, bounds, url}}
+  dataDate: null,       // "YYYYMMDD" from the network file name (date of the first slot)
+  showRain: true,
+  hoverId: null, pinnedId: null,
+  playing: false, timer: null
+};
+let map = null;
+
+// ============================================================
+// Loading
+// ============================================================
+const $ = (id) => document.getElementById(id);
+function setProgress(msg){ $("progress").textContent = msg; }
+function setTitle(t){ document.title = t; document.querySelector("#topbar h1").textContent = t; }
+function setTitleFrom(name){
+  const m = String(name).match(/(\d{4})(\d{2})(\d{2})/);
+  if(!m) return;
+  S.dataDate = `${m[1]}${m[2]}${m[3]}`;                       // date of the first slot when no period is known
+  setTitle(`Tokyo ${m[1]}-${m[2]}-${m[3]} Flood Candidates`);
+}
+function fileRow(name, state){
+  let li = document.querySelector(`#fileList li[data-name="${name}"]`);
+  if(!li){ li = document.createElement("li"); li.dataset.name = name; $("fileList").appendChild(li); }
+  li.textContent = `${name}: ${state}`;
+}
+async function fetchText(name, optional=false){
+  fileRow(name, "取得中");
+  try{
+    const r = await fetch(name, {cache:"no-store"});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const txt = await r.text();
+    fileRow(name, `OK (${(txt.length/1048576).toFixed(1)} MB)`);
+    return txt;
+  }catch(e){
+    fileRow(name, optional ? "なし" : `失敗: ${e.message}`);
+    if(optional) return null;
+    throw e;
+  }
+}
+
+async function loadViaFetch(){
+  const f = CONFIG.files;
+  setTitleFrom(f.network);
+  const [network, bs, es, bc, ec, err] = await Promise.all([
+    fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
+    fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
+  ]);
+  const rainIdx = await fetchText(f.rain_dir + "/index.json", true);
+  const rain = rainIdx ? rainFromIndex(JSON.parse(rainIdx), (name) => `${f.rain_dir}/${name}`) : null;
+  if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
+  return {network, bs, es, bc, ec, err, rain};
+}
+
+const RAIN_NAME = /^rain_(\d{8})_(\d{2})(\d{2})\.tiff?$/i;
+function rainSlotKey(m){
+  let date = m[1], hh = m[2], mm = m[3];
+  if(hh === "24" && mm === "00"){
+    const d = new Date(Date.UTC(+date.slice(0, 4), +date.slice(4, 6) - 1, +date.slice(6, 8) + 1));
+    date = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`; hh = "00";
+  }
+  return `${date}_${hh}:${mm}`;
+}
+function rainFromIndex(index, srcOf){
+  const sources = new Map();
+  for(const f of (index && index.files) || []){ const m = String(f.file || "").match(RAIN_NAME); if(m) sources.set(rainSlotKey(m), srcOf(f.file)); }
+  return rainRegistry(sources, index);
+}
+function rainRegistry(sources, index){
+  if(!sources.size) return null;
+  const dates = [...new Set([...sources.keys()].map(k => k.split("_")[0]))].sort();
+  return {index: index || {}, sources, dates, cache: new Map(), date: dates[dates.length - 1], cur: null, loading: null};
+}
+function readSource(src){
+  if(typeof src === "string") return fetch(src, {cache:"no-store"}).then(r => { if(!r.ok) throw new Error(`HTTP ${r.status} ${src}`); return r.text(); });
+  return new Promise((res, rej) => { const rd = new FileReader(); rd.onload = () => res(rd.result); rd.onerror = () => rej(rd.error); rd.readAsText(src); });
+}
+
+// fileList: the traffic folder (or the individual files); rainList: the rain folder.
+// rain_*.tif (and rain/index.json) inside the traffic folder are accepted when no rain folder is chosen.
+function loadViaFiles(fileList, rainList = []){
+  const want = CONFIG.files;
+  const byName = {}, rainFiles = new Map();
+  let rainIndexFile = null;
+  for(const fl of rainList){
+    const r = fl.name.match(RAIN_NAME);
+    if(r) rainFiles.set(rainSlotKey(r), fl);
+    else if(fl.name === "index.json") rainIndexFile = fl;
+  }
+  for(const fl of fileList){
+    const r = fl.name.match(RAIN_NAME);
+    if(r){ if(!rainList.length) rainFiles.set(rainSlotKey(r), fl); continue; }
+    if(fl.name === "index.json"){
+      if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl;
+      continue;
+    }
+    byName[fl.name] = fl;
+  }
+  if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（GeoTIFF、表示時に読み込み）`);
+  const read = (key, optional=false) => new Promise((res, rej) => {
+    let name = want[key];
+    let fl = byName[name];
+    if(!fl && key === "network"){   // any *_network.geojson (other dates / areas) stands in for the default name
+      const alt = Object.keys(byName).filter(n => /network\.geojson$/i.test(n));
+      if(alt.length === 1){ name = alt[0]; fl = byName[name]; }
+    }
+    if(!fl){ fileRow(name, optional ? "なし" : "未選択"); return optional ? res(null) : rej(new Error(`${name} が選択されていません`)); }
+    if(key === "network") setTitleFrom(name);
+    const rd = new FileReader();
+    rd.onload = () => { fileRow(name, `OK (${(rd.result.length/1048576).toFixed(1)} MB)`); res(rd.result); };
+    rd.onerror = () => rej(rd.error);
+    rd.readAsText(fl);
+  });
+  const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), rainIndex])
+    .then(([network, bs, es, bc, ec, err, rainIdx]) => ({network, bs, es, bc, ec, err, rain: rainRegistry(rainFiles, rainIdx)}));   // the file names alone define the slots
+}
+
+function parseMatrix(text, {first=false, uint8=false}={}){
+  const lines = text.split(/\r?\n/);
+  const header = lines[0].split(",");
+  const times = header.slice(1).map(s => s.trim());
+  const T = times.length;
+  if(first){
+    S.times = times; S.T = T;
+  }else{
+    if(T !== S.T) throw new Error(`時刻列数が一致しません (${T} vs ${S.T})`);
+    for(let i=0;i<T;i++) if(times[i] !== S.times[i]) throw new Error(`時刻ヘッダが一致しません: ${times[i]} vs ${S.times[i]}`);
+  }
+  const rows = [];
+  for(let i=1;i<lines.length;i++){ if(lines[i].length) rows.push(lines[i]); }
+  const N = rows.length;
+  if(first){
+    S.ids = new Array(N);
+    S.idx = new Map();
+  }else if(N !== S.ids.length){
+    throw new Error(`行数が一致しません (${N} vs ${S.ids.length})`);
+  }
+  const out = uint8 ? new Uint8Array(N*T) : new Float32Array(N*T);
+  if(!uint8) out.fill(NaN);
+  for(let r=0;r<N;r++){
+    const cells = rows[r].split(",");
+    const id = cells[0].trim();
+    if(first){ S.ids[r] = id; S.idx.set(id, r); }
+    else if(S.ids[r] !== id) throw new Error(`行 ${r} の id が一致しません (${id} vs ${S.ids[r]})`);
+    const base = r*T;
+    for(let c=0;c<T;c++){
+      const v = cells[c+1];
+      if(v === undefined || v === "" ) continue;
+      if(uint8){ out[base+c] = (v === "1" || v === "True" || v === "true") ? 1 : (parseFloat(v) > 0 ? 1 : 0); }
+      else { const x = parseFloat(v); if(!Number.isNaN(x)) out[base+c] = x; }
+    }
+  }
+  return out;
+}
+function parseRefLevels(text){
+  const lines = text.split(/\r?\n/);
+  const times = lines[0].split(",").slice(1).map(s => s.trim());
+  if(times.length !== S.T) throw new Error(`error.csv の時刻列数が一致しません (${times.length} vs ${S.T})`);
+  for(let i=0;i<S.T;i++) if(times[i] !== S.times[i]) throw new Error(`error.csv の時刻ヘッダが一致しません: ${times[i]} vs ${S.times[i]}`);
+  const N = S.ids.length, T = S.T, out = new Uint8Array(N*T);
+  let rows = 0, unknown = 0, maxv = 0;
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].length) continue;
+    rows++;
+    const cells = lines[i].split(","), r = S.idx.get(cells[0].trim());
+    if(r === undefined){ unknown++; continue; }
+    for(let c=0;c<T;c++){
+      const v = cells[c+1];
+      if(v === undefined || v === "") continue;
+      const x = (v === "True" || v === "true") ? 1 : (v === "False" || v === "false") ? 0 : parseInt(v, 10);
+      if(x > 0){ out[r*T+c] = x; if(x > maxv) maxv = x; }
+    }
+  }
+  S.errRefRows = rows; S.errRefUnknown = unknown; S.errRefBinary = maxv <= 1;
+  return out;
+}
+function defaultParams(){
+  return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
+           levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count, op: CONFIG.ERROR_LEVEL_OP})) };
+}
+function recompute(){
+  const N = S.ids.length, T = S.T, P = S.params, L = P.levels.length;
+  const tgt = S.tgt = new Uint8Array(N*T);
+  const e1 = S.e1 = new Uint8Array(N*T);
+  const err = S.err = new Uint8Array(N*T);
+  for(let i=0;i<N*T;i++){
+    const bs = S.bs[i], bc = S.bc[i];
+    const t = (bc >= P.minCount && bs >= P.minSpeed) ? 1 : 0;   // NaN compares false
+    tgt[i] = t;
+    if(!t) continue;
+    const sr = bs > 0 ? S.es[i]/bs : NaN;
+    const cr = bc > 0 ? S.ec[i]/bc : NaN;
+    let k = 0;
+    for(let l=0;l<L;l++){
+      const lv = P.levels[l];
+      if(lv.op === "and" ? (sr <= lv.speed && cr <= lv.count) : (sr <= lv.speed || cr <= lv.count)) k = l+1;
+    }
+    e1[i] = k;
+  }
+  for(let r=0;r<N;r++){
+    const base = r*T, pr = S.pairRow[r], pb = pr >= 0 ? pr*T : -1;
+    for(let c=0;c<T;c++){
+      const i = base+c, k = e1[i];
+      if(!k) continue;
+      if(!P.corrob){ err[i] = k; continue; }
+      const m = Math.max(pb >= 0 ? e1[pb+c] : 0, (c > 0 && S.adjPrev[c]) ? e1[i-1] : 0, (c < T-1 && S.adjPrev[c+1]) ? e1[i+1] : 0);
+      err[i] = Math.min(k, m);
+    }
+  }
+  S.cls = new Uint8Array(N*T);
+  S.countsTarget = new Array(T).fill(0);
+  S.countsError = new Array(T).fill(0);
+  S.countsLevel = [0, 1, 2].map(() => new Array(T).fill(0));
+  for(let i=0;i<N*T;i++){
+    const k = err[i] ? 1 + err[i] : tgt[i] ? 1 : 0;
+    S.cls[i] = k;
+    const c = i % T;
+    if(k >= 1) S.countsTarget[c]++;
+    if(k >= 2){ S.countsError[c]++; S.countsLevel[Math.min(k, 4) - 2][c]++; }
+  }
+  if(!S.cur) S.cur = new Uint8Array(N);
+  if(!S.hasData){
+    S.hasData = new Uint8Array(N);
+    for(let r=0;r<N;r++){ let any = 0; for(let c=0;c<T;c++){ const i=r*T+c; if(!Number.isNaN(S.bs[i]) || !Number.isNaN(S.bc[i])){ any = 1; break; } } S.hasData[r] = any; }
+  }
+}
+function checkAgainstRef(){
+  const el = $("pCheck");
+  if(!S.errRef){ el.textContent = "error.csv は未読み込み（照合なし）"; el.className = "check"; return; }
+  let diff = 0, refOn = 0;
+  const binary = S.errRefBinary;   // an old 0/1 error.csv: compare presence only
+  for(let i=0;i<S.err.length;i++){
+    const ref = S.errRef[i], mine = binary ? (S.err[i] ? 1 : 0) : S.err[i];
+    if(ref) refOn++; if(mine !== ref) diff++;
+  }
+  const isDefault = JSON.stringify(S.params) === JSON.stringify(defaultParams());
+  el.textContent = `ノートブック error.csv との不一致: ${diff.toLocaleString()} セル（error.csv の異常 ${refOn.toLocaleString()} セル、${S.errRefRows.toLocaleString()} 行`
+    + (S.errRefUnknown ? `、ネットワークに無い id ${S.errRefUnknown} 行` : "") + (binary ? "、0/1 形式のため異常あり／なしで照合" : "、レベル 0〜3 で照合") + "）"
+    + (isDefault ? "" : " ※閾値が既定値と異なるため不一致は想定内");
+  el.className = "check " + (diff === 0 ? "ok" : (isDefault ? "ng" : ""));
+}
+function applyParams(){
+  const num = (id, fallback) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : fallback; };
+  const d = defaultParams();
+  S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), corrob: $("pCorrob").checked,
+               levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count), op: $(`pL${i+1}Op`).value === "and" ? "and" : "or"})) };
+  recompute();
+  checkAgainstRef();
+  if(map) applyTime(S.t);
+}
+function fillParamInputs(){
+  const P = S.params;
+  $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob;
+  P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; $(`pL${i+1}Op`).value = l.op || "or"; });
+}
+
+async function boot(loaderFn){
+  const raw = await loaderFn();
+  setProgress("CSV を解析中 …");
+  await tick();
+  S.bs = parseMatrix(raw.bs, {first:true});
+  S.es = parseMatrix(raw.es);
+  S.bc = parseMatrix(raw.bc);
+  S.ec = parseMatrix(raw.ec);
+  S.errRef = raw.err ? parseRefLevels(raw.err) : null;
+  // time adjacency (for the corroboration at t±1): consecutive columns exactly one interval apart
+  const mins = S.times.map(t => { const [h,m] = t.split(":").map(Number); return h*60+m; });
+  const step = S.T > 1 ? ((mins[1]-mins[0]) % 1440 + 1440) % 1440 : 15;
+  S.adjPrev = new Uint8Array(S.T);
+  for(let c=1;c<S.T;c++) S.adjPrev[c] = (((mins[c]-mins[c-1]) % 1440 + 1440) % 1440 === step) ? 1 : 0;   // 23:45 -> 00:00 is adjacent
+  setProgress("ネットワークを構築中 …");
+  await tick();
+  const gj = JSON.parse(raw.network);
+  const N = S.ids.length;
+  S.fids = new Int32Array(N).fill(-1);
+  S.pairRow = new Int32Array(N).fill(-1);
+  let fid = 0, unmatched = 0;
+  for(const ft of gj.features){
+    const id = String(ft.properties.id);
+    ft.id = fid;
+    const r = S.idx.get(id);
+    if(r === undefined){ unmatched++; ft.properties._row = -1; }
+    else {
+      S.fids[r] = fid; ft.properties._row = r;
+      const pid = ft.properties.pair_id;
+      if(pid !== null && pid !== undefined && pid !== ""){ const pr = S.idx.get(String(pid)); if(pr !== undefined) S.pairRow[r] = pr; }
+    }
+    fid++;
+  }
+  setProgress("判定クラスを計算中 …");
+  await tick();
+  S.params = defaultParams();
+  fillParamInputs();
+  recompute();
+  checkAgainstRef();
+  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}）/ CSV 未対応リンク ${unmatched} 本`);
+  await tick();
+  S.rain = raw.rain || null;
+  if(S.rain){
+    if(S.dataDate && S.rain.dates.includes(S.dataDate)) S.rain.date = S.dataDate;   // the network file's date is the date of the first slot
+    setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick();
+  }
+  initMap(gj);
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+
+// ============================================================
+// Map
+// ============================================================
+function bboxOf(gj){
+  let minx=Infinity,miny=Infinity,maxx=-Infinity,maxy=-Infinity;
+  const visit = (c) => { if(typeof c[0] === "number"){ if(c[0]<minx)minx=c[0]; if(c[0]>maxx)maxx=c[0]; if(c[1]<miny)miny=c[1]; if(c[1]>maxy)maxy=c[1]; } else c.forEach(visit); };
+  for(const ft of gj.features) if(ft.geometry) visit(ft.geometry.coordinates);
+  return [[minx,miny],[maxx,maxy]];
+}
+const CLS_EXPR = ["coalesce", ["feature-state", "cls"], 0];
+const BLANK_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+const RAIN_CACHE = 8;
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+function initMap(gj){
+  S.gj = gj;
+  const bb = bboxOf(gj);
+  map = new maplibregl.Map({
+    container: "map",
+    style: {
+      version: 8,
+      sources: {
+        base: { type:"raster", tiles: CONFIG.basemap.tiles, tileSize:256, maxzoom: CONFIG.basemap.maxzoom, attribution: CONFIG.basemap.attribution }
+      },
+      layers: [
+        { id:"base", type:"raster", source:"base", paint:{ "raster-opacity": 0.55 } }
+      ]
+    },
+    bounds: bb,
+    fitBoundsOptions: { padding: 40 },
+    attributionControl: { compact: true }
+  });
+  map.addControl(new maplibregl.NavigationControl({showCompass:false}), "bottom-right");
+  map.addControl(new maplibregl.ScaleControl({unit:"metric"}), "bottom-right");
+
+  map.once("style.load", () => {
+    // rain under the road network (image source, coloured in updateRain)
+    if(S.rain){
+      const [W, Sb, E, Nb] = S.rain.index.bounds || [0, 0, 1e-6, 1e-6];   // real bounds come from each GeoTIFF
+      map.addSource("rain", {type:"image", url: BLANK_PNG, coordinates: [[W, Nb], [E, Nb], [E, Sb], [W, Sb]]});
+      map.addLayer({id:"rain", type:"raster", source:"rain", paint:{"raster-opacity": CONFIG.RAIN_OPACITY, "raster-resampling":"nearest", "raster-fade-duration": 0}});
+    }
+    map.addSource("links", { type:"geojson", data: gj, tolerance: 0.2, buffer: 8 });
+    const cls = CLS_EXPR;
+    const hov = ["coalesce", ["feature-state", "hover"], 0];
+    // gray / black lines (links-base) and the error levels (links-error), coloured by the feature-state "cls" set in applyTime
+    map.addLayer({
+      id:"links-base", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": ["match", cls, 1, cssVar("--road-black"), cssVar("--road-gray")],
+        "line-width": ["interpolate", ["linear"], ["zoom"],
+          10, ["match", cls, 1, CONFIG.lineWidth.black*0.6, CONFIG.lineWidth.gray*0.6],
+          14, ["match", cls, 1, CONFIG.lineWidth.black, CONFIG.lineWidth.gray],
+          17, ["match", cls, 1, CONFIG.lineWidth.black*2.2, CONFIG.lineWidth.gray*2.2]],
+        "line-opacity": ["case", [">=", cls, 2], 0, 1]
+      }
+    });
+    map.addLayer({
+      id:"links-error", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": ["match", cls, 2, cssVar("--lv1"), 3, cssVar("--lv2"), cssVar("--lv3")],
+        "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
+        "line-opacity": ["case", [">=", cls, 2], 1, 0]
+      }
+    });
+    // hover highlight
+    map.addLayer({
+      id:"links-hover", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": cssVar("--series-1"),
+        "line-width": 7, "line-opacity": ["case", ["==", hov, 1], 0.45, 0], "line-blur": 1
+      }
+    });
+    // wide invisible hit layer
+    map.addLayer({
+      id:"links-hit", type:"line", source:"links",
+      paint:{ "line-width": 10, "line-opacity": 0 }
+    });
+
+    setupControls();
+    applyTime(0, true);
+    $("loader").style.display = "none";
+
+    map.on("mousemove", "links-hit", onHover);
+    map.on("mouseleave", "links-hit", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("click", "links-hit", onClick);
+    map.on("click", (e) => {   // a click beside the links releases a pinned chart
+      const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
+      if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
+    });
+    setupOverlays();
+    updateRain();
+  });
+}
+
+// ============================================================
+// Rain (XRAIN 15-min slots)
+// ============================================================
+function setupOverlays(){
+  if(!S.rain) return;
+  $("overlayOpts").style.display = "inline";
+  $("rainOpt").style.display = "inline";
+  const sel = $("rainDate"); sel.innerHTML = "";
+  for(const d of S.rain.dates){ const o = document.createElement("option"); o.value = d; o.textContent = `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}`; sel.appendChild(o); }
+  sel.value = S.rain.date;
+  sel.addEventListener("change", () => { S.rain.date = sel.value; sel.blur(); updateRain(); });
+  $("chkRain").addEventListener("change", (e) => { S.showRain = e.target.checked; e.target.blur(); updateRain(); });
+  const lg = $("legendRain");
+  const unit = (S.rain.index.unit || "").startsWith("mm (") ? "降雨量 mm（15 分）" : "降雨 mm/h（15 分平均）";
+  lg.innerHTML = `<span class="lab">${unit}</span>` + CONFIG.RAIN_SCALE.map(([v, c], i) => {
+    const next = CONFIG.RAIN_SCALE[i+1];
+    return `<span class="sw" style="background:${c}"></span><span class="lab">${v}${next ? "–" + next[0] : "+"}</span>`;
+  }).join("");
+  lg.style.display = "flex";
+  // value under the cursor
+  let t = null;
+  map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; $("rainVal").textContent = rainAt(e.lngLat); }, 100); });
+}
+
+function parseGeoTiff(buf){
+  const dv = new DataView(buf), le = dv.getUint16(0, true) === 0x4949;
+  const u16 = (o) => dv.getUint16(o, le), u32 = (o) => dv.getUint32(o, le);
+  if(u16(2) !== 42) throw new Error("BigTIFF / not a TIFF");
+  const SZ = {1:1, 2:1, 3:2, 4:4, 5:8, 6:1, 7:1, 8:2, 9:4, 10:8, 11:4, 12:8};
+  const ifd = u32(4), n = u16(ifd), tags = {};
+  for(let i = 0; i < n; i++){
+    const o = ifd + 2 + 12*i, tag = u16(o), typ = u16(o+2), cnt = u32(o+4);
+    const size = SZ[typ] * cnt, off = size > 4 ? u32(o+8) : o + 8;
+    const rd = (k) => typ === 3 ? u16(off + 2*k) : typ === 4 ? u32(off + 4*k) : typ === 12 ? dv.getFloat64(off + 8*k, le) : typ === 11 ? dv.getFloat32(off + 4*k, le) : dv.getUint8(off + k);
+    tags[tag] = {typ, cnt, off, get: rd, all: () => Array.from({length: cnt}, (_, k) => rd(k))};
+  }
+  const w = tags[256].get(0), h = tags[257].get(0), bits = tags[258] ? tags[258].get(0) : 8, fmt = tags[339] ? tags[339].get(0) : 1;
+  if(tags[259] && tags[259].get(0) !== 1) throw new Error("compressed TIFF is not supported (write it uncompressed)");
+  if(tags[277] && tags[277].get(0) !== 1) throw new Error("multi-band TIFF is not supported");
+  const offs = tags[273].all(), cnts = tags[279].all(), rps = tags[278] ? tags[278].get(0) : h;
+  const vals = new Float32Array(w*h);
+  const bytes = bits / 8;
+  let k = 0;
+  for(let s = 0; s < offs.length; s++){
+    const rows = Math.min(rps, h - s*rps), cells = rows * w;
+    for(let c = 0; c < cells; c++, k++){
+      const o = offs[s] + c*bytes;
+      vals[k] = fmt === 3 ? (bits === 32 ? dv.getFloat32(o, le) : dv.getFloat64(o, le))
+              : fmt === 2 ? (bits === 16 ? dv.getInt16(o, le) : bits === 32 ? dv.getInt32(o, le) : dv.getInt8(o))
+              : (bits === 16 ? dv.getUint16(o, le) : bits === 32 ? dv.getUint32(o, le) : dv.getUint8(o));
+    }
+  }
+  let nodata = NaN;
+  if(tags[42113]){ const t = tags[42113]; let str = ""; for(let i = 0; i < t.cnt; i++){ const ch = dv.getUint8(t.off + i); if(!ch) break; str += String.fromCharCode(ch); } nodata = parseFloat(str); }
+  let bounds = null;
+  if(tags[33550] && tags[33922]){
+    const sc = tags[33550].all(), tp = tags[33922].all();
+    const west = tp[3] - tp[0]*sc[0], north = tp[4] + tp[1]*sc[1];
+    bounds = [west, north - h*sc[1], west + w*sc[0], north];
+  }
+  return {vals, w, h, nodata, bounds};
+}
+function decodeRain(src){
+  const bufP = (typeof src === "string") ? fetch(src, {cache:"no-store"}).then(r => { if(!r.ok) throw new Error(`HTTP ${r.status} ${src}`); return r.arrayBuffer(); }) : src.arrayBuffer();
+  return bufP.then(parseGeoTiff);
+}
+function paintRain(slot){
+  const {vals, w, h, nodata} = slot;
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const ctx = cv.getContext("2d");
+  const img = ctx.createImageData(w, h), d = img.data;
+  const scale = CONFIG.RAIN_SCALE.map(([v, c]) => [v, parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]);
+  for(let j = 0, i = 0; j < vals.length; j++, i += 4){
+    const v = vals[j];
+    if(Number.isNaN(v) || v === nodata || v < 0) continue;
+    let col = null;
+    for(let k = scale.length - 1; k >= 0; k--) if(v >= scale[k][0]){ col = scale[k]; break; }
+    if(!col) continue;
+    d[i] = col[1]; d[i+1] = col[2]; d[i+2] = col[3]; d[i+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv.toDataURL("image/png");
+}
+
+// Date ("YYYYMMDD") of slot t: the date chosen in the select is the date of the first slot (the left end of the
+// slider); every wrap of the clock along the axis (23:45 -> 00:00) adds a day. A day without files shows no rain.
+function rainDateFor(t){
+  const R = S.rain; if(!R) return null;
+  const mins = (x) => { const [h, m] = S.times[x].split(":").map(Number); return h * 60 + m; };
+  let days = 0; for(let i = 1; i <= t; i++) if(mins(i) < mins(i - 1)) days++;
+  if(!days) return R.date;
+  const d = new Date(Date.UTC(+R.date.slice(0, 4), +R.date.slice(4, 6) - 1, +R.date.slice(6, 8) + days));
+  return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null; }
+function updateRain(){
+  if(!map || !S.rain || !map.getSource("rain")) return;
+  const R = S.rain, key = rainKey();
+  map.setLayoutProperty("rain", "visibility", S.showRain ? "visible" : "none");
+  if(!S.showRain) return;
+  if(!R.sources.has(key)){ R.cur = null; map.getSource("rain").updateImage({url: BLANK_PNG}); $("rainVal").textContent = "（この時刻の降雨なし）"; return; }
+  const show = (c) => { R.cur = {key, ...c}; map.getSource("rain").updateImage(c.bounds ? {url: c.url, coordinates: [[c.bounds[0], c.bounds[3]], [c.bounds[2], c.bounds[3]], [c.bounds[2], c.bounds[1]], [c.bounds[0], c.bounds[1]]]} : {url: c.url}); $("rainVal").textContent = ""; };
+  if(S.period && S.period.event && $("rainDate").value !== rainDateFor(S.t)) $("rainDate").value = rainDateFor(S.t);
+  if(R.cache.has(key)){ show(R.cache.get(key)); return; }
+  if(R.loading === key) return;
+  R.loading = key; $("rainVal").textContent = "読み込み中…";
+  decodeRain(R.sources.get(key)).then(slot => {
+    const c = {...slot, url: paintRain(slot)};
+    R.cache.set(key, c); if(R.cache.size > RAIN_CACHE) R.cache.delete(R.cache.keys().next().value);
+    if(R.loading === key) R.loading = null;
+    if(rainKey() === key) show(c);
+  }).catch(e => { console.error(e); R.loading = null; $("rainVal").textContent = `降雨を読み込めません: ${e.message}`; });
+}
+function rainAt(ll){
+  const R = S.rain; if(!R || !R.cur || !S.showRain || !R.cur.bounds) return "";
+  const [W, Sb, E, Nb] = R.cur.bounds;
+  if(ll.lng < W || ll.lng >= E || ll.lat <= Sb || ll.lat > Nb) return "";
+  const x = Math.floor((ll.lng - W) / (E - W) * R.cur.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * R.cur.h);
+  const v = R.cur.vals[y * R.cur.w + x];
+  if(Number.isNaN(v) || v === R.cur.nodata || v < 0) return "–";
+  return `${v.toFixed(1)} ${(R.index.unit || "").startsWith("mm (") ? "mm" : "mm/h"}`;
+}
+
+// ============================================================
+// Hover / chart panel
+// ============================================================
+function setHover(fid){
+  if(S.hoverId === fid) return;
+  if(S.hoverId !== null) map.setFeatureState({source:S.hoverSrc || "links", id:S.hoverId}, {hover:0});
+  S.hoverId = fid; S.hoverSrc = "links";
+  if(fid !== null) map.setFeatureState({source:S.hoverSrc, id:fid}, {hover:1});
+}
+function placePanel(point){
+  // put the chart panel on the side away from the cursor, so it never appears under it
+  const el = $("chartPanel"), w = $("map").clientWidth;
+  const right = point.x < w/2;
+  el.style.left = right ? "auto" : "10px";
+  el.style.right = right ? "10px" : "auto";
+}
+function pickFeature(fts){
+  if(!fts || !fts.length) return null;
+  let best = fts[0], bk = -1;
+  for(const f of fts){
+    const r = f.properties._row;
+    const k = (r >= 0) ? S.cls[r*S.T + S.t] : -1;
+    if(k > bk){ bk = k; best = f; }
+  }
+  return best;
+}
+function onHover(e){
+  if(S.mode === "traj") return;   // no traffic information in trajectory mode
+  const ft = pickFeature(e.features);
+  if(!ft) return;
+  map.getCanvas().style.cursor = "pointer";
+  setHover(ft.id);
+  if(S.pinnedId === null){ placePanel(e.point); showChart(ft); }
+}
+function onClick(e){
+  if(S.mode === "traj") return;
+  const ft = pickFeature(e.features);
+  if(!ft) return;
+  if(S.pinnedId === ft.id){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
+  else { S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); }
+  showChart(ft);
+}
+function hideChart(){ $("chartPanel").style.display = "none"; }
+
+// ============================================================
+// Time
+// ============================================================
+function applyTime(t, force=false){
+  S.t = t;
+  const T = S.T, N = S.ids.length;
+  $("timeLabel").textContent = S.times[t];
+  $("slider").value = t;
+  $("stTarget").textContent = S.countsTarget[t].toLocaleString();
+  $("stError").textContent = S.countsError[t].toLocaleString();
+  for(let l=0;l<3;l++) $(`stL${l+1}`).textContent = S.countsLevel[l][t].toLocaleString();
+  for(let r=0;r<N;r++){
+    const fid = S.fids[r]; if(fid < 0) continue;
+    const k = S.cls[r*T+t];
+    if(force || k !== S.cur[r]){
+      map.setFeatureState({source:"links", id:fid}, {cls:k});
+      S.cur[r] = k;
+    }
+  }
+  if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
+  updateRain();
+}
+
+function setupControls(){
+  const sl = $("slider");
+  sl.max = S.T-1; sl.value = 0;
+  sl.addEventListener("input", () => applyTime(+sl.value));
+  $("playBtn").addEventListener("click", togglePlay);
+  $("settingsBtn").addEventListener("click", () => { const el = $("settings"); el.style.display = el.style.display === "block" ? "none" : "block"; });
+  $("settingsClose").addEventListener("click", () => { $("settings").style.display = "none"; });
+  let pTimer = null;
+  const schedule = () => { clearTimeout(pTimer); pTimer = setTimeout(applyParams, 250); };
+  for(const id of ["pMinCount","pMinSpeed","pL1Speed","pL1Count","pL2Speed","pL2Count","pL3Speed","pL3Count"]){
+    $(id).addEventListener("input", schedule);
+    $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
+  }
+  $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
+  for(const id of ["pL1Op","pL2Op","pL3Op"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
+  $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
+  document.addEventListener("keydown", (e) => {
+    if(e.target.tagName === "INPUT" && ["text","number","search","file"].includes(e.target.type)) return;
+    if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
+    else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
+    else if(e.key === " "){ togglePlay(); e.preventDefault(); }
+  });
+}
+function togglePlay(){
+  S.playing = !S.playing;
+  $("playBtn").textContent = S.playing ? "❚❚ 停止" : "▶ 再生";
+  if(S.playing){
+    S.timer = setInterval(() => { applyTime((S.t+1) % S.T); }, CONFIG.playIntervalMs);
+  }else{ clearInterval(S.timer); S.timer = null; }
+}
+
+// ============================================================
+// Chart panel (two single-axis charts: speed, count)
+// ============================================================
+let lastFeature = null;
+const STATUS_LABEL = {0:"対象外", 1:"対象", 2:"異常 レベル1", 3:"異常 レベル2", 4:"異常 レベル3"};
+const STATUS_COLOR = {0:"var(--road-gray)", 1:"var(--road-black)", 2:"var(--lv1)", 3:"var(--lv2)", 4:"var(--lv3)"};
+function fmt(v, d=1){ return Number.isNaN(v) || v === undefined ? "–" : v.toFixed(d); }
+function showChart(ft){
+  lastFeature = ft; S.kadenChartIdx = null;
+  $("roL1").textContent = "速度 km/h"; $("roL2").textContent = "台数 /15分";
+  const p = ft.properties;
+  const r = p._row;
+  const T = S.T, t = S.t;
+  $("chartPanel").style.display = "block";
+  $("cpTitle").textContent = `Link ${p.id}`;
+  $("cpSub").textContent = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? `対向: ${p.pair_id}` : "対向なし";
+  if(r < 0){
+    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0];
+    ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
+    drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, "台数 /15分");
+    return;
+  }
+  const b = r*T;
+  const k = S.cls[b+t];
+  let label = STATUS_LABEL[k];
+  if(k === 1 && S.e1[b+t]) label = `対象（単独異常 L${S.e1[b+t]}、裏取りなし）`;
+  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k];
+  $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(S.es[b+t]);
+  $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
+  const errMask = S.err.subarray(b, b+T);
+  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), S.es.subarray(b,b+T), errMask, "速度 km/h");
+  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, "台数 /15分");
+}
+function niceMax(v){
+  if(!(v > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const m = v/p;
+  const n = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10;
+  return n*p;
+}
+function drawChart(svg, a, b, errMask, title){
+  const W = svg.clientWidth || 416, H = svg.clientHeight || 150;
+  const M = {l:40, r:10, t:20, b:22};
+  const pw = W-M.l-M.r, ph = H-M.t-M.b;
+  const T = S.T;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const ns = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(txt !== undefined) e.textContent = txt; return e; };
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  svg.appendChild(el("text", {x:M.l, y:13, class:"ttl"}, title));
+  if(!a){ svg.appendChild(el("text", {x:M.l+pw/2, y:M.t+ph/2, "text-anchor":"middle"}, "データなし")); return; }
+
+  let mx = 0;
+  for(let i=0;i<T;i++){ if(a[i] > mx) mx = a[i]; if(b[i] > mx) mx = b[i]; }
+  const ymax = niceMax(mx*1.05);
+  const x = (i) => M.l + (T <= 1 ? 0 : i*pw/(T-1));
+  const y = (v) => M.t + ph - v/ymax*ph;
+
+  // error shading
+  if(errMask){
+    let i = 0;
+    while(i < T){
+      if(errMask[i]){ const lv = errMask[i]; let j = i; while(j+1 < T && errMask[j+1] === lv) j++;   // one band per run of equal level
+        const x0 = x(Math.max(0, i-0.5)), x1 = x(Math.min(T-1, j+0.5));
+        svg.appendChild(el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err l" + Math.min(lv, 3)}));
+        i = j+1; } else i++;
+    }
+  }
+  // grid + y ticks
+  for(let g=0; g<=4; g++){
+    const v = ymax*g/4, yy = y(v);
+    svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: g===0 ? "axis" : "grid"}));
+    svg.appendChild(el("text", {x:M.l-6, y:yy+4, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
+  }
+  // x ticks: every 8th step (2 h at 15 min) so labels do not collide
+  for(let i=0;i<T;i+=8){
+    svg.appendChild(el("text", {x:x(i), y:H-6, "text-anchor":"middle"}, S.times[i]));
+  }
+  // series
+  const path = (arr) => { let d = "", pen = false;
+    for(let i=0;i<T;i++){ const v = arr[i]; if(Number.isNaN(v)){ pen = false; continue; } d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; }
+    return d; };
+  svg.appendChild(el("path", {d:path(a), class:"l1"}));
+  svg.appendChild(el("path", {d:path(b), class:"l2"}));
+  // current time marker + dots
+  const xt = x(S.t);
+  svg.appendChild(el("line", {x1:xt, x2:xt, y1:M.t, y2:M.t+ph, class:"now"}));
+  if(!Number.isNaN(a[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill:"var(--series-1)", class:"dot"}));
+  if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
+
+  // crosshair tooltip on chart hover
+  const cross = el("line", {x1:0, x2:0, y1:M.t, y2:M.t+ph, class:"cross", visibility:"hidden"});
+  const tipbg = el("rect", {x:0, y:0, width:0, height:32, rx:4, class:"tipbg", visibility:"hidden"});
+  const tip1 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
+  const tip2 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
+  svg.append(cross, tipbg, tip1, tip2);
+  svg.onmousemove = (ev) => {
+    const rect = svg.getBoundingClientRect();
+    const px = (ev.clientX-rect.left) * W/rect.width;
+    let i = Math.round((px-M.l)/(pw/(T-1))); i = Math.max(0, Math.min(T-1, i));
+    const xx = x(i);
+    cross.setAttribute("x1", xx); cross.setAttribute("x2", xx); cross.setAttribute("visibility","visible");
+    tip1.textContent = `${S.times[i]}  平時 ${fmt(a[i])}`; tip2.textContent = `イベント時 ${fmt(b[i])}`;
+    const tw = Math.max(tip1.getComputedTextLength(), tip2.getComputedTextLength()) + 12;
+    const tx = xx + 8 + tw > W ? xx - 8 - tw : xx + 8;
+    tipbg.setAttribute("x", tx); tipbg.setAttribute("y", M.t+2); tipbg.setAttribute("width", tw); tipbg.setAttribute("visibility","visible");
+    tip1.setAttribute("x", tx+6); tip1.setAttribute("y", M.t+14); tip1.setAttribute("visibility","visible");
+    tip2.setAttribute("x", tx+6); tip2.setAttribute("y", M.t+28); tip2.setAttribute("visibility","visible");
+  };
+  svg.onmouseleave = () => { [cross, tipbg, tip1, tip2].forEach(e => e.setAttribute("visibility","hidden")); };
+}
+
+// ============================================================
+// Entry
+// ============================================================
+(async function(){
+  try{
+    await boot(loadViaFetch);
+  }catch(e){
+    console.warn("fetch failed, falling back to file picker", e);
+    setProgress("");
+    $("filePick").style.display = "block";
+    const note = () => {
+      const main = $("dirInput").files.length || $("fileInput").files.length;
+      const rain = [...$("rainInput").files].filter(f => RAIN_NAME.test(f.name)).length;
+      $("pickNote").textContent = `${main ? `1: ${main} ファイル` : "1: 未選択"} / 2: ${$("rainInput").files.length ? `降雨 ${rain} 枚` : "なし"}`;
+      $("loadBtn").disabled = !main;
+    };
+    for(const id of ["fileInput","dirInput","rainInput"]) $(id).addEventListener("change", note);
+    $("loadBtn").addEventListener("click", async () => {
+      const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
+      if(!main.length) return;
+      $("filePick").style.display = "none";
+      try{ await boot(() => loadViaFiles([...main], $("rainInput").files)); }
+      catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

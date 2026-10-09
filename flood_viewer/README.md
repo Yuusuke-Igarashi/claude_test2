@@ -49,14 +49,27 @@ error_k   = is_target AND error1_k AND (対向リンクが同時刻に is_target
 error_level = 満たした最も厳しい k（0 = 異常なし）。リンクは L1 橙 / L2 赤 / L3 暗赤で着色
 ```
 
+## シンプル版（車流 + 降雨のみ）: flood_viewer_simple.html
+
+車流（TomTom の異常リンク）と降雨（XRAIN）だけを表示する版。配布物は `dist/flood_viewer_simple_standalone.html` 1 ファイル（約 1.1 MB）。
+入力は 1: 車流のフォルダ（必須。tomtom_out そのまま、または個別ファイル）と 2: 降雨のフォルダ（任意。1 の中の rain/ でも可）の 2 つだけで、
+タブ・軌跡・徒歩変化・家電・SNS は無い。道路の着色、閾値パネル（⚙）、ホバーの時系列グラフ、再生・キー操作、降雨の切替と凡例、カーソル位置の降雨強度は本体と同じ。
+期間モード（viewer/index.json）が無いので、降雨の日付はプルダウンで選ぶ「最初の時刻（スライダー左端）の日付」とし、時刻軸が日付をまたぐところ（23:45 → 00:00）から翌日のファイルを使う。
+既定の日付はネットワークファイル名の YYYYMMDD（フォルダにその日のファイルがあるとき。無ければ最後の日付）。選んだ日付のファイルが無い時刻は「この時刻の降雨なし」で、別の日の降雨は出さない。
+
+`flood_viewer_simple.html` は生成ファイル（先頭に GENERATED の注記）。`build_simple.mjs` が `flood_viewer_simple.template.html`（画面と固有の処理）に、
+`flood_viewer.html` の共通関数（CSV / GeoTIFF の解析、異常判定、グラフ、降雨の描画など。テンプレートの `// @from flood_viewer.html: 名前, …` 行）と
+CONFIG の必要な項目（`// @config from flood_viewer.html: …` 行）、MapLibre のタグをそのまま埋め込んで作る。本体を直せばシンプル版にも `npm run build` で反映される。
+直すときはテンプレートか本体を編集して `npm run build` し、生成された `flood_viewer_simple.html` も一緒にコミットする（テストが生成結果との一致を確かめる）。
+
 ## 開発・テスト
 
 ```
 npm install                      # maplibre-gl, playwright
 npx playwright install chromium  # 初回のみ
 npm run data                     # sample/output に合成データ 10 ファイルを生成（numpy, pandas が必要）
-npm run build                    # dist/flood_viewer_standalone.html を生成
-npm test                         # Playwright + node:test によるブラウザテスト
+npm run build                    # flood_viewer_simple.html を生成し、dist/ に 2 つの standalone HTML（本体・シンプル版）を作る
+npm test                         # Playwright + node:test によるブラウザテスト（tests/viewer.test.js と tests/simple.test.js）
 ```
 
 テスト内容（`tests/viewer.test.js`）:
@@ -76,6 +89,10 @@ npm test                         # Playwright + node:test によるブラウザ�
 10. トラックタブ: network_agg.shp/.dbf と時刻別 CSV の読み込みと日付の役割分け、平時 2 台以上の描画と 50 % 以下の赤、CSV からの独立再集計との一致、ホバーの統計パネル、閾値変更、M キーの 3 タブ巡回。
 11. グリッド重畳: grid/index.json からの登録、軌跡モードでの表示と時刻連動、指標の切替、表示切替、カーソル位置の判定。
 12. JavaScript エラーが発生していないこと。
+
+シンプル版（`tests/simple.test.js`）: 生成ファイルがテンプレートと本体から作り直した結果と一致し、本体のタブ・重ね合わせを含まないこと。http での読み込みと error.csv との全セル一致、
+スライダー・キー・再生、ホバーのグラフと固定・解除、閾値パネル、降雨（登録、最初の時刻の日付 + 日付またぎ、GeoTIFF の復号、カーソルの値、切替、日付変更で該当日の無い時刻は降雨なし）、
+file:// でのファイル選択 + 降雨フォルダ、フォルダ選択（中の rain/ と error.csv）、降雨なし、JavaScript エラーなし。
 
 GitHub Actions（`.github/workflows/flood-viewer.yml`）が `flood_viewer/` の変更で同じ手順を実行し、
 standalone HTML とスクリーンショットをアーティファクトとして残す。

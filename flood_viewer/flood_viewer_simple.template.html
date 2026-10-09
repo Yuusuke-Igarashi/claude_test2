@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<!-- @generated -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tokyo 2024-08-21 Flood Candidates</title>
+<!-- @maplibre from flood_viewer.html -->
+<style>
+:root{
+  color-scheme: light;
+  --surface:#fcfcfb; --page:#f9f9f7;
+  --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --series-1:#2a78d6;   /* baseline */
+  --series-2:#eb6834;   /* event    */
+  --road-gray:#b4b2ab; --road-black:#1a1a19; --road-red:#d03b3b;
+  --lv1:#f0a23a; --lv2:#d03b3b; --lv3:#7a0f3d;   /* error level 1 / 2 / 3 (3 = strongest drop) */
+  --font:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+}
+html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);background:var(--page);font-size:13px}
+#map{position:absolute;inset:0}
+.panel{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.10);padding:10px 12px;z-index:5}
+#topbar{top:10px;left:10px;right:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+#topbar h1{font-size:14px;font-weight:600;margin:0 6px 0 0;white-space:nowrap}
+#timeLabel{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.2em}
+#slider{flex:1;min-width:200px;accent-color:var(--ink)}
+button{font:inherit;padding:4px 10px;border:1px solid var(--axis);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{background:#f0efec}
+.stat{color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stat b{color:var(--ink);font-weight:600}
+.legend{display:flex;gap:12px;align-items:center;color:var(--ink2);white-space:nowrap}
+.legend span::before{content:"";display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px;background:var(--c)}
+#chartPanel{bottom:24px;left:10px;width:440px;display:none}
+#chartPanel.pinned{border-color:var(--ink)}
+#chartPanel header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+#chartPanel header .title{font-weight:600;font-size:14px}
+#chartPanel header .sub{color:var(--muted)}
+#chartPanel .status{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;color:#fff;margin-left:6px;vertical-align:middle}
+.readout{display:grid;grid-template-columns:auto 1fr 1fr;gap:2px 12px;color:var(--ink2);font-variant-numeric:tabular-nums;margin:4px 0 6px}
+.readout .h{color:var(--muted);font-size:11px}
+.readout .v{color:var(--ink);text-align:right}
+.chart{display:block;width:100%;height:150px}
+.chart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
+.chart .ttl{fill:var(--ink2);font-size:12px;font-weight:600}
+.chart .grid{stroke:var(--grid);stroke-width:1}
+.chart .axis{stroke:var(--axis);stroke-width:1}
+.chart .l1{stroke:var(--series-1);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chart .l2{stroke:var(--series-2);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.chart .now{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
+.chart .err{fill:var(--road-red);opacity:.16}
+.chart .err.l1{fill:var(--lv1)} .chart .err.l2{fill:var(--lv2)} .chart .err.l3{fill:var(--lv3)}
+.chart .cross{stroke:var(--muted);stroke-width:1}
+.chart .dot{stroke:var(--surface);stroke-width:2}
+.chart .tip{fill:var(--ink);font-size:11px}
+.chart .tipbg{fill:var(--surface);stroke:var(--border)}
+.clegend{display:flex;gap:14px;color:var(--ink2);margin-top:2px}
+.clegend span::before{content:"";display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px;background:var(--c)}
+.hint{color:var(--muted);font-size:11px;margin-top:6px}
+#settings{top:64px;right:10px;width:400px;display:none;z-index:6}
+#settings h2{font-size:13px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+#settings h2 button{font-size:12px;padding:2px 8px}
+#settings .grp{margin:8px 0 4px;color:var(--muted);font-size:11px;letter-spacing:.02em}
+#settings .row{display:flex;align-items:center;gap:6px;margin:4px 0;color:var(--ink2);flex-wrap:wrap}
+#settings select{font:inherit;padding:2px 4px;border:1px solid var(--axis);border-radius:5px;background:var(--panel-bg,transparent);color:inherit}
+#settings input[type=number]{width:70px;font:inherit;padding:3px 6px;border:1px solid var(--axis);border-radius:5px;text-align:right;font-variant-numeric:tabular-nums}
+#settings .note{color:var(--muted);font-size:11px;margin-top:8px;line-height:1.5}
+#settings .check{margin-top:8px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#settings .check.ok{color:#006300}
+#settings .check.ng{color:var(--road-red)}
+#settings .foot{display:flex;gap:8px;margin-top:10px}
+#overlayOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
+#rainDate{font:inherit;font-size:12px;padding:1px 2px}
+#legendRain{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
+#legendRain .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
+#legendRain .lab{margin-right:6px}
+#loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
+#loader .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:520px;max-width:90vw}
+#loader h2{margin:0 0 8px;font-size:15px}
+#loader ul{margin:6px 0;padding-left:18px;color:var(--ink2)}
+#loader .err{color:var(--road-red)}
+#progress{color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
+#filePick{display:none;margin-top:10px}
+.maplibregl-ctrl-attrib{font-size:10px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="topbar" class="panel">
+  <h1>Tokyo 2024-08-21 Flood Candidates</h1>
+  <button id="playBtn" title="Space">▶ 再生</button>
+  <span id="timeLabel">--:--</span>
+  <input id="slider" type="range" min="0" max="0" value="0" step="1">
+  <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</span>
+  <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
+  <span id="overlayOpts" style="display:none">
+    <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <select id="rainDate" title="最初の時刻（スライダー左端）の日付。日付をまたぐ時刻は翌日のファイルを使う"></select> <b id="rainVal" class="stat"></b></label>
+  </span>
+  <span class="legend" id="legendTraffic">
+    <span style="--c:var(--road-gray)">対象外</span>
+    <span style="--c:var(--road-black)">対象</span>
+    <span style="--c:var(--lv1)">異常 L1</span>
+    <span style="--c:var(--lv2)">L2</span>
+    <span style="--c:var(--lv3)">L3</span>
+  </span>
+  <div id="legendRain"></div>
+</div>
+
+<div id="settings" class="panel">
+  <h2>判定閾値 <button id="settingsClose">閉じる</button></h2>
+  <div class="grp">対象リンク（is_target）: 両方を満たす</div>
+  <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="1" min="0"> 台/15分</div>
+  <div class="row">平時速度 ≥ <input type="number" id="pMinSpeed" step="1" min="0"> km/h</div>
+  <div class="grp">異常レベル（error1）: 対象リンクで、速度比 ≤ 値 と 台数比 ≤ 値 を「または」（どちらか）か「かつ」（両方）で組み合わせる。番号が大きいほど厳しい（L3 ⊂ L2 ⊂ L1 になるよう設定する）</div>
+  <div class="row">L1: 速度比 ≤ <input type="number" id="pL1Speed" step="0.05" min="0" max="2"> <select id="pL1Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL1Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L2: 速度比 ≤ <input type="number" id="pL2Speed" step="0.05" min="0" max="2"> <select id="pL2Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL2Count" step="0.05" min="0" max="2"></div>
+  <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> <select id="pL3Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
+  <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
+  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 15 分も同レベル以上であることを要求する</label></div>
+  <div class="check" id="pCheck"></div>
+  <div class="foot"><button id="pDefault">既定値に戻す</button></div>
+  <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
+</div>
+
+<div id="chartPanel" class="panel">
+  <header>
+    <span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
+    <span class="sub" id="cpSub"></span>
+  </header>
+  <div class="readout">
+    <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
+    <span id="roL1">速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
+    <span id="roL2">台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
+  </div>
+  <svg id="chartSpeed" class="chart"></svg>
+  <svg id="chartCount" class="chart"></svg>
+  <div class="clegend">
+    <span style="--c:var(--series-1)">平時 (baseline)</span>
+    <span style="--c:var(--series-2)">イベント時 (event)</span>
+    <span style="--c:var(--lv1)">異常 L1</span><span style="--c:var(--lv2)">L2</span><span style="--c:var(--lv3)">L3</span>
+  </div>
+  <div class="hint" id="cpHint">クリックで固定 / もう一度クリックで解除</div>
+</div>
+
+<div id="loader">
+  <div class="box">
+    <h2>データ読み込み中</h2>
+    <ul id="fileList"></ul>
+    <div id="progress"></div>
+    <div id="filePick">
+      <p>フォルダ・ファイルを選んで「読み込む」を押してください。1 だけが必須です。<br>
+      <span style="color:var(--muted)">HTML を出力フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
+      <p style="margin:6px 0 2px"><b>1. 車流（TomTom 交通統計）のフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">tomtom_out: network.geojson、baseline_/event_ の speed・count CSV、error.csv。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
+      <p style="margin:6px 0 2px"><b>2. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
+      <span style="color:var(--muted)">xrain_to_geotiff.py の出力（rain_YYYYMMDD_HHMM.tif。index.json は無くてよい）。車流フォルダの中の rain/ でも可。道路の下に半透明で重ねる</span></p>
+      <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Config: the file names, thresholds, rain colours and basemap are copied from flood_viewer.html at build time.
+//   is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
+//   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed <op> count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest; op = ERROR_LEVEL_OP: "or" / "and")
+//   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)   (when REQUIRE_CORROBORATION)
+//   error_level = highest k with error_k (0 = none). Editable in the ⚙ panel.
+// ============================================================
+// @config from flood_viewer.html: files.network, files.baseline_speed, files.event_speed, files.baseline_count, files.event_count, files.error, files.rain_dir, RAIN_SCALE, RAIN_OPACITY, MIN_BASE_COUNT, MIN_BASE_SPEED, ERROR_LEVELS, ERROR_LEVEL_OP, REQUIRE_CORROBORATION, basemap, playIntervalMs, lineWidth
+
+// ============================================================
+// State
+// ============================================================
+const S = {
+  times: [],            // ["12:00", ...]
+  ids: [],              // link ids (string) in CSV row order
+  idx: new Map(),       // id -> row index
+  T: 0,                 // number of time steps
+  bs: null, es: null, bc: null, ec: null,   // Float32Array[N*T]
+  err: null,            // Uint8Array[N*T]  final error (computed in page)
+  e1: null,             // Uint8Array[N*T]  valid error1 (is_target & error1)
+  errRef: null,         // Uint8Array[N*T]  error.csv from the notebook, for cross-checking (optional)
+  tgt: null,            // Uint8Array[N*T]
+  pairRow: null,        // Int32Array[N] row index of the opposing link, -1 if none
+  adjPrev: null,        // Uint8Array[T] 1 if times[c-1] is exactly one interval before times[c]
+  params: null,         // current thresholds
+  cls: null,            // Uint8Array[N*T]  0 gray / 1 black / 2.. error level + 1
+  cur: null,            // Uint8Array[N] current class applied to map
+  fids: null,           // Int32Array[N] feature id (numeric) or -1 if not in network
+  hasData: null,        // Uint8Array[N] any finite baseline value
+  countsTarget: [], countsError: [], countsLevel: [[], [], []],
+  t: 0,
+  rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, dates, date, cur: {key, vals, w, h, nodata, bounds, url}}
+  dataDate: null,       // "YYYYMMDD" from the network file name (date of the first slot)
+  showRain: true,
+  hoverId: null, pinnedId: null,
+  playing: false, timer: null
+};
+let map = null;
+
+// ============================================================
+// Loading
+// ============================================================
+const $ = (id) => document.getElementById(id);
+function setProgress(msg){ $("progress").textContent = msg; }
+function setTitle(t){ document.title = t; document.querySelector("#topbar h1").textContent = t; }
+// @from flood_viewer.html: setTitleFrom, fileRow, fetchText
+
+async function loadViaFetch(){
+  const f = CONFIG.files;
+  setTitleFrom(f.network);
+  const [network, bs, es, bc, ec, err] = await Promise.all([
+    fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
+    fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
+  ]);
+  const rainIdx = await fetchText(f.rain_dir + "/index.json", true);
+  const rain = rainIdx ? rainFromIndex(JSON.parse(rainIdx), (name) => `${f.rain_dir}/${name}`) : null;
+  if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
+  return {network, bs, es, bc, ec, err, rain};
+}
+
+// @from flood_viewer.html: RAIN_NAME, rainSlotKey, rainFromIndex, rainRegistry, readSource
+
+// fileList: the traffic folder (or the individual files); rainList: the rain folder.
+// rain_*.tif (and rain/index.json) inside the traffic folder are accepted when no rain folder is chosen.
+function loadViaFiles(fileList, rainList = []){
+  const want = CONFIG.files;
+  const byName = {}, rainFiles = new Map();
+  let rainIndexFile = null;
+  for(const fl of rainList){
+    const r = fl.name.match(RAIN_NAME);
+    if(r) rainFiles.set(rainSlotKey(r), fl);
+    else if(fl.name === "index.json") rainIndexFile = fl;
+  }
+  for(const fl of fileList){
+    const r = fl.name.match(RAIN_NAME);
+    if(r){ if(!rainList.length) rainFiles.set(rainSlotKey(r), fl); continue; }
+    if(fl.name === "index.json"){
+      if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl;
+      continue;
+    }
+    byName[fl.name] = fl;
+  }
+  if(rainFiles.size) fileRow(want.rain_dir + "/", `降雨 ${rainFiles.size} スロット（GeoTIFF、表示時に読み込み）`);
+  const read = (key, optional=false) => new Promise((res, rej) => {
+    let name = want[key];
+    let fl = byName[name];
+    if(!fl && key === "network"){   // any *_network.geojson (other dates / areas) stands in for the default name
+      const alt = Object.keys(byName).filter(n => /network\.geojson$/i.test(n));
+      if(alt.length === 1){ name = alt[0]; fl = byName[name]; }
+    }
+    if(!fl){ fileRow(name, optional ? "なし" : "未選択"); return optional ? res(null) : rej(new Error(`${name} が選択されていません`)); }
+    if(key === "network") setTitleFrom(name);
+    const rd = new FileReader();
+    rd.onload = () => { fileRow(name, `OK (${(rd.result.length/1048576).toFixed(1)} MB)`); res(rd.result); };
+    rd.onerror = () => rej(rd.error);
+    rd.readAsText(fl);
+  });
+  const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), rainIndex])
+    .then(([network, bs, es, bc, ec, err, rainIdx]) => ({network, bs, es, bc, ec, err, rain: rainRegistry(rainFiles, rainIdx)}));   // the file names alone define the slots
+}
+
+// @from flood_viewer.html: parseMatrix, parseRefLevels, defaultParams, recompute, checkAgainstRef, applyParams, fillParamInputs
+
+async function boot(loaderFn){
+  const raw = await loaderFn();
+  setProgress("CSV を解析中 …");
+  await tick();
+  S.bs = parseMatrix(raw.bs, {first:true});
+  S.es = parseMatrix(raw.es);
+  S.bc = parseMatrix(raw.bc);
+  S.ec = parseMatrix(raw.ec);
+  S.errRef = raw.err ? parseRefLevels(raw.err) : null;
+  // time adjacency (for the corroboration at t±1): consecutive columns exactly one interval apart
+  const mins = S.times.map(t => { const [h,m] = t.split(":").map(Number); return h*60+m; });
+  const step = S.T > 1 ? ((mins[1]-mins[0]) % 1440 + 1440) % 1440 : 15;
+  S.adjPrev = new Uint8Array(S.T);
+  for(let c=1;c<S.T;c++) S.adjPrev[c] = (((mins[c]-mins[c-1]) % 1440 + 1440) % 1440 === step) ? 1 : 0;   // 23:45 -> 00:00 is adjacent
+  setProgress("ネットワークを構築中 …");
+  await tick();
+  const gj = JSON.parse(raw.network);
+  const N = S.ids.length;
+  S.fids = new Int32Array(N).fill(-1);
+  S.pairRow = new Int32Array(N).fill(-1);
+  let fid = 0, unmatched = 0;
+  for(const ft of gj.features){
+    const id = String(ft.properties.id);
+    ft.id = fid;
+    const r = S.idx.get(id);
+    if(r === undefined){ unmatched++; ft.properties._row = -1; }
+    else {
+      S.fids[r] = fid; ft.properties._row = r;
+      const pid = ft.properties.pair_id;
+      if(pid !== null && pid !== undefined && pid !== ""){ const pr = S.idx.get(String(pid)); if(pr !== undefined) S.pairRow[r] = pr; }
+    }
+    fid++;
+  }
+  setProgress("判定クラスを計算中 …");
+  await tick();
+  S.params = defaultParams();
+  fillParamInputs();
+  recompute();
+  checkAgainstRef();
+  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}）/ CSV 未対応リンク ${unmatched} 本`);
+  await tick();
+  S.rain = raw.rain || null;
+  if(S.rain){
+    if(S.dataDate && S.rain.dates.includes(S.dataDate)) S.rain.date = S.dataDate;   // the network file's date is the date of the first slot
+    setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick();
+  }
+  initMap(gj);
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+
+// ============================================================
+// Map
+// ============================================================
+// @from flood_viewer.html: bboxOf, CLS_EXPR, BLANK_PNG, RAIN_CACHE, cssVar
+
+function initMap(gj){
+  S.gj = gj;
+  const bb = bboxOf(gj);
+  map = new maplibregl.Map({
+    container: "map",
+    style: {
+      version: 8,
+      sources: {
+        base: { type:"raster", tiles: CONFIG.basemap.tiles, tileSize:256, maxzoom: CONFIG.basemap.maxzoom, attribution: CONFIG.basemap.attribution }
+      },
+      layers: [
+        { id:"base", type:"raster", source:"base", paint:{ "raster-opacity": 0.55 } }
+      ]
+    },
+    bounds: bb,
+    fitBoundsOptions: { padding: 40 },
+    attributionControl: { compact: true }
+  });
+  map.addControl(new maplibregl.NavigationControl({showCompass:false}), "bottom-right");
+  map.addControl(new maplibregl.ScaleControl({unit:"metric"}), "bottom-right");
+
+  map.once("style.load", () => {
+    // rain under the road network (image source, coloured in updateRain)
+    if(S.rain){
+      const [W, Sb, E, Nb] = S.rain.index.bounds || [0, 0, 1e-6, 1e-6];   // real bounds come from each GeoTIFF
+      map.addSource("rain", {type:"image", url: BLANK_PNG, coordinates: [[W, Nb], [E, Nb], [E, Sb], [W, Sb]]});
+      map.addLayer({id:"rain", type:"raster", source:"rain", paint:{"raster-opacity": CONFIG.RAIN_OPACITY, "raster-resampling":"nearest", "raster-fade-duration": 0}});
+    }
+    map.addSource("links", { type:"geojson", data: gj, tolerance: 0.2, buffer: 8 });
+    const cls = CLS_EXPR;
+    const hov = ["coalesce", ["feature-state", "hover"], 0];
+    // gray / black lines (links-base) and the error levels (links-error), coloured by the feature-state "cls" set in applyTime
+    map.addLayer({
+      id:"links-base", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": ["match", cls, 1, cssVar("--road-black"), cssVar("--road-gray")],
+        "line-width": ["interpolate", ["linear"], ["zoom"],
+          10, ["match", cls, 1, CONFIG.lineWidth.black*0.6, CONFIG.lineWidth.gray*0.6],
+          14, ["match", cls, 1, CONFIG.lineWidth.black, CONFIG.lineWidth.gray],
+          17, ["match", cls, 1, CONFIG.lineWidth.black*2.2, CONFIG.lineWidth.gray*2.2]],
+        "line-opacity": ["case", [">=", cls, 2], 0, 1]
+      }
+    });
+    map.addLayer({
+      id:"links-error", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": ["match", cls, 2, cssVar("--lv1"), 3, cssVar("--lv2"), cssVar("--lv3")],
+        "line-width": ["interpolate", ["linear"], ["zoom"], 10, CONFIG.lineWidth.red*0.6, 14, CONFIG.lineWidth.red, 17, CONFIG.lineWidth.red*2.2],
+        "line-opacity": ["case", [">=", cls, 2], 1, 0]
+      }
+    });
+    // hover highlight
+    map.addLayer({
+      id:"links-hover", type:"line", source:"links",
+      layout:{ "line-cap":"round", "line-join":"round" },
+      paint:{
+        "line-color": cssVar("--series-1"),
+        "line-width": 7, "line-opacity": ["case", ["==", hov, 1], 0.45, 0], "line-blur": 1
+      }
+    });
+    // wide invisible hit layer
+    map.addLayer({
+      id:"links-hit", type:"line", source:"links",
+      paint:{ "line-width": 10, "line-opacity": 0 }
+    });
+
+    setupControls();
+    applyTime(0, true);
+    $("loader").style.display = "none";
+
+    map.on("mousemove", "links-hit", onHover);
+    map.on("mouseleave", "links-hit", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("click", "links-hit", onClick);
+    map.on("click", (e) => {   // a click beside the links releases a pinned chart
+      const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
+      if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
+    });
+    setupOverlays();
+    updateRain();
+  });
+}
+
+// ============================================================
+// Rain (XRAIN 15-min slots)
+// ============================================================
+function setupOverlays(){
+  if(!S.rain) return;
+  $("overlayOpts").style.display = "inline";
+  $("rainOpt").style.display = "inline";
+  const sel = $("rainDate"); sel.innerHTML = "";
+  for(const d of S.rain.dates){ const o = document.createElement("option"); o.value = d; o.textContent = `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}`; sel.appendChild(o); }
+  sel.value = S.rain.date;
+  sel.addEventListener("change", () => { S.rain.date = sel.value; sel.blur(); updateRain(); });
+  $("chkRain").addEventListener("change", (e) => { S.showRain = e.target.checked; e.target.blur(); updateRain(); });
+  const lg = $("legendRain");
+  const unit = (S.rain.index.unit || "").startsWith("mm (") ? "降雨量 mm（15 分）" : "降雨 mm/h（15 分平均）";
+  lg.innerHTML = `<span class="lab">${unit}</span>` + CONFIG.RAIN_SCALE.map(([v, c], i) => {
+    const next = CONFIG.RAIN_SCALE[i+1];
+    return `<span class="sw" style="background:${c}"></span><span class="lab">${v}${next ? "–" + next[0] : "+"}</span>`;
+  }).join("");
+  lg.style.display = "flex";
+  // value under the cursor
+  let t = null;
+  map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; $("rainVal").textContent = rainAt(e.lngLat); }, 100); });
+}
+
+// @from flood_viewer.html: parseGeoTiff, decodeRain, paintRain
+
+// Date ("YYYYMMDD") of slot t: the date chosen in the select is the date of the first slot (the left end of the
+// slider); every wrap of the clock along the axis (23:45 -> 00:00) adds a day. A day without files shows no rain.
+function rainDateFor(t){
+  const R = S.rain; if(!R) return null;
+  const mins = (x) => { const [h, m] = S.times[x].split(":").map(Number); return h * 60 + m; };
+  let days = 0; for(let i = 1; i <= t; i++) if(mins(i) < mins(i - 1)) days++;
+  if(!days) return R.date;
+  const d = new Date(Date.UTC(+R.date.slice(0, 4), +R.date.slice(4, 6) - 1, +R.date.slice(6, 8) + days));
+  return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+// @from flood_viewer.html: rainKey, updateRain, rainAt
+
+// ============================================================
+// Hover / chart panel
+// ============================================================
+// @from flood_viewer.html: setHover, placePanel, pickFeature, onHover, onClick
+function hideChart(){ $("chartPanel").style.display = "none"; }
+
+// ============================================================
+// Time
+// ============================================================
+function applyTime(t, force=false){
+  S.t = t;
+  const T = S.T, N = S.ids.length;
+  $("timeLabel").textContent = S.times[t];
+  $("slider").value = t;
+  $("stTarget").textContent = S.countsTarget[t].toLocaleString();
+  $("stError").textContent = S.countsError[t].toLocaleString();
+  for(let l=0;l<3;l++) $(`stL${l+1}`).textContent = S.countsLevel[l][t].toLocaleString();
+  for(let r=0;r<N;r++){
+    const fid = S.fids[r]; if(fid < 0) continue;
+    const k = S.cls[r*T+t];
+    if(force || k !== S.cur[r]){
+      map.setFeatureState({source:"links", id:fid}, {cls:k});
+      S.cur[r] = k;
+    }
+  }
+  if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
+  updateRain();
+}
+
+function setupControls(){
+  const sl = $("slider");
+  sl.max = S.T-1; sl.value = 0;
+  sl.addEventListener("input", () => applyTime(+sl.value));
+  $("playBtn").addEventListener("click", togglePlay);
+  $("settingsBtn").addEventListener("click", () => { const el = $("settings"); el.style.display = el.style.display === "block" ? "none" : "block"; });
+  $("settingsClose").addEventListener("click", () => { $("settings").style.display = "none"; });
+  let pTimer = null;
+  const schedule = () => { clearTimeout(pTimer); pTimer = setTimeout(applyParams, 250); };
+  for(const id of ["pMinCount","pMinSpeed","pL1Speed","pL1Count","pL2Speed","pL2Count","pL3Speed","pL3Count"]){
+    $(id).addEventListener("input", schedule);
+    $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
+  }
+  $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
+  for(const id of ["pL1Op","pL2Op","pL3Op"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
+  $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
+  document.addEventListener("keydown", (e) => {
+    if(e.target.tagName === "INPUT" && ["text","number","search","file"].includes(e.target.type)) return;
+    if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
+    else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
+    else if(e.key === " "){ togglePlay(); e.preventDefault(); }
+  });
+}
+// @from flood_viewer.html: togglePlay
+
+// ============================================================
+// Chart panel (two single-axis charts: speed, count)
+// ============================================================
+// @from flood_viewer.html: lastFeature, STATUS_LABEL, STATUS_COLOR, fmt, showChart, niceMax, drawChart
+
+// ============================================================
+// Entry
+// ============================================================
+(async function(){
+  try{
+    await boot(loadViaFetch);
+  }catch(e){
+    console.warn("fetch failed, falling back to file picker", e);
+    setProgress("");
+    $("filePick").style.display = "block";
+    const note = () => {
+      const main = $("dirInput").files.length || $("fileInput").files.length;
+      const rain = [...$("rainInput").files].filter(f => RAIN_NAME.test(f.name)).length;
+      $("pickNote").textContent = `${main ? `1: ${main} ファイル` : "1: 未選択"} / 2: ${$("rainInput").files.length ? `降雨 ${rain} 枚` : "なし"}`;
+      $("loadBtn").disabled = !main;
+    };
+    for(const id of ["fileInput","dirInput","rainInput"]) $(id).addEventListener("change", note);
+    $("loadBtn").addEventListener("click", async () => {
+      const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
+      if(!main.length) return;
+      $("filePick").style.display = "none";
+      try{ await boot(() => loadViaFiles([...main], $("rainInput").files)); }
+      catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
