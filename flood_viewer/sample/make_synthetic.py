@@ -101,6 +101,11 @@ link_level = err.max(axis=1)
 save(err, "error.csv", rows=link_level >= 1, integer=True)
 for k in (1, 2, 3):
     save(err, f"error_level{k}.csv", rows=link_level == k, integer=True)
+# ---- viewer.json: the period and the thresholds, as tomtom_run.ipynb writes them (the viewers read the start, the window length and the ⚙ defaults from it)
+with open(OUT / "viewer.json", "w") as f:
+    json.dump({"period": {"start": "2024-08-21 18:00", "hours": 12, "slot_min": 15},
+               "thresholds": {"min_base_count": MIN_BASE_COUNT, "min_base_speed": MIN_BASE_SPEED, "require_corroboration": True,
+                              "error_levels": [{"speed": s, "count": c, "op": "or"} for s, c in LEVELS]}}, f, indent=1)
 # ---- error_geojson/: the notebook's anomaly links per window and level, error_L{k}_YYYYMMDD_HHMM.geojson (empty when none).
 # The sample period is 2024-08-21 18:00 -> 08-22 05:45; the window's date in the file name is what the simple viewer reads for its time axis.
 EG = OUT / "error_geojson"; EG.mkdir(exist_ok=True)

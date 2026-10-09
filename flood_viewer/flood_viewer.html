@@ -164,14 +164,14 @@ button:hover{background:#f0efec}
 <div id="settings" class="panel">
   <h2>判定閾値 <button id="settingsClose">閉じる</button></h2>
   <div class="grp">対象リンク（is_target）: 両方を満たす</div>
-  <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="1" min="0"> 台/15分</div>
+  <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="0.5" min="0"> 台/<span id="pSlot1">15</span>分</div>
   <div class="row">平時速度 ≥ <input type="number" id="pMinSpeed" step="1" min="0"> km/h</div>
   <div class="grp">異常レベル（error1）: 対象リンクで、速度比 ≤ 値 と 台数比 ≤ 値 を「または」（どちらか）か「かつ」（両方）で組み合わせる。番号が大きいほど厳しい（L3 ⊂ L2 ⊂ L1 になるよう設定する）</div>
   <div class="row">L1: 速度比 ≤ <input type="number" id="pL1Speed" step="0.05" min="0" max="2"> <select id="pL1Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL1Count" step="0.05" min="0" max="2"></div>
   <div class="row">L2: 速度比 ≤ <input type="number" id="pL2Speed" step="0.05" min="0" max="2"> <select id="pL2Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL2Count" step="0.05" min="0" max="2"></div>
   <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> <select id="pL3Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
   <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
-  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 15 分も同レベル以上であることを要求する</label></div>
+  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 <span id="pSlot2">15</span> 分（隣の窓）も同レベル以上であることを要求する</label></div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
   <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
@@ -185,7 +185,7 @@ button:hover{background:#f0efec}
   <div class="readout">
     <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
     <span id="roL1">速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
-    <span id="roL2">台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
+    <span id="roL2">台数 /窓</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
   </div>
   <svg id="chartSpeed" class="chart"></svg>
   <svg id="chartCount" class="chart"></svg>
@@ -259,11 +259,11 @@ const CONFIG = {
   TRAJ_MIN_ZOOM: 14,        // trajectories are drawn only at this zoom or closer
   TRAJ_WINDOW_MIN: 60,      // each trajectory covers [time - window, time]
   // Default thresholds (same as the notebook). Editable in the ⚙ panel.
-  //   is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
+  //   is_target = baseline_count >= MIN_BASE_COUNT_PER_HOUR * slot_min / 60 AND baseline_speed >= MIN_BASE_SPEED
   //   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed <op> count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest; op = ERROR_LEVEL_OP: "or" / "and")
   //   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)
   //   error_level = highest k with error_k (0 = none). Levels must be nested (L3 ⊂ L2 ⊂ L1), as in the notebook.
-  MIN_BASE_COUNT: 2.5,      // notebook: 既存秋田分析の「日中 10 カウント/時以上」を 15 分換算
+  MIN_BASE_COUNT_PER_HOUR: 10,   // notebook: 既存秋田分析の「日中 10 カウント/時以上」。1 窓の値は CSV の時刻列の間隔で換算（15 分 -> 2.5、30 分 -> 5）
   MIN_BASE_SPEED: 10.0,
   ERROR_LEVELS: [{speed: 0.75, count: 0.75}, {speed: 0.60, count: 0.60}, {speed: 0.50, count: 0.50}],
   ERROR_LEVEL_OP: "or",     // "or": either ratio at or below its value; "and": both (switchable per level in the ⚙ panel)
@@ -384,6 +384,8 @@ async function loadViaFetch(){
   const rainIdx = await fetchText(f.rain_dir + "/index.json", true);
   const rain = rainIdx ? rainFromIndex(JSON.parse(rainIdx), (name) => `${f.rain_dir}/${name}`) : null;
   if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
+  const vj = await fetchText("viewer.json", true), tomtom = vj ? parseViewerJson(vj) : null;   // tomtom_run.ipynb: period + thresholds
+  S.period = (tomtom && tomtom.period) || null; S.nbParams = (tomtom && tomtom.nbParams) || null;
   const gridFound = [];
   for(const dir of f.grid_dirs){ const txt = await fetchText(dir + "/index.json", true); if(txt) gridFound.push([JSON.parse(txt), (name) => `${dir}/${name}`]); }
   const grid = gridFromIndexes(gridFound);
@@ -391,7 +393,7 @@ async function loadViaFetch(){
   const idx = await fetchText(f.viewer_dir + "/index.json", true);
   if(idx){
     const index = JSON.parse(idx), sources = new Map();
-    S.period = index.period || null;
+    S.period = index.period || S.period;   // the probe folder's period wins over viewer.json
     for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
     fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
     return {network, bs, es, bc, ec, err, lazySources: sources, rain, grid, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
@@ -567,7 +569,7 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
   const kadenTxt = readKadenFiles(kadenList);
   const snsTxt = snsList.length ? Promise.all([...snsList].map(readSnsFile)).then(parseSns) : Promise.resolve(null);
   const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
-  let total = 0, rainIndexFile = null, viewerIndexFile = null;
+  let total = 0, rainIndexFile = null, viewerIndexFile = null, tomtomFile = null;
   const gridIndexFiles = [];
   const gridFiles = new Map();
   for(const fl of gridList){                       // input 3: a grid folder on its own (any folder name)
@@ -594,6 +596,7 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
       else if(/(^|\/)grid[^\/]*\/index\.json$/.test(fl.webkitRelativePath || "")) gridIndexFiles.push(fl);
       continue;
     }
+    if(fl.name === "viewer.json"){ tomtomFile = tomtomFile || fl; continue; }   // tomtom_run.ipynb: period + thresholds
     byName[fl.name] = fl;
     if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
   }
@@ -620,12 +623,15 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
                                 : [read("baseline_traj", true), read("event_traj", true), read("baseline_dwell", true), read("event_dwell", true)];
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
+  const tomtomJson = tomtomFile ? readSource(tomtomFile).then(parseViewerJson).catch(() => null) : Promise.resolve(null);
   const gridIndex = Promise.all(gridIndexFiles.map(fl => readSource(fl).then(JSON.parse).catch(() => null)));
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt, snsTxt])
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, rainIdx, viewerIdx, gridIdx, kaden, sns]) => {
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt, snsTxt, tomtomJson])
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, rainIdx, viewerIdx, gridIdx, kaden, sns, tomtom]) => {
+      if(tomtomFile) fileRow("viewer.json", tomtom ? `${tomtom.period ? "期間 " + tomtom.period.event.start + " から " + tomtom.period.event.hours + " 時間（" + tomtom.period.event.slot_min + " 分窓）" : "期間なし"} / ${tomtom.nbParams ? "閾値を既定値に" : "閾値なし"}` : "読めません");
       if(snsList.length) fileRow("SNS", sns ? `${sns.posts.length.toLocaleString()} 件（座標なし ${sns.noCoord.toLocaleString()} 件は非表示、${sns.dates.join(", ")}、形式 ${sns.formats.join("/")}）` : "読める投稿がありません（列名を確認）");
       if(kadenList.length) fileRow("家電", kaden ? `kaden_event_ts.csv / kaden_baseline_ts.csv（${kaden.name}）` : "不足: *_event_ts.csv と *_baseline_ts.csv の組が見つかりません");
-      S.period = (viewerIdx && viewerIdx.period) || null;
+      S.period = (viewerIdx && viewerIdx.period) || (tomtom && tomtom.period) || null;   // the probe folder's period wins over viewer.json
+      S.nbParams = (tomtom && tomtom.nbParams) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
       const grid = gridRegistry(gridFiles, gridIdx);   // gridIdx: one index per grid folder
       return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, grid, kaden, sns, loadInfo};
@@ -729,9 +735,39 @@ function parseRefLevels(text){
   return out;
 }
 
+// Default thresholds: the notebook's own values when the data folder holds viewer.json (S.nbParams), else CONFIG with the
+// count threshold scaled to the window length (MIN_BASE_COUNT_PER_HOUR * slot / 60: 2.5 per 15 min, 5 per 30 min).
 function defaultParams(){
-  return { minCount: CONFIG.MIN_BASE_COUNT, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
+  const nb = S.nbParams;
+  if(nb) return { minCount: nb.minCount, minSpeed: nb.minSpeed, corrob: nb.corrob, levels: nb.levels.map(l => ({speed: l.speed, count: l.count, op: l.op})) };
+  return { minCount: CONFIG.MIN_BASE_COUNT_PER_HOUR * slotMin() / 60, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
            levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count, op: CONFIG.ERROR_LEVEL_OP})) };
+}
+// Minutes between consecutive time columns of the traffic CSV (15 for run2024.ipynb, 30 for tomtom_run.ipynb with 30-minute sets).
+function slotMin(){
+  if(S.T < 2) return 15;
+  const m = (t) => { const [h, mm] = t.split(":").map(Number); return h * 60 + mm; };
+  return ((m(S.times[1]) - m(S.times[0])) % 1440 + 1440) % 1440 || 15;
+}
+// viewer.json written by tomtom_run.ipynb next to the CSVs:
+//   {"period": {"start": "2026-08-13 12:00", "hours": 24, "slot_min": 30},
+//    "thresholds": {"min_base_count": 5, "min_base_speed": 10, "require_corroboration": true,
+//                   "error_levels": [{"speed": 0.4, "count": 0.4, "op": "or"}, {"speed": 0.4, "count": 0.4, "op": "and"}, {"speed": 0.2, "count": 0.2, "op": "and"}]}}
+// The period is used when the probe folder gives none (viewer/index.json); the thresholds become the ⚙ panel's defaults.
+// Returns {period, nbParams} (either may be null).
+function parseViewerJson(txt){
+  let j; try{ j = JSON.parse(txt); }catch(e){ console.warn("viewer.json: " + e.message); return null; }
+  const out = {period: null, nbParams: null};
+  const pd = j && j.period;
+  if(pd && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(String(pd.start || ""))) out.period = {event: {start: String(pd.start).slice(0, 16).replace("T", " "), hours: +pd.hours || 24, slot_min: +pd.slot_min || 15}};
+  const th = j && j.thresholds, lv = th && th.error_levels;
+  if(th && Array.isArray(lv) && lv.length === 3){
+    const P = { minCount: +th.min_base_count, minSpeed: +th.min_base_speed, corrob: th.require_corroboration !== false,
+                levels: lv.map(l => ({speed: +l.speed, count: +l.count, op: l.op === "and" ? "and" : "or"})) };
+    if([P.minCount, P.minSpeed, ...P.levels.flatMap(l => [l.speed, l.count])].every(Number.isFinite)) out.nbParams = P;
+    else console.warn("viewer.json: thresholds ignored (not numeric)");
+  } else if(th) console.warn("viewer.json: thresholds ignored (error_levels must list 3 levels)");
+  return out;
 }
 
 function recompute(){
@@ -809,6 +845,7 @@ function applyParams(){
 }
 function fillParamInputs(){
   const P = S.params;
+  $("pSlot1").textContent = $("pSlot2").textContent = slotMin();
   $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob;
   P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; $(`pL${i+1}Op`).value = l.op || "or"; });
 }
@@ -1830,7 +1867,7 @@ function showKadenChart(i){
 
 function showChart(ft){
   lastFeature = ft; S.kadenChartIdx = null;
-  $("roL1").textContent = "速度 km/h"; $("roL2").textContent = "台数 /15分";
+  $("roL1").textContent = "速度 km/h"; $("roL2").textContent = `台数 /${slotMin()}分`;
   const p = ft.properties;
   const r = p._row;
   const T = S.T, t = S.t;
@@ -1840,7 +1877,7 @@ function showChart(ft){
   if(r < 0){
     $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0];
     ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
-    drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, "台数 /15分");
+    drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, `台数 /${slotMin()}分`);
     return;
   }
   const b = r*T;
@@ -1852,7 +1889,7 @@ function showChart(ft){
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
   const errMask = S.err.subarray(b, b+T);
   drawChart($("chartSpeed"), S.bs.subarray(b,b+T), S.es.subarray(b,b+T), errMask, "速度 km/h");
-  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, "台数 /15分");
+  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`);
 }
 
 function niceMax(v){

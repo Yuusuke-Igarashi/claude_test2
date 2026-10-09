@@ -111,14 +111,14 @@ button:hover{background:#f0efec}
 <div id="settings" class="panel">
   <h2>判定閾値 <button id="settingsClose">閉じる</button></h2>
   <div class="grp">対象リンク（is_target）: 両方を満たす</div>
-  <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="1" min="0"> 台/15分</div>
+  <div class="row">平時台数 ≥ <input type="number" id="pMinCount" step="0.5" min="0"> 台/<span id="pSlot1">15</span>分</div>
   <div class="row">平時速度 ≥ <input type="number" id="pMinSpeed" step="1" min="0"> km/h</div>
   <div class="grp">異常レベル（error1）: 対象リンクで、速度比 ≤ 値 と 台数比 ≤ 値 を「または」（どちらか）か「かつ」（両方）で組み合わせる。番号が大きいほど厳しい（L3 ⊂ L2 ⊂ L1 になるよう設定する）</div>
   <div class="row">L1: 速度比 ≤ <input type="number" id="pL1Speed" step="0.05" min="0" max="2"> <select id="pL1Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL1Count" step="0.05" min="0" max="2"></div>
   <div class="row">L2: 速度比 ≤ <input type="number" id="pL2Speed" step="0.05" min="0" max="2"> <select id="pL2Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL2Count" step="0.05" min="0" max="2"></div>
   <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> <select id="pL3Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
   <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
-  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 15 分も同レベル以上であることを要求する</label></div>
+  <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 <span id="pSlot2">15</span> 分（隣の窓）も同レベル以上であることを要求する</label></div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
   <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
@@ -132,7 +132,7 @@ button:hover{background:#f0efec}
   <div class="readout">
     <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
     <span id="roL1">速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
-    <span id="roL2">台数 /15分</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
+    <span id="roL2">台数 /窓</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
   </div>
   <svg id="chartSpeed" class="chart"></svg>
   <svg id="chartCount" class="chart"></svg>
@@ -164,12 +164,12 @@ button:hover{background:#f0efec}
 <script>
 // ============================================================
 // Config: the file names, thresholds, rain colours and basemap are copied from flood_viewer.html at build time.
-//   is_target = baseline_count >= MIN_BASE_COUNT AND baseline_speed >= MIN_BASE_SPEED
+//   is_target = baseline_count >= MIN_BASE_COUNT_PER_HOUR * slot_min / 60 AND baseline_speed >= MIN_BASE_SPEED   (slot_min = CSV の時刻列の間隔)
 //   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed <op> count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest; op = ERROR_LEVEL_OP: "or" / "and")
 //   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)   (when REQUIRE_CORROBORATION)
 //   error_level = highest k with error_k (0 = none). Editable in the ⚙ panel.
 // ============================================================
-// @config from flood_viewer.html: files.network, files.baseline_speed, files.event_speed, files.baseline_count, files.event_count, files.error, files.rain_dir, RAIN_SCALE, RAIN_OPACITY, MIN_BASE_COUNT, MIN_BASE_SPEED, ERROR_LEVELS, ERROR_LEVEL_OP, REQUIRE_CORROBORATION, basemap, playIntervalMs, lineWidth
+// @config from flood_viewer.html: files.network, files.baseline_speed, files.event_speed, files.baseline_count, files.event_count, files.error, files.rain_dir, RAIN_SCALE, RAIN_OPACITY, MIN_BASE_COUNT_PER_HOUR, MIN_BASE_SPEED, ERROR_LEVELS, ERROR_LEVEL_OP, REQUIRE_CORROBORATION, basemap, playIntervalMs, lineWidth
 
 // ============================================================
 // State
@@ -199,7 +199,8 @@ const S = {
   orig: null,           // {times, T, bs, es, bc, ec, errRef} in CSV column order; setAxis() reorders from here
   axisStart: null,      // "HH:MM" of slot 0 (one of the CSV columns)
   axisDate: null,       // "YYYYMMDD" of slot 0 or null; every wrap of the clock along the axis adds a day
-  axisSource: null,     // "files" (error_L*_YYYYMMDD_HHMM.geojson names) | "default" (CSV order, date from the network file name / rain folder)
+  axisSource: null,     // "viewer.json" | "files" (error_L*_YYYYMMDD_HHMM.geojson names) | "default" (CSV order, date from the network file name / rain folder)
+  nbParams: null,       // thresholds from viewer.json (tomtom_run.ipynb): the ⚙ panel's defaults
   showRain: true,
   hoverId: null, pinnedId: null,
   playing: false, timer: null
@@ -224,7 +225,8 @@ async function loadViaFetch(){
   const rainIdx = await fetchText(f.rain_dir + "/index.json", true);
   const rain = rainIdx ? rainFromIndex(JSON.parse(rainIdx), (name) => `${f.rain_dir}/${name}`) : null;
   if(rain) fileRow(f.rain_dir + "/", `降雨 ${rain.sources.size} スロット（表示時に読み込み）`);
-  return {network, bs, es, bc, ec, err, rain};
+  const vj = await fetchText("viewer.json", true);   // tomtom_run.ipynb: period + thresholds
+  return {network, bs, es, bc, ec, err, rain, tomtom: vj ? parseViewerJson(vj) : null};
 }
 
 // @from flood_viewer.html: RAIN_NAME, rainSlotKey, rainFromIndex, rainRegistry, readSource
@@ -244,7 +246,7 @@ function periodFromNames(names){
 function loadViaFiles(fileList, rainList = []){
   const want = CONFIG.files;
   const byName = {}, rainFiles = new Map(), periodNames = [];
-  let rainIndexFile = null;
+  let rainIndexFile = null, tomtomFile = null;
   for(const fl of rainList){
     const r = fl.name.match(RAIN_NAME);
     if(r) rainFiles.set(rainSlotKey(r), fl);
@@ -254,6 +256,7 @@ function loadViaFiles(fileList, rainList = []){
     const r = fl.name.match(RAIN_NAME);
     if(r){ if(!rainList.length) rainFiles.set(rainSlotKey(r), fl); continue; }
     if(PERIOD_NAME.test(fl.name)){ periodNames.push(fl.name); continue; }
+    if(fl.name === "viewer.json"){ tomtomFile = tomtomFile || fl; continue; }   // tomtom_run.ipynb: period + thresholds
     if(fl.name === "index.json"){
       if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl;
       continue;
@@ -276,11 +279,15 @@ function loadViaFiles(fileList, rainList = []){
     rd.readAsText(fl);
   });
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
-  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), rainIndex])
-    .then(([network, bs, es, bc, ec, err, rainIdx]) => ({network, bs, es, bc, ec, err, rain: rainRegistry(rainFiles, rainIdx), period: periodFromNames(periodNames)}));   // the file names alone define the slots
+  const tomtomJson = tomtomFile ? readSource(tomtomFile).then(parseViewerJson).catch(() => null) : Promise.resolve(null);
+  return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), rainIndex, tomtomJson])
+    .then(([network, bs, es, bc, ec, err, rainIdx, tomtom]) => {
+      if(tomtomFile) fileRow("viewer.json", tomtom ? `${tomtom.period ? "期間 " + tomtom.period.event.start + " から " + tomtom.period.event.hours + " 時間（" + tomtom.period.event.slot_min + " 分窓）" : "期間なし"} / ${tomtom.nbParams ? "閾値を既定値に" : "閾値なし"}` : "読めません");
+      return {network, bs, es, bc, ec, err, rain: rainRegistry(rainFiles, rainIdx), period: periodFromNames(periodNames), tomtom};   // the file names alone define the rain slots
+    });
 }
 
-// @from flood_viewer.html: parseMatrix, parseRefLevels, defaultParams, recompute, checkAgainstRef, applyParams, fillParamInputs
+// @from flood_viewer.html: parseMatrix, parseRefLevels, slotMin, parseViewerJson, defaultParams, recompute, checkAgainstRef, applyParams, fillParamInputs
 
 async function boot(loaderFn){
   const raw = await loaderFn();
@@ -313,16 +320,20 @@ async function boot(loaderFn){
   }
   setProgress("判定クラスを計算中 …");
   await tick();
+  S.nbParams = (raw.tomtom && raw.tomtom.nbParams) || null;   // the notebook's thresholds become the defaults
   S.params = defaultParams();
   fillParamInputs();
-  // time axis: the period from the anomaly file names when the folder holds them; else the CSV order, dated by the
-  // network file name (or by the rain folder when that date has no rain files)
-  const det = raw.period && S.orig.times.includes(raw.period.time) ? raw.period : null;
+  // time axis, in this order: the period of viewer.json (tomtom_run.ipynb); the anomaly file names error_L*_YYYYMMDD_HHMM.geojson
+  // when the folder holds them; else the CSV order, dated by the network file name (or by the rain folder when that date has no rain)
+  const vp = raw.tomtom && raw.tomtom.period && raw.tomtom.period.event, vm = vp && String(vp.start).match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+  const fromJson = vm && S.orig.times.includes(`${vm[4]}:${vm[5]}`) ? {date: `${vm[1]}${vm[2]}${vm[3]}`, time: `${vm[4]}:${vm[5]}`} : null;
+  const det = fromJson || (raw.period && S.orig.times.includes(raw.period.time) ? raw.period : null);
   const rainDates = raw.rain ? raw.rain.dates : [];
-  S.axisSource = det ? "files" : "default";
+  S.axisSource = fromJson ? "viewer.json" : det ? "files" : "default";
   setAxis(det ? det.time : S.orig.times[0], det ? det.date : ((rainDates.length && !rainDates.includes(S.dataDate)) ? rainDates[0] : S.dataDate));
-  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}）/ CSV 未対応リンク ${unmatched} 本`
-    + (det ? ` / 期間 ${det.first}〜${det.last}（error_L*.geojson ${det.windows} 窓のファイル名から）` : ` / 時間軸は CSV の列順（${S.times[0]} 開始。「開始」で変更できる）`));
+  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}、${slotMin()} 分窓）/ CSV 未対応リンク ${unmatched} 本`
+    + (fromJson ? ` / 期間 ${vp.start} から ${vp.hours} 時間（viewer.json）` : det ? ` / 期間 ${det.first}〜${det.last}（error_L*.geojson ${det.windows} 窓のファイル名から）` : ` / 時間軸は CSV の列順（${S.times[0]} 開始。「開始」で変更できる）`)
+    + (S.nbParams ? " / 閾値は viewer.json の値" : ""));
   await tick();
   S.rain = raw.rain || null;
   if(S.rain){ setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick(); }

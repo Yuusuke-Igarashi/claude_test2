@@ -126,12 +126,14 @@ test("loads over http: the thresholds reproduce error.csv, the axis is the CSV o
   const page = await openViewer();
   const info = await page.evaluate(() => ({ N: S.ids.length, T: S.T, check: $("pCheck").textContent, title: document.querySelector("#topbar h1").textContent, docTitle: document.title,
     layers: map.getStyle().layers.map((l) => l.id), axis: [S.axisStart, S.axisDate, S.axisSource], label: $("timeLabel").textContent, adj: S.adjPrev[24], stat: getComputedStyle($("statTraffic")).display,
-    inputs: [$("axisDate").value, $("axisStart").value, $("axisStart").options.length] }));
+    inputs: [$("axisDate").value, $("axisStart").value, $("axisStart").options.length], nb: S.nbParams, slot: [slotMin(), $("pSlot1").textContent, $("pSlot2").textContent, $("roL2").textContent] }));
   assert.equal(info.T, 48);
   assert.ok(info.N > 1000);
   assert.match(info.check, /不一致: 0 セル/, "in-page error computation must match error.csv at default thresholds");
   assert.match(info.check, /レベル 0〜3 で照合/);
-  assert.deepEqual(info.axis, ["18:00", "20240821", "default"], "first CSV column, date from tokyo_20240821_network.geojson");
+  assert.deepEqual(info.axis, ["18:00", "20240821", "viewer.json"], "period from viewer.json (tomtom_run.ipynb)");
+  assert.deepEqual(info.nb, { minCount: 2.5, minSpeed: 10, corrob: true, levels: [{ speed: 0.75, count: 0.75, op: "or" }, { speed: 0.6, count: 0.6, op: "or" }, { speed: 0.5, count: 0.5, op: "or" }] }, "thresholds of viewer.json are the defaults");
+  assert.deepEqual(info.slot, [15, "15", "15", "台数 /窓"], "window length from the CSV columns in the ⚙ labels");
   assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00", "title from the axis: 48 slots of 15 min from the start"); assert.equal(info.docTitle, info.title);
   assert.equal(info.label, "08-21 18:00", "time label carries the slot's date");
   assert.deepEqual(info.inputs, ["2024-08-21", "18:00", 48]);
@@ -206,6 +208,23 @@ test("time axis: the start column rotates the CSV columns, the date gives the sl
   });
   assert.deepEqual(det, { date: "20260813", time: "12:00", windows: 96, first: "20260813 12:00", last: "20260814 11:45" });
   assert.equal(await page.evaluate(() => periodFromNames(["error.csv", "error_level1.csv"])), null);
+  // a 30-minute CSV: the count threshold is per hour (10) scaled to the window, the labels say 30
+  const thirty = await page.evaluate(() => {
+    const keep = { times: S.times, T: S.T, nb: S.nbParams };
+    S.times = ["12:00", "12:30", "13:00"]; S.T = 3; S.nbParams = null;
+    const d = defaultParams(), slot = slotMin();
+    fillParamInputs();
+    const labels = [$("pSlot1").textContent, $("pSlot2").textContent];
+    S.times = keep.times; S.T = keep.T; S.nbParams = keep.nb; fillParamInputs();
+    return { minCount: d.minCount, slot, labels, back: [$("pSlot1").textContent, slotMin()] };
+  });
+  assert.deepEqual(thirty, { minCount: 5, slot: 30, labels: ["30", "30"], back: ["15", 15] });
+  const vj = await page.evaluate(() => parseViewerJson(JSON.stringify({ period: { start: "2026-08-13 12:00", hours: 24, slot_min: 30 },
+    thresholds: { min_base_count: 5, min_base_speed: 10, require_corroboration: true, error_levels: [{ speed: 0.4, count: 0.4, op: "or" }, { speed: 0.4, count: 0.4, op: "and" }, { speed: 0.2, count: 0.2, op: "and" }] } })));
+  assert.deepEqual(vj, { period: { event: { start: "2026-08-13 12:00", hours: 24, slot_min: 30 } },
+    nbParams: { minCount: 5, minSpeed: 10, corrob: true, levels: [{ speed: 0.4, count: 0.4, op: "or" }, { speed: 0.4, count: 0.4, op: "and" }, { speed: 0.2, count: 0.2, op: "and" }] } });
+  assert.deepEqual(await page.evaluate(() => parseViewerJson("{\"thresholds\": {\"error_levels\": [{\"speed\": 1}]}}")), { period: null, nbParams: null }, "an incomplete thresholds block is ignored");
+  assert.equal(await page.evaluate(() => parseViewerJson("not json")), null);
   await page.close();
 });
 
@@ -328,7 +347,8 @@ test("standalone file:// with the file picker: traffic files (input 1) and the r
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ rain: S.rain.sources.size, axis: [S.axisStart, S.axisDate, S.axisSource], ref: S.errRef, check: $("pCheck").textContent, title: document.title }));
-  assert.equal(info.rain, 48, "rain registered from input 2"); assert.deepEqual(info.axis, ["18:00", "20240821", "default"]);
+  assert.equal(info.rain, 48, "rain registered from input 2"); assert.deepEqual(info.axis, ["18:00", "20240821", "default"], "no viewer.json among the 5 files: CSV order, date from the file name");
+  assert.equal(await page.evaluate(() => S.nbParams), null);
   assert.equal(info.ref, null); assert.match(info.check, /未読み込み/); assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00");
   await page.evaluate((t) => applyTime(t), T_18);
   assert.equal((await status(page)).error, errorCountsFromCsv()[T_18], "same result without error.csv");
@@ -349,7 +369,9 @@ test("standalone file:// with the folder picker: rain/ inside the traffic folder
   assert.equal(info.rain, 48, "rain slots found in the folder (rain_*.tif)"); assert.deepEqual(info.dates, ["20240821", "20240822"]);
   assert.match(info.check, /不一致: 0 セル/, "error.csv from the folder is compared");
   assert.ok(info.unit, "rain/index.json inside the folder is read");
-  assert.deepEqual(info.axis, ["18:00", "20240821", "files"], "period start from error_geojson/error_L*_YYYYMMDD_HHMM.geojson");
+  assert.deepEqual(info.axis, ["18:00", "20240821", "viewer.json"], "period from viewer.json in the folder (the error_L*.geojson names are the fallback)");
+  assert.ok(await page.evaluate(() => !!S.nbParams), "thresholds from viewer.json");
+  assert.match(await page.evaluate(() => document.querySelector('#fileList li[data-name="viewer.json"]').textContent), /期間 2024-08-21 18:00 から 12 時間（15 分窓） \/ 閾値を既定値に/);
   assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00");
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
