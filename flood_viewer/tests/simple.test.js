@@ -101,6 +101,7 @@ async function hover(page, pt) {
 
 before(async () => {
   for (const f of [...REQUIRED, "error.csv"]) assert.ok(existsSync(join(DATA, f)), `missing sample file ${f} (run: npm run data)`);
+  assert.ok(existsSync(join(DATA, "error_geojson", "error_L1_20240821_1800.geojson")), "missing sample error_geojson/ (run: npm run data)");
   assert.ok(existsSync(join(DIST, HTML)), `missing dist/${HTML} (run: npm run build)`);
   mkdirSync(SHOTS, { recursive: true });
   server = serve();
@@ -116,22 +117,26 @@ test("flood_viewer_simple.html is the build of its template and flood_viewer.htm
   assert.equal(readFileSync(TARGET, "utf8"), buildSimple(), "flood_viewer_simple.html is stale: run npm run build and commit it");
   const html = readFileSync(join(DIST, HTML), "utf8");
   for (const id of ["modeTraj", "modeGrid", "probeInput", "gridInput", "kadenInput", "snsInput", "kadenOpt", "snsOpt", "gridOpts", "trajOpts", "snsCallout"]) assert.doesNotMatch(html, new RegExp(` id="${id}"`), id);
-  for (const fn of ["updateTraj", "updateKaden", "updateSns", "updateGrid", "setMode", "parseSns", "parseKaden", "parseTraj"]) assert.doesNotMatch(html, new RegExp(`function ${fn}\\(`), fn);
-  for (const fn of ["parseMatrix", "recompute", "parseGeoTiff", "paintRain", "updateRain", "drawChart", "showChart"]) assert.match(html, new RegExp(`\\nfunction ${fn}\\(`), fn + " copied from the full viewer");
+  for (const fn of ["updateTraj", "updateKaden", "updateSns", "updateGrid", "setMode", "parseSns", "parseKaden", "parseTraj", "alignAxisToPeriod"]) assert.doesNotMatch(html, new RegExp(`function ${fn}\\(`), fn);
+  for (const fn of ["parseMatrix", "recompute", "parseGeoTiff", "paintRain", "updateRain", "drawChart", "showChart", "periodSpan"]) assert.match(html, new RegExp(`\\nfunction ${fn}\\(`), fn + " copied from the full viewer");
   assert.match(html, /GENERATED FILE/);
 });
 
-test("loads over http: the thresholds reproduce error.csv, title from the network file name, only the link and rain layers", async () => {
+test("loads over http: the thresholds reproduce error.csv, the axis is the CSV order dated by the network file name, only the link and rain layers", async () => {
   const page = await openViewer();
   const info = await page.evaluate(() => ({ N: S.ids.length, T: S.T, check: $("pCheck").textContent, title: document.querySelector("#topbar h1").textContent, docTitle: document.title,
-    layers: map.getStyle().layers.map((l) => l.id), dataDate: S.dataDate, adj: S.adjPrev[24], stat: getComputedStyle($("statTraffic")).display }));
+    layers: map.getStyle().layers.map((l) => l.id), axis: [S.axisStart, S.axisDate, S.axisSource], label: $("timeLabel").textContent, adj: S.adjPrev[24], stat: getComputedStyle($("statTraffic")).display,
+    inputs: [$("axisDate").value, $("axisStart").value, $("axisStart").options.length] }));
   assert.equal(info.T, 48);
   assert.ok(info.N > 1000);
   assert.match(info.check, /不一致: 0 セル/, "in-page error computation must match error.csv at default thresholds");
   assert.match(info.check, /レベル 0〜3 で照合/);
-  assert.equal(info.title, "Tokyo 2024-08-21 Flood Candidates"); assert.equal(info.docTitle, info.title);
+  assert.deepEqual(info.axis, ["18:00", "20240821", "default"], "first CSV column, date from tokyo_20240821_network.geojson");
+  assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00", "title from the axis: 48 slots of 15 min from the start"); assert.equal(info.docTitle, info.title);
+  assert.equal(info.label, "08-21 18:00", "time label carries the slot's date");
+  assert.deepEqual(info.inputs, ["2024-08-21", "18:00", 48]);
   assert.deepEqual(info.layers, ["base", "rain", "links-base", "links-error", "links-hover", "links-hit"]);
-  assert.equal(info.dataDate, "20240821"); assert.equal(info.adj, 1, "23:45 -> 00:00 counts as consecutive"); assert.notEqual(info.stat, "none");
+  assert.equal(info.adj, 1, "23:45 -> 00:00 counts as consecutive"); assert.notEqual(info.stat, "none");
   const ref = errorCountsFromCsv(), refL = [1, 2, 3].map((l) => errorCountsFromCsv(l));
   for (const t of [0, T_18, 47]) {
     await page.evaluate((t) => applyTime(t), t);
@@ -139,7 +144,9 @@ test("loads over http: the thresholds reproduce error.csv, title from the networ
     assert.equal(st.error, ref[t], `error count at t=${t} matches error.csv`);
     assert.deepEqual(st.levels, refL.map((c) => c[t]), `per-level counts at t=${t} match error.csv`);
   }
+  assert.equal((await status(page)).time, "08-22 05:45", "after midnight the label shows the next day");
   assert.ok(refL[0][T_18] > 0 && refL[2][T_18] > 0, "sample has level-1 and level-3 errors at 00:00");
+  await page.evaluate((t) => applyTime(t), T_18);
   await page.screenshot({ path: join(SHOTS, "simple_traffic.png") });
   await page.close();
 });
@@ -147,15 +154,58 @@ test("loads over http: the thresholds reproduce error.csv, title from the networ
 test("slider, play and keyboard change the time", async () => {
   const page = await openViewer();
   await page.locator("#slider").fill(String(T_18));
-  assert.equal((await status(page)).time, "00:00");
+  assert.equal((await status(page)).time, "08-22 00:00");
   await page.mouse.move(700, 450);
   await page.keyboard.press("ArrowRight");
-  assert.equal((await status(page)).time, "00:15");
+  assert.equal((await status(page)).time, "08-22 00:15");
   await page.keyboard.press("ArrowLeft");
-  assert.equal((await status(page)).time, "00:00");
+  assert.equal((await status(page)).time, "08-22 00:00");
   await page.keyboard.press("Space"); await page.waitForTimeout(1500); await page.keyboard.press("Space");
   const after = await page.evaluate(() => ({ t: S.t, playing: S.playing, btn: $("playBtn").textContent }));
   assert.ok(after.t > T_18 + 1, "playback advanced"); assert.equal(after.playing, false); assert.equal(after.btn, "▶ 再生");
+  await page.close();
+});
+
+test("time axis: the start column rotates the CSV columns, the date gives the slot dates, both editable", async () => {
+  const page = await openViewer();
+  const ref = errorCountsFromCsv();
+  // a whole-day CSV built for a period starting at 12:00 is the real case; the sample (18:00 … 05:45) is rotated to 00:00 here
+  await page.selectOption("#axisStart", "00:00"); await page.waitForTimeout(300);
+  const rot = await page.evaluate(() => ({ times: [S.times[0], S.times[23], S.times[24], S.times[47]], adj: [S.adjPrev[0], S.adjPrev[1], S.adjPrev[24], S.adjPrev[25]], title: document.title,
+    label: $("timeLabel").textContent, t: S.t, check: $("pCheck").textContent, orig: S.orig.times[0], copy: S.bs !== S.orig.bs }));
+  assert.deepEqual(rot.times, ["00:00", "05:45", "18:00", "23:45"], "the columns before the start follow after the wrap of the clock");
+  assert.deepEqual(rot.adj, [0, 1, 0, 1], "05:45 -> 18:00 is not consecutive, 18:00 -> 18:15 is");
+  assert.equal(rot.title, "冠水候補 2024-08-21 00:00〜08-21 12:00");
+  assert.deepEqual([rot.t, rot.label], [24, "08-21 18:00"], "the clock time on screen is kept (18:00 moved to slot 24, same day: the clock did not wrap)");
+  // error.csv is reordered the same way, but the ends of the axis moved: 23:45 -> 00:00 is no longer consecutive, so cells the
+  // notebook confirmed only across that boundary (it used the CSV order) differ; everything away from the ends still matches
+  assert.match(rot.check, /不一致: [1-9]\d* セル/, "cross-check reports the boundary cells: " + rot.check);
+  assert.equal(rot.orig, "18:00", "the CSV order is kept aside"); assert.equal(rot.copy, true);
+  for (const [t, c] of [[2, 26], [24, 0], [30, 6], [46, 22]]) {
+    await page.evaluate((t) => applyTime(t), t);
+    assert.equal((await status(page)).error, ref[c], `slot ${t} holds the ${c < 24 ? "" : "next-day "}column ${c} of the CSV`);
+  }
+  await page.selectOption("#axisStart", "18:00"); await page.waitForTimeout(300);
+  const back = await page.evaluate(() => ({ t0: S.times[0], same: S.bs === S.orig.bs && S.errRef === S.orig.errRef, t: S.t, label: $("timeLabel").textContent, title: document.title, check: $("pCheck").textContent }));
+  assert.deepEqual(back, { t0: "18:00", same: true, t: 22, label: "08-21 23:30", title: "冠水候補 2024-08-21 18:00〜08-22 06:00", check: back.check }, "23:30 stays on screen: column 22 of the CSV order");
+  assert.match(back.check, /不一致: 0 セル/, "back in the CSV order the cross-check matches again");
+  await page.evaluate(() => applyTime(0));
+  assert.equal((await status(page)).error, ref[0]);
+  // no date: CSV order, title from the file name, labels without a date, no rain
+  await page.fill("#axisDate", ""); await page.waitForTimeout(300);
+  const none = await page.evaluate(() => ({ date: S.axisDate, title: document.title, label: $("timeLabel").textContent, rain: $("rainVal").textContent, cur: S.rain.cur, key: rainDateFor(0) }));
+  assert.deepEqual(none, { date: null, title: "Tokyo 2024-08-21 Flood Candidates", label: "18:00", rain: "（開始の日付を入れると降雨を表示）", cur: null, key: null });
+  await page.fill("#axisDate", "2024-08-22"); await page.waitForTimeout(300);
+  const moved = await page.evaluate(() => ({ date: S.axisDate, title: document.title, label: $("timeLabel").textContent, d: [0, 23, 24, 47].map(rainDateFor) }));
+  assert.deepEqual(moved, { date: "20240822", title: "冠水候補 2024-08-22 18:00〜08-23 06:00", label: "08-22 18:00", d: ["20240822", "20240822", "20240823", "20240823"] });
+  // the anomaly file names of a period 12:00 -> next day 12:00 give its start (any level, any order)
+  const det = await page.evaluate(() => {
+    const names = ["readme.txt", "error.csv"];
+    for (const [d, hours] of [["20260814", [0, 12]], ["20260813", [12, 24]]]) for (let h = hours[0]; h < hours[1]; h++) for (const m of [45, 30, 15, 0]) names.push(`error_L${1 + (h % 3)}_${d}_${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}.geojson`);
+    return periodFromNames(names);
+  });
+  assert.deepEqual(det, { date: "20260813", time: "12:00", windows: 96, first: "20260813 12:00", last: "20260814 11:45" });
+  assert.equal(await page.evaluate(() => periodFromNames(["error.csv", "error_level1.csv"])), null);
   await page.close();
 });
 
@@ -226,25 +276,20 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   await page.close();
 });
 
-test("rain over http: slots follow the slider, the select holds the date of the first slot, readout, toggle", async () => {
+test("rain over http: slots follow the slider and the axis date, readout, toggle, a day without files shows no rain", async () => {
   const page = await openViewer();
-  const r = await page.evaluate(() => ({ n: S.rain.sources.size, dates: S.rain.dates, date: S.rain.date, sel: $("rainDate").value, disabled: $("rainDate").disabled,
-    options: [...$("rainDate").options].map((o) => [o.value, o.textContent]), opts: getComputedStyle($("overlayOpts")).display, legend: $("legendRain").textContent,
-    d: [0, 23, 24, 47].map(rainDateFor), vis: map.getLayoutProperty("rain", "visibility") }));
+  const r = await page.evaluate(() => ({ n: S.rain.sources.size, dates: S.rain.dates, opts: getComputedStyle($("overlayOpts")).display, legend: $("legendRain").textContent,
+    d: [0, 23, 24, 47].map(rainDateFor), vis: map.getLayoutProperty("rain", "visibility"), sel: getComputedStyle($("rainDate")).display }));
   assert.equal(r.n, 48, "48 rain GeoTIFF slots registered from rain/index.json");
   assert.deepEqual(r.dates, ["20240821", "20240822"]);
-  assert.equal(r.date, "20240821", "the network file's date is the date of the first slot (not the folder's last date)");
-  assert.equal(r.sel, "20240821"); assert.equal(r.disabled, false, "no period: the select stays editable");
-  assert.deepEqual(r.options, [["20240821", "2024-08-21"], ["20240822", "2024-08-22"]]);
-  assert.notEqual(r.opts, "none"); assert.match(r.legend, /降雨 mm\/h（15 分平均）1–5.*80\+/); assert.equal(r.vis, "visible");
+  assert.notEqual(r.opts, "none"); assert.match(r.legend, /降雨 mm\/h（15 分平均）1–5.*80\+/); assert.equal(r.vis, "visible"); assert.equal(r.sel, "none", "no rain date select: the date comes from the axis");
   assert.deepEqual(r.d, ["20240821", "20240821", "20240822", "20240822"], "after the clock wraps the next day's files are used");
   await page.evaluate((t) => applyTime(t + 2), T_18);   // 00:30 of the next day = peak
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
-  const peak = await page.evaluate(() => ({ max: Math.max(...S.rain.cur.vals), url: map.getSource("rain").url.slice(0, 21), w: S.rain.cur.w, h: S.rain.cur.h, nodata: S.rain.cur.nodata, bounds: S.rain.cur.bounds, sel: $("rainDate").value }));
+  const peak = await page.evaluate(() => ({ max: Math.max(...S.rain.cur.vals), url: map.getSource("rain").url.slice(0, 21), w: S.rain.cur.w, h: S.rain.cur.h, nodata: S.rain.cur.nodata, bounds: S.rain.cur.bounds }));
   assert.ok(peak.max > 80, "peak slot decoded from the GeoTIFF: " + JSON.stringify(peak));
   assert.equal(peak.nodata, -1); assert.deepEqual([peak.w, peak.h], [160, 96]); assert.equal(peak.url, "data:image/png;base64");
   assert.ok(Math.abs(peak.bounds[0] - 139.70) < 1e-9 && Math.abs(peak.bounds[3] - 35.71) < 1e-9, "georeference from the tags: " + peak.bounds);
-  assert.equal(peak.sel, "20240821", "the select keeps the first slot's date while the slider moves");
   const centre = await page.evaluate((ll) => rainAt({ lng: ll[0], lat: ll[1] }), WET);
   assert.match(centre, /^\d+\.\d mm\/h$/); assert.ok(parseFloat(centre) > 60, "wet centre value " + centre);
   assert.equal(await page.evaluate(() => rainAt({ lng: 139.7001, lat: 35.68 })), "–", "no-data stripe reads as –");
@@ -264,11 +309,11 @@ test("rain over http: slots follow the slider, the select holds the date of the 
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "none");
   await page.click("#chkRain"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
-  // the select is the date of the first slot: with 2024-08-22 at 18:00, 00:00 falls on 08-23, which has no file -> no rain, never another day's
-  await page.selectOption("#rainDate", "20240822"); await page.waitForTimeout(300);
-  const moved = await page.evaluate(() => ({ d: [0, 24].map(rainDateFor), cur: S.rain.cur, val: $("rainVal").textContent }));
-  assert.deepEqual(moved.d, ["20240822", "20240823"]); assert.equal(moved.cur, null); assert.equal(moved.val, "（この時刻の降雨なし）");
-  await page.selectOption("#rainDate", "20240821");
+  // the axis date moved to 2024-08-22: 00:00 falls on 08-23, which has no file -> no rain, never another day's
+  await page.fill("#axisDate", "2024-08-22"); await page.waitForTimeout(300);
+  const moved = await page.evaluate(() => ({ key: rainDateFor(24), cur: S.rain.cur, val: $("rainVal").textContent }));
+  assert.deepEqual(moved, { key: "20240823", cur: null, val: "（この時刻の降雨なし）" });
+  await page.fill("#axisDate", "2024-08-21");
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:00", null, { timeout: 15000 });
   await page.close();
 });
@@ -282,9 +327,9 @@ test("standalone file:// with the file picker: traffic files (input 1) and the r
   assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 降雨 48 枚$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const info = await page.evaluate(() => ({ rain: S.rain.sources.size, date: S.rain.date, ref: S.errRef, check: $("pCheck").textContent, title: document.title }));
-  assert.equal(info.rain, 48, "rain registered from input 2"); assert.equal(info.date, "20240821");
-  assert.equal(info.ref, null); assert.match(info.check, /未読み込み/); assert.equal(info.title, "Tokyo 2024-08-21 Flood Candidates");
+  const info = await page.evaluate(() => ({ rain: S.rain.sources.size, axis: [S.axisStart, S.axisDate, S.axisSource], ref: S.errRef, check: $("pCheck").textContent, title: document.title }));
+  assert.equal(info.rain, 48, "rain registered from input 2"); assert.deepEqual(info.axis, ["18:00", "20240821", "default"]);
+  assert.equal(info.ref, null); assert.match(info.check, /未読み込み/); assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00");
   await page.evaluate((t) => applyTime(t), T_18);
   assert.equal((await status(page)).error, errorCountsFromCsv()[T_18], "same result without error.csv");
   await page.evaluate((t) => applyTime(t + 2), T_18);
@@ -293,29 +338,32 @@ test("standalone file:// with the file picker: traffic files (input 1) and the r
   await page.close();
 });
 
-test("standalone file:// with the folder picker: rain/ inside the traffic folder is found, error.csv is cross-checked", async () => {
+test("standalone file:// with the folder picker: rain/ inside the traffic folder, error.csv cross-checked, the period from the error_L*.geojson names", async () => {
   const page = await openPicker();
   await page.setInputFiles("#dirInput", DATA);
   assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const info = await page.evaluate(() => ({ rain: S.rain ? S.rain.sources.size : 0, dates: S.rain && S.rain.dates, check: $("pCheck").textContent, unit: S.rain && S.rain.index.unit }));
+  const info = await page.evaluate(() => ({ rain: S.rain ? S.rain.sources.size : 0, dates: S.rain && S.rain.dates, check: $("pCheck").textContent, unit: S.rain && S.rain.index.unit,
+    axis: [S.axisStart, S.axisDate, S.axisSource], title: document.title }));
   assert.equal(info.rain, 48, "rain slots found in the folder (rain_*.tif)"); assert.deepEqual(info.dates, ["20240821", "20240822"]);
   assert.match(info.check, /不一致: 0 セル/, "error.csv from the folder is compared");
   assert.ok(info.unit, "rain/index.json inside the folder is read");
+  assert.deepEqual(info.axis, ["18:00", "20240821", "files"], "period start from error_geojson/error_L*_YYYYMMDD_HHMM.geojson");
+  assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00");
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80));
   await page.close();
 });
 
-test("standalone file:// without a rain folder: no overlay controls", async () => {
+test("standalone file:// without a rain folder: no overlay controls, the axis date still comes from the network file name", async () => {
   const page = await openPicker();
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const info = await page.evaluate(() => ({ rain: S.rain, layer: map.getLayer("rain") || null, opts: getComputedStyle($("overlayOpts")).display, legend: getComputedStyle($("legendRain")).display }));
-  assert.deepEqual(info, { rain: null, layer: null, opts: "none", legend: "none" });
+  const info = await page.evaluate(() => ({ rain: S.rain, layer: map.getLayer("rain") || null, opts: getComputedStyle($("overlayOpts")).display, legend: getComputedStyle($("legendRain")).display, date: S.axisDate, label: $("timeLabel").textContent }));
+  assert.deepEqual(info, { rain: null, layer: null, opts: "none", legend: "none", date: "20240821", label: "08-21 18:00" });
   await page.close();
 });
 

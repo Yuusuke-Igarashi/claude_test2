@@ -101,6 +101,19 @@ link_level = err.max(axis=1)
 save(err, "error.csv", rows=link_level >= 1, integer=True)
 for k in (1, 2, 3):
     save(err, f"error_level{k}.csv", rows=link_level == k, integer=True)
+# ---- error_geojson/: the notebook's anomaly links per window and level, error_L{k}_YYYYMMDD_HHMM.geojson (empty when none).
+# The sample period is 2024-08-21 18:00 -> 08-22 05:45; the window's date in the file name is what the simple viewer reads for its time axis.
+EG = OUT / "error_geojson"; EG.mkdir(exist_ok=True)
+num = lambda v: None if np.isnan(v) else round(float(v), 3)
+for ti, tm in enumerate(times):
+    day = "20240821" if ti < 24 else "20240822"
+    for k in (1, 2, 3):
+        feats = [{"type": "Feature", "geometry": features[r]["geometry"],
+                  "properties": {"id": ids[r], "timestamp": f"{day[:4]}-{day[4:6]}-{day[6:]} {tm}", "baseline_speed": num(bs[r, ti]), "event_speed": num(es[r, ti]),
+                                 "speed_ratio": num(speed_ratio[r, ti]), "baseline_count": num(bc[r, ti]), "event_count": num(ec[r, ti]), "count_ratio": num(count_ratio[r, ti]), "error_level": k}}
+                 for r in np.where(err[:, ti] == k)[0]]
+        with open(EG / f"error_L{k}_{day}_{tm.replace(':', '')}.geojson", "w") as f:
+            json.dump({"type": "FeatureCollection", "features": feats}, f)
 # ---- truck/: network_agg.shp/.shx/.dbf/.prj (aggregated links) + traffic_YYYYMMDD_HHMM.csv per window (truck_traffic.ipynb output) ----
 # baseline 2024-08-14/15, event 2024-08-21/22 (the sample period runs 18:00 -> 05:45 across midnight); Id = the network link id
 import struct

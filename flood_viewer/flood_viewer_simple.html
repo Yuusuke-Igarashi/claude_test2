@@ -71,7 +71,7 @@ button:hover{background:#f0efec}
 #settings .check.ng{color:var(--road-red)}
 #settings .foot{display:flex;gap:8px;margin-top:10px}
 #overlayOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
-#rainDate{font:inherit;font-size:12px;padding:1px 2px}
+#axisDate,#axisStart{font:inherit;font-size:12px;padding:1px 2px}
 #legendRain{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
 #legendRain .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
 #legendRain .lab{margin-right:6px}
@@ -92,10 +92,12 @@ button:hover{background:#f0efec}
   <button id="playBtn" title="Space">▶ 再生</button>
   <span id="timeLabel">--:--</span>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
+  <span class="stat" id="axisOpt" title="時間軸の最初の時刻（スライダー左端）の日付と時刻。CSV の列はこの時刻から並び、日付をまたいだ先は翌日になる">開始 <input type="date" id="axisDate"> <select id="axisStart"></select></span>
   <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</span>
   <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
   <span id="overlayOpts" style="display:none">
-    <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <select id="rainDate" title="最初の時刻（スライダー左端）の日付。日付をまたぐ時刻は翌日のファイルを使う"></select> <b id="rainVal" class="stat"></b></label>
+    <!-- the rain date follows the time axis ("開始"); the select stays, hidden, for updateRain, which is shared with the full viewer -->
+    <label id="rainOpt" style="display:none"><input type="checkbox" id="chkRain" checked> 降雨 <b id="rainVal" class="stat"></b><select id="rainDate" style="display:none"></select></label>
   </span>
   <span class="legend" id="legendTraffic">
     <span style="--c:var(--road-gray)">対象外</span>
@@ -152,7 +154,7 @@ button:hover{background:#f0efec}
       <p>フォルダ・ファイルを選んで「読み込む」を押してください。1 だけが必須です。<br>
       <span style="color:var(--muted)">HTML を出力フォルダに置いて http:// 経由で開いた場合は自動で読み込まれます。</span></p>
       <p style="margin:6px 0 2px"><b>1. 車流（TomTom 交通統計）のフォルダ（必須）:</b> <input id="dirInput" type="file" webkitdirectory><br>
-      <span style="color:var(--muted)">tomtom_out: network.geojson、baseline_/event_ の speed・count CSV、error.csv。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
+      <span style="color:var(--muted)">tomtom_out: network.geojson、baseline_/event_ の speed・count CSV、error.csv（error_L*_YYYYMMDD_HHMM.geojson があれば期間の開始日時を自動設定）。または個別に:</span> <input id="fileInput" type="file" multiple accept=".geojson,.json,.csv"></p>
       <p style="margin:6px 0 2px"><b>2. 降雨（XRAIN）のフォルダ（任意）:</b> <input id="rainInput" type="file" webkitdirectory><br>
       <span style="color:var(--muted)">xrain_to_geotiff.py の出力（rain_YYYYMMDD_HHMM.tif。index.json は無くてよい）。車流フォルダの中の rain/ でも可。道路の下に半透明で重ねる</span></p>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
@@ -221,7 +223,12 @@ const S = {
   countsTarget: [], countsError: [], countsLevel: [[], [], []],
   t: 0,
   rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, dates, date, cur: {key, vals, w, h, nodata, bounds, url}}
-  dataDate: null,       // "YYYYMMDD" from the network file name (date of the first slot)
+  dataDate: null,       // "YYYYMMDD" from the network file name
+  networkName: null,    // network file name (title when no axis date is set)
+  orig: null,           // {times, T, bs, es, bc, ec, errRef} in CSV column order; setAxis() reorders from here
+  axisStart: null,      // "HH:MM" of slot 0 (one of the CSV columns)
+  axisDate: null,       // "YYYYMMDD" of slot 0 or null; every wrap of the clock along the axis adds a day
+  axisSource: null,     // "files" (error_L*_YYYYMMDD_HHMM.geojson names) | "default" (CSV order, date from the network file name / rain folder)
   showRain: true,
   hoverId: null, pinnedId: null,
   playing: false, timer: null
@@ -239,6 +246,14 @@ function setTitleFrom(name){
   if(!m) return;
   S.dataDate = `${m[1]}${m[2]}${m[3]}`;                       // date of the first slot when no period is known
   setTitle(`Tokyo ${m[1]}-${m[2]}-${m[3]} Flood Candidates`);
+}
+function periodSpan(pd){
+  const m = String(pd.start).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  if(!m) return String(pd.start);
+  const a = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
+  const b = new Date(a.getTime() + (+pd.hours || 24) * 3600e3);
+  const f = (d, y) => `${y ? d.getUTCFullYear() + "-" : ""}${String(d.getUTCMonth()+1).padStart(2,"0")}-${String(d.getUTCDate()).padStart(2,"0")} ${String(d.getUTCHours()).padStart(2,"0")}:${String(d.getUTCMinutes()).padStart(2,"0")}`;
+  return `${f(a, true)}〜${f(b, b.getUTCFullYear() !== a.getUTCFullYear())}`;
 }
 function fileRow(name, state){
   let li = document.querySelector(`#fileList li[data-name="${name}"]`);
@@ -262,7 +277,7 @@ async function fetchText(name, optional=false){
 
 async function loadViaFetch(){
   const f = CONFIG.files;
-  setTitleFrom(f.network);
+  S.networkName = f.network; setTitleFrom(f.network);
   const [network, bs, es, bc, ec, err] = await Promise.all([
     fetchText(f.network), fetchText(f.baseline_speed), fetchText(f.event_speed),
     fetchText(f.baseline_count), fetchText(f.event_count), fetchText(f.error, true)
@@ -297,11 +312,21 @@ function readSource(src){
   return new Promise((res, rej) => { const rd = new FileReader(); rd.onload = () => res(rd.result); rd.onerror = () => rej(rd.error); rd.readAsText(src); });
 }
 
+// The notebook's anomaly files error_L{1,2,3}_YYYYMMDD_HHMM.geojson (one per window and level, empty when none) name every
+// window with its date: the earliest is the start of the period, so a traffic folder holding them sets the time axis by itself.
+const PERIOD_NAME = /^error_L[123]_(\d{8})_(\d{2})(\d{2})\.geojson$/i;
+function periodFromNames(names){
+  const keys = [...new Set(names.map(n => String(n).match(PERIOD_NAME)).filter(Boolean).map(m => `${m[1]} ${m[2]}:${m[3]}`))].sort();
+  if(!keys.length) return null;
+  const [date, time] = keys[0].split(" ");
+  return {date, time, windows: keys.length, first: keys[0], last: keys[keys.length - 1]};
+}
+
 // fileList: the traffic folder (or the individual files); rainList: the rain folder.
 // rain_*.tif (and rain/index.json) inside the traffic folder are accepted when no rain folder is chosen.
 function loadViaFiles(fileList, rainList = []){
   const want = CONFIG.files;
-  const byName = {}, rainFiles = new Map();
+  const byName = {}, rainFiles = new Map(), periodNames = [];
   let rainIndexFile = null;
   for(const fl of rainList){
     const r = fl.name.match(RAIN_NAME);
@@ -311,6 +336,7 @@ function loadViaFiles(fileList, rainList = []){
   for(const fl of fileList){
     const r = fl.name.match(RAIN_NAME);
     if(r){ if(!rainList.length) rainFiles.set(rainSlotKey(r), fl); continue; }
+    if(PERIOD_NAME.test(fl.name)){ periodNames.push(fl.name); continue; }
     if(fl.name === "index.json"){
       if(!rainList.length && /(^|\/)rain\/index\.json$/.test(fl.webkitRelativePath || "")) rainIndexFile = fl;
       continue;
@@ -326,7 +352,7 @@ function loadViaFiles(fileList, rainList = []){
       if(alt.length === 1){ name = alt[0]; fl = byName[name]; }
     }
     if(!fl){ fileRow(name, optional ? "なし" : "未選択"); return optional ? res(null) : rej(new Error(`${name} が選択されていません`)); }
-    if(key === "network") setTitleFrom(name);
+    if(key === "network"){ S.networkName = name; setTitleFrom(name); }
     const rd = new FileReader();
     rd.onload = () => { fileRow(name, `OK (${(rd.result.length/1048576).toFixed(1)} MB)`); res(rd.result); };
     rd.onerror = () => rej(rd.error);
@@ -334,7 +360,7 @@ function loadViaFiles(fileList, rainList = []){
   });
   const rainIndex = rainIndexFile ? readSource(rainIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   return Promise.all([read("network"), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), rainIndex])
-    .then(([network, bs, es, bc, ec, err, rainIdx]) => ({network, bs, es, bc, ec, err, rain: rainRegistry(rainFiles, rainIdx)}));   // the file names alone define the slots
+    .then(([network, bs, es, bc, ec, err, rainIdx]) => ({network, bs, es, bc, ec, err, rain: rainRegistry(rainFiles, rainIdx), period: periodFromNames(periodNames)}));   // the file names alone define the slots
 }
 
 function parseMatrix(text, {first=false, uint8=false}={}){
@@ -485,11 +511,7 @@ async function boot(loaderFn){
   S.bc = parseMatrix(raw.bc);
   S.ec = parseMatrix(raw.ec);
   S.errRef = raw.err ? parseRefLevels(raw.err) : null;
-  // time adjacency (for the corroboration at t±1): consecutive columns exactly one interval apart
-  const mins = S.times.map(t => { const [h,m] = t.split(":").map(Number); return h*60+m; });
-  const step = S.T > 1 ? ((mins[1]-mins[0]) % 1440 + 1440) % 1440 : 15;
-  S.adjPrev = new Uint8Array(S.T);
-  for(let c=1;c<S.T;c++) S.adjPrev[c] = (((mins[c]-mins[c-1]) % 1440 + 1440) % 1440 === step) ? 1 : 0;   // 23:45 -> 00:00 is adjacent
+  S.orig = {times: S.times.slice(), T: S.T, bs: S.bs, es: S.es, bc: S.bc, ec: S.ec, errRef: S.errRef};   // CSV column order
   setProgress("ネットワークを構築中 …");
   await tick();
   const gj = JSON.parse(raw.network);
@@ -513,18 +535,74 @@ async function boot(loaderFn){
   await tick();
   S.params = defaultParams();
   fillParamInputs();
-  recompute();
-  checkAgainstRef();
-  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}）/ CSV 未対応リンク ${unmatched} 本`);
+  // time axis: the period from the anomaly file names when the folder holds them; else the CSV order, dated by the
+  // network file name (or by the rain folder when that date has no rain files)
+  const det = raw.period && S.orig.times.includes(raw.period.time) ? raw.period : null;
+  const rainDates = raw.rain ? raw.rain.dates : [];
+  S.axisSource = det ? "files" : "default";
+  setAxis(det ? det.time : S.orig.times[0], det ? det.date : ((rainDates.length && !rainDates.includes(S.dataDate)) ? rainDates[0] : S.dataDate));
+  setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}）/ CSV 未対応リンク ${unmatched} 本`
+    + (det ? ` / 期間 ${det.first}〜${det.last}（error_L*.geojson ${det.windows} 窓のファイル名から）` : ` / 時間軸は CSV の列順（${S.times[0]} 開始。「開始」で変更できる）`));
   await tick();
   S.rain = raw.rain || null;
-  if(S.rain){
-    if(S.dataDate && S.rain.dates.includes(S.dataDate)) S.rain.date = S.dataDate;   // the network file's date is the date of the first slot
-    setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick();
-  }
+  if(S.rain){ setProgress(`降雨: ${S.rain.sources.size} スロット（${S.rain.dates.join(", ")}）`); await tick(); }
   initMap(gj);
 }
 const tick = () => new Promise(r => setTimeout(r, 0));
+
+// ============================================================
+// Time axis. The CSV columns are clock times (HH:MM). The chosen start column becomes slot 0 and the columns before it
+// follow after the wrap of the clock, so a whole-day CSV (00:00 … 23:45) built for a period 12:00 -> 12:00 is shown as
+// 12:00 … 23:45, 00:00 … 11:45, and the corroboration at t±1 uses that order. Nothing is dropped (S.orig keeps the CSV order).
+// The axis date is the date of slot 0; every wrap of the clock along the axis adds a day (labels, title, rain).
+// ============================================================
+function setAxis(start, date){
+  const O = S.orig, k = Math.max(0, O.times.indexOf(start)), N = S.ids.length, T = O.T;
+  S.axisStart = O.times[k]; S.axisDate = date || null;
+  const prev = S.times.length ? S.times[S.t] : null;   // keep the clock time on screen
+  const perm = O.times.map((_, j) => (k + j) % T);
+  const remap = (src, uint8) => {
+    if(!src || !k) return src;
+    const out = uint8 ? new Uint8Array(N * T) : new Float32Array(N * T);
+    for(let r = 0; r < N; r++) for(let j = 0; j < T; j++) out[r * T + j] = src[r * T + perm[j]];
+    return out;
+  };
+  S.times = perm.map(j => O.times[j]); S.T = T;
+  S.bs = remap(O.bs); S.es = remap(O.es); S.bc = remap(O.bc); S.ec = remap(O.ec); S.errRef = remap(O.errRef, true);
+  // time adjacency (for the corroboration at t±1): consecutive columns exactly one interval apart (23:45 -> 00:00 is adjacent)
+  const mins = S.times.map(t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; }), step = axisStep();
+  S.adjPrev = new Uint8Array(T);
+  for(let c = 1; c < T; c++) S.adjPrev[c] = (((mins[c] - mins[c - 1]) % 1440 + 1440) % 1440 === step) ? 1 : 0;
+  recompute(); checkAgainstRef();
+  fillAxisInputs(); setTitleFromAxis();
+  if(map) applyTime(prev ? Math.max(0, S.times.indexOf(prev)) : 0, true);
+}
+// minutes between consecutive CSV columns (15 for the notebook output)
+function axisStep(){
+  const O = S.orig, m = (t) => { const [h, mm] = t.split(":").map(Number); return h * 60 + mm; };
+  return O.T > 1 ? ((m(O.times[1]) - m(O.times[0])) % 1440 + 1440) % 1440 : 15;
+}
+// "YYYYMMDD" of slot t, or null without an axis date
+function slotDate(t){
+  if(!S.axisDate) return null;
+  const mins = (x) => { const [h, m] = S.times[x].split(":").map(Number); return h * 60 + m; };
+  let days = 0; for(let i = 1; i <= t; i++) if(mins(i) < mins(i - 1)) days++;
+  const d = new Date(Date.UTC(+S.axisDate.slice(0, 4), +S.axisDate.slice(4, 6) - 1, +S.axisDate.slice(6, 8) + days));
+  return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+function timeLabel(t){ const d = slotDate(t); return d ? `${d.slice(4, 6)}-${d.slice(6)} ${S.times[t]}` : S.times[t]; }
+// "冠水候補 2026-08-13 12:00〜08-14 12:00" from the axis; the network file name's date when no axis date is set
+function setTitleFromAxis(){
+  if(!S.axisDate){ setTitle("Flood Candidates"); if(S.networkName) setTitleFrom(S.networkName); return; }
+  const d = S.axisDate;
+  setTitle(`冠水候補 ${periodSpan({start: `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)} ${S.axisStart}`, hours: S.T * axisStep() / 60})}`);
+}
+function fillAxisInputs(){
+  const sel = $("axisStart");
+  if(sel.options.length !== S.orig.T){ sel.innerHTML = ""; for(const t of S.orig.times){ const o = document.createElement("option"); o.value = t; o.textContent = t; sel.appendChild(o); } }
+  sel.value = S.axisStart;
+  $("axisDate").value = S.axisDate ? `${S.axisDate.slice(0, 4)}-${S.axisDate.slice(4, 6)}-${S.axisDate.slice(6)}` : "";
+}
 
 // ============================================================
 // Map
@@ -631,10 +709,6 @@ function setupOverlays(){
   if(!S.rain) return;
   $("overlayOpts").style.display = "inline";
   $("rainOpt").style.display = "inline";
-  const sel = $("rainDate"); sel.innerHTML = "";
-  for(const d of S.rain.dates){ const o = document.createElement("option"); o.value = d; o.textContent = `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}`; sel.appendChild(o); }
-  sel.value = S.rain.date;
-  sel.addEventListener("change", () => { S.rain.date = sel.value; sel.blur(); updateRain(); });
   $("chkRain").addEventListener("change", (e) => { S.showRain = e.target.checked; e.target.blur(); updateRain(); });
   const lg = $("legendRain");
   const unit = (S.rain.index.unit || "").startsWith("mm (") ? "降雨量 mm（15 分）" : "降雨 mm/h（15 分平均）";
@@ -708,16 +782,9 @@ function paintRain(slot){
   return cv.toDataURL("image/png");
 }
 
-// Date ("YYYYMMDD") of slot t: the date chosen in the select is the date of the first slot (the left end of the
-// slider); every wrap of the clock along the axis (23:45 -> 00:00) adds a day. A day without files shows no rain.
-function rainDateFor(t){
-  const R = S.rain; if(!R) return null;
-  const mins = (x) => { const [h, m] = S.times[x].split(":").map(Number); return h * 60 + m; };
-  let days = 0; for(let i = 1; i <= t; i++) if(mins(i) < mins(i - 1)) days++;
-  if(!days) return R.date;
-  const d = new Date(Date.UTC(+R.date.slice(0, 4), +R.date.slice(4, 6) - 1, +R.date.slice(6, 8) + days));
-  return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(d.getUTCDate()).padStart(2, "0")}`;
-}
+// Date ("YYYYMMDD") of the rain slot = the date of the slot on the time axis (null without an axis date: no rain is shown).
+// A day without files shows no rain, never another day's.
+function rainDateFor(t){ return S.rain ? slotDate(t) : null; }
 
 function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null; }
 function updateRain(){
@@ -798,7 +865,7 @@ function hideChart(){ $("chartPanel").style.display = "none"; }
 function applyTime(t, force=false){
   S.t = t;
   const T = S.T, N = S.ids.length;
-  $("timeLabel").textContent = S.times[t];
+  $("timeLabel").textContent = timeLabel(t);
   $("slider").value = t;
   $("stTarget").textContent = S.countsTarget[t].toLocaleString();
   $("stError").textContent = S.countsError[t].toLocaleString();
@@ -813,6 +880,7 @@ function applyTime(t, force=false){
   }
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
   updateRain();
+  if(S.rain && !S.axisDate) $("rainVal").textContent = "（開始の日付を入れると降雨を表示）";
 }
 
 function setupControls(){
@@ -831,8 +899,10 @@ function setupControls(){
   $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
   for(const id of ["pL1Op","pL2Op","pL3Op"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
   $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
+  $("axisStart").addEventListener("change", (e) => { e.target.blur(); setAxis(e.target.value, S.axisDate); });
+  $("axisDate").addEventListener("change", (e) => { const v = e.target.value; setAxis(S.axisStart, /^\d{4}-\d{2}-\d{2}$/.test(v) ? v.replace(/-/g, "") : null); });
   document.addEventListener("keydown", (e) => {
-    if(e.target.tagName === "INPUT" && ["text","number","search","file"].includes(e.target.type)) return;
+    if(e.target.tagName === "SELECT" || (e.target.tagName === "INPUT" && ["text","number","search","file","date"].includes(e.target.type))) return;
     if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
     else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
     else if(e.key === " "){ togglePlay(); e.preventDefault(); }
