@@ -137,7 +137,9 @@ test("slider, play and keyboard change the time", async () => {
   await page.mouse.move(700, 450);
   await page.keyboard.press("ArrowRight");
   assert.equal((await status(page)).time, "00:15");
-  await page.keyboard.press("Space"); await page.waitForTimeout(1500); await page.keyboard.press("Space");
+  await page.keyboard.press("Space");
+  await page.waitForFunction((t) => S.t > t + 1, T_18, { timeout: 10000 });   // playback: wait for two steps instead of a fixed delay (a loaded machine runs timers late)
+  await page.keyboard.press("Space");
   const after = await page.evaluate(() => S.t);
   assert.ok(after > T_18 + 1, "playback advanced");
   await page.close();

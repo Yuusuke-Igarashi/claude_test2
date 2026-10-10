@@ -172,6 +172,8 @@ button:hover{background:#f0efec}
   <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> <select id="pL3Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
   <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
   <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 <span id="pSlot2">15</span> 分（隣の窓）も同レベル以上であることを要求する</label></div>
+  <div class="grp">欠測の扱い</div>
+  <div class="row"><label><input type="checkbox" id="pZeroSpeed"> 当日の台数が 0 で速度が欠測の窓は速度 0 として判定する（グラフにも 0 で描く）</label></div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
   <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
@@ -268,6 +270,7 @@ const CONFIG = {
   ERROR_LEVELS: [{speed: 0.75, count: 0.75}, {speed: 0.60, count: 0.60}, {speed: 0.50, count: 0.50}],
   ERROR_LEVEL_OP: "or",     // "or": either ratio at or below its value; "and": both (switchable per level in the ⚙ panel)
   REQUIRE_CORROBORATION: true,
+  ZERO_SPEED_WHEN_NO_TRAFFIC: false,   // an event window with count 0 and no speed counts as speed 0 (tomtom_run.ipynb sets it in viewer.json; ⚙ switch)
   // Basemap: GSI pale (地理院タイル). Alternative: OpenStreetMap.
   basemap: {
     tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
@@ -742,8 +745,8 @@ function parseRefLevels(text){
 // count threshold scaled to the window length (MIN_BASE_COUNT_PER_HOUR * slot / 60: 2.5 per 15 min, 5 per 30 min).
 function defaultParams(){
   const nb = S.nbParams;
-  if(nb) return { minCount: nb.minCount, minSpeed: nb.minSpeed, corrob: nb.corrob, levels: nb.levels.map(l => ({speed: l.speed, count: l.count, op: l.op})) };
-  return { minCount: CONFIG.MIN_BASE_COUNT_PER_HOUR * slotMin() / 60, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION,
+  if(nb) return { minCount: nb.minCount, minSpeed: nb.minSpeed, corrob: nb.corrob, zeroSpeed: nb.zeroSpeed, levels: nb.levels.map(l => ({speed: l.speed, count: l.count, op: l.op})) };
+  return { minCount: CONFIG.MIN_BASE_COUNT_PER_HOUR * slotMin() / 60, minSpeed: CONFIG.MIN_BASE_SPEED, corrob: CONFIG.REQUIRE_CORROBORATION, zeroSpeed: CONFIG.ZERO_SPEED_WHEN_NO_TRAFFIC,
            levels: CONFIG.ERROR_LEVELS.map(l => ({speed: l.speed, count: l.count, op: CONFIG.ERROR_LEVEL_OP})) };
 }
 // Minutes between consecutive time columns of the traffic CSV (15 for run2024.ipynb, 30 for tomtom_run.ipynb with 30-minute sets):
@@ -758,7 +761,7 @@ function slotMin(){
 }
 // viewer.json written by tomtom_run.ipynb next to the CSVs:
 //   {"period": {"start": "2026-08-13 12:00", "hours": 24, "slot_min": 30},
-//    "thresholds": {"min_base_count": 5, "min_base_speed": 10, "require_corroboration": true,
+//    "thresholds": {"min_base_count": 5, "min_base_speed": 10, "require_corroboration": true, "zero_speed_when_no_traffic": true,
 //                   "error_levels": [{"speed": 0.4, "count": 0.4, "op": "or"}, {"speed": 0.4, "count": 0.4, "op": "and"}, {"speed": 0.2, "count": 0.2, "op": "and"}]}}
 // The period is used when the probe folder gives none (viewer/index.json); the thresholds become the ⚙ panel's defaults.
 // Returns {period, nbParams} (either may be null).
@@ -771,7 +774,7 @@ function parseViewerJson(txt){
     if(pd && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(String(pd.start || ""))) out.period = {event: {start: String(pd.start).slice(0, 16).replace("T", " "), hours: num(pd.hours) > 0 ? pd.hours : 24, slot_min: num(pd.slot_min) > 0 ? pd.slot_min : 15}};
     const th = j && j.thresholds, lv = th && th.error_levels;
     if(th && Array.isArray(lv) && lv.length === 3 && lv.every(l => l && typeof l === "object")){
-      const P = { minCount: num(th.min_base_count), minSpeed: num(th.min_base_speed), corrob: th.require_corroboration !== false,
+      const P = { minCount: num(th.min_base_count), minSpeed: num(th.min_base_speed), corrob: th.require_corroboration !== false, zeroSpeed: th.zero_speed_when_no_traffic === true,
                   levels: lv.map(l => ({speed: num(l.speed), count: num(l.count), op: l.op === "and" ? "and" : "or"})) };
       if([P.minCount, P.minSpeed, ...P.levels.flatMap(l => [l.speed, l.count])].every(Number.isFinite)) out.nbParams = P;
       else console.warn("viewer.json: thresholds ignored (not numeric)");
@@ -790,7 +793,8 @@ function recompute(){
     const t = (bc >= P.minCount && bs >= P.minSpeed) ? 1 : 0;   // NaN compares false
     tgt[i] = t;
     if(!t) continue;
-    const sr = bs > 0 ? S.es[i]/bs : NaN;
+    const es = (P.zeroSpeed && S.ec[i] === 0 && Number.isNaN(S.es[i])) ? 0 : S.es[i];   // ⚙: no event traffic and no speed = speed 0
+    const sr = bs > 0 ? es/bs : NaN;
     const cr = bc > 0 ? S.ec[i]/bc : NaN;
     let k = 0;
     for(let l=0;l<L;l++){
@@ -847,7 +851,7 @@ function checkAgainstRef(){
 function applyParams(){
   const num = (id, fallback) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : fallback; };
   const d = defaultParams();
-  S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), corrob: $("pCorrob").checked,
+  S.params = { minCount: num("pMinCount", d.minCount), minSpeed: num("pMinSpeed", d.minSpeed), corrob: $("pCorrob").checked, zeroSpeed: $("pZeroSpeed").checked,
                levels: d.levels.map((l, i) => ({speed: num(`pL${i+1}Speed`, l.speed), count: num(`pL${i+1}Count`, l.count), op: $(`pL${i+1}Op`).value === "and" ? "and" : "or"})) };
   recompute();
   checkAgainstRef();
@@ -856,7 +860,7 @@ function applyParams(){
 function fillParamInputs(){
   const P = S.params;
   $("pSlot1").textContent = $("pSlot2").textContent = slotMin();
-  $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob;
+  $("pMinCount").value = P.minCount; $("pMinSpeed").value = P.minSpeed; $("pCorrob").checked = P.corrob; $("pZeroSpeed").checked = !!P.zeroSpeed;
   P.levels.forEach((l, i) => { $(`pL${i+1}Speed`).value = l.speed; $(`pL${i+1}Count`).value = l.count; $(`pL${i+1}Op`).value = l.op || "or"; });
 }
 
@@ -1800,7 +1804,7 @@ function setupControls(){
     $(id).addEventListener("input", schedule);
     $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
   }
-  $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
+  for(const id of ["pCorrob", "pZeroSpeed"]) $(id).addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
   for(const id of ["pL1Op","pL2Op","pL3Op"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
   $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
   $("modeGrid").addEventListener("click", () => setMode("grid"));
@@ -1875,6 +1879,13 @@ function showKadenChart(i){
   drawChart($("chartCount"), K.base.subarray(b, b+T), K.ev.subarray(b, b+T), mask, "接続台数 /15分");
 }
 
+// Event speed of one link as judged: with the ⚙ rule on, windows with count 0 and no speed are 0 (drawn and read out as 0)
+function eventSpeedSeries(b){
+  const T = S.T, out = S.es.slice(b, b + T);
+  if(S.params && S.params.zeroSpeed) for(let c = 0; c < T; c++) if(S.ec[b + c] === 0 && Number.isNaN(out[c])) out[c] = 0;
+  return out;
+}
+
 function showChart(ft){
   lastFeature = ft; S.kadenChartIdx = null;
   $("roL1").textContent = "速度 km/h"; $("roL2").textContent = `台数 /${slotMin()}分`;
@@ -1895,10 +1906,11 @@ function showChart(ft){
   let label = STATUS_LABEL[k];
   if(k === 1 && S.e1[b+t]) label = `対象（単独異常 L${S.e1[b+t]}、裏取りなし）`;
   $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k];
-  $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(S.es[b+t]);
+  const es = eventSpeedSeries(b);
+  $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(es[t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
   const errMask = S.err.subarray(b, b+T);
-  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), S.es.subarray(b,b+T), errMask, "速度 km/h");
+  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, "速度 km/h");
   drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`);
 }
 

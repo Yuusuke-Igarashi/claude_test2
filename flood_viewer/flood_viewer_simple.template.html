@@ -117,6 +117,8 @@ button:hover{background:#f0efec}
   <div class="row">L3: 速度比 ≤ <input type="number" id="pL3Speed" step="0.05" min="0" max="2"> <select id="pL3Op"><option value="or">または</option><option value="and">かつ</option></select> 台数比 ≤ <input type="number" id="pL3Count" step="0.05" min="0" max="2"></div>
   <div class="grp">確定（error）: レベルごとに同じレベルの裏取りを求める</div>
   <div class="row"><label><input type="checkbox" id="pCorrob" checked> 対向リンクも同時刻に同レベル以上、または同一リンクで前後 <span id="pSlot2">15</span> 分（隣の窓）も同レベル以上であることを要求する</label></div>
+  <div class="grp">欠測の扱い</div>
+  <div class="row"><label><input type="checkbox" id="pZeroSpeed"> 当日の台数が 0 で速度が欠測の窓は速度 0 として判定する（グラフにも 0 で描く）</label></div>
   <div class="check" id="pCheck"></div>
   <div class="foot"><button id="pDefault">既定値に戻す</button></div>
   <div class="note">比 = イベント時 / 平時。平時が 0 の比は判定しない。リンクの色は満たした最も厳しいレベル。変更は即時に再計算され、地図・集計・グラフの異常区間に反映されます。</div>
@@ -167,7 +169,7 @@ button:hover{background:#f0efec}
 //   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)   (when REQUIRE_CORROBORATION)
 //   error_level = highest k with error_k (0 = none). Editable in the ⚙ panel.
 // ============================================================
-// @config from flood_viewer.html: files.network, files.baseline_speed, files.event_speed, files.baseline_count, files.event_count, files.error, files.rain_dir, RAIN_SCALE, RAIN_OPACITY, MIN_BASE_COUNT_PER_HOUR, MIN_BASE_SPEED, ERROR_LEVELS, ERROR_LEVEL_OP, REQUIRE_CORROBORATION, basemap, playIntervalMs, lineWidth
+// @config from flood_viewer.html: files.network, files.baseline_speed, files.event_speed, files.baseline_count, files.event_count, files.error, files.rain_dir, RAIN_SCALE, RAIN_OPACITY, MIN_BASE_COUNT_PER_HOUR, MIN_BASE_SPEED, ERROR_LEVELS, ERROR_LEVEL_OP, REQUIRE_CORROBORATION, ZERO_SPEED_WHEN_NO_TRAFFIC, basemap, playIntervalMs, lineWidth
 
 // ============================================================
 // State
@@ -550,7 +552,7 @@ function setupControls(){
     $(id).addEventListener("input", schedule);
     $(id).addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(pTimer); applyParams(); } e.stopPropagation(); });
   }
-  $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
+  for(const id of ["pCorrob", "pZeroSpeed"]) $(id).addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
   for(const id of ["pL1Op","pL2Op","pL3Op"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
   $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
   document.addEventListener("keydown", (e) => {
@@ -565,7 +567,7 @@ function setupControls(){
 // ============================================================
 // Chart panel (two single-axis charts: speed, count)
 // ============================================================
-// @from flood_viewer.html: lastFeature, STATUS_LABEL, STATUS_COLOR, fmt, showChart, niceMax, drawChart
+// @from flood_viewer.html: lastFeature, STATUS_LABEL, STATUS_COLOR, fmt, eventSpeedSeries, showChart, niceMax, drawChart
 
 // ============================================================
 // Entry

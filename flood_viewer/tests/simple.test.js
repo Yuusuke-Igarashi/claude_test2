@@ -132,7 +132,7 @@ test("loads over http: the thresholds reproduce error.csv, the axis is the CSV o
   assert.match(info.check, /不一致: 0 セル/, "in-page error computation must match error.csv at default thresholds");
   assert.match(info.check, /レベル 0〜3 で照合/);
   assert.deepEqual(info.axis, ["18:00", "20240821", "viewer.json"], "period from viewer.json (tomtom_run.ipynb)");
-  assert.deepEqual(info.nb, { minCount: 2.5, minSpeed: 10, corrob: true, levels: [{ speed: 0.75, count: 0.75, op: "or" }, { speed: 0.6, count: 0.6, op: "or" }, { speed: 0.5, count: 0.5, op: "or" }] }, "thresholds of viewer.json are the defaults");
+  assert.deepEqual(info.nb, { minCount: 2.5, minSpeed: 10, corrob: true, zeroSpeed: false, levels: [{ speed: 0.75, count: 0.75, op: "or" }, { speed: 0.6, count: 0.6, op: "or" }, { speed: 0.5, count: 0.5, op: "or" }] }, "thresholds of viewer.json are the defaults");
   assert.deepEqual(info.slot, [15, "15", "15", "台数 /窓"], "window length from the CSV columns in the ⚙ labels");
   assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00", "title from the axis: 48 slots of 15 min from the start"); assert.equal(info.docTitle, info.title);
   assert.equal(info.label, "08-21 18:00", "time label carries the slot's date");
@@ -162,7 +162,9 @@ test("slider, play and keyboard change the time", async () => {
   assert.equal((await status(page)).time, "08-22 00:15");
   await page.keyboard.press("ArrowLeft");
   assert.equal((await status(page)).time, "08-22 00:00");
-  await page.keyboard.press("Space"); await page.waitForTimeout(1500); await page.keyboard.press("Space");
+  await page.keyboard.press("Space");
+  await page.waitForFunction((t) => S.t > t + 1, T_18, { timeout: 10000 });   // playback: wait for two steps instead of a fixed delay (a loaded machine runs timers late)
+  await page.keyboard.press("Space");
   const after = await page.evaluate(() => ({ t: S.t, playing: S.playing, btn: $("playBtn").textContent }));
   assert.ok(after.t > T_18 + 1, "playback advanced"); assert.equal(after.playing, false); assert.equal(after.btn, "▶ 再生");
   await page.close();
@@ -227,7 +229,8 @@ test("time axis: the start column rotates the CSV columns and the date gives the
   const vj = await page.evaluate(() => parseViewerJson(JSON.stringify({ period: { start: "2026-08-13 12:00", hours: 24, slot_min: 30 },
     thresholds: { min_base_count: 5, min_base_speed: 10, require_corroboration: true, error_levels: [{ speed: 0.4, count: 0.4, op: "or" }, { speed: 0.4, count: 0.4, op: "and" }, { speed: 0.2, count: 0.2, op: "and" }] } })));
   assert.deepEqual(vj, { period: { event: { start: "2026-08-13 12:00", hours: 24, slot_min: 30 } }, files: null,
-    nbParams: { minCount: 5, minSpeed: 10, corrob: true, levels: [{ speed: 0.4, count: 0.4, op: "or" }, { speed: 0.4, count: 0.4, op: "and" }, { speed: 0.2, count: 0.2, op: "and" }] } });
+    nbParams: { minCount: 5, minSpeed: 10, corrob: true, zeroSpeed: false, levels: [{ speed: 0.4, count: 0.4, op: "or" }, { speed: 0.4, count: 0.4, op: "and" }, { speed: 0.2, count: 0.2, op: "and" }] } });
+  assert.equal(await page.evaluate(() => parseViewerJson(JSON.stringify({ thresholds: { min_base_count: 5, min_base_speed: 10, zero_speed_when_no_traffic: true, error_levels: [{ speed: 0.4, count: 0.4 }, { speed: 0.4, count: 0.4 }, { speed: 0.2, count: 0.2 }] } })).nbParams.zeroSpeed), true, "the zero-speed rule of the notebook");
   assert.deepEqual(await page.evaluate(() => parseViewerJson(JSON.stringify({ files: { network: "20260813_network.geojson" } })).files), { network: "20260813_network.geojson" }, "the network file name of viewer.json");
   assert.equal(await page.evaluate(() => parseViewerJson(JSON.stringify({ files: { network: "../x.geojson" } })).files), null, "only a plain file name is accepted");
   assert.deepEqual(await page.evaluate(() => parseViewerJson("{\"thresholds\": {\"error_levels\": [{\"speed\": 1}]}}")), { period: null, nbParams: null, files: null }, "an incomplete thresholds block is ignored");
@@ -299,6 +302,15 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   await page.click("#pDefault"); await page.waitForTimeout(500);
   assert.deepEqual(await status(page), base0, "defaults restore the original counts");
   assert.match(await page.textContent("#pCheck"), /不一致: 0 セル/);
+  // the zero-speed rule: windows with event count 0 and no speed count as speed 0 (a judgment switch, drawn as 0 in the chart)
+  await page.click("#pZeroSpeed"); await page.waitForTimeout(500);
+  const zs = await page.evaluate(() => { const r = S.ids.findIndex((_, r) => { for (let c = 0; c < S.T; c++) if (S.ec[r * S.T + c] === 0 && Number.isNaN(S.es[r * S.T + c]) && S.bs[r * S.T + c] > 0) return true; return false; });
+    return { on: S.params.zeroSpeed, row: r, series: r >= 0 ? Array.from(eventSpeedSeries(r * S.T)).filter((v, c) => S.ec[r * S.T + c] === 0 && Number.isNaN(S.es[r * S.T + c])) : null }; });
+  assert.equal(zs.on, true); assert.ok((await status(page)).error >= base0.error, "the rule can only add anomalies");
+  if (zs.row >= 0) assert.ok(zs.series.every((v) => v === 0), "the chart series carries 0 for those windows");
+  assert.match(await page.textContent("#pCheck"), /想定内/);
+  await page.click("#pZeroSpeed"); await page.waitForTimeout(500);
+  assert.deepEqual(await status(page), base0); assert.match(await page.textContent("#pCheck"), /不一致: 0 セル/);
   await page.click("#settingsClose");
   assert.equal(await page.evaluate(() => $("settings").style.display), "none");
   await page.close();
