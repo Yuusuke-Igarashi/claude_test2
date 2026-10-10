@@ -108,9 +108,9 @@ standalone HTML とスクリーンショットをアーティファクトとし�
 ## TomTom 交通統計の notebook（tomtom_run.ipynb、2026-08-13 版）と台数の点検
 
 tomtom_run.ipynb（利用者の notebook。リポジトリ外）に 2026-10-09〜10 に入れた変更:
-窓の日時は TomTom の DBF ファイル名（命名規則は固定: `<ジョブ名>_<MMDD>_<k>_<開始 H_MM>-<終了 H_MM>_<通し番号>.dbf`、例 `ChibaFlood_0813_0_12_00-12_15_0.dbf`）だけから読む。
-MMDD が日付（年は `EVENT_DATE`）、通し番号が時間セットの順で、同じ日付のまま時計が戻る窓は翌日にする（12:00 開始の 24 時間なら 12:00 … 23:30, 翌 00:00 … 11:30）。窓の長さは 開始-終了 の差。
-平時（pre）のファイルは日付が違うので、通し番号順に並べた同じ位置の窓（開始時刻が同じ）を有事の窓に対応付ける。手入力の開始時刻や窓の長さのパラメータは無い。CSV の時刻列は期間の順で書き、
+窓の日時は TomTom の DBF ファイル名（命名規則は固定: `<ジョブ名>_<MMDD>_<k>_<開始 HH_MM>-<終了 HH_MM>_<番号>.dbf`、例 `ChibaFlood_0813_0_12_00-12_15_0.dbf`）だけから読む。
+日時 = MMDD（年は `EVENT_DATE`）+ 開始 HH_MM、窓の長さ = 終了 − 開始。`<k>` と末尾の番号（24 窓ごとに 0 に戻る）は使わない。
+平時（pre）のファイルは日付が違うので、時系列に並べた同じ位置の窓（時刻が同じ）を有事の窓に対応付ける。手入力の開始時刻や窓の長さのパラメータは無い。CSV の時刻列は期間の順で書き、
 `viewer.json`（files: network = ネットワーク GeoJSON の名前、period: start / hours / slot_min、thresholds: min_base_count / min_base_speed / require_corroboration / error_levels）を出力フォルダに書く。
 ビューアはこれで開始日時・窓の長さ・閾値を自動設定し、http 経由では files.network の名前でネットワークを読む（フォルダ選択では *_network.geojson を探す）。
 当日の走行が無いリンクは post に行が無く台数 0・速度 NaN になるので、「かつ」のレベル（L2・L3）には届かず L1 止まりになる（notebook の定義どおり。ビューアも同じ）。
