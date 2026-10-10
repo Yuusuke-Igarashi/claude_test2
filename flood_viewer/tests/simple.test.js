@@ -3,7 +3,7 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { readFileSync, existsSync, mkdirSync, createReadStream, statSync, copyFileSync, writeFileSync } from "node:fs";
+import { readFileSync, existsSync, mkdirSync, createReadStream, statSync, copyFileSync, writeFileSync, rmSync } from "node:fs";
 import { dirname, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
@@ -126,7 +126,7 @@ test("loads over http: the thresholds reproduce error.csv, the axis is the CSV o
   const page = await openViewer();
   const info = await page.evaluate(() => ({ N: S.ids.length, T: S.T, check: $("pCheck").textContent, title: document.querySelector("#topbar h1").textContent, docTitle: document.title,
     layers: map.getStyle().layers.map((l) => l.id), axis: [S.axisStart, S.axisDate, S.axisSource], label: $("timeLabel").textContent, adj: S.adjPrev[24], stat: getComputedStyle($("statTraffic")).display,
-    inputs: [$("axisDate").value, $("axisStart").value, $("axisStart").options.length], nb: S.nbParams, slot: [slotMin(), $("pSlot1").textContent, $("pSlot2").textContent, $("roL2").textContent] }));
+    control: document.getElementById("axisOpt") || document.getElementById("axisStart") || null, nb: S.nbParams, slot: [slotMin(), $("pSlot1").textContent, $("pSlot2").textContent, $("roL2").textContent] }));
   assert.equal(info.T, 48);
   assert.ok(info.N > 1000);
   assert.match(info.check, /不一致: 0 セル/, "in-page error computation must match error.csv at default thresholds");
@@ -136,7 +136,7 @@ test("loads over http: the thresholds reproduce error.csv, the axis is the CSV o
   assert.deepEqual(info.slot, [15, "15", "15", "台数 /窓"], "window length from the CSV columns in the ⚙ labels");
   assert.equal(info.title, "冠水候補 2024-08-21 18:00〜08-22 06:00", "title from the axis: 48 slots of 15 min from the start"); assert.equal(info.docTitle, info.title);
   assert.equal(info.label, "08-21 18:00", "time label carries the slot's date");
-  assert.deepEqual(info.inputs, ["2024-08-21", "18:00", 48]);
+  assert.equal(info.control, null, "no start control on the page: the axis comes from the data");
   assert.deepEqual(info.layers, ["base", "rain", "links-base", "links-error", "links-hover", "links-hit"]);
   assert.equal(info.adj, 1, "23:45 -> 00:00 counts as consecutive"); assert.notEqual(info.stat, "none");
   const ref = errorCountsFromCsv(), refL = [1, 2, 3].map((l) => errorCountsFromCsv(l));
@@ -168,11 +168,11 @@ test("slider, play and keyboard change the time", async () => {
   await page.close();
 });
 
-test("time axis: the start column rotates the CSV columns, the date gives the slot dates, both editable", async () => {
+test("time axis: the start column rotates the CSV columns and the date gives the slot dates (setAxis, data-driven)", async () => {
   const page = await openViewer();
   const ref = errorCountsFromCsv();
   // a whole-day CSV built for a period starting at 12:00 is the real case; the sample (18:00 … 05:45) is rotated to 00:00 here
-  await page.selectOption("#axisStart", "00:00"); await page.waitForTimeout(300);
+  await page.evaluate(() => setAxis("00:00", S.axisDate)); await page.waitForTimeout(300);
   const rot = await page.evaluate(() => ({ times: [S.times[0], S.times[23], S.times[24], S.times[47]], adj: [S.adjPrev[0], S.adjPrev[1], S.adjPrev[24], S.adjPrev[25]], title: document.title,
     label: $("timeLabel").textContent, t: S.t, check: $("pCheck").textContent, orig: S.orig.times[0], copy: S.bs !== S.orig.bs }));
   assert.deepEqual(rot.times, ["00:00", "05:45", "18:00", "23:45"], "the columns before the start follow after the wrap of the clock");
@@ -187,17 +187,17 @@ test("time axis: the start column rotates the CSV columns, the date gives the sl
     await page.evaluate((t) => applyTime(t), t);
     assert.equal((await status(page)).error, ref[c], `slot ${t} holds the ${c < 24 ? "" : "next-day "}column ${c} of the CSV`);
   }
-  await page.selectOption("#axisStart", "18:00"); await page.waitForTimeout(300);
+  await page.evaluate(() => setAxis("18:00", S.axisDate)); await page.waitForTimeout(300);
   const back = await page.evaluate(() => ({ t0: S.times[0], same: S.bs === S.orig.bs && S.errRef === S.orig.errRef, t: S.t, label: $("timeLabel").textContent, title: document.title, check: $("pCheck").textContent }));
   assert.deepEqual(back, { t0: "18:00", same: true, t: 22, label: "08-21 23:30", title: "冠水候補 2024-08-21 18:00〜08-22 06:00", check: back.check }, "23:30 stays on screen: column 22 of the CSV order");
   assert.match(back.check, /不一致: 0 セル/, "back in the CSV order the cross-check matches again");
   await page.evaluate(() => applyTime(0));
   assert.equal((await status(page)).error, ref[0]);
   // no date: CSV order, title from the file name, labels without a date, no rain
-  await page.fill("#axisDate", ""); await page.waitForTimeout(300);
+  await page.evaluate(() => setAxis(S.axisStart, null)); await page.waitForTimeout(300);
   const none = await page.evaluate(() => ({ date: S.axisDate, title: document.title, label: $("timeLabel").textContent, rain: $("rainVal").textContent, cur: S.rain.cur, key: rainDateFor(0) }));
-  assert.deepEqual(none, { date: null, title: "Tokyo 2024-08-21 Flood Candidates", label: "18:00", rain: "（開始の日付を入れると降雨を表示）", cur: null, key: null });
-  await page.fill("#axisDate", "2024-08-22"); await page.waitForTimeout(300);
+  assert.deepEqual(none, { date: null, title: "Tokyo 2024-08-21 Flood Candidates", label: "18:00", rain: "（日付が不明なので降雨を表示できません。viewer.json のある出力を読み込んでください）", cur: null, key: null });
+  await page.evaluate(() => setAxis(S.axisStart, "20240822")); await page.waitForTimeout(300);
   const moved = await page.evaluate(() => ({ date: S.axisDate, title: document.title, label: $("timeLabel").textContent, d: [0, 23, 24, 47].map(rainDateFor) }));
   assert.deepEqual(moved, { date: "20240822", title: "冠水候補 2024-08-22 18:00〜08-23 06:00", label: "08-22 18:00", d: ["20240822", "20240822", "20240823", "20240823"] });
   // the anomaly file names of a period 12:00 -> next day 12:00 give its start (any level, any order)
@@ -209,11 +209,10 @@ test("time axis: the start column rotates the CSV columns, the date gives the sl
   assert.deepEqual(det, { date: "20260813", time: "12:00", windows: 96, first: "20260813 12:00", last: "20260814 11:45" });
   assert.equal(await page.evaluate(() => periodFromNames(["error.csv", "error_level1.csv"])), null);
   // the last column as the start: slot 0 -> slot 1 jumps 12 h, but the window length stays the common 15-minute gap
-  await page.selectOption("#axisStart", "05:45"); await page.waitForTimeout(300);
+  await page.evaluate(() => setAxis("05:45", S.axisDate)); await page.waitForTimeout(300);
   const late = await page.evaluate(() => ({ t: [S.times[0], S.times[1]], slot: slotMin(), minCount: defaultParams().minCount, labels: [$("pSlot1").textContent, $("pSlot2").textContent], title: document.title }));
   assert.deepEqual(late, { t: ["05:45", "18:00"], slot: 15, minCount: 2.5, labels: ["15", "15"], title: "冠水候補 2024-08-22 05:45〜08-22 17:45" });   // the date is still 08-22 from above
-  await page.selectOption("#axisStart", "18:00"); await page.waitForTimeout(300);
-  await page.fill("#axisDate", "2024-08-21"); await page.waitForTimeout(300);
+  await page.evaluate(() => setAxis("18:00", "20240821")); await page.waitForTimeout(300);
   // a 30-minute CSV: the count threshold is per hour (10) scaled to the window, the labels say 30
   const thirty = await page.evaluate(() => {
     const keep = { times: S.times, T: S.T, nb: S.nbParams };
@@ -338,13 +337,13 @@ test("rain over http: slots follow the slider and the axis date, readout, toggle
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "none");
   await page.click("#chkRain"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
-  // the axis date moved to 2024-08-22: 00:00 falls on 08-23, which has no file -> no rain, never another day's
-  await page.fill("#axisDate", "2024-08-22"); await page.waitForTimeout(300);
+  // the axis date moved to 2024-08-22 (as a period file could say): 00:00 falls on 08-23, which has no file -> no rain, never another day's
+  await page.evaluate(() => setAxis(S.axisStart, "20240822")); await page.waitForTimeout(300);
   const moved = await page.evaluate(() => ({ key: rainDateFor(24), cur: S.rain.cur, val: $("rainVal").textContent }));
   assert.deepEqual(moved, { key: "20240823", cur: null, val: "（この時刻の降雨なし）" });
   await page.mouse.move(box.x + px.x + 20, box.y + px.y + 20); await page.waitForTimeout(400);
   assert.equal(await page.textContent("#rainVal"), "（この時刻の降雨なし）", "the status is kept while the mouse moves over the map");
-  await page.fill("#axisDate", "2024-08-21");
+  await page.evaluate(() => setAxis(S.axisStart, "20240821"));
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:00", null, { timeout: 15000 });
   await page.close();
 });
@@ -393,6 +392,7 @@ test("standalone file:// with the folder picker: rain/ inside the traffic folder
 
 test("folder picker with two network files: viewer.json names the one to use, without it the load stops with a message", async () => {
   const dir = join(SHOTS, "two_networks");
+  rmSync(dir, { recursive: true, force: true });   // a previous run leaves viewer.json behind
   mkdirSync(dir, { recursive: true });
   for (const f of REQUIRED) copyFileSync(join(DATA, f), join(dir, f === REQUIRED[0] ? "chiba_20260813_network.geojson" : f));   // another area's name
   writeFileSync(join(dir, "other_network.geojson"), JSON.stringify({ type: "FeatureCollection", features: [{ type: "Feature", properties: { id: "1", pair_id: null }, geometry: { type: "LineString", coordinates: [[139.7, 35.65], [139.71, 35.66]] } }] }));

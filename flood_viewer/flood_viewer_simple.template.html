@@ -70,7 +70,6 @@ button:hover{background:#f0efec}
 #settings .check.ng{color:var(--road-red)}
 #settings .foot{display:flex;gap:8px;margin-top:10px}
 #overlayOpts label{margin-right:8px;color:var(--ink2);white-space:nowrap;cursor:pointer}
-#axisDate,#axisStart{font:inherit;font-size:12px;padding:1px 2px}
 #legendRain{display:none;flex-basis:100%;gap:0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px}
 #legendRain .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
 #legendRain .lab{margin-right:6px}
@@ -91,7 +90,6 @@ button:hover{background:#f0efec}
   <button id="playBtn" title="Space">▶ 再生</button>
   <span id="timeLabel">--:--</span>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
-  <span class="stat" id="axisOpt" title="時間軸の最初の時刻（スライダー左端）の日付と時刻。CSV の列はこの時刻から並び、日付をまたいだ先は翌日になる">開始 <input type="date" id="axisDate"> <select id="axisStart"></select></span>
   <span class="stat" id="statTraffic">対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</span>
   <button id="settingsBtn" title="判定閾値の設定">⚙ 閾値</button>
   <span id="overlayOpts" style="display:none">
@@ -333,7 +331,7 @@ async function boot(loaderFn){
   S.axisSource = fromJson ? "viewer.json" : det ? "files" : "default";
   setAxis(det ? det.time : S.orig.times[0], det ? det.date : ((rainDates.length && !rainDates.includes(S.dataDate)) ? rainDates[0] : S.dataDate));
   setProgress(`リンク ${gj.features.length} 本 / 時刻 ${S.T} ステップ（${S.times[0]} 〜 ${S.times[S.T - 1]}、${slotMin()} 分窓）/ CSV 未対応リンク ${unmatched} 本`
-    + (fromJson ? ` / 期間 ${vp.start} から ${vp.hours} 時間（viewer.json）` : det ? ` / 期間 ${det.first}〜${det.last}（error_L*.geojson ${det.windows} 窓のファイル名から）` : ` / 時間軸は CSV の列順（${S.times[0]} 開始。「開始」で変更できる）`)
+    + (fromJson ? ` / 期間 ${vp.start} から ${vp.hours} 時間（viewer.json）` : det ? ` / 期間 ${det.first}〜${det.last}（error_L*.geojson ${det.windows} 窓のファイル名から）` : ` / 時間軸は CSV の列順（${S.times[0]} 開始。viewer.json が無いので期間は不明）`)
     + (S.nbParams ? " / 閾値は viewer.json の値" : ""));
   await tick();
   S.rain = raw.rain || null;
@@ -343,9 +341,11 @@ async function boot(loaderFn){
 const tick = () => new Promise(r => setTimeout(r, 0));
 
 // ============================================================
-// Time axis. The CSV columns are clock times (HH:MM). The chosen start column becomes slot 0 and the columns before it
-// follow after the wrap of the clock, so a whole-day CSV (00:00 … 23:45) built for a period 12:00 -> 12:00 is shown as
-// 12:00 … 23:45, 00:00 … 11:45, and the corroboration at t±1 uses that order. Nothing is dropped (S.orig keeps the CSV order).
+// Time axis, set from the data only (no control on the page): the period of viewer.json written by tomtom_run.ipynb, else the
+// anomaly file names error_L*_YYYYMMDD_HHMM.geojson, else the CSV column order dated by the network file name.
+// The CSV columns are clock times (HH:MM). The start column becomes slot 0 and the columns before it follow after the wrap of
+// the clock, so a whole-day CSV (00:00 … 23:45) of a period 12:00 -> 12:00 is shown as 12:00 … 23:45, 00:00 … 11:45, and the
+// corroboration at t±1 uses that order. Nothing is dropped (S.orig keeps the CSV order).
 // The axis date is the date of slot 0; every wrap of the clock along the axis adds a day (labels, title, rain).
 // ============================================================
 function setAxis(start, date){
@@ -366,7 +366,7 @@ function setAxis(start, date){
   S.adjPrev = new Uint8Array(T);
   for(let c = 1; c < T; c++) S.adjPrev[c] = (((mins[c] - mins[c - 1]) % 1440 + 1440) % 1440 === step) ? 1 : 0;
   recompute(); checkAgainstRef();
-  fillAxisInputs(); setTitleFromAxis();
+  fillParamInputs(); setTitleFromAxis();   // the ⚙ labels show the window length
   if(map) applyTime(prev ? Math.max(0, S.times.indexOf(prev)) : 0, true);
 }
 // minutes between consecutive CSV columns (15 for the notebook output)
@@ -388,12 +388,6 @@ function setTitleFromAxis(){
   if(!S.axisDate){ setTitle("Flood Candidates"); if(S.networkName) setTitleFrom(S.networkName); return; }
   const d = S.axisDate;
   setTitle(`冠水候補 ${periodSpan({start: `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)} ${S.axisStart}`, hours: S.T * axisStep() / 60})}`);
-}
-function fillAxisInputs(){
-  const sel = $("axisStart");
-  if(sel.options.length !== S.orig.T){ sel.innerHTML = ""; for(const t of S.orig.times){ const o = document.createElement("option"); o.value = t; o.textContent = t; sel.appendChild(o); } }
-  sel.value = S.axisStart;
-  $("axisDate").value = S.axisDate ? `${S.axisDate.slice(0, 4)}-${S.axisDate.slice(4, 6)}-${S.axisDate.slice(6)}` : "";
 }
 
 // ============================================================
@@ -540,7 +534,7 @@ function applyTime(t, force=false){
   }
   if($("chartPanel").style.display !== "none" && lastFeature) showChart(lastFeature);
   updateRain();
-  if(S.rain && !S.axisDate) $("rainVal").textContent = "（開始の日付を入れると降雨を表示）";
+  if(S.rain && !S.axisDate) $("rainVal").textContent = "（日付が不明なので降雨を表示できません。viewer.json のある出力を読み込んでください）";
 }
 
 function setupControls(){
@@ -559,8 +553,6 @@ function setupControls(){
   $("pCorrob").addEventListener("change", () => { clearTimeout(pTimer); applyParams(); });
   for(const id of ["pL1Op","pL2Op","pL3Op"]) $(id).addEventListener("change", (e) => { clearTimeout(pTimer); e.target.blur(); applyParams(); });
   $("pDefault").addEventListener("click", () => { S.params = defaultParams(); fillParamInputs(); applyParams(); });
-  $("axisStart").addEventListener("change", (e) => { e.target.blur(); setAxis(e.target.value, S.axisDate); });
-  $("axisDate").addEventListener("change", (e) => { const v = e.target.value; setAxis(S.axisStart, /^\d{4}-\d{2}-\d{2}$/.test(v) ? v.replace(/-/g, "") : null); });
   document.addEventListener("keydown", (e) => {
     if(e.target.tagName === "SELECT" || (e.target.tagName === "INPUT" && ["text","number","search","file","date"].includes(e.target.type))) return;
     if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
