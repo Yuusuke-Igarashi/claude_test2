@@ -69,6 +69,7 @@ error_level = 満たした最も厳しい k（0 = 異常なし）。リンクは
 CONFIG の必要な項目（`// @config from flood_viewer.html: …` 行）、MapLibre のタグをそのまま埋め込んで作る。本体を直せばシンプル版にも `npm run build` で反映される。
 直すときはテンプレートか本体を編集して `npm run build` し、生成された `flood_viewer_simple.html` も一緒にコミットする（テストが生成結果との一致を確かめる）。
 配布先向けの使い方は `README_simple_viewer.txt`（単独で読める 1 枚もの。本体やビルドには触れない）。
+別の notebook の出力をこのビューアで表示するときのファイル仕様は `viewer_input_spec.md`（id・列・viewer.json・降雨 GeoTIFF の制約と判定式）。
 
 ## 開発・テスト
 
