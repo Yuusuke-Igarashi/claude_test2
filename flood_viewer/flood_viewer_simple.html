@@ -808,7 +808,7 @@ function paintRain(slot){
   const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
   const ctx = cv.getContext("2d");
   const img = ctx.createImageData(w, h), d = img.data;
-  const scale = CONFIG.RAIN_SCALE.map(([v, c]) => [v, parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]);
+  const scale = rainScale().map(([v, c]) => [v, parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]);
   for(let j = 0, i = 0; j < vals.length; j++, i += 4){
     const v = vals[j];
     if(Number.isNaN(v) || v === nodata || v < 0) continue;
@@ -886,6 +886,7 @@ function onHover(e){
   if(!ft) return;
   map.getCanvas().style.cursor = "pointer";
   setHover(ft.id);
+  if(S.present && !CONFIG.PRESENT.hoverChart) return;   // presentation: the panel changes on click only, so the chart shown is always the road outlined on the map
   if(S.pinnedId === null){ placePanel(e.point); showChart(ft); }
 }
 function onClick(e){
@@ -902,6 +903,9 @@ function setSelLink(){}
 function renderDetail(){}
 function chartNote(){}
 const layerOn = (key) => key === "rain" ? !!S.rain && S.showRain : true;   // the shared updateRain / rainAt ask the full viewer's layer state
+const rainScale = () => CONFIG.RAIN_SCALE;   // the shared paintRain / legends take the presentation's scale from here in the full viewer
+const label = (s) => String(s);              // wording hooks of the presentation (平時 / イベント時 stay as they are here)
+const missingLabel = () => "–";
 
 // ============================================================
 // Time
@@ -978,10 +982,12 @@ function showChart(ft){
   const T = S.T, t = S.t;
   $("chartPanel").style.display = "block";
   $("cpKind").textContent = S.present ? (S.pinnedId === ft.id ? "選択中の道路" : "カーソル位置の道路") : "";
+  $("cpKind").classList.toggle("sel", S.present && S.pinnedId === ft.id);
   $("cpTitle").textContent = `Link ${p.id}`;
-  $("cpSub").textContent = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? `対向: ${p.pair_id}` : "対向なし";
+  const pair = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? (S.present ? `対向 Link ${p.pair_id}` : `対向: ${p.pair_id}`) : "対向なし";
+  $("cpSub").textContent = S.present ? `${pair}${baselineNote()}` : pair;
   if(r < 0){
-    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0];
+    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[0]);
     ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
     drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, `台数 /${slotMin()}分`);
     chartNote([], ""); renderDetail();
@@ -991,14 +997,14 @@ function showChart(ft){
   const k = S.cls[b+t];
   let label = STATUS_LABEL[k];
   if(k === 1 && S.e1[b+t]) label = `対象（単独異常 L${S.e1[b+t]}、裏取りなし）`;
-  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k];
+  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[k]);
   const es = eventSpeedSeries(b);
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(es[t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
   const errMask = S.err.subarray(b, b+T), labels = S.present ? CONFIG.PRESENT.seriesLabels : ["平時", "イベント時"];
-  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, "速度 km/h", labels);
-  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`, labels);
-  chartNote([S.bs.subarray(b,b+T), es, S.bc.subarray(b,b+T), S.ec.subarray(b,b+T)], "帯 = 異常と判定した時間帯（色はレベル L1 橙・L2 赤・L3 暗赤）");
+  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, S.present ? "速度（km/h）" : "速度 km/h", labels, S.present ? {values: [S.bs[b+t], es[t]]} : undefined);
+  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, S.present ? `台数（台 / ${slotMin()} 分）` : `台数 /${slotMin()}分`, labels, S.present ? {values: [S.bc[b+t], S.ec[b+t]]} : undefined);
+  chartNote([S.bs.subarray(b,b+T), es, S.bc.subarray(b,b+T), S.ec.subarray(b,b+T)], "帯 = 異常と判定した時間帯（上端の帯の色 = レベル L1 橙・L2 赤・L3 暗赤）");
   renderDetail();
 }
 function niceMax(v){
@@ -1008,32 +1014,49 @@ function niceMax(v){
   const n = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10;
   return n*p;
 }
-function drawChart(svg, a, b, errMask, title, labels){
+function drawChart(svg, a, b, errMask, title, labels, opts){
+  labels = labels || ["平時", "イベント時"]; opts = opts || {};
   const W = svg.clientWidth || 416, H = svg.clientHeight || 150, pz = S.present;
-  const fs = parseFloat(cssVar("--chart-fs")) || 12, d = fs - 12;   // chart text size (CSS --chart-fs); 12 px gives the original margins
-  const M = {l:40 + 5*d, r: pz ? 12 + fs * 3.6 : 10, t: 20 + 2*d + (pz ? fs : 0), b:22 + 2*d};   // presentation: room for the line labels (right) and the time label (top)
+  const fs = parseFloat(getComputedStyle(svg).fontSize) || 12, d = fs - 12;   // chart text size (.chart font-size = --chart-fs); 12 px gives the original margins
+  // presentation: fixed margins with the indicator row on top (title, the values at the selected time) and room for the line names on the right
+  const M = pz ? {l:64, r:96, t:60, b:34} : {l:40 + 5*d, r:10, t:20 + 2*d, b:22 + 2*d};
   const pw = W-M.l-M.r, ph = H-M.t-M.b;
-  const T = S.T;
+  const T = S.T, digits = opts.digits === undefined ? 1 : opts.digits;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const ns = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(txt !== undefined) e.textContent = txt; return e; };
+  const width = (t) => { try { return t.getComputedTextLength(); } catch(e) { return 0; } };
   while(svg.firstChild) svg.removeChild(svg.firstChild);
-  svg.appendChild(el("text", {x:M.l, y:13 + d, class:"ttl"}, title));
+  if(pz){
+    svg.appendChild(el("text", {x: 0, y: 26, class:"ttl"}, title));
+    if(a && opts.values){   // right-aligned: 平時 13.4  対象日 4.3 (series colours), or 比 0.10 in navy; a missing value reads 欠測
+      const items = opts.single ? [[opts.single, opts.values[0], "sn"]] : [[labels[0], opts.values[0], "s1"], [labels[1], opts.values[1], "s2"]];
+      let x = W;
+      for(const [name, v, c] of items.reverse()){
+        const miss = v === undefined || v === null || Number.isNaN(v);
+        const vt = el("text", {x: 0, y: 26, "text-anchor":"end", class: "indv " + (miss ? "miss" : c)}, miss ? missingLabel() : fmt(v, digits)); svg.appendChild(vt);
+        vt.setAttribute("x", x); x -= width(vt) + 6;
+        const nt = el("text", {x: 0, y: 26, "text-anchor":"end", class:"ind"}, name); svg.appendChild(nt);
+        nt.setAttribute("x", x); x -= width(nt) + 24;
+      }
+    }
+  } else svg.appendChild(el("text", {x:M.l, y:13 + d, class:"ttl"}, title));
   if(!a){ svg.appendChild(el("text", {x:M.l+pw/2, y:M.t+ph/2, "text-anchor":"middle"}, "データなし")); return; }
 
   let mx = 0;
   for(let i=0;i<T;i++){ if(a[i] > mx) mx = a[i]; if(b[i] > mx) mx = b[i]; }
-  const ymax = niceMax(mx*1.05);
+  const ymax = niceMax(Math.max(mx*1.05, pz && opts.minMax ? opts.minMax : 0));
   const x = (i) => M.l + (T <= 1 ? 0 : i*pw/(T-1));
   const y = (v) => M.t + ph - v/ymax*ph;
 
-  // error shading
+  // error shading: one band per run of equal level; the presentation adds a solid 4 px strip at the top of the plot area in the same colour
   if(errMask){
     let i = 0;
     while(i < T){
-      if(errMask[i]){ const lv = errMask[i]; let j = i; while(j+1 < T && errMask[j+1] === lv) j++;   // one band per run of equal level
-        const x0 = x(Math.max(0, i-0.5)), x1 = x(Math.min(T-1, j+0.5));
-        svg.appendChild(el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err l" + Math.min(lv, 3)}));
+      if(errMask[i]){ const lv = errMask[i]; let j = i; while(j+1 < T && errMask[j+1] === lv) j++;
+        const x0 = x(Math.max(0, i-0.5)), x1 = x(Math.min(T-1, j+0.5)), fill = opts.bandColor ? opts.bandColor(lv) : null;
+        const r = el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err l" + Math.min(lv, 3)}); if(fill) r.style.fill = fill; svg.appendChild(r);
+        if(pz){ const s = el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:4, class:"errtop l" + Math.min(lv, 3)}); if(fill) s.style.fill = fill; svg.appendChild(s); }
         i = j+1; } else i++;
     }
   }
@@ -1043,34 +1066,44 @@ function drawChart(svg, a, b, errMask, title, labels){
     svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: g===0 ? "axis" : "grid"}));
     svg.appendChild(el("text", {x:M.l-6, y:yy + 4 + d/2, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
   }
+  // reference lines (presentation, the ratio chart): 1.0 = 平時並み solid, the thresholds dashed, when inside the range
+  if(pz && opts.refs) for(const r of opts.refs){
+    if(!(r.v >= 0 && r.v <= ymax)) continue;
+    const yy = y(r.v);
+    svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: r.solid ? "ref" : "ref dash"}));
+    svg.appendChild(el("text", {x:M.l + 4, y:yy - 4, class:"reflab"}, r.text));
+  }
   // x ticks: every 8th step (2 h at 15 min), or 16th, 32nd, ... when the labels would collide
   let step = 8; while(step < T && step * pw / Math.max(1, T - 1) < fs * 3.7) step *= 2;
   for(let i=0;i<T;i+=step){
     svg.appendChild(el("text", {x:x(i), y:H-6, "text-anchor":"middle"}, S.times[i]));
   }
-  // series
-  const path = (arr) => { let d = "", pen = false;
-    for(let i=0;i<T;i++){ const v = arr[i]; if(Number.isNaN(v)){ pen = false; continue; } d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; }
-    return d; };
-  svg.appendChild(el("path", {d:path(a), class:"l1"}));
+  // series (NaN breaks the line: a gap is a missing window, not 0)
+  const path = (arr) => { let dd = "", pen = false;
+    for(let i=0;i<T;i++){ const v = arr[i]; if(Number.isNaN(v)){ pen = false; continue; } dd += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; }
+    return dd; };
+  const pa = el("path", {d:path(a), class:"l1"}); if(opts.colorA) pa.style.stroke = opts.colorA; svg.appendChild(pa);
   svg.appendChild(el("path", {d:path(b), class:"l2"}));
-  // presentation: each line is named at its last value (平時 / 対象日), the names pushed apart when the ends are close
+  // presentation: each line is named at its last value (平時 / 対象日), kept inside the right margin, the names pushed apart when the ends are close
   if(pz && labels){
     const last = (arr) => { for(let i = T-1; i >= 0; i--) if(!Number.isNaN(arr[i])) return i; return -1; };
-    const ends = [[a, labels[0], "s1"], [b, labels[1], "s2"]].map(([arr, text, c]) => { const i = text ? last(arr) : -1; return i < 0 ? null : {x: x(i), y: y(arr[i]), text, c}; }).filter(Boolean);
-    if(ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < fs * 1.2){ const mid = (ends[0].y + ends[1].y) / 2, up = ends[0].y <= ends[1].y ? ends[0] : ends[1], dn = up === ends[0] ? ends[1] : ends[0]; up.y = mid - fs * 0.6; dn.y = mid + fs * 0.6; }
-    for(const e of ends) svg.appendChild(el("text", {x: e.x + 8, y: e.y + fs * 0.36, class: "slab " + e.c}, e.text));
+    const ends = [[a, labels[0], opts.colorA ? "sn" : "s1"], [b, labels[1], "s2"]].map(([arr, text, c]) => { const i = text ? last(arr) : -1; return i < 0 ? null : {x: x(i), y: y(arr[i]), text, c}; }).filter(Boolean);
+    if(ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < fs * 1.3){ const mid = (ends[0].y + ends[1].y) / 2, up = ends[0].y <= ends[1].y ? ends[0] : ends[1], dn = up === ends[0] ? ends[1] : ends[0]; up.y = mid - fs * 0.66; dn.y = mid + fs * 0.66; }
+    for(const e of ends){
+      const t = el("text", {x: e.x + 8, y: Math.max(M.t + fs * 0.8, Math.min(M.t + ph, e.y + fs * 0.36)), class: "slab " + e.c}, e.text); svg.appendChild(t);
+      t.setAttribute("x", Math.min(e.x + 8, W - 4 - width(t)));
+    }
   }
-  // current time marker + dots
+  // current time marker + dots (no dot at a missing value)
   const xt = x(S.t);
   svg.appendChild(el("line", {x1:xt, x2:xt, y1:M.t, y2:M.t+ph, class:"now"}));
-  if(pz){   // the time of the marker, in a navy tag on top of the line
+  if(!Number.isNaN(a[S.t])){ const c = el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill: opts.colorA || "var(--series-1)", class:"dot"}); svg.appendChild(c); }
+  if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
+  if(pz){   // the time of the marker, in a navy tag on top of the line (kept inside the plot width)
     const tw = fs * 3.2, th = fs * 1.4, tx = Math.max(M.l, Math.min(xt - tw / 2, W - M.r - tw));
     svg.appendChild(el("rect", {x: tx, y: M.t - th - 2, width: tw, height: th, rx: 4, class: "tlabbg"}));
     svg.appendChild(el("text", {x: tx + tw / 2, y: M.t - 2 - th * 0.3, "text-anchor": "middle", class: "tlab"}, S.times[S.t]));
   }
-  if(!Number.isNaN(a[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill:"var(--series-1)", class:"dot"}));
-  if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
 
   // crosshair tooltip on chart hover
   const cross = el("line", {x1:0, x2:0, y1:M.t, y2:M.t+ph, class:"cross", visibility:"hidden"});
@@ -1084,7 +1117,7 @@ function drawChart(svg, a, b, errMask, title, labels){
     let i = Math.round((px-M.l)/(pw/(T-1))); i = Math.max(0, Math.min(T-1, i));
     const xx = x(i);
     cross.setAttribute("x1", xx); cross.setAttribute("x2", xx); cross.setAttribute("visibility","visible");
-    tip1.textContent = `${S.times[i]}  平時 ${fmt(a[i])}`; tip2.textContent = `イベント時 ${fmt(b[i])}`;
+    tip1.textContent = `${S.times[i]}  ${opts.single || labels[0]} ${fmt(a[i], digits)}`; tip2.textContent = opts.single ? "" : `${labels[1]} ${fmt(b[i], digits)}`;
     const tw = Math.max(tip1.getComputedTextLength(), tip2.getComputedTextLength()) + 12;
     const tx = xx + 8 + tw > W ? xx - 8 - tw : xx + 8;
     tipbg.setAttribute("x", tx); tipbg.setAttribute("y", M.t+2); tipbg.setAttribute("width", tw); tipbg.setAttribute("visibility","visible");

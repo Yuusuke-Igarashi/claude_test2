@@ -132,107 +132,144 @@ button:hover{background:#f0efec}
 #presentRow{display:flex;gap:8px;align-items:center;margin:0 0 10px}
 #presentRow button{font-size:14px;padding:3px 10px}
 #presentRow .k{color:var(--muted);font-size:13px}
-/* ---- プレゼン表示 (html.present): a header band, the map (left) and the detail panel (right), a subtitle band at the bottom.
-   Designed for a 1920 x 1080 recording; the numbers are CSS variables so other sizes scale the same way. ---- */
-:root{--pz-head:108px;--pz-sub:150px;--pz-pad:28px;--pz-panel:40%;--navy:#15233b;--pz-bg:#f3f5f8;--pz-line:#d5dbe4;--pz-line2:#e6eaf0;--pz-accent:#d03b3b;--pz-chart-h:272px;
-      --pz-fs-heading:34px;--pz-fs-clock:42px;--pz-fs-date:22px;--pz-fs-body:18px;--pz-fs-small:16px;--pz-fs-title:26px;--pz-fs-legend:17px}
-html.present{--chart-fs:17px;--font:"Noto Sans JP","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;--ink:#15233b;--ink2:#3d4a60;--muted:#6b778a;--page:var(--pz-bg);--surface:#ffffff}
-html.present body{font-size:var(--pz-fs-body)}
+/* ---- プレゼン表示 (html.present): a header band, the map (left, 60 %) and the detail panel (right, 40 %), a subtitle band at the bottom.
+   Designed for a 1920 x 1080 recording. Every size is N px * --pz-u, which fitStage sets to (box width / 1920), so a smaller 16:9 box
+   scales the bands, panel and text alike (the map canvas is never scaled). Decoration colours are --navy / --pz-*, data colours stay. ---- */
+:root{--pz-u:1;--navy:#15233b;--pz-accent:#d03b3b;--pz-bg:#f4f6f9;--pz-line:#d7dde6;--pz-line2:#e6eaf0;--pz-panel:40%;
+      --pz-head:calc(108px * var(--pz-u));--pz-sub:calc(150px * var(--pz-u));--pz-pad:calc(32px * var(--pz-u));--pz-chart-h:calc(290px * var(--pz-u));
+      --pz-fs-heading:calc(40px * var(--pz-u));--pz-fs-clock:calc(48px * var(--pz-u));--pz-fs-date:calc(22px * var(--pz-u));--pz-fs-big:calc(40px * var(--pz-u));
+      --pz-fs-title:calc(28px * var(--pz-u));--pz-fs-num:calc(24px * var(--pz-u));--pz-fs-body:calc(22px * var(--pz-u));--pz-fs-text:calc(20px * var(--pz-u));
+      --pz-fs-small:calc(18px * var(--pz-u));--pz-fs-legend:calc(20px * var(--pz-u));--pz-fs-op:calc(16px * var(--pz-u));--pz-r:calc(8px * var(--pz-u))}
+html.present{--chart-fs:calc(18px * var(--pz-u));--font:"Noto Sans JP","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+             --ink:#15233b;--ink2:#3a4a66;--muted:#5b6b85;--grid:#e6eaf0;--axis:#c3c9d4;--page:var(--pz-bg);--surface:#ffffff;--border:rgba(21,35,59,.12);
+             --road-black:#7d8690;--road-gray:#adb4bd}   /* the roads without an anomaly drop to two greys; the sidebar legend follows the variables */
+html.present body{font-size:var(--pz-fs-text)}
 html.present #side,html.present #tip,html.present #snsCallout,html.present #snsLead{display:none !important}
 html.present #main{left:0;top:var(--pz-head);bottom:var(--pz-sub);display:grid;grid-template-columns:calc(100% - var(--pz-panel)) var(--pz-panel);background:var(--pz-bg)}
 html.present #map{position:relative;inset:auto;width:100%;height:100%;box-sizing:border-box;border-right:1px solid var(--pz-line)}
 #pzHead,#pzSub,#pzBar,#detail,#pzLegend{display:none}
 html.present #pzHead{display:flex;position:absolute;left:0;right:0;top:0;height:var(--pz-head);box-sizing:border-box;padding:0 var(--pz-pad);align-items:center;justify-content:space-between;gap:24px;background:#fff;border-bottom:1px solid var(--pz-line);color:var(--navy)}
 #pzHead .hl{min-width:0;flex:1}
-#pzHeading{font-size:var(--pz-fs-heading);font-weight:700;line-height:1.3;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#pzHeading::before{content:"";display:inline-block;width:8px;height:.9em;background:var(--pz-accent);border-radius:2px;margin:0 14px -2px 0}
-#pzChips{display:flex;gap:8px;margin-top:8px;font-size:var(--pz-fs-small);color:var(--ink2);flex-wrap:wrap}
-#pzChips span{display:inline-flex;align-items:center;gap:6px;padding:1px 10px;border:1px solid var(--pz-line);border-radius:999px;background:#fff;white-space:nowrap}
-#pzChips span.focus{border-color:var(--navy);color:var(--navy);font-weight:600}
-#pzChips span.faint{color:var(--muted)}
+#pzHeading{font-size:var(--pz-fs-heading);font-weight:700;line-height:1.3;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
+#pzHeading::before{content:"";flex:none;width:calc(8px * var(--pz-u));height:calc(36px * var(--pz-u));background:var(--pz-accent);border-radius:2px;margin-right:calc(14px * var(--pz-u))}
+#pzChips{display:flex;gap:8px;margin-top:6px;font-size:var(--pz-fs-small);color:var(--muted);flex-wrap:nowrap;overflow:hidden;align-items:center}
+#pzChips span{display:inline-flex;align-items:center;height:calc(28px * var(--pz-u));padding:0 10px;border:1px solid var(--pz-line);border-radius:999px;background:#fff;white-space:nowrap;color:var(--muted);box-sizing:border-box}
+#pzChips span.focus{border:1.5px solid var(--navy);color:var(--navy);font-weight:700}
 #pzChips span.lab{border:0;padding-left:0;color:var(--muted)}
 #pzHead .hr{text-align:right;flex:none}
-#pzTitle{font-size:var(--pz-fs-small);color:var(--ink2);white-space:nowrap}
+#pzTitle{display:none}
 #pzClock{font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap}
 #pzDate{font-size:var(--pz-fs-date);color:var(--ink2);margin-right:12px}
 #pzTime{font-size:var(--pz-fs-clock);font-weight:700;color:var(--navy)}
 #pzPeriod{font-size:var(--pz-fs-small);color:var(--muted);margin-top:4px;white-space:nowrap}
-html.present #detail{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#fff;padding:20px var(--pz-pad) 16px;box-sizing:border-box}
+html.present #detail{display:flex;flex-direction:column;min-width:0;min-height:0;overflow-y:auto;background:#fff;padding:calc(24px * var(--pz-u)) var(--pz-pad) calc(20px * var(--pz-u));box-sizing:border-box;font-size:var(--pz-fs-text)}
 #dsChart,#dsOther{min-height:0}
 html.present #chartPanel{position:static;width:auto;max-height:none;border:0;box-shadow:none;border-radius:0;padding:0;background:transparent;overflow:visible}
-html.present #chartPanel header{display:block;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--navy)}
-html.present #chartPanel header .title{font-size:var(--pz-fs-title);font-weight:700;color:var(--navy)}
-html.present #chartPanel header .kind{display:block;font-size:var(--pz-fs-small);color:var(--ink2);margin-bottom:2px}
-html.present #chartPanel header .kind::before{content:"";display:inline-block;width:14px;height:14px;border-radius:50%;border:4px solid var(--navy);box-sizing:border-box;margin:0 8px -1px 0}
-html.present #chartPanel header .status{font-size:var(--pz-fs-small);padding:2px 12px;margin-left:12px;vertical-align:middle}
-html.present #chartPanel header .sub{display:block;font-size:var(--pz-fs-small);color:var(--muted);margin-top:4px}
-html.present .readout{grid-template-columns:auto 1fr 1fr;gap:4px 18px;font-size:var(--pz-fs-body);margin:6px 0 10px;padding:8px 12px;background:var(--pz-bg);border-radius:8px}
-html.present .readout .h{font-size:var(--pz-fs-small);font-weight:600}
-html.present .readout .h.s1{color:var(--series-1)} html.present .readout .h.s2{color:var(--series-2)}
-html.present .readout .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+html.present #chartPanel header{display:block;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid var(--navy)}
+html.present #chartPanel header .title{font-size:var(--pz-fs-title);font-weight:700;color:var(--navy);line-height:1.3}
+html.present #chartPanel header .kind{display:flex;align-items:center;font-size:var(--pz-fs-text);color:var(--ink2);margin-bottom:4px;line-height:1.3}
+html.present #chartPanel header .status{font-size:var(--pz-fs-small);font-weight:700;padding:2px 12px 2px 10px;margin-left:12px;vertical-align:middle;background:#fff !important;color:var(--navy);border:2px solid var(--st,var(--navy));border-radius:999px;display:inline-flex;align-items:center;gap:8px}
+html.present #chartPanel header .status::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--st,var(--navy));flex:none}
+html.present #chartPanel header .sub{display:block;font-size:var(--pz-fs-small);color:var(--muted);margin-top:4px;line-height:1.5}
+html.present .readout{display:none}
+.pzBadge,.kind.sel::before{display:inline-flex;align-items:center;justify-content:center;width:calc(28px * var(--pz-u));height:calc(28px * var(--pz-u));border-radius:50%;background:var(--navy);color:#fff;font:700 var(--pz-fs-small)/1 var(--font);flex:none}
+.kind.sel::before{content:"1";margin-right:10px}
+.pzBadge{width:36px;height:36px;font-size:20px;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--navy);box-sizing:border-box;cursor:default}
+.chart{font-size:var(--chart-fs)}
 html.present .chart{height:var(--pz-chart-h)}
-html.present .chart .ttl{font-size:calc(var(--chart-fs) + 3px)}
-html.present .chart .l1,html.present .chart .l2{stroke-width:3}
-html.present .chart .now{stroke:var(--navy);stroke-width:2;stroke-dasharray:5 4}
-html.present .chart .dot{r:6}
-.chart .slab{font-weight:700;font-size:var(--chart-fs)}
-.chart .slab.s1{fill:var(--series-1)} .chart .slab.s2{fill:var(--series-2)}
-.chart .tlab{fill:#fff;font-weight:700;font-size:calc(var(--chart-fs) - 1px)}
+html.present .chart .ttl{font-size:var(--pz-fs-body);font-weight:700;fill:var(--navy)}
+html.present .chart .l1{stroke-width:2.5} html.present .chart .l2{stroke-width:3.5}
+html.present .chart .now{stroke:var(--navy);stroke-width:2;stroke-dasharray:none}
+html.present .chart .dot{r:6;stroke-width:2.5}
+html.present .chart text{fill:var(--muted)}
+.chart .slab{font-weight:700;font-size:var(--pz-fs-text)}
+.chart .slab.s1{fill:var(--series-1)} .chart .slab.s2{fill:var(--series-2)} .chart .slab.sn{fill:var(--navy)}
+.chart .tlab{fill:#fff;font-weight:700;font-size:var(--pz-fs-small)}
 .chart .tlabbg{fill:var(--navy)}
+.chart .ind{font-size:var(--pz-fs-small);fill:var(--muted)} .chart .indv{font-size:var(--pz-fs-num);font-weight:700}
+.chart .indv.s1{fill:var(--series-1)} .chart .indv.s2{fill:var(--series-2)} .chart .indv.sn{fill:var(--navy)} .chart .indv.miss{fill:var(--muted);font-weight:400;font-size:var(--pz-fs-text)}
+.chart .errtop{opacity:1} .chart .errtop.l1{fill:var(--lv1)} .chart .errtop.l2{fill:var(--lv2)} .chart .errtop.l3{fill:var(--lv3)}
+.chart .ref{stroke:var(--muted);stroke-width:1} .chart .ref.dash{stroke:var(--axis);stroke-dasharray:4 4} .chart .reflab{font-size:var(--pz-fs-small);fill:var(--muted)}
 html.present .clegend{display:none}
-html.present .pzNote{font-size:var(--pz-fs-small);color:var(--muted);margin-top:4px;line-height:1.5}
-html.present .pzNote .band{display:inline-block;width:18px;height:12px;background:var(--lv2);opacity:.3;vertical-align:middle;margin-right:4px}
 html.present #cpHint{display:none}
-#dsOther{display:none;line-height:1.55}
-#dsOther .dhead{margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--navy)}
-#dsOther .dhead .kind{display:block;font-size:var(--pz-fs-small);color:var(--ink2);margin-bottom:2px}
-#dsOther .dhead .kind.sel::before{content:"";display:inline-block;width:14px;height:14px;border-radius:50%;border:4px solid var(--navy);box-sizing:border-box;margin:0 8px -1px 0}
-#dsOther .dhead .ttl{font-size:var(--pz-fs-title);font-weight:700;color:var(--navy)}
-#dsOther .dhead .ttl .when{font-weight:400;color:var(--ink2);font-size:var(--pz-fs-body);margin-left:12px}
-#dsOther .big{font-size:40px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1.2}
-#dsOther .big small{font-size:var(--pz-fs-body);font-weight:400;color:var(--ink2);margin-left:6px}
-#dsOther .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:var(--pz-fs-body);margin:8px 0}
+html.present .pzNote{font-size:var(--pz-fs-small);color:var(--muted);margin-top:6px;line-height:1.5}
+.opHint{color:var(--muted)}
+html.present.barhidden .opHint,html.present.barhidden .maplibregl-ctrl-zoom-in,html.present.barhidden .maplibregl-ctrl-zoom-out{display:none !important}
+#dsOther{display:none;line-height:1.5}
+#dsOther .dhead{margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid var(--navy)}
+#dsOther .dhead .kind{display:flex;align-items:center;font-size:var(--pz-fs-text);color:var(--ink2);margin-bottom:4px;line-height:1.3}
+#dsOther .dhead .ttl{font-size:var(--pz-fs-title);font-weight:700;color:var(--navy);line-height:1.3;display:flex;align-items:baseline;flex-wrap:wrap;gap:0 12px;overflow:hidden}
+#dsOther .dhead .ttl .when{font-weight:400;color:var(--ink2);font-size:var(--pz-fs-small)}
+#dsOther .dhead .ttl .one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#dsOther .big{font-size:var(--pz-fs-big);font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1.25;margin:4px 0}
+#dsOther .big small{font-size:var(--pz-fs-text);font-weight:400;color:var(--ink2);margin-left:8px}
+#dsOther .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:var(--pz-fs-text);margin:8px 0}
 #dsOther .kv .k{color:var(--ink2)}
-#dsOther .kv .v{font-weight:600;font-variant-numeric:tabular-nums}
-#dsOther .txt{font-size:21px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin:10px 0;padding:14px 16px;background:var(--pz-bg);border-radius:8px;max-height:46%;overflow:auto}
-#dsOther .meta{font-size:var(--pz-fs-small);color:var(--ink2)}
+#dsOther .kv .v{font-weight:700;font-variant-numeric:tabular-nums;color:var(--navy)}
+#dsOther .txt{font-size:var(--pz-fs-body);line-height:1.6;white-space:pre-wrap;word-break:break-word;margin:10px 0;padding:14px 16px;background:var(--pz-bg);border-radius:var(--pz-r);max-height:calc(var(--pz-fs-body) * 1.6 * 8 + 28px);overflow:auto;color:var(--navy)}
+#dsOther .meta{font-size:var(--pz-fs-small);color:var(--muted);line-height:1.5}
 #dsOther .meta a{color:var(--series-1)}
-#dsOther .nav{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:var(--pz-fs-small);color:var(--ink2)}
-#dsOther .nav button{font-size:var(--pz-fs-small);padding:3px 12px}
-#dsOther .hint{color:var(--muted);font-size:var(--pz-fs-body);margin-top:14px}
-#dsOther .sum{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:var(--pz-fs-body);margin-top:10px}
-#dsOther .sum .n{font-size:26px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;text-align:right}
+#dsOther .nav{display:flex;gap:12px;align-items:center;margin-top:12px;font-size:var(--pz-fs-text);color:var(--ink2)}
+#dsOther .nav button{font-size:var(--pz-fs-text);height:calc(44px * var(--pz-u));padding:0 18px;border-radius:6px}
+#dsOther .hint{font-size:var(--pz-fs-small);margin-top:14px;line-height:1.5}
+#dsOther .sum{display:grid;grid-template-columns:auto 1fr;gap:10px 16px;font-size:var(--pz-fs-text);margin-top:10px;align-items:center}
+#dsOther .sum .n{font-size:var(--pz-fs-num);font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 #dsOther .sum .n small{font-size:var(--pz-fs-small);font-weight:400;color:var(--ink2);margin-left:4px}
-#dsOther .sum .l{align-self:center;color:var(--ink2)}
+#dsOther .sum .l{color:var(--ink2)}
 #dsOther .sum .l b{color:var(--navy)}
-#dsOther .cat{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:8px;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.2)}
-html.present #pzLegend{display:block;position:absolute;left:16px;bottom:16px;z-index:5;max-width:calc(100% - var(--pz-panel) - 120px);background:rgba(255,255,255,.94);border:1px solid var(--pz-line);border-radius:8px;padding:10px 16px;font-size:var(--pz-fs-legend);color:var(--ink2)}
+#dsOther .cat{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:8px;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.2);flex:none}
+#dsOther .ring{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:8px;background:#fff;box-shadow:inset 0 0 0 3px var(--c),0 0 0 1px rgba(0,0,0,.15);flex:none}
+#dsOther .ln{display:inline-block;width:24px;height:4px;border-radius:2px;vertical-align:middle;margin-right:8px;background:var(--c)}
+#dsOther .arr{font-size:var(--pz-fs-body)}
+#dsOther .lvs{display:flex;gap:18px;flex-wrap:wrap;font-size:var(--pz-fs-body);color:var(--ink2);margin:6px 0}
+#dsOther .lvs b{color:var(--navy);font-variant-numeric:tabular-nums}
+#dsOther .steps{display:grid;grid-template-columns:auto auto;gap:4px 12px;align-items:center;margin:12px 0;font-size:var(--pz-fs-text);color:var(--ink2);font-variant-numeric:tabular-nums;justify-content:start}
+#dsOther .steps .sw{width:28px;height:24px;border-radius:3px;box-sizing:border-box}
+#dsOther .steps .sw.on{outline:2px solid var(--navy);outline-offset:2px}
+#dsOther .posts{display:grid;grid-template-columns:auto auto 1fr;gap:8px 12px;align-items:center;font-size:var(--pz-fs-text);margin:10px 0}
+#dsOther .posts .p{display:contents;cursor:pointer}
+#dsOther .posts .p:hover span{color:var(--series-1)}
+#dsOther .posts .t{font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
+#dsOther .posts .x{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--navy)}
+#dsOther .dim{color:var(--muted);font-size:var(--pz-fs-small);margin-top:10px}
+html.present #pzLegend{display:block;position:absolute;left:16px;bottom:16px;z-index:5;pointer-events:none;max-width:calc(820px * var(--pz-u));max-height:calc(220px * var(--pz-u));overflow:hidden;background:rgba(255,255,255,.94);border:1px solid var(--pz-line);border-radius:var(--pz-r);padding:10px 16px;font-size:var(--pz-fs-legend);color:var(--ink2);box-sizing:border-box}
+html.present #pzLegend.tl{bottom:auto;top:16px}
 #pzLegend .row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:3px 0}
+#pzLegend .row.sub{font-size:var(--pz-fs-small);color:var(--muted)}
 #pzLegend .row .nm{font-weight:700;color:var(--navy);white-space:nowrap}
-#pzLegend .row .nm small{font-weight:400;color:var(--muted);margin-left:6px}
-#pzLegend .legend{font-size:var(--pz-fs-legend);gap:4px 14px}
+#pzLegend .row.sub .nm{font-weight:400;color:var(--muted)}
+#pzLegend .legend{font-size:inherit;gap:4px 14px;color:inherit}
 #pzLegend .legend span::before{width:24px;height:4px}
 #pzLegend .legend .pt::before,#pzLegend .legend .ring::before,#pzLegend .legend .turn::before{width:11px;height:11px}
-#pzLegend .lg{display:flex;flex-wrap:wrap;gap:4px 0;align-items:center;font-size:var(--pz-fs-legend)}
+#pzLegend .lg{display:flex;flex-wrap:wrap;gap:4px 0;align-items:center;font-size:inherit}
 #pzLegend .lg .sw{display:inline-block;width:30px;height:14px;margin-right:4px;vertical-align:middle}
+#pzLegend .row.sub .lg .sw{width:22px;height:10px}
 #pzLegend .lg .it{margin-right:14px}
 #pzLegend .lg .dot{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#pzLegend .row.kaden .lg .dot{background:#fff !important;box-shadow:inset 0 0 0 3px var(--c),0 0 0 1px rgba(0,0,0,.15)}
 #pzLegend .lg .lab{margin-right:8px}
-#pzLegend .lg .arr{font-size:22px}
-#pzLegend .cur{color:var(--navy);font-weight:600;margin-left:6px}
-html.present #pzSub{display:block;position:absolute;left:0;right:0;bottom:0;height:var(--pz-sub);box-sizing:border-box;background:#fff;border-top:1px solid var(--pz-line)}
-html.present #pzBar{display:flex;position:absolute;left:0;right:0;bottom:0;height:60px;box-sizing:border-box;padding:0 var(--pz-pad);align-items:center;gap:10px;background:#eef1f5;border-top:1px solid var(--pz-line);font-size:15px;color:var(--ink2);z-index:9}
-html.present #pzSub::before{content:"字幕の領域（編集で字幕を載せる。録画の前に H で操作バーを隠す）";position:absolute;left:var(--pz-pad);top:14px;font-size:14px;color:#b4b9c3}
+#pzLegend .lg .arr{font-size:calc(22px * var(--pz-u))}
+#pzLegend .row.sub .legend span::before,#pzLegend .row.sub .lg .sw,#pzLegend .row.sub .lg .arr,#pzLegend .row.sub .lg .dot{opacity:var(--sw-op,1)}
+#pzLegend .note{color:var(--muted);font-size:var(--pz-fs-small);margin-left:8px}
+html.present #pzSub{display:block;position:absolute;left:0;right:0;bottom:0;height:var(--pz-sub);box-sizing:border-box;background:var(--pz-bg);border-top:1px solid var(--pz-line)}
+html.present #pzSub::before{content:"字幕の領域（編集で字幕を載せる。録画の前に H で操作バーを隠す）";position:absolute;left:var(--pz-pad);top:14px;font-size:var(--pz-fs-op);color:#9aa3b5}
 html.present.barhidden #pzSub::before{content:none}
+html.present #pzBar{display:flex;position:absolute;left:0;right:0;bottom:0;height:calc(60px * var(--pz-u));box-sizing:border-box;padding:0 var(--pz-pad);align-items:center;gap:10px;background:#eef1f5;border-top:1px solid var(--pz-line);font-size:var(--pz-fs-small);color:var(--ink2);z-index:9}
 html.present.barhidden #pzBar{display:none}
-#pzBar button{font-size:15px;padding:5px 12px;border-radius:6px}
-#pzBar .scenes button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
-#pzBar .scenes button b{font-weight:600;margin-right:4px;opacity:.75}
+#pzBar button{font-size:var(--pz-fs-small);height:calc(40px * var(--pz-u));padding:0 14px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--navy);white-space:nowrap;flex:none}
+#pzBar button:disabled{color:var(--muted);background:#f4f6f9;cursor:default}
 #pzBar .scenes{display:flex;gap:6px}
-#pzBar .timeCtl{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
-#pzBar .timeCtl #slider{margin:0;flex:1}
-#pzBar .k{color:var(--muted);font-size:13px}
+#pzBar .scenes button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+#pzBar .scenes button b{font-weight:700;margin-right:5px;opacity:.6}
+#pzBar .scenes button.on b{opacity:.8}
+#pzBar .sep{width:1px;height:calc(28px * var(--pz-u));background:var(--pz-line);margin:0 4px}
+#pzBar .timeCtl{display:flex;align-items:center;gap:12px;flex:1;min-width:calc(220px * var(--pz-u))}
+#pzBar .timeCtl #slider{margin:0;flex:1;accent-color:var(--navy)}
+#pzBar .timeCtl #playBtn{height:calc(40px * var(--pz-u));font-size:var(--pz-fs-small);border-radius:6px;background:#fff;color:var(--navy)}
+#pzBar .keys{font-size:calc(15px * var(--pz-u));color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
 html.present .maplibregl-ctrl-attrib{font-size:13px}
+html.present .maplibregl-ctrl-scale{font-size:12px}
+html.present .maplibregl-ctrl-bottom-right .maplibregl-ctrl{margin-right:16px}
 </style>
 </head>
 <body>
@@ -356,10 +393,13 @@ html.present .maplibregl-ctrl-attrib{font-size:13px}
 <div id="pzSub" aria-hidden="true"></div>
 <div id="pzBar">
   <div class="scenes" id="pzScenes"></div>
+  <span class="sep"></span>
   <button id="pzRain" title="R キー">降雨</button>
   <div class="timeCtl" id="pzTimeCtl"></div>
-  <button id="pzHide" title="H キー">操作バーを隠す</button>
-  <button id="pzExit" title="Esc キー">通常表示</button>
+  <button id="pzClear" title="Delete キー">選択解除</button>
+  <span class="keys" id="pzKeys">1–6 場面 ／ R 降雨 ／ Space 再生 ／ ←→ 時刻 ／ [ ] 投稿 ／ Del 解除</span>
+  <button id="pzHide" title="H キー">操作バーを隠す（H）</button>
+  <button id="pzExit" title="Esc キー">通常表示（Esc）</button>
 </div>
 <svg id="snsLead" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;display:none">
   <line id="snsLeadLine" x1="0" y1="0" x2="0" y2="0" stroke="#222" stroke-width="1.5"/><circle id="snsLeadDot" cx="0" cy="0" r="3.5" fill="#222"/>
@@ -459,26 +499,40 @@ const CONFIG = {
   lineWidth: { gray: 1.0, black: 1.6, red: 3.0 },
   // プレゼン表示 (P): the scenes (keys 1-6). focus = the layers of the scene at full strength, faint = shown dimmed (PRESENT.dim; rain by its
   // level, R), everything else hidden. The headings are the one message of each scene (short, within what the data shows).
+  // プレゼン表示 (P): the scenes (keys 1-6). focus = the scene's layers at full strength and clickable; opt = clickable too, but only when its 表示
+  // checkbox is on (the scene does not force it); faint = shown dimmed (PRESENT.dim / dimBase, rain by its level, R) and not clickable;
+  // context = the road network as a grey backdrop only (links-context); everything else hidden. The headings are the one message of each scene.
   SCENES: [
-    {key: "rain",    label: "降雨", heading: "降雨の分布から、強い雨の範囲と時刻をつかむ",              focus: ["rain"],  faint: ["roads"],
+    {key: "rain",    label: "降雨", heading: "降雨の分布から、強い雨の範囲と時間帯を確認する",          focus: ["rain"],                        opt: [],       faint: [],               context: ["roads"], rain: "full",
      hint: "地図をクリックすると、その地点の降雨強度をここに表示します。"},
-    {key: "traffic", label: "交通", heading: "交通量の変化から、冠水が疑われる道路を絞り込む",            focus: ["roads"], faint: ["rain"],
-     hint: "色のついた道路をクリックすると、その道路の速度と台数の推移を平時と比べてここに表示します。"},
-    {key: "walk",    label: "人流", heading: "徒歩移動者の増減から、人の動きが変わった場所を見つける",      focus: ["grid", "walk"], faint: ["rain", "roads"],
+    {key: "traffic", label: "交通", heading: "交通量の変化から、冠水が疑われる道路を絞り込む",            focus: ["roads"],                       opt: [],       faint: ["rain"],         context: [],        rain: "dim",
+     hint: "色のついた道路をクリックすると、その道路の速度と台数を平時と比べてここに表示します。"},
+    {key: "walk",    label: "人流", heading: "徒歩移動者の増減から、人の動きが変わった場所を絞り込む",      focus: ["grid"],                        opt: ["walk"], faint: ["rain", "roads"], context: [],        rain: "dim",
      hint: "矢印のセルをクリックすると、そのセルの徒歩移動者数の比をここに表示します。"},
-    {key: "kaden",   label: "家電", heading: "家電の接続台数の変化から、影響が疑われる地域を絞り込む",      focus: ["kaden"], faint: ["rain", "roads"],
+    {key: "kaden",   label: "家電", heading: "家電の接続台数の変化から、台数が減った地域を絞り込む",        focus: ["kaden"],                       opt: [],       faint: ["rain", "roads"], context: [],        rain: "dim",
      hint: "点をクリックすると、その郵便番号の接続台数の推移を平時と比べてここに表示します。"},
-    {key: "sns",     label: "SNS",  heading: "SNS の投稿から、現地の状況を確かめる",                    focus: ["sns"],   faint: ["rain", "roads"],
+    {key: "sns",     label: "SNS",  heading: "SNS の投稿地点と内容から、現地の手がかりを得る",             focus: ["sns"],                         opt: [],       faint: ["rain", "roads"], context: [],        rain: "dim",
      hint: "投稿の地点をクリックすると、本文をここに表示します。"},
-    {key: "all",     label: "統合", heading: "複数のデータを重ね、冠水が疑われる場所を絞り込む",          focus: ["roads", "walk", "grid", "kaden", "sns"], faint: ["rain"],
+    {key: "all",     label: "統合", heading: "複数のデータを重ね、冠水が疑われる場所を絞り込む",            focus: ["roads", "grid", "kaden", "sns"], opt: ["walk"], faint: ["rain"],         context: [],        rain: "dim",
      hint: "道路・点・投稿をクリックすると、その詳細をここに表示します。"},
   ],
   PRESENT: {
-    dim: 0.3,          // opacity factor of the faint layers
-    rainDim: 0.3,      // opacity factor of the rain when it is faint (R: 通常 / 薄い / 非表示)
-    navy: "#15233b",   // selection highlight (decoration colour, not a data colour)
-    scene: "traffic",  // scene at the first switch to the presentation
-    seriesLabels: ["平時", "対象日"],   // the two lines of the charts in the presentation (normal view: 平時 / イベント時)
+    dim: 0.35, dimBase: 0.60,                       // faint roads: the anomaly lines / the roads without one
+    rainOpacity: {full: 0.70, dim: 0.18},           // R: full -> dim -> off -> full
+    // rain colours of the presentation: one blue hue in 7 steps (the thresholds and unit of RAIN_SCALE stay), so the warm colours on the map
+    // mean a change against the baseline only (road anomalies, appliance decreases, walker increases). null = RAIN_SCALE in the presentation too.
+    rainScale: [[1, "#c6dbef"], [5, "#9ecae1"], [10, "#6baed6"], [20, "#4292c6"], [30, "#2171b5"], [50, "#08519c"], [80, "#08306b"]],
+    kadenColors: {2: "#d97706"},                    // KADEN_COLOR replaced in the presentation (legend, pill and chart bands follow): 2/3 以下 darker on white
+    lineWidth: {red: 4.0, black: 1.4, gray: 1.0},   // road lines at zoom 14 (x0.6 at 10, x2.2 at 17, as CONFIG.lineWidth)
+    pointScale: {kaden: 1.3, sns: 1.3, kadenAll: 1.0, snsAll: 1.15},   // marker radii in the layer's own scene / in 統合
+    kadenFade: {1: 0.45, 0: 0.30},                  // opacity of 平時並み / 判定なし appliance points (ring and fill)
+    gridMarkPx: [12, 30], gridIconAll: 0.8, gridOpacityAll: 0.85,     // walker-change arrows: size range, and the factor in 統合
+    basemapOpacity: 0.45,
+    navy: "#15233b",                                // selection highlight, ① badge, time tag (decoration colour, not a data colour)
+    scene: "traffic",                               // scene at the first switch to the presentation
+    seriesLabels: ["平時", "対象日"], missing: "欠測",   // the two lines of the charts, and a missing value (normal view: 平時 / イベント時, –)
+    hoverChart: false,                              // the panel changes on click only (hover: cursor and glow)
+    subtitleBand: 150, legendCorner: "bl",          // subtitle band height in px at 1920 x 1080 (0 folds it), legend card corner ("bl" | "tl")
   }
 };
 
@@ -525,7 +579,8 @@ const S = {
   present: false, scene: "traffic", rainLevel: "dim", barHidden: false,   // プレゼン表示 (P): scene key, rain level in the scenes where rain is faint, operator bar
   detail: null,         // what the detail panel shows besides the chart panel: "sns" | "grid" | "rain" | "traj" | null
   gridSel: null,        // {x, y} of the selected mesh cell (presentation); rainSel: {lng, lat} of the rain probe (presentation)
-  rainSel: null, kadenCnt: null,
+  rainSel: null, kadenCnt: null, snsCount: null,
+  badge: null,          // maplibregl.Marker with the ① of the selected object (presentation)
   playing: false, timer: null
 };
 let map = null;
@@ -1327,7 +1382,9 @@ function initMap(gj){
       onHover(e);
     });
     map.on("mouseleave", "links-hit", () => { if(!layerActive("roads")) return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
-    map.on("click", "links-hit", (e) => { if(layerActive("roads") && !onWalk(e.point)) onClick(e); });
+    // presentation: a marker (SNS, appliance point) under the cursor wins over the road under it (the map's click handler takes it)
+    const markerAt = (pt) => S.present && map.queryRenderedFeatures(pt, {layers: [layerActive("sns") && map.getLayer("sns") && "sns", layerActive("kaden") && map.getLayer("kaden") && "kaden"].filter(Boolean)}).length > 0;
+    map.on("click", "links-hit", (e) => { if(layerActive("roads") && !onWalk(e.point) && !markerAt(e.point)) onClick(e); });
     // something clickable (a road, an appliance point, an SNS marker) under the cursor: the pointer cursor stays
     const clickableAt = (pt) => { const ls = [layerActive("roads") && "links-hit", layerActive("kaden") && "kaden", layerActive("sns") && "sns"].filter((l) => l && map.getLayer(l));
                                   return ls.length > 0 && map.queryRenderedFeatures(pt, {layers: ls}).length > 0; };
@@ -1348,20 +1405,18 @@ function initMap(gj){
     });
     map.getCanvas().addEventListener("mouseleave", () => { if(walkCursor){ map.getCanvas().style.cursor = ""; walkCursor = false; } hideTip(); });
     map.on("click", (e) => {
-      if(layerActive("kaden") && map.getLayer("kaden")){
-        const hit = map.queryRenderedFeatures(e.point, {layers: ["kaden"]});
-        if(hit.length){
-          const i = hit[0].properties.i, key = "k" + i;
-          if(S.pinnedId === key) clearPin();
-          else { clearPin(); S.pinnedId = key; $("chartPanel").classList.add("pinned"); setSelPoint(S.kaden.lon[i], S.kaden.lat[i], kadenRadius(S.kadenFeats[i].properties.base), "kaden"); }
-          placePanel(e.point); showKadenChart(i); return;
-        }
-      }
-      if(S.sns && map.getLayer("sns")){
+      // the appliance point and the SNS marker under the cursor; the presentation picks the SNS marker first (it is drawn on top)
+      const kadenHit = () => { if(!layerActive("kaden") || !map.getLayer("kaden")) return false;
+        const hit = map.queryRenderedFeatures(e.point, {layers: ["kaden"]}); if(!hit.length) return false;
+        const i = hit[0].properties.i, key = "k" + i;
+        if(S.pinnedId === key) clearPin();
+        else { clearPin(); S.pinnedId = key; $("chartPanel").classList.add("pinned"); setSelPoint(S.kaden.lon[i], S.kaden.lat[i], kadenRadius(S.kadenFeats[i].properties.base), "kaden"); }
+        placePanel(e.point); showKadenChart(i); return true; };
+      const snsHit = () => { if(!S.sns || !map.getLayer("sns")) return false;
         const hit = layerActive("sns") ? map.queryRenderedFeatures(e.point, {layers: ["sns"]}) : [];
-        if(hit.length){ openSnsCallout(hit[0].properties.key, 0); return; }
-        if(S.snsSel) closeSnsCallout();
-      }
+        if(hit.length){ openSnsCallout(hit[0].properties.key, 0); return true; }
+        if(S.snsSel) closeSnsCallout(); return false; };
+      if(S.present ? (snsHit() || kadenHit()) : (kadenHit() || snsHit())) return;
       if(walkOn()){   // a click marks the trajectory feature under the cursor; a second click or an empty click clears it
         const ft = trajHit(e.point);
         const same = ft && S.trajSel && S.trajSel.source === ft.layer.id && S.trajSel.id === ft.id;
@@ -1374,6 +1429,20 @@ function initMap(gj){
       if(S.present) presentClick(e);   // a mesh cell or a rain probe point for the detail panel
     });
     map.on("moveend", () => { updateTraj(); drawGridMarks(); });
+    map.on("move", () => { if(S.badge) updateBadge(); });
+    if(S.kaden){
+      map.addSource("kaden", {type:"geojson", data: EMPTY_FC});
+      map.addLayer({ id:"kaden", type:"circle", source:"kaden",
+                     paint:{ "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "base"]], 0, 3, 3, 5, 10, 9, 30, 14],
+                             "circle-color": ["match", ["get", "cls"], 0, KADEN_COLOR[0], 1, KADEN_COLOR[1], 2, KADEN_COLOR[2], 3, KADEN_COLOR[3], 4, KADEN_COLOR[4], KADEN_COLOR[0]],
+                             "circle-opacity": ["case", ["==", ["get", "cls"], 0], 0.35, 0.85], "circle-stroke-color": "#ffffff", "circle-stroke-width": 1 } });
+      map.on("mousemove", "kaden", (e) => {
+        if(!e.features.length || !layerActive("kaden")) return;
+        map.getCanvas().style.cursor = "pointer";
+        if(S.pinnedId === null && !(S.present && !CONFIG.PRESENT.hoverChart)){ placePanel(e.point); showKadenChart(e.features[0].properties.i); }   // presentation: click only
+      });
+      map.on("mouseleave", "kaden", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null && S.kadenChartIdx !== null) hideChart(); });
+    }
     if(S.sns){
       const pairs = Object.entries(CONFIG.SNS_COLORS).flat();
       map.addSource("sns", {type:"geojson", data: EMPTY_FC});
@@ -1384,19 +1453,6 @@ function initMap(gj){
       map.on("mouseenter", "sns", () => { if(layerActive("sns")) map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "sns", () => { map.getCanvas().style.cursor = ""; });
       map.on("move", placeSnsCallout);
-    }
-    if(S.kaden){
-      map.addSource("kaden", {type:"geojson", data: EMPTY_FC});
-      map.addLayer({ id:"kaden", type:"circle", source:"kaden",
-                     paint:{ "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "base"]], 0, 3, 3, 5, 10, 9, 30, 14],
-                             "circle-color": ["match", ["get", "cls"], 0, KADEN_COLOR[0], 1, KADEN_COLOR[1], 2, KADEN_COLOR[2], 3, KADEN_COLOR[3], 4, KADEN_COLOR[4], KADEN_COLOR[0]],
-                             "circle-opacity": ["case", ["==", ["get", "cls"], 0], 0.35, 0.85], "circle-stroke-color": "#ffffff", "circle-stroke-width": 1 } });
-      map.on("mousemove", "kaden", (e) => {
-        if(!e.features.length || !layerActive("kaden")) return;
-        map.getCanvas().style.cursor = "pointer";
-        if(S.pinnedId === null){ placePanel(e.point); showKadenChart(e.features[0].properties.i); }
-      });
-      map.on("mouseleave", "kaden", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null && S.kadenChartIdx !== null) hideChart(); });
     }
     // the selected point (appliance point, SNS marker, rain probe) and the selected mesh cell: a navy ring / frame with a white gap (above the data layers)
     map.addSource("sel-point", {type:"geojson", data: EMPTY_FC});
@@ -1415,6 +1471,7 @@ function initMap(gj){
     updateGrid();
     applyEmphasis();
     map.on("zoom", () => { if(walkOn() && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
+    applyUrlParams();
   });
 }
 
@@ -1450,20 +1507,30 @@ const LAYER_DATA = {roads: () => true, walk: () => hasTraj(), grid: () => !!S.gr
 function layerOn(key){
   if(!LAYER_DATA[key]() || !S[LAYER_FLAG[key]]) return false;
   if(!S.present) return true;
-  const sc = sceneDef(), inScene = sc.focus.includes(key) || sc.faint.includes(key);
-  if(key === "rain") return inScene && (sc.focus.includes("rain") || S.rainLevel !== "off");
-  return inScene;
+  const sc = sceneDef(), inScene = sc.focus.includes(key) || sc.opt.includes(key) || sc.faint.includes(key);
+  if(key === "rain") return inScene && S.rainLevel !== "off";
+  return inScene;   // roads of a "context" scene are not on: the grey network (links-context) stands in for them
 }
-// A layer the cursor can pick (hover, click): shown, and in the presentation one of the scene's focus layers (faint layers are context only).
-const layerActive = (key) => layerOn(key) && (!S.present || sceneDef().focus.includes(key));
-// Opacity factor of a layer: 1 in the normal view and for the scene's focus layers, PRESENT.dim for the faint ones (rain by its level).
+// A layer the cursor can pick (hover, click): shown, and in the presentation a focus / opt layer of the scene (faint layers are context only).
+const layerActive = (key) => layerOn(key) && (!S.present || sceneDef().focus.includes(key) || sceneDef().opt.includes(key));
+// Opacity factor of a layer: 1 in the normal view and for the scene's focus / opt layers, PRESENT.dim for the faint ones (rain: see rainOpacity()).
 function layerDim(key){
   if(!S.present) return 1;
   const sc = sceneDef();
-  if(sc.focus.includes(key)) return 1;
-  if(key === "rain") return S.rainLevel === "full" ? 1 : CONFIG.PRESENT.rainDim;
+  if(sc.focus.includes(key) || sc.opt.includes(key)) return 1;
   return CONFIG.PRESENT.dim;
 }
+// Rain raster opacity: the normal view's RAIN_OPACITY, or the presentation level (R).
+const rainOpacity = () => S.present ? (S.rainLevel === "full" ? CONFIG.PRESENT.rainOpacity.full : CONFIG.PRESENT.rainOpacity.dim) : CONFIG.RAIN_OPACITY;
+// Rain colour steps: the presentation's blue steps when set, else RAIN_SCALE (paintRain and every legend use this one function).
+const rainScale = () => (S.present && CONFIG.PRESENT.rainScale) || CONFIG.RAIN_SCALE;
+// Appliance class colour: the presentation's replacements when set (legend, status pill, chart bands and the map use this one function).
+const kadenColor = (k) => (S.present && CONFIG.PRESENT.kadenColors && CONFIG.PRESENT.kadenColors[k]) || KADEN_COLOR[k];
+// Wording of the presentation: the comparison day is 対象日 (normal view: イベント時 / 有事 / 発災日), a missing value 欠測 (normal view: –).
+const label = (s) => S.present ? String(s).replace(/イベント時|有事|発災日/g, "対象日") : String(s);
+const missingLabel = () => S.present ? CONFIG.PRESENT.missing : "–";
+const gridMarkPx = () => S.present ? CONFIG.PRESENT.gridMarkPx : CONFIG.GRID_MARK_PX;
+const gridIconScale = () => S.present && S.scene === "all" ? CONFIG.PRESENT.gridIconAll : 1;
 function setupLayers(){
   const rows = [   // [key, data present, reason when absent]
     ["roads", true, ""],
@@ -1500,9 +1567,9 @@ function setLayer(key, on){
 // Map layers, road counts and legend boxes after a change of the layer checkboxes.
 function syncLayers(){
   if(!map || !map.getLayer("links-base")) return;
-  const roads = layerOn("roads"), walk = walkOn();
+  const roads = layerOn("roads"), walk = walkOn(), context = S.present && sceneDef().context.includes("roads");
   for(const id of ["links-base", "links-error", "links-hover", "links-hit", "links-sel-casing", "links-sel-gap", "links-sel"]) map.setLayoutProperty(id, "visibility", roads ? "visible" : "none");
-  map.setLayoutProperty("links-context", "visibility", walk && !roads ? "visible" : "none");   // trajectories without the anomaly colours: the network as light context
+  map.setLayoutProperty("links-context", "visibility", (walk && !roads) || (context && !roads) ? "visible" : "none");   // the network as light context: trajectories without the anomaly colours, or a "context" scene
   $("statTraffic").style.display = roads ? "" : "none";
   $("nearestBtn").disabled = !walk; $("nearestBtn").title = walk ? "現在の時刻のデータのうち、地図中心に最も近いものへ移動" : "徒歩の軌跡を表示すると使えます";
   const shown = {lgRoads: roads, lgWalk: walk, lgGrid: gridOn(), lgKaden: layerOn("kaden"), lgRain: layerOn("rain"), lgSns: layerOn("sns")};
@@ -1641,13 +1708,7 @@ function setupOverlays(){
       sel.disabled = true; sel.title = `イベント期間 ${S.period.event.start} から ${S.period.event.hours} 時間に合わせて自動選択`;
       $("rainDateNote").textContent = "期間に合わせて時刻ごとに自動で選びます（日付をまたいだ時刻は翌日）。";
     }
-    const lg = $("legendRain");
-    const unit = (S.rain.index.unit || "").startsWith("mm (") ? "mm（15 分）" : "mm/h";
-    lg.innerHTML = `<span class="lab">${unit}</span>` + CONFIG.RAIN_SCALE.map(([v, c], i) => {
-      const next = CONFIG.RAIN_SCALE[i+1];
-      return `<span class="it"><span class="sw" style="background:${c}"></span>${v}${next ? "–" + next[0] : "+"}</span>`;
-    }).join("");
-    lg.style.display = "flex";
+    renderRainLegend();
     // value under the cursor
     let t = null;
     map.on("mousemove", (e) => { if(t) return; t = setTimeout(() => { t = null; const v = rainAt(e.lngLat); if(v || (S.rain && S.rain.cur)) $("rainVal").textContent = v;
@@ -1655,6 +1716,16 @@ function setupOverlays(){
   }
 }
 
+// The rain legend (sidebar; the presentation clones it): unit, then the steps of rainScale().
+function renderRainLegend(){
+  const lg = $("legendRain"); if(!S.rain) return;
+  const unit = (S.rain.index.unit || "").startsWith("mm (") ? "mm（15 分）" : "mm/h", sc = rainScale();
+  lg.innerHTML = `<span class="lab">${unit}</span>` + sc.map(([v, c], i) => {
+    const next = sc[i+1];
+    return `<span class="it"><span class="sw" style="background:${c}"></span>${v}${next ? "–" + next[0] : "+"}</span>`;
+  }).join("");
+  lg.style.display = "flex";
+}
 // ---- Walker-change mesh (徒歩の増減): one raster per layer and slot; ratio layers as arrows, count layers as a colour fill ----
 function setupGrid(){
   const G = S.grid; if(!G) return;
@@ -1732,8 +1803,8 @@ function arrowIcon(up, color){
 function markSize(bb, w, h){
   const [W, Sb, E, Nb] = bb, cosLat = Math.cos((Sb + Nb) / 2 * Math.PI / 180);
   const cell0 = Math.min((E - W) / w, (Nb - Sb) / h / cosLat) * 512 / 360;   // cell size in screen px at zoom 0 (512 px world)
-  const [lo, hi] = CONFIG.GRID_MARK_PX;
-  return ["interpolate", ["exponential", 2], ["zoom"], Math.log2(lo / (0.8 * cell0)), lo / 24, Math.log2(hi / (0.8 * cell0)), hi / 24];
+  const [lo, hi] = gridMarkPx(), f = gridIconScale();
+  return ["interpolate", ["exponential", 2], ["zoom"], Math.log2(lo / (0.8 * cell0)), lo / 24 * f, Math.log2(hi / (0.8 * cell0)), hi / 24 * f];
 }
 // GeoJSON points of the marked cells of slot c inside the current view (d = +1 up / -1 down, s = |log2 ratio|).
 // Cells at least as large as the arrow on screen get their own arrow at the cell centre. Zoomed out, when the arrow is larger than a cell,
@@ -1743,7 +1814,7 @@ function markSize(bb, w, h){
 function gridMarks(c, bb){
   const [W, Sb, E, Nb] = bb, w = c.w, h = c.h, dx = (E - W) / w, dy = (Nb - Sb) / h, vals = c.vals, up = S.gridUp, down = S.gridDown;
   const cellPx = Math.min(dx, dy / Math.cos((Sb + Nb) / 2 * Math.PI / 180)) * 512 / 360 * Math.pow(2, map.getZoom());
-  const [lo, hi] = CONFIG.GRID_MARK_PX, k = Math.max(1, Math.ceil(Math.min(hi, Math.max(lo, 0.8 * cellPx)) / cellPx));
+  const [lo, hi] = gridMarkPx(), k = Math.max(1, Math.ceil(Math.min(hi, Math.max(lo, 0.8 * cellPx)) / cellPx));
   const v = map.getBounds();
   const x0 = Math.max(0, Math.floor((v.getWest() - W) / dx) - k), x1 = Math.min(w - 1, Math.ceil((v.getEast() - W) / dx) + k);
   const y0 = Math.max(0, Math.floor((Nb - v.getNorth()) / dy) - k), y1 = Math.min(h - 1, Math.ceil((Nb - v.getSouth()) / dy) + k);
@@ -1875,7 +1946,7 @@ function paintRain(slot){
   const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
   const ctx = cv.getContext("2d");
   const img = ctx.createImageData(w, h), d = img.data;
-  const scale = CONFIG.RAIN_SCALE.map(([v, c]) => [v, parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]);
+  const scale = rainScale().map(([v, c]) => [v, parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)]);
   for(let j = 0, i = 0; j < vals.length; j++, i += 4){
     const v = vals[j];
     if(Number.isNaN(v) || v === nodata || v < 0) continue;
@@ -2044,7 +2115,7 @@ function setTrajSel(sel){
   if(S.trajSel) map.removeFeatureState({source: S.trajSel.source, id: S.trajSel.id});
   S.trajSel = sel;
   if(sel) map.setFeatureState({source: sel.source, id: sel.id}, {sel: true});
-  if(S.present){ S.detail = sel ? "traj" : (S.detail === "traj" ? null : S.detail); renderDetail(); }
+  if(S.present){ S.detail = sel ? "traj" : (S.detail === "traj" ? null : S.detail); updateBadge(); renderDetail(); }
 }
 
 function showTip(e, ft){
@@ -2109,6 +2180,7 @@ function onHover(e){
   if(!ft) return;
   map.getCanvas().style.cursor = "pointer";
   setHover(ft.id);
+  if(S.present && !CONFIG.PRESENT.hoverChart) return;   // presentation: the panel changes on click only, so the chart shown is always the road outlined on the map
   if(S.pinnedId === null){ placePanel(e.point); showChart(ft); }
 }
 function onClick(e){
@@ -2130,15 +2202,34 @@ function setSelLink(fid){
   if(S.selLink !== null) map.setFeatureState({source:"links", id:S.selLink}, {sel:0});
   S.selLink = fid;
   if(fid !== null) map.setFeatureState({source:"links", id:fid}, {sel:1});
+  updateBadge();
 }
 function setSelPoint(lon, lat, r, kind){
   S.selPoint = lon === null ? null : {lon, lat, r, kind};
   if(map && map.getSource("sel-point")) map.getSource("sel-point").setData(S.selPoint ? {type:"FeatureCollection", features:[{type:"Feature", properties:{r, kind}, geometry:{type:"Point", coordinates:[lon, lat]}}]} : EMPTY_FC);
+  updateBadge();
+}
+// The ① badge (presentation): an HTML marker at the selected object, the same mark as the one before the panel's heading. Hidden when the
+// object is out of view or within 48 px of the map's bottom edge, so it never reaches the subtitle band.
+function updateBadge(){
+  if(!map) return;
+  let at = null, off = [0, -8];
+  if(S.selPoint){ at = [S.selPoint.lon, S.selPoint.lat]; off = [0, -(S.selPoint.r + 9 + 6)]; }
+  else if(S.selLink !== null && S.gj){ const c = S.gj.features[S.selLink].geometry.coordinates; at = c[Math.floor(c.length / 2)]; off = [0, -12]; }
+  else if(S.gridSel && S.grid && S.grid.cur && S.grid.cur.bounds){ const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds; at = [W + (S.gridSel.x + 0.5) * (E - W) / c.w, Nb - S.gridSel.y * (Nb - Sb) / c.h]; }
+  else if(S.trajSel && S.trajSel.ds){ const o = S.trajSel.id * 4, bb = S.trajSel.ds.bbox; at = [(bb[o] + bb[o+2]) / 2, (bb[o+1] + bb[o+3]) / 2]; }
+  if(!S.present || !at){ if(S.badge){ S.badge.remove(); S.badge = null; } return; }
+  if(!S.badge){ const el = document.createElement("div"); el.className = "pzBadge"; el.textContent = "1"; el.setAttribute("aria-hidden", "true"); S.badge = new maplibregl.Marker({element: el, anchor: "bottom"}); }
+  S.badge.setLngLat(at).setOffset(off);
+  if(!S.badge._map) S.badge.addTo(map);
+  const p = map.project(at), h = map.getCanvas().clientHeight, w = map.getCanvas().clientWidth;
+  S.badge.getElement().style.display = p.x < 0 || p.x > w || p.y < 0 || p.y > h - 48 ? "none" : "";
 }
 // Marker radii on screen, as the circle layers draw them (for the highlight ring around a marker).
 const interp = (stops, v) => { if(v <= stops[0][0]) return stops[0][1]; for(let i = 1; i < stops.length; i++) if(v <= stops[i][0]){ const [a, fa] = stops[i-1], [b, fb] = stops[i]; return fa + (fb - fa) * (v - a) / (b - a); } return stops[stops.length-1][1]; };
-const kadenRadius = (base) => interp([[0, 3], [3, 5], [10, 9], [30, 14]], Math.sqrt(Math.max(0, base)));
-const snsRadius = (n) => interp([[1, 5.5], [3, 9], [8, 15]], Math.sqrt(Math.max(1, n)));
+const pointScale = (kind) => !S.present ? 1 : CONFIG.PRESENT.pointScale[S.scene === "all" ? kind + "All" : kind];   // marker radius factor of the presentation
+const kadenRadius = (base) => interp([[0, 3], [3, 5], [10, 9], [30, 14]], Math.sqrt(Math.max(0, base))) * pointScale("kaden");
+const snsRadius = (n) => interp([[1, 5.5], [3, 9], [8, 15]], Math.sqrt(Math.max(1, n))) * pointScale("sns");
 
 // ============================================================
 // Time
@@ -2200,6 +2291,8 @@ function setupControls(){
     else if(S.present && e.key >= "1" && e.key <= "6" && CONFIG.SCENES[+e.key - 1]) setScene(CONFIG.SCENES[+e.key - 1].key);
     else if(S.present && (e.key === "h" || e.key === "H")) setBarHidden(!S.barHidden);
     else if(S.present && (e.key === "r" || e.key === "R")) cycleRain();
+    else if(S.present && (e.key === "[" || e.key === "]") && S.snsSel && S.snsNow && S.snsNow.get(S.snsSel.key)){ const g = S.snsNow.get(S.snsSel.key); openSnsCallout(S.snsSel.key, (S.snsSel.idx + (e.key === "]" ? 1 : -1) + g.posts.length) % g.posts.length); }
+    else if(S.present && (e.key === "Delete" || e.key === "Backspace")){ clearSelection(); e.preventDefault(); }
   });
   $("presentBtn").addEventListener("click", (e) => { e.target.blur(); setPresent(true); });
 }
@@ -2236,7 +2329,7 @@ function updateKaden(){
   const lg = $("legendKaden");
   if(kadenOn){
     lg.innerHTML = `<span class="lab">平時比</span>` +
-      [3, 2, 1, 4, 0].map(k => `<span class="it"><span class="dot" style="background:${KADEN_COLOR[k]}"></span>${KADEN_SHORT[k]}</span>`).join("");
+      [3, 2, 1, 4, 0].map(k => `<span class="it"><span class="dot" style="--c:${kadenColor(k)};background:${kadenColor(k)}"></span>${KADEN_SHORT[k]}</span>`).join("");
     lg.style.display = "flex";
   } else lg.style.display = "none";
   if(S.kadenChartIdx !== null && $("chartPanel").style.display !== "none") showKadenChart(S.kadenChartIdx);
@@ -2247,30 +2340,40 @@ function showKadenChart(i){
   lastFeature = null; S.kadenChartIdx = i;
   $("chartPanel").style.display = "block";
   $("cpKind").textContent = S.present ? (S.pinnedId === "k" + i ? "選択中の地点（家電の接続台数、郵便番号）" : "カーソル位置の地点（家電の接続台数、郵便番号）") : "";
+  $("cpKind").classList.toggle("sel", S.present && S.pinnedId === "k" + i);
   $("cpTitle").textContent = `〒${K.zip[i]} ${K.city[i]} ${K.place[i]}`.trim();
-  $("cpSub").textContent = "家電の接続台数（郵便番号）";
+  $("cpSub").textContent = S.present ? `接続台数（15 分ごと）${baselineNote()}` : "家電の接続台数（郵便番号）";
   const k = kadenCls(K.base[b+t], K.ev[b+t]);
-  $("cpStatus").textContent = KADEN_LABEL[k]; $("cpStatus").style.background = KADEN_COLOR[k];
+  $("cpStatus").textContent = KADEN_LABEL[k]; $("cpStatus").style.background = kadenColor(k); $("cpStatus").style.setProperty("--st", kadenColor(k));
   $("roL1").textContent = S.present ? "比（対象日 ÷ 平時）" : "比 (発災日/平時)"; $("roL2").textContent = "台数 /15分";
   const ratio = K.base[b+t] >= CONFIG.KADEN.minBase ? K.ev[b+t] / K.base[b+t] : NaN;
   $("roBS").textContent = "–"; $("roES").textContent = fmt(ratio, 2);
   $("roBC").textContent = fmt(K.base[b+t]); $("roEC").textContent = fmt(K.ev[b+t]);
   const mask = new Uint8Array(T), ratios = new Float32Array(T), none = new Float32Array(T).fill(NaN);
-  for(let c=0;c<T;c++){
-    const kc = kadenCls(K.base[b+c], K.ev[b+c]); mask[c] = kc === 3 ? 3 : kc === 2 ? 1 : kc === 4 ? 2 : 0;
+  for(let c=0;c<T;c++){   // bands: the judged classes 2 (2/3 以下), 3 (1/3 以下), 4 (3 倍以上), coloured as the legend (kadenColor)
+    const kc = kadenCls(K.base[b+c], K.ev[b+c]); mask[c] = kc >= 2 ? kc : 0;
     ratios[c] = K.base[b+c] >= CONFIG.KADEN.minBase ? K.ev[b+c] / K.base[b+c] : NaN;
   }
-  const [L0, L1] = S.present ? CONFIG.PRESENT.seriesLabels : ["平時", "イベント時"];
-  drawChart($("chartSpeed"), ratios, none, mask, S.present ? `接続台数の比（${L1} ÷ ${L0}）` : "比（発災日 / 平時）", [S.present ? "比" : null, null]);
-  drawChart($("chartCount"), K.base.subarray(b, b+T), K.ev.subarray(b, b+T), mask, "接続台数 /15分", [L0, L1]);
-  chartNote([K.base.subarray(b, b+T), K.ev.subarray(b, b+T)], "帯 = 判定の時間帯（赤 1/3 以下、橙 2/3 以下、青 3 倍以上）");
+  const [L0, L1] = S.present ? CONFIG.PRESENT.seriesLabels : ["平時", "イベント時"], KD = CONFIG.KADEN;
+  const bands = {bandColor: kadenColor};
+  drawChart($("chartSpeed"), ratios, none, mask, S.present ? `比（${L1} ÷ ${L0}）` : "比（発災日 / 平時）", [S.present ? "比" : null, null],
+            S.present ? {...bands, values: [ratio], digits: 2, single: "比", colorA: CONFIG.PRESENT.navy, minMax: 1.2,
+                         refs: [{v: 1, solid: true, text: "1.0 = 平時並み"}, {v: KD.low, text: "1/3"}, {v: KD.mild, text: "2/3"}, {v: KD.high, text: "3"}]} : bands);
+  drawChart($("chartCount"), K.base.subarray(b, b+T), K.ev.subarray(b, b+T), mask, S.present ? "接続台数（台 / 15 分）" : "接続台数 /15分", [L0, L1],
+            S.present ? {...bands, values: [K.base[b+t], K.ev[b+t]]} : bands);
+  chartNote([K.base.subarray(b, b+T), K.ev.subarray(b, b+T)], `帯 = 判定の時間帯（1/3 以下・2/3 以下・3 倍以上。色は凡例と同じ）。平時 ${KD.minBase} 台未満の窓は比を出さない（判定なし）`);
   renderDetail();
+}
+// "／ 平時 = 08-14 18:00〜08-15 06:00" for the panel's sub line (presentation) when the baseline period is known.
+function baselineNote(){
+  const pd = S.period; return pd && pd.baseline && pd.baseline.start ? ` ／ 平時 = ${periodSpan(pd.baseline).replace(/^\d{4}-/, "")}` : "";
 }
 // Under the charts in the presentation: the meaning of the bands, and the gaps when a series has missing windows.
 function chartNote(series, bands){
   const el = $("cpNote"); if(!el) return;
   const gap = series.some(s => { for(let i = 0; i < s.length; i++) if(Number.isNaN(s[i])) return true; return false; });
-  el.textContent = S.present ? `${bands}${gap ? "。線の切れ目は欠測（0 ではない）" : ""}` : "";
+  const zero = lastFeature && S.params && S.params.zeroSpeed ? "。台数 0 で速度欠測の窓は速度 0 として表示（設定）" : "";
+  el.textContent = S.present ? `${bands}${gap ? "。線の切れ目 = 欠測（0 ではない）" : ""}${zero}` : "";
 }
 
 // Event speed of one link as judged: with the ⚙ rule on, windows with count 0 and no speed are 0 (drawn and read out as 0)
@@ -2288,10 +2391,12 @@ function showChart(ft){
   const T = S.T, t = S.t;
   $("chartPanel").style.display = "block";
   $("cpKind").textContent = S.present ? (S.pinnedId === ft.id ? "選択中の道路" : "カーソル位置の道路") : "";
+  $("cpKind").classList.toggle("sel", S.present && S.pinnedId === ft.id);
   $("cpTitle").textContent = `Link ${p.id}`;
-  $("cpSub").textContent = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? `対向: ${p.pair_id}` : "対向なし";
+  const pair = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? (S.present ? `対向 Link ${p.pair_id}` : `対向: ${p.pair_id}`) : "対向なし";
+  $("cpSub").textContent = S.present ? `${pair}${baselineNote()}` : pair;
   if(r < 0){
-    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0];
+    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[0]);
     ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
     drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, `台数 /${slotMin()}分`);
     chartNote([], ""); renderDetail();
@@ -2301,14 +2406,14 @@ function showChart(ft){
   const k = S.cls[b+t];
   let label = STATUS_LABEL[k];
   if(k === 1 && S.e1[b+t]) label = `対象（単独異常 L${S.e1[b+t]}、裏取りなし）`;
-  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k];
+  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[k]);
   const es = eventSpeedSeries(b);
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(es[t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
   const errMask = S.err.subarray(b, b+T), labels = S.present ? CONFIG.PRESENT.seriesLabels : ["平時", "イベント時"];
-  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, "速度 km/h", labels);
-  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`, labels);
-  chartNote([S.bs.subarray(b,b+T), es, S.bc.subarray(b,b+T), S.ec.subarray(b,b+T)], "帯 = 異常と判定した時間帯（色はレベル L1 橙・L2 赤・L3 暗赤）");
+  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, S.present ? "速度（km/h）" : "速度 km/h", labels, S.present ? {values: [S.bs[b+t], es[t]]} : undefined);
+  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, S.present ? `台数（台 / ${slotMin()} 分）` : `台数 /${slotMin()}分`, labels, S.present ? {values: [S.bc[b+t], S.ec[b+t]]} : undefined);
+  chartNote([S.bs.subarray(b,b+T), es, S.bc.subarray(b,b+T), S.ec.subarray(b,b+T)], "帯 = 異常と判定した時間帯（上端の帯の色 = レベル L1 橙・L2 赤・L3 暗赤）");
   renderDetail();
 }
 
@@ -2320,32 +2425,49 @@ function niceMax(v){
   return n*p;
 }
 
-function drawChart(svg, a, b, errMask, title, labels){
+function drawChart(svg, a, b, errMask, title, labels, opts){
+  labels = labels || ["平時", "イベント時"]; opts = opts || {};
   const W = svg.clientWidth || 416, H = svg.clientHeight || 150, pz = S.present;
-  const fs = parseFloat(cssVar("--chart-fs")) || 12, d = fs - 12;   // chart text size (CSS --chart-fs); 12 px gives the original margins
-  const M = {l:40 + 5*d, r: pz ? 12 + fs * 3.6 : 10, t: 20 + 2*d + (pz ? fs : 0), b:22 + 2*d};   // presentation: room for the line labels (right) and the time label (top)
+  const fs = parseFloat(getComputedStyle(svg).fontSize) || 12, d = fs - 12;   // chart text size (.chart font-size = --chart-fs); 12 px gives the original margins
+  // presentation: fixed margins with the indicator row on top (title, the values at the selected time) and room for the line names on the right
+  const M = pz ? {l:64, r:96, t:60, b:34} : {l:40 + 5*d, r:10, t:20 + 2*d, b:22 + 2*d};
   const pw = W-M.l-M.r, ph = H-M.t-M.b;
-  const T = S.T;
+  const T = S.T, digits = opts.digits === undefined ? 1 : opts.digits;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const ns = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(txt !== undefined) e.textContent = txt; return e; };
+  const width = (t) => { try { return t.getComputedTextLength(); } catch(e) { return 0; } };
   while(svg.firstChild) svg.removeChild(svg.firstChild);
-  svg.appendChild(el("text", {x:M.l, y:13 + d, class:"ttl"}, title));
+  if(pz){
+    svg.appendChild(el("text", {x: 0, y: 26, class:"ttl"}, title));
+    if(a && opts.values){   // right-aligned: 平時 13.4  対象日 4.3 (series colours), or 比 0.10 in navy; a missing value reads 欠測
+      const items = opts.single ? [[opts.single, opts.values[0], "sn"]] : [[labels[0], opts.values[0], "s1"], [labels[1], opts.values[1], "s2"]];
+      let x = W;
+      for(const [name, v, c] of items.reverse()){
+        const miss = v === undefined || v === null || Number.isNaN(v);
+        const vt = el("text", {x: 0, y: 26, "text-anchor":"end", class: "indv " + (miss ? "miss" : c)}, miss ? missingLabel() : fmt(v, digits)); svg.appendChild(vt);
+        vt.setAttribute("x", x); x -= width(vt) + 6;
+        const nt = el("text", {x: 0, y: 26, "text-anchor":"end", class:"ind"}, name); svg.appendChild(nt);
+        nt.setAttribute("x", x); x -= width(nt) + 24;
+      }
+    }
+  } else svg.appendChild(el("text", {x:M.l, y:13 + d, class:"ttl"}, title));
   if(!a){ svg.appendChild(el("text", {x:M.l+pw/2, y:M.t+ph/2, "text-anchor":"middle"}, "データなし")); return; }
 
   let mx = 0;
   for(let i=0;i<T;i++){ if(a[i] > mx) mx = a[i]; if(b[i] > mx) mx = b[i]; }
-  const ymax = niceMax(mx*1.05);
+  const ymax = niceMax(Math.max(mx*1.05, pz && opts.minMax ? opts.minMax : 0));
   const x = (i) => M.l + (T <= 1 ? 0 : i*pw/(T-1));
   const y = (v) => M.t + ph - v/ymax*ph;
 
-  // error shading
+  // error shading: one band per run of equal level; the presentation adds a solid 4 px strip at the top of the plot area in the same colour
   if(errMask){
     let i = 0;
     while(i < T){
-      if(errMask[i]){ const lv = errMask[i]; let j = i; while(j+1 < T && errMask[j+1] === lv) j++;   // one band per run of equal level
-        const x0 = x(Math.max(0, i-0.5)), x1 = x(Math.min(T-1, j+0.5));
-        svg.appendChild(el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err l" + Math.min(lv, 3)}));
+      if(errMask[i]){ const lv = errMask[i]; let j = i; while(j+1 < T && errMask[j+1] === lv) j++;
+        const x0 = x(Math.max(0, i-0.5)), x1 = x(Math.min(T-1, j+0.5)), fill = opts.bandColor ? opts.bandColor(lv) : null;
+        const r = el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:ph, class:"err l" + Math.min(lv, 3)}); if(fill) r.style.fill = fill; svg.appendChild(r);
+        if(pz){ const s = el("rect", {x:x0, y:M.t, width:Math.max(1, x1-x0), height:4, class:"errtop l" + Math.min(lv, 3)}); if(fill) s.style.fill = fill; svg.appendChild(s); }
         i = j+1; } else i++;
     }
   }
@@ -2355,34 +2477,44 @@ function drawChart(svg, a, b, errMask, title, labels){
     svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: g===0 ? "axis" : "grid"}));
     svg.appendChild(el("text", {x:M.l-6, y:yy + 4 + d/2, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
   }
+  // reference lines (presentation, the ratio chart): 1.0 = 平時並み solid, the thresholds dashed, when inside the range
+  if(pz && opts.refs) for(const r of opts.refs){
+    if(!(r.v >= 0 && r.v <= ymax)) continue;
+    const yy = y(r.v);
+    svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: r.solid ? "ref" : "ref dash"}));
+    svg.appendChild(el("text", {x:M.l + 4, y:yy - 4, class:"reflab"}, r.text));
+  }
   // x ticks: every 8th step (2 h at 15 min), or 16th, 32nd, ... when the labels would collide
   let step = 8; while(step < T && step * pw / Math.max(1, T - 1) < fs * 3.7) step *= 2;
   for(let i=0;i<T;i+=step){
     svg.appendChild(el("text", {x:x(i), y:H-6, "text-anchor":"middle"}, S.times[i]));
   }
-  // series
-  const path = (arr) => { let d = "", pen = false;
-    for(let i=0;i<T;i++){ const v = arr[i]; if(Number.isNaN(v)){ pen = false; continue; } d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; }
-    return d; };
-  svg.appendChild(el("path", {d:path(a), class:"l1"}));
+  // series (NaN breaks the line: a gap is a missing window, not 0)
+  const path = (arr) => { let dd = "", pen = false;
+    for(let i=0;i<T;i++){ const v = arr[i]; if(Number.isNaN(v)){ pen = false; continue; } dd += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; }
+    return dd; };
+  const pa = el("path", {d:path(a), class:"l1"}); if(opts.colorA) pa.style.stroke = opts.colorA; svg.appendChild(pa);
   svg.appendChild(el("path", {d:path(b), class:"l2"}));
-  // presentation: each line is named at its last value (平時 / 対象日), the names pushed apart when the ends are close
+  // presentation: each line is named at its last value (平時 / 対象日), kept inside the right margin, the names pushed apart when the ends are close
   if(pz && labels){
     const last = (arr) => { for(let i = T-1; i >= 0; i--) if(!Number.isNaN(arr[i])) return i; return -1; };
-    const ends = [[a, labels[0], "s1"], [b, labels[1], "s2"]].map(([arr, text, c]) => { const i = text ? last(arr) : -1; return i < 0 ? null : {x: x(i), y: y(arr[i]), text, c}; }).filter(Boolean);
-    if(ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < fs * 1.2){ const mid = (ends[0].y + ends[1].y) / 2, up = ends[0].y <= ends[1].y ? ends[0] : ends[1], dn = up === ends[0] ? ends[1] : ends[0]; up.y = mid - fs * 0.6; dn.y = mid + fs * 0.6; }
-    for(const e of ends) svg.appendChild(el("text", {x: e.x + 8, y: e.y + fs * 0.36, class: "slab " + e.c}, e.text));
+    const ends = [[a, labels[0], opts.colorA ? "sn" : "s1"], [b, labels[1], "s2"]].map(([arr, text, c]) => { const i = text ? last(arr) : -1; return i < 0 ? null : {x: x(i), y: y(arr[i]), text, c}; }).filter(Boolean);
+    if(ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < fs * 1.3){ const mid = (ends[0].y + ends[1].y) / 2, up = ends[0].y <= ends[1].y ? ends[0] : ends[1], dn = up === ends[0] ? ends[1] : ends[0]; up.y = mid - fs * 0.66; dn.y = mid + fs * 0.66; }
+    for(const e of ends){
+      const t = el("text", {x: e.x + 8, y: Math.max(M.t + fs * 0.8, Math.min(M.t + ph, e.y + fs * 0.36)), class: "slab " + e.c}, e.text); svg.appendChild(t);
+      t.setAttribute("x", Math.min(e.x + 8, W - 4 - width(t)));
+    }
   }
-  // current time marker + dots
+  // current time marker + dots (no dot at a missing value)
   const xt = x(S.t);
   svg.appendChild(el("line", {x1:xt, x2:xt, y1:M.t, y2:M.t+ph, class:"now"}));
-  if(pz){   // the time of the marker, in a navy tag on top of the line
+  if(!Number.isNaN(a[S.t])){ const c = el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill: opts.colorA || "var(--series-1)", class:"dot"}); svg.appendChild(c); }
+  if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
+  if(pz){   // the time of the marker, in a navy tag on top of the line (kept inside the plot width)
     const tw = fs * 3.2, th = fs * 1.4, tx = Math.max(M.l, Math.min(xt - tw / 2, W - M.r - tw));
     svg.appendChild(el("rect", {x: tx, y: M.t - th - 2, width: tw, height: th, rx: 4, class: "tlabbg"}));
     svg.appendChild(el("text", {x: tx + tw / 2, y: M.t - 2 - th * 0.3, "text-anchor": "middle", class: "tlab"}, S.times[S.t]));
   }
-  if(!Number.isNaN(a[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill:"var(--series-1)", class:"dot"}));
-  if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
 
   // crosshair tooltip on chart hover
   const cross = el("line", {x1:0, x2:0, y1:M.t, y2:M.t+ph, class:"cross", visibility:"hidden"});
@@ -2396,7 +2528,7 @@ function drawChart(svg, a, b, errMask, title, labels){
     let i = Math.round((px-M.l)/(pw/(T-1))); i = Math.max(0, Math.min(T-1, i));
     const xx = x(i);
     cross.setAttribute("x1", xx); cross.setAttribute("x2", xx); cross.setAttribute("visibility","visible");
-    tip1.textContent = `${S.times[i]}  平時 ${fmt(a[i])}`; tip2.textContent = `イベント時 ${fmt(b[i])}`;
+    tip1.textContent = `${S.times[i]}  ${opts.single || labels[0]} ${fmt(a[i], digits)}`; tip2.textContent = opts.single ? "" : `${labels[1]} ${fmt(b[i], digits)}`;
     const tw = Math.max(tip1.getComputedTextLength(), tip2.getComputedTextLength()) + 12;
     const tx = xx + 8 + tw > W ? xx - 8 - tw : xx + 8;
     tipbg.setAttribute("x", tx); tipbg.setAttribute("y", M.t+2); tipbg.setAttribute("width", tw); tipbg.setAttribute("visibility","visible");
@@ -2414,18 +2546,42 @@ const LAYER_NAME = {rain: "降雨", roads: "道路の異常（車の流れ）", 
 const LAYER_SHORT = {rain: "降雨", roads: "道路の異常", walk: "徒歩の軌跡", grid: "徒歩の増減", kaden: "家電の接続", sns: "SNS 投稿"};
 function setupPresent(){
   S.scene = CONFIG.PRESENT.scene;
+  document.documentElement.style.setProperty("--pz-sub", `calc(${CONFIG.PRESENT.subtitleBand}px * var(--pz-u))`);
+  $("pzLegend").classList.toggle("tl", CONFIG.PRESENT.legendCorner === "tl");
   const sc = $("pzScenes"); sc.innerHTML = "";
   CONFIG.SCENES.forEach((s, i) => { const b = document.createElement("button"); b.innerHTML = `<b>${i + 1}</b>${esc(s.label)}`; b.dataset.key = s.key; b.title = `${s.heading}（キー ${i + 1}）`;
                                     b.addEventListener("click", () => { b.blur(); setScene(s.key); }); sc.appendChild(b); });
   $("pzRain").addEventListener("click", (e) => { e.target.blur(); cycleRain(); });
+  $("pzClear").addEventListener("click", (e) => { e.target.blur(); clearSelection(); });
   $("pzHide").addEventListener("click", (e) => { e.target.blur(); setBarHidden(true); });
   $("pzExit").addEventListener("click", (e) => { e.target.blur(); setPresent(false); });
+}
+// ?present=1&scene=traffic&rain=dim&bar=0&t=00:30 reproduces a recording state (read once the map and the time axis are ready).
+function applyUrlParams(){
+  const q = new URLSearchParams(location.search);
+  if(q.get("t") && S.times.includes(q.get("t"))) applyTime(S.times.indexOf(q.get("t")));
+  if(q.get("present") !== "1") return;
+  if(q.get("scene") && CONFIG.SCENES.some(s => s.key === q.get("scene"))) S.scene = q.get("scene");
+  setPresent(true);
+  if(["full", "dim", "off"].includes(q.get("rain"))){ S.rainLevel = q.get("rain"); syncAll(); }
+  if(q.get("bar") === "0") setBarHidden(true);
+}
+// Drop every selection (選択解除 button, Delete): pinned road or appliance point, SNS post, mesh cell, trajectory feature, rain probe.
+function clearSelection(){
+  if(S.pinnedId !== null) clearPin();
+  if($("chartPanel").style.display === "block") hideChart();
+  if(S.snsSel) closeSnsCallout();
+  if(S.gridSel) setSelCell(null);
+  if(S.trajSel) setTrajSel(null);
+  if(S.rainSel){ S.rainSel = null; if(S.selPoint && S.selPoint.kind === "rain") setSelPoint(null); if(S.detail === "rain") S.detail = null; }
+  renderDetail();
 }
 // Switch the presentation on or off: the play button, slider and chart panel move between the sidebar / map and the presentation's bar / panel.
 function setPresent(on){
   if(on === S.present || !map) return;
   S.present = on;
   document.documentElement.classList.toggle("present", on);
+  if(S.rain){ S.rain.cache.clear(); S.rain.cur = null; renderRainLegend(); }   // the rain colours differ between the views: repaint from the data
   if(on){
     $("pzTimeCtl").append($("playBtn"), $("slider")); $("dsChart").appendChild($("chartPanel"));
     hideTip(); if(S.snsSel){ $("snsCallout").style.display = "none"; $("snsLead").style.display = "none"; S.detail = "sns"; }
@@ -2436,8 +2592,8 @@ function setPresent(on){
     const row = document.querySelector("#side .timeRow"); row.insertBefore($("playBtn"), $("timeLabel")); $("side").insertBefore($("slider"), $("statTraffic"));
     $("main").insertBefore($("chartPanel"), $("tip"));
     setSelCell(null); S.gridSel = null; if(S.selPoint && S.selPoint.kind === "rain") setSelPoint(null); S.rainSel = null; S.detail = null;
-    $("cpKind").textContent = ""; $("cpNote").textContent = ""; $("roH1").textContent = "平時"; $("roH2").textContent = "イベント時";
-    syncAll();
+    $("cpKind").textContent = ""; $("cpKind").classList.remove("sel"); $("cpNote").textContent = ""; $("roH1").textContent = "平時"; $("roH2").textContent = "イベント時";
+    syncAll(); updateBadge();
     if(S.snsSel) openSnsCallout(S.snsSel.key, S.snsSel.idx);
   }
   map.resize();
@@ -2450,9 +2606,9 @@ function setScene(key){
   S.scene = key;
   const sc = sceneDef();
   for(const k of sc.focus) if(LAYER_DATA[k]() && !S[LAYER_FLAG[k]]){ S[LAYER_FLAG[k]] = true; const cb = $("chk" + k[0].toUpperCase() + k.slice(1)); if(cb) cb.checked = true; }
-  S.rainLevel = sc.focus.includes("rain") ? "full" : "dim";
+  S.rainLevel = sc.rain || (sc.focus.includes("rain") ? "full" : "dim");
   // the selections of the other scenes go, so the panel shows this scene's data
-  const focus = (k) => sc.focus.includes(k);
+  const focus = (k) => sc.focus.includes(k) || sc.opt.includes(k);
   if(S.pinnedId !== null && !focus(typeof S.pinnedId === "string" ? "kaden" : "roads")) clearPin();
   if($("chartPanel").style.display === "block" && (S.pinnedId === null || !focus(typeof S.pinnedId === "string" ? "kaden" : "roads"))) hideChart();
   if(S.snsSel && !focus("sns")) closeSnsCallout();
@@ -2462,9 +2618,9 @@ function setScene(key){
   for(const b of $("pzScenes").querySelectorAll("button")) b.classList.toggle("on", b.dataset.key === key);
   syncAll();
 }
-function cycleRain(){
-  if(!S.rain || sceneDef().focus.includes("rain")) return;
-  S.rainLevel = S.rainLevel === "dim" ? "off" : S.rainLevel === "off" ? "full" : "dim";
+function cycleRain(){   // R: full -> dim -> off -> full (every scene)
+  if(!S.rain) return;
+  S.rainLevel = S.rainLevel === "full" ? "dim" : S.rainLevel === "dim" ? "off" : "full";
   syncAll();
 }
 // Everything that depends on the layer state: map layers, emphasis, header, legend, detail panel.
@@ -2481,47 +2637,93 @@ function syncAll(){
 // Opacity of every data layer from layerDim: the scene's focus layers at full strength, the faint ones dimmed (the normal view: all 1).
 function applyEmphasis(){
   if(!map || !map.getLayer("links-base")) return;
-  const f = layerDim("roads"), cls = CLS_EXPR;
-  map.setPaintProperty("links-base", "line-opacity", ["case", [">=", cls, 2], 0, f]);
-  map.setPaintProperty("links-error", "line-opacity", ["case", [">=", cls, 2], f, 0]);
-  if(map.getLayer("rain")) map.setPaintProperty("rain", "raster-opacity", CONFIG.RAIN_OPACITY * layerDim("rain"));
-  if(map.getLayer("kaden")){ const k = layerDim("kaden"); map.setPaintProperty("kaden", "circle-opacity", ["case", ["==", ["get", "cls"], 0], 0.35 * k, 0.85 * k]); map.setPaintProperty("kaden", "circle-stroke-opacity", k); }
-  if(map.getLayer("sns")){ const k = layerDim("sns"); map.setPaintProperty("sns", "circle-opacity", 0.85 * k); map.setPaintProperty("sns", "circle-stroke-opacity", k); }
-  if(map.getLayer("grid-marks")){ const k = layerDim("grid"); map.setPaintProperty("grid-marks", "icon-opacity", k); map.setPaintProperty("grid", "raster-opacity", CONFIG.GRID_OPACITY * k); }
+  const P = CONFIG.PRESENT, pz = S.present, cls = CLS_EXPR, sc = sceneDef();
+  const zoomW = (w) => ["interpolate", ["linear"], ["zoom"], 10, w * 0.6, 14, w, 17, w * 2.2];
+  // roads: colours from the current CSS variables (the presentation greys the roads without an anomaly), widths of the view, the faint factor
+  const lw = pz ? P.lineWidth : CONFIG.lineWidth, gray = cssVar("--road-gray"), black = cssVar("--road-black");
+  const fErr = layerDim("roads"), fBase = pz && fErr < 1 ? P.dimBase : fErr;
+  map.setPaintProperty("links-base", "line-color", ["match", cls, 1, black, gray]);
+  map.setPaintProperty("links-base", "line-width", ["interpolate", ["linear"], ["zoom"], 10, ["match", cls, 1, lw.black * 0.6, lw.gray * 0.6], 14, ["match", cls, 1, lw.black, lw.gray], 17, ["match", cls, 1, lw.black * 2.2, lw.gray * 2.2]]);
+  map.setPaintProperty("links-base", "line-opacity", ["case", [">=", cls, 2], 0, fBase]);
+  map.setPaintProperty("links-error", "line-width", zoomW(lw.red));
+  map.setPaintProperty("links-error", "line-opacity", ["case", [">=", cls, 2], fErr, 0]);
+  map.setPaintProperty("links-sel", "line-color", ["match", cls, 0, gray, 1, black, 2, cssVar("--lv1"), 3, cssVar("--lv2"), cssVar("--lv3")]);
+  map.setPaintProperty("links-context", "line-color", gray);
+  map.setPaintProperty("links-context", "line-opacity", pz ? 0.6 : 0.45);
+  map.setPaintProperty("base", "raster-opacity", pz ? P.basemapOpacity : 0.55);
+  if(map.getLayer("rain")) map.setPaintProperty("rain", "raster-opacity", rainOpacity());
+  if(map.getLayer("kaden")){   // presentation: white fill with a ring in the class colour, larger, the undecided classes faded
+    const k = layerDim("kaden"), col = ["match", ["get", "cls"], 0, kadenColor(0), 1, kadenColor(1), 2, kadenColor(2), 3, kadenColor(3), 4, kadenColor(4), kadenColor(0)];
+    const r = ["interpolate", ["linear"], ["sqrt", ["get", "base"]], 0, 3 * pointScale("kaden"), 3, 5 * pointScale("kaden"), 10, 9 * pointScale("kaden"), 30, 14 * pointScale("kaden")];
+    const op = pz ? ["match", ["get", "cls"], 1, P.kadenFade[1] * k, 0, P.kadenFade[0] * k, 0.9 * k] : ["case", ["==", ["get", "cls"], 0], 0.35 * k, 0.85 * k];
+    map.setPaintProperty("kaden", "circle-radius", r);
+    map.setPaintProperty("kaden", "circle-color", pz ? "#ffffff" : col);
+    map.setPaintProperty("kaden", "circle-opacity", op);
+    map.setPaintProperty("kaden", "circle-stroke-color", pz ? col : "#ffffff");
+    map.setPaintProperty("kaden", "circle-stroke-width", pz ? (S.scene === "all" ? 3 : 3.5) : 1);
+    map.setPaintProperty("kaden", "circle-stroke-opacity", pz ? op : k);
+  }
+  if(map.getLayer("sns")){
+    const k = layerDim("sns"), f = pointScale("sns");
+    map.setPaintProperty("sns", "circle-radius", ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 5.5 * f, 3, 9 * f, 8, 15 * f]);
+    map.setPaintProperty("sns", "circle-opacity", (pz ? 0.95 : 0.85) * k);
+    map.setPaintProperty("sns", "circle-stroke-width", pz ? 2.5 : 1.5);
+    map.setPaintProperty("sns", "circle-stroke-opacity", k);
+  }
+  if(map.getLayer("grid-marks")){
+    const k = layerDim("grid") * (pz && S.scene === "all" ? P.gridOpacityAll : 1);
+    map.setPaintProperty("grid-marks", "icon-opacity", k); map.setPaintProperty("grid", "raster-opacity", CONFIG.GRID_OPACITY * layerDim("grid"));
+    S.grid && (S.grid.markSize = null);   // the arrow size ramp depends on the view and scene: drawGridMarks sets it again
+  }
 }
 function renderHeader(){
   const sc = sceneDef();
   $("pzHeading").textContent = sc.heading;
+  // the layers shown, from the real state: the scene's main layers first, then the faint ones; the rain's R level always visible
   const chips = [`<span class="lab">表示中</span>`];
-  for(const k of ["rain", "roads", "walk", "grid", "kaden", "sns"]){
+  const name = (k) => k === "sns" ? `SNS 投稿（${esc(snsWindow()[2])}）` : k === "grid" ? "徒歩の増減（メッシュ）" : esc(LAYER_NAME[k]);
+  for(const k of [...sc.focus, ...sc.opt]) if(layerOn(k)) chips.push(`<span class="focus">${name(k)}</span>`);
+  for(const k of sc.faint){
+    if(k === "rain" && S.rain && S.showRain && S.rainLevel === "off"){ chips.push(`<span class="faint">降雨（非表示）</span>`); continue; }
     if(!layerOn(k)) continue;
-    const focus = sc.focus.includes(k), faint = !focus && !(k === "rain" && S.rainLevel === "full");
-    chips.push(`<span class="${focus ? "focus" : "faint"}">${esc(LAYER_SHORT[k])}${faint ? " ・ 薄く" : ""}</span>`);
+    chips.push(`<span class="faint">${k === "roads" ? "道路の異常" : name(k)}（${k === "rain" && S.rainLevel === "full" ? "通常" : "薄く表示"}）</span>`);
   }
+  if(sc.context.includes("roads")) chips.push(`<span class="faint">道路網（位置の目安）</span>`);
   $("pzChips").innerHTML = chips.join("");
-  $("pzTitle").textContent = S.userTitle.trim() || "";
   const ymd = slotDateFor(S.t, S.dataDate);
   $("pzDate").textContent = ymd ? `${ymd.slice(0, 4)}年${+ymd.slice(4, 6)}月${+ymd.slice(6, 8)}日` : "";
   $("pzTime").textContent = S.times[S.t] || "";
-  $("pzPeriod").textContent = S.autoTitle.replace(/^冠水候補 /, "対象 ").replace("（平時 ", "　平時 ").replace(/）$/, "");
+  const pd = S.period;
+  $("pzPeriod").textContent = pd && pd.event && pd.event.start ? `対象 ${periodSpan(pd.event)}${pd.baseline && pd.baseline.start ? `　平時 ${periodSpan(pd.baseline).replace(/^\d{4}-/, "")}` : ""}`
+                               : S.dataDate ? `対象 ${S.dataDate.slice(0, 4)}-${S.dataDate.slice(4, 6)}-${S.dataDate.slice(6, 8)}` : "";
 }
 // Legend of the layers of the scene (focus first), from the sidebar's legend markup, over the bottom-left of the map.
 function renderLegend(){
   const sc = sceneDef(), rows = [];
   const src = {roads: ["legendTraffic", "legend"], walk: ["legendTraj", "legend"], grid: ["legendGrid", "lg"], kaden: ["legendKaden", "lg"], rain: ["legendRain", "lg"], sns: ["legendSns", "lg"]};
-  for(const k of [...sc.focus, ...sc.faint]){
-    if(!layerOn(k)) continue;
-    const [id, cls] = src[k], faint = !sc.focus.includes(k);
-    let html = $(id).innerHTML;
-    if(k === "grid") html = html.replace(/<span class="lab cap">[^<]*<\/span>/, "");   // the layer name is the row's name
-    const name = k === "grid" ? ((gridLayer() || [0, S.gridParam])[1] || LAYER_NAME[k]) : LAYER_NAME[k];
-    const cur = k === "rain" && $("rainVal").textContent && !/読み込み|なし|できません/.test($("rainVal").textContent) ? `<span class="cur">カーソル位置 ${esc($("rainVal").textContent)}</span>` : "";
-    rows.push(`<div class="row"><span class="nm">${esc(name)}${faint ? "<small>薄く表示</small>" : ""}</span><div class="${cls}">${html}</div>${cur}</div>`);
-  }
+  const all = sc.key === "all";
+  const row = (k, sub) => {
+    if(!layerOn(k)) return;
+    const [id, cls] = src[k];
+    let html = $(id).innerHTML, name = LAYER_NAME[k], note = "";
+    if(k === "grid"){ html = html.replace(/<span class="lab cap">[^<]*<\/span>/, ""); name = label((gridLayer() || [0, S.gridParam])[1] || LAYER_NAME[k]); }
+    if(k === "walk"){ html = html.replace(/<span class="pt"[\s\S]*$/, ""); }   // the two roles only (the dwell / mode / turn marks are detail)
+    if(k === "kaden"){ html = html.replace(/<span class="lab">平時比<\/span>/, ""); name = all ? "家電の接続" : "家電の接続（対象日 ÷ 平時）"; note = all ? "" : "大きさ = 平時の台数"; }
+    if(k === "sns") note = all ? "" : "大きさ = 同じ地点の件数";
+    if(all && k === "sns"){   // 統合: the top 3 categories (the sidebar legend lists up to 8, by count)
+      const items = html.split('<span class="it">').slice(1).map(x => '<span class="it">' + x.replace(/<span class="lab">[\s\S]*$/, ""));
+      html = items.slice(0, 3).join("") + (items.length > 3 ? `<span class="lab">他 ${items.length - 3} 区分</span>` : "");
+    }
+    const op = sub ? (k === "rain" ? rainOpacity() : CONFIG.PRESENT.dim) : 1;
+    rows.push(`<div class="row ${sub ? "sub" : ""} ${k}" style="--sw-op:${op}"><span class="nm">${esc(name)}${sub ? `（${k === "rain" && S.rainLevel === "full" ? "通常" : "薄く表示"}）` : ""}</span><div class="${cls}">${label(html)}</div>${note ? `<span class="note">${note}</span>` : ""}</div>`);
+  };
+  for(const k of [...sc.focus, ...sc.opt]) row(k, false);
+  for(const k of sc.faint) row(k, true);
+  if(sc.context.includes("roads")) rows.push(`<div class="row sub roads" style="--sw-op:0.6"><span class="nm">道路網（位置の目安）</span><div class="legend"><span style="--c:var(--road-gray)">道路</span></div></div>`);
   $("pzLegend").innerHTML = rows.join("");
   $("pzLegend").style.display = rows.length ? "block" : "none";
-  $("pzRain").textContent = `降雨: ${!S.rain ? "データなし" : sceneDef().focus.includes("rain") ? "通常" : {full: "通常", dim: "薄い", off: "非表示"}[S.rainLevel]}`;
-  $("pzRain").disabled = !S.rain || sceneDef().focus.includes("rain");
+  $("pzRain").textContent = `R 降雨: ${!S.rain ? "データなし" : {full: "通常", dim: "薄い", off: "非表示"}[S.rainLevel]}`;
+  $("pzRain").disabled = !S.rain;
 }
 // The detail panel besides the chart panel: the SNS post, the mesh cell, the rain probe, the clicked trajectory feature, or the scene's hint / summary.
 function renderDetail(){
@@ -2537,18 +2739,20 @@ function renderDetail(){
   else html = emptyDetailHtml();
   other.innerHTML = html;
   for(const b of other.querySelectorAll("button[data-d]")) b.onclick = () => { const g = S.snsNow.get(S.snsSel.key); openSnsCallout(S.snsSel.key, (S.snsSel.idx + +b.dataset.d + g.posts.length) % g.posts.length); };
+  for(const r of other.querySelectorAll(".posts .p")) r.onclick = () => openSnsCallout(r.dataset.key, +r.dataset.idx);
 }
+const dhead = (kicker, sel, ttl, when) => `<div class="dhead"><span class="kind${sel ? " sel" : ""}">${kicker}</span><span class="ttl"><span class="one">${ttl}</span>${when ? `<span class="when">${when}</span>` : ""}</span></div>`;
+const opHint = (text, cls = "hint") => text ? `<div class="${cls} opHint">${text}</div>` : "";
 function snsDetailHtml(){
-  const g = S.snsNow.get(S.snsSel.key), idx = Math.min(S.snsSel.idx, g.posts.length - 1), p = g.posts[idx];
+  const g = S.snsNow.get(S.snsSel.key), idx = Math.min(S.snsSel.idx, g.posts.length - 1), p = g.posts[idx], n = g.posts.length;
   const who = [p.platform, p.author ? "@" + p.author : ""].filter(Boolean).join(" ");
-  const meta = [p.ev, p.place, p.range && p.range !== "0" ? `範囲 ${p.range} m` : "", who, p.id ? `投稿ID ${p.id}` : ""].filter(Boolean);
-  const note = [p.evidence, p.level, p.conf, p.status, p.flags, p.notes].filter(Boolean);
+  const meta = [p.ev, p.place, p.range && p.range !== "0" ? `範囲 ${p.range} m` : ""].filter(Boolean);
+  const op = [who, p.id ? `投稿ID ${p.id}` : "", ...[p.evidence, p.level, p.conf, p.status, p.flags, p.notes].filter(Boolean)].filter(Boolean).map(esc);
   const links = [p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">投稿を開く</a>` : "", p.media ? `<a href="${esc(p.media)}" target="_blank" rel="noopener">写真・動画を開く</a>` : ""].filter(Boolean);
-  return `<div class="dhead"><span class="kind sel">選択中の投稿地点（${esc(snsWindow()[2])}の投稿 ${g.posts.length} 件）</span>`
-    + `<span class="ttl"><span class="cat" style="background:${CONFIG.SNS_COLORS[p.cat] || CONFIG.SNS_DEFAULT_COLOR}"></span>${esc(p.cat)}<span class="when">${esc(p.time)}</span></span></div>`
-    + `<div class="meta">${meta.map(esc).join(" ／ ")}</div><div class="txt">${esc(p.text)}</div>`
-    + (note.length ? `<div class="meta">${note.map(esc).join(" ／ ")}</div>` : "") + (links.length ? `<div class="meta">${links.join(" ｜ ")}</div>` : "")
-    + `<div class="nav">${g.posts.length > 1 ? `<button data-d="-1">前</button><span>${idx + 1} / ${g.posts.length} 件（この地点）</span><button data-d="1">次</button>` : `<span>この地点の投稿 1 件</span>`}</div>`;
+  return dhead(`選択中の投稿地点（${esc(snsWindow()[2])}の投稿 ${n} 件）`, true, `<span class="cat" style="background:${CONFIG.SNS_COLORS[p.cat] || CONFIG.SNS_DEFAULT_COLOR}"></span>${esc(p.cat)}`, esc(p.time))
+    + (meta.length ? `<div class="meta">${meta.map(esc).join(" ／ ")}</div>` : "") + `<div class="txt">${esc(p.text)}</div>`
+    + opHint([...op, ...links].join(" ／ "), "meta")
+    + `<div class="nav">${n > 1 ? `<button data-d="-1">前</button><span>${idx + 1} / ${n} 件（この地点）</span><button data-d="1">次</button>` : `<span>この地点の投稿 1 件</span>`}</div>`;
 }
 function gridDetailHtml(){
   const G = S.grid, c = G.cur, L = gridLayer() || [S.gridParam, S.gridParam, "ratio", "", 60], {x, y} = S.gridSel;
@@ -2557,46 +2761,84 @@ function gridDetailHtml(){
     : count ? `<div class="big">${Number.isInteger(v) ? v : v.toFixed(1)}<small>${esc(L[3] || "")}</small></div>`
     : `<div class="big">${Math.round(v * 100)} %<small>${v >= S.gridUp ? "増加（閾値 " + Math.round(S.gridUp * 100) + " % 以上）" : v <= S.gridDown ? "減少（閾値 " + Math.round(S.gridDown * 100) + " % 以下）" : "閾値の間（矢印なし）"}</small></div>`;
   const m = c && c.key === gridKey() ? c.marks : null;
-  return `<div class="dhead"><span class="kind sel">選択中のメッシュのセル</span><span class="ttl">${esc(L[1])}<span class="when">直近 ${L[4]} 分（${S.times[S.t]} まで）</span></span></div>`
-    + big + `<div class="kv"><span class="k">${count ? "値" : "比"}</span><span class="v">${count ? "セル内の値" : "対象日 ÷ 平時 の徒歩移動者数"}</span>`
-    + (m && !count ? `<span class="k">この時刻の全セル</span><span class="v">増加 ${m.up.toLocaleString()} セル・減少 ${m.down.toLocaleString()} セル</span>` : "") + `</div>`
-    + `<div class="hint">別のセルをクリックすると切り替わります。</div>`;
+  return dhead("選択中のメッシュのセル", true, esc(label(L[1])), `直近 ${L[4]} 分（${S.times[S.t]} まで）`) + big
+    + `<div class="kv">` + (count ? `<span class="k">値</span><span class="v">セル内の${esc(label(L[1]))}</span>` : `<span class="k">比</span><span class="v">対象日 ÷ 平時 の徒歩移動者数</span>`)
+    + (m && !count ? `<span class="k">この時刻の全セル</span><span class="v">増加 ${m.up.toLocaleString()} ・ 減少 ${m.down.toLocaleString()}</span>` : "") + `</div>`
+    + opHint("別のセルをクリックすると切り替わります。");
+}
+// The strongest rain in the current view (mm/h or mm), or null without a slot.
+function rainMaxInView(){
+  const R = S.rain; if(!R || !R.cur || !R.cur.bounds) return null;
+  const [W, Sb, E, Nb] = R.cur.bounds, b = map.getBounds(), w = R.cur.w, h = R.cur.h;
+  const x0 = Math.max(0, Math.floor((b.getWest() - W) / (E - W) * w)), x1 = Math.min(w - 1, Math.floor((b.getEast() - W) / (E - W) * w));
+  const y0 = Math.max(0, Math.floor((Nb - b.getNorth()) / (Nb - Sb) * h)), y1 = Math.min(h - 1, Math.floor((Nb - b.getSouth()) / (Nb - Sb) * h));
+  let mx = 0; for(let yy = y0; yy <= y1; yy++) for(let xx = x0; xx <= x1; xx++){ const q = R.cur.vals[yy * w + xx]; if(q > mx && q !== R.cur.nodata) mx = q; }
+  return mx;
+}
+const rainUnit = () => (S.rain && (S.rain.index.unit || "").startsWith("mm (")) ? "mm（15 分）" : "mm/h";
+// The 7 rain steps as a vertical bar (presentation), the step of value v framed.
+function rainStepsHtml(v){
+  const sc = rainScale();
+  let on = -1; if(Number.isFinite(v)) for(let k = sc.length - 1; k >= 0; k--) if(v >= sc[k][0]){ on = k; break; }
+  return `<div class="steps">` + sc.map(([t, c], i) => `<span class="sw${i === on ? " on" : ""}" style="background:${c}"></span><span>${t}${sc[i+1] ? "–" + sc[i+1][0] : "+"}</span>`).join("") + `</div>`;
 }
 function rainDetailHtml(){
-  const v = rainAt(S.rainSel), R = S.rain, unit = (R.index.unit || "").startsWith("mm (") ? "mm（15 分）" : "mm/h";
-  let mx = null;
-  if(R.cur && R.cur.bounds){   // the strongest rain in the current view
-    const [W, Sb, E, Nb] = R.cur.bounds, b = map.getBounds(), w = R.cur.w, h = R.cur.h;
-    const x0 = Math.max(0, Math.floor((b.getWest() - W) / (E - W) * w)), x1 = Math.min(w - 1, Math.floor((b.getEast() - W) / (E - W) * w));
-    const y0 = Math.max(0, Math.floor((Nb - b.getNorth()) / (Nb - Sb) * h)), y1 = Math.min(h - 1, Math.floor((Nb - b.getSouth()) / (Nb - Sb) * h));
-    mx = 0; for(let yy = y0; yy <= y1; yy++) for(let xx = x0; xx <= x1; xx++){ const q = R.cur.vals[yy * w + xx]; if(q > mx && q !== R.cur.nodata) mx = q; }
-  }
-  return `<div class="dhead"><span class="kind sel">選択中の地点</span><span class="ttl">降雨強度<span class="when">${S.times[S.t]} の 15 分</span></span></div>`
-    + `<div class="big">${v && v !== "–" ? esc(v) : "–"}${!v ? `<small>この地点の値なし</small>` : v === "–" ? `<small>欠測</small>` : ""}</div>`
+  const txt = rainAt(S.rainSel), v = parseFloat(txt), mx = rainMaxInView();
+  return dhead("選択中の地点", true, "降雨強度", `${S.times[S.t]} の 15 分`)
+    + `<div class="big">${txt && txt !== "–" ? esc(txt) : "–"}${!txt ? `<small>この地点の値なし</small>` : txt === "–" ? `<small>${missingLabel()}</small>` : ""}</div>`
+    + rainStepsHtml(v)
     + `<div class="kv"><span class="k">地点</span><span class="v">${S.rainSel.lat.toFixed(4)}, ${S.rainSel.lng.toFixed(4)}</span>`
-    + (mx !== null ? `<span class="k">表示範囲の最大</span><span class="v">${mx.toFixed(1)} ${unit}</span>` : "") + `</div>`
-    + `<div class="hint">別の地点をクリックすると切り替わります。</div>`;
+    + (mx !== null ? `<span class="k">表示範囲の最大</span><span class="v">${mx.toFixed(1)} ${rainUnit()}</span>` : "") + `</div>`
+    + opHint("別の地点をクリックすると切り替わります。");
 }
 function trajDetailHtml(){
   const sel = S.trajSel, ds = sel.ds, f = ds && ds.feats[sel.id], p = f ? f.properties : {};
   const val = (k) => k === "mode" ? String(p[k]).split(",").map(m => MODE_LABEL[m] || m).join(",") : p[k];
   const rows = Object.keys(p).filter(k => !["time", "kind"].includes(k) && p[k] !== null && p[k] !== "null").map(k => `<span class="k">${esc(PROP_LABEL[k] || k)}</span><span class="v">${esc(val(k))}</span>`).join("");
-  return `<div class="dhead"><span class="kind sel">選択中の徒歩データ</span><span class="ttl">${esc(TRAJ_KIND[sel.source])}<span class="when">${esc(windowLabel(S.t))}</span></span></div><div class="kv">${rows}</div>`;
+  return dhead("選択中の徒歩データ", true, esc(label(TRAJ_KIND[sel.source])), esc(windowLabel(S.t))) + `<div class="kv">${rows}</div>`;
 }
+// The panel without a selection: the scene's figures of this time, then the operator's hint.
 function emptyDetailHtml(){
-  const sc = sceneDef(), rows = [];
-  const n = (v) => Number(v).toLocaleString();
-  const f = (k) => sc.focus.includes(k) && layerOn(k);
-  if(f("roads")) rows.push([`${n(S.countsError[S.t])}<small>本</small>`, `<b>道路の異常</b>（対象 ${n(S.countsTarget[S.t])} 本のうち。L1 ${n(S.countsLevel[0][S.t])}・L2 ${n(S.countsLevel[1][S.t])}・L3 ${n(S.countsLevel[2][S.t])}）`]);
-  if(f("kaden") && S.kadenCnt) rows.push([`${n(S.kadenCnt[2] + S.kadenCnt[3])}<small>地点</small>`, `<b>家電の接続台数の減少</b>（${n(S.kaden.n)} 地点のうち。1/3 以下 ${n(S.kadenCnt[3])}・2/3 以下 ${n(S.kadenCnt[2])}・増加 ${n(S.kadenCnt[4])}）`]);
-  if(f("grid") && S.grid.cur && S.grid.cur.key === gridKey() && S.grid.cur.marks) rows.push([`${n(S.grid.cur.marks.up)}<small>↑</small> ${n(S.grid.cur.marks.down)}<small>↓</small>`, `<b>徒歩の増減</b>（増加 ${Math.round(S.gridUp * 100)} % 以上・減少 ${Math.round(S.gridDown * 100)} % 以下のセル）`]);
-  if(f("sns") && S.snsCount) rows.push([`${n(S.snsCount.posts)}<small>件</small>`, `<b>SNS 投稿</b>（${n(S.snsCount.spots)} 地点、${esc(S.snsCount.label)}）`]);
-  const sum = rows.length ? `<div class="sum">${rows.map(([a, b]) => `<span class="n">${a}</span><span class="l">${b}</span>`).join("")}</div>` : "";
-  return `<div class="dhead"><span class="kind">${esc(S.times[S.t])} の状況</span><span class="ttl">${esc(sc.label)}</span></div>${sum}<div class="hint">${esc(sc.hint)}</div>`;
+  const sc = sceneDef(), t = S.t, n = (v) => Number(v).toLocaleString(), kick = `${esc(S.times[t])} の状況`;
+  const f = (k) => (sc.focus.includes(k) || sc.opt.includes(k)) && layerOn(k);
+  const lv = (k, c) => `<span><span class="ln" style="--c:${c}"></span>${k}</span>`;
+  const sum = [];   // 統合: one line per layer with its mark
+  if(f("roads")) sum.push([`${n(S.countsError[t])}<small>本</small>`, `<span class="ln" style="--c:var(--lv3)"></span><b>道路の異常</b>（対象 ${n(S.countsTarget[t])} 本のうち。L3 ${n(S.countsLevel[2][t])}）`]);
+  if(f("kaden") && S.kadenCnt) sum.push([`${n(S.kadenCnt[2] + S.kadenCnt[3])}<small>地点</small>`, `<span class="ring" style="--c:${kadenColor(3)}"></span><b>家電の接続台数の減少</b>（${n(S.kaden.n)} 地点のうち）`]);
+  if(f("grid") && S.grid.cur && S.grid.cur.key === gridKey() && S.grid.cur.marks) sum.push([`<span class="arr up">↑</span>${n(S.grid.cur.marks.up)} <span class="arr down">↓</span>${n(S.grid.cur.marks.down)}<small>セル</small>`, `<b>徒歩の増減</b>（直近 ${(gridLayer() || [0, 0, 0, 0, 60])[4]} 分）`]);
+  if(f("sns") && S.snsCount) sum.push([`${n(S.snsCount.posts)}<small>件</small>`, `<span class="cat" style="background:${CONFIG.SNS_COLORS["浸水・冠水"]}"></span><b>SNS 投稿</b>（${n(S.snsCount.spots)} 地点、${esc(S.snsCount.label)}）`]);
+  const sumHtml = sum.length ? `<div class="sum">${sum.map(([a, b]) => `<span class="n">${a}</span><span class="l">${b}</span>`).join("")}</div>` : "";
+  if(sc.key === "traffic" && f("roads"))
+    return dhead(kick, false, "道路の異常（車の流れ）") + `<div class="big">${n(S.countsError[t])} 本<small>対象 ${n(S.countsTarget[t])} 本のうち</small></div>`
+      + `<div class="lvs">${lv(`L1 <b>${n(S.countsLevel[0][t])}</b>`, "var(--lv1)")}${lv(`L2 <b>${n(S.countsLevel[1][t])}</b>`, "var(--lv2)")}${lv(`L3 <b>${n(S.countsLevel[2][t])}</b>`, "var(--lv3)")}</div>` + opHint(esc(sc.hint));
+  if(sc.key === "kaden" && f("kaden") && S.kadenCnt){
+    const c = S.kadenCnt, cls = [3, 2, 1, 4, 0].map(k => `<span><span class="ring" style="--c:${kadenColor(k)}"></span>${esc(KADEN_LABEL[k])} <b>${n(c[k])}</b></span>`).join("");
+    return dhead(kick, false, "家電の接続台数（郵便番号）") + `<div class="big">減少 ${n(c[2] + c[3])} 地点<small>${n(S.kaden.n)} 地点のうち。1/3 以下 ${n(c[3])} ・ 2/3 以下 ${n(c[2])} ・ 増加 ${n(c[4])}</small></div>`
+      + `<div class="lvs" style="flex-direction:column;gap:6px">${cls}</div>` + opHint(esc(sc.hint));
+  }
+  if(sc.key === "walk" && f("grid")){
+    const m = S.grid.cur && S.grid.cur.key === gridKey() ? S.grid.cur.marks : null, L = gridLayer() || [0, S.gridParam, "ratio", "", 60];
+    const zoomNote = walkOn() && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM ? `<div class="dim">徒歩の軌跡はズーム ${CONFIG.TRAJ_MIN_ZOOM} 以上で表示（現在 ${map.getZoom().toFixed(1)}）</div>` : "";
+    return dhead(kick, false, "徒歩の増減（メッシュ）") + (m ? `<div class="big"><span class="arr up">↑</span> ${n(m.up)} セル　<span class="arr down">↓</span> ${n(m.down)} セル</div>` : `<div class="big">–<small>この時刻のメッシュなし</small></div>`)
+      + `<div class="meta">増加 ${Math.round(S.gridUp * 100)} % 以上・減少 ${Math.round(S.gridDown * 100)} % 以下（比 = 対象日 ÷ 平時、直近 ${L[4]} 分）</div>` + zoomNote + opHint(esc(sc.hint));
+  }
+  if(sc.key === "sns" && f("sns") && S.snsCount){
+    const posts = []; for(const g of (S.snsNow ? S.snsNow.values() : [])) g.posts.forEach((p, i) => posts.push({g, p, i}));
+    posts.sort((a, b) => b.p.t - a.p.t);
+    const list = posts.slice(0, 5).map(({g, p, i}) => `<span class="p" data-key="${esc(g.key)}" data-idx="${i}"><span class="cat" style="background:${CONFIG.SNS_COLORS[p.cat] || CONFIG.SNS_DEFAULT_COLOR}"></span><span class="t">${esc(String(p.time).slice(11, 16) || p.time)}</span><span class="x">${esc(String(p.text).slice(0, 30))}</span></span>`).join("");
+    return dhead(kick, false, `SNS 投稿（${esc(S.snsCount.label)}）`) + `<div class="big">${n(S.snsCount.posts)} 件・${n(S.snsCount.spots)} 地点</div>` + (list ? `<div class="posts">${list}</div>` : "") + opHint(esc(sc.hint));
+  }
+  if(sc.key === "rain" && layerOn("rain")){
+    const mx = rainMaxInView();
+    return dhead(kick, false, "降雨強度（XRAIN、15 分ごと）") + (S.rain.cur ? `<div class="big">${mx !== null ? mx.toFixed(1) : "–"} ${rainUnit()}<small>表示範囲の最大</small></div>` + rainStepsHtml(mx) : `<div class="big" style="font-size:var(--pz-fs-title)">（この時刻の降雨なし）</div>`)
+      + opHint(esc(sc.hint));
+  }
+  return dhead(kick, false, sc.key === "all" ? "この時刻の重なり" : esc(sc.label)) + sumHtml + opHint(esc(sc.hint));
 }
 // A click on the map in the presentation with nothing clickable under it: a mesh cell (walker change) or a rain probe point for the detail panel.
 function presentClick(e){
-  if(gridOn() && S.grid.cur && S.grid.cur.bounds && S.grid.cur.key === gridKey()){
+  const arrowOnly = layerActive("roads");   // roads clickable too (統合): a cell is picked by its arrow, not by the whole cell area
+  if(gridOn() && S.grid.cur && S.grid.cur.bounds && S.grid.cur.key === gridKey() && (!arrowOnly || map.queryRenderedFeatures(e.point, {layers: ["grid-marks"]}).length)){
     const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, ll = e.lngLat;
     if(ll.lng >= W && ll.lng < E && ll.lat > Sb && ll.lat <= Nb){
       const x = Math.floor((ll.lng - W) / (E - W) * c.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * c.h);
@@ -2623,6 +2865,7 @@ function setSelCell(cell){
     map.getSource("sel-cell").setData(fc);
   }
   if(cell) S.detail = "grid"; else if(S.detail === "grid") S.detail = null;
+  updateBadge();
   renderDetail();
 }
 
@@ -2635,6 +2878,7 @@ function fitStage(){
   for(let j = k; j > Math.max(0, k - 8); j--) if(whole(16 * j * dpr) && whole(9 * j * dpr)){ k = j; break; }
   const w = 16 * k, h = 9 * k, st = $("stage"), info = $("stageInfo");
   st.style.width = `${w}px`; st.style.height = `${h}px`;
+  document.documentElement.style.setProperty("--pz-u", (k / 120).toFixed(4));   // presentation sizes scale with the box (1 at 1920 x 1080)
   info.textContent = `16:9 の枠 ${w} × ${h} px` + (dpr === 1 ? "" : `（画面の画素 ${Math.round(w * dpr)} × ${Math.round(h * dpr)}）`);
   info.style.display = "block";
   info.style.display = innerHeight - h >= info.offsetHeight + 12 || innerWidth - w >= info.offsetWidth + 24 ? "block" : "none";

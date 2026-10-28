@@ -521,6 +521,9 @@ function setSelLink(){}
 function renderDetail(){}
 function chartNote(){}
 const layerOn = (key) => key === "rain" ? !!S.rain && S.showRain : true;   // the shared updateRain / rainAt ask the full viewer's layer state
+const rainScale = () => CONFIG.RAIN_SCALE;   // the shared paintRain / legends take the presentation's scale from here in the full viewer
+const label = (s) => String(s);              // wording hooks of the presentation (平時 / イベント時 stay as they are here)
+const missingLabel = () => "–";
 
 // ============================================================
 // Time
