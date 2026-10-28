@@ -281,7 +281,7 @@ const CONFIG = {
   GRID_OPACITY: 0.45,
   GRID_UP: 2.0,
   GRID_DOWN: 0.5,
-  GRID_MARK_PX: [10, 30],   // arrow size on screen: 80 % of the cell, but at least / at most this many pixels
+  GRID_MARK_PX: [10, 30],   // arrow size on screen: 80 % of the cell, but at least / at most this many pixels (ascending)
   GRID_MARK_MAX: 40000,     // arrows drawn per view at most (the strongest changes first)
   // count rasters (<param>_<role>_<HHMM>.tif, e.g. grid_users.py): 0 transparent, then 5 steps up to the max (editable; empty = the slot's max)
   GRID_COUNT_COLORS: ["#d9ecff", "#a9cdf4", "#6ea6e3", "#3a7bc8", "#174f93"],
@@ -291,7 +291,7 @@ const CONFIG = {
   // Trajectory mode
   TRAJ_MIN_ZOOM: 14,        // trajectories are drawn only at this zoom or closer
   TRAJ_WINDOW_MIN: 60,      // each trajectory covers [time - window, time]
-  // Default thresholds (same as the notebook). Editable in the ⚙ panel.
+  // Default thresholds (same as the notebook). Editable in 詳細設定 > 道路の異常判定.
   //   is_target = baseline_count >= MIN_BASE_COUNT_PER_HOUR * slot_min / 60 AND baseline_speed >= MIN_BASE_SPEED
   //   error1_k  = speed_ratio <= ERROR_LEVELS[k].speed <op> count_ratio <= ERROR_LEVELS[k].count   (k = 1..3, 3 = strictest; op = ERROR_LEVEL_OP: "or" / "and")
   //   error_k   = is_target AND error1_k AND (pair link error1_k at same time OR same link error1_k at t±15min)
@@ -299,9 +299,9 @@ const CONFIG = {
   MIN_BASE_COUNT_PER_HOUR: 10,   // notebook: 既存秋田分析の「日中 10 カウント/時以上」。1 窓の値は CSV の時刻列の間隔で換算（15 分 -> 2.5、30 分 -> 5）
   MIN_BASE_SPEED: 10.0,
   ERROR_LEVELS: [{speed: 0.75, count: 0.75}, {speed: 0.60, count: 0.60}, {speed: 0.50, count: 0.50}],
-  ERROR_LEVEL_OP: "or",     // "or": either ratio at or below its value; "and": both (switchable per level in the ⚙ panel)
+  ERROR_LEVEL_OP: "or",     // "or": either ratio at or below its value; "and": both (switchable per level in 詳細設定)
   REQUIRE_CORROBORATION: true,
-  ZERO_SPEED_WHEN_NO_TRAFFIC: false,   // an event window with count 0 and no speed counts as speed 0 (tomtom_run.ipynb sets it in viewer.json; ⚙ switch)
+  ZERO_SPEED_WHEN_NO_TRAFFIC: false,   // an event window with count 0 and no speed counts as speed 0 (tomtom_run.ipynb sets it in viewer.json; switch in 詳細設定)
   // Basemap: GSI pale (地理院タイル). Alternative: OpenStreetMap.
   basemap: {
     tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
@@ -794,7 +794,7 @@ function slotMin(){
 //   {"period": {"start": "2026-08-13 12:00", "hours": 24, "slot_min": 30},
 //    "thresholds": {"min_base_count": 5, "min_base_speed": 10, "require_corroboration": true, "zero_speed_when_no_traffic": true,
 //                   "error_levels": [{"speed": 0.4, "count": 0.4, "op": "or"}, {"speed": 0.4, "count": 0.4, "op": "and"}, {"speed": 0.2, "count": 0.2, "op": "and"}]}}
-// The period is used when the probe folder gives none (viewer/index.json); the thresholds become the ⚙ panel's defaults.
+// The period is used when the probe folder gives none (viewer/index.json); the thresholds become the defaults of the threshold settings.
 // Returns {period, nbParams} (either may be null).
 function parseViewerJson(txt){
   try{
@@ -1038,8 +1038,7 @@ function initMap(gj){
     map.addSource("links", { type:"geojson", data: gj, tolerance: 0.2, buffer: 8 });
     const cls = CLS_EXPR;
     const hov = ["coalesce", ["feature-state", "hover"], 0];
-    // gray / black lines and red lines. Two sets: normal ("") and dimmed ("-dim", used in
-    // trajectory mode); switching visibility avoids re-parsing the 77k-link source.
+    // gray / black lines and the anomaly colours (feature-state "cls"); toggling visibility avoids re-parsing the 77k-link source.
     const addLinkLayers = (suffix, f, visible) => {
       map.addLayer({
         id:"links-base"+suffix, type:"line", source:"links",
@@ -1064,7 +1063,7 @@ function initMap(gj){
       });
     };
     addLinkLayers("", 1, true);
-    // trajectory mode: the network is drawn as uniform light-gray context only (no traffic classes)
+    // trajectories shown without the roads: the network as uniform light-gray context (no traffic classes)
     map.addLayer({
       id:"links-context", type:"line", source:"links",
       layout:{ "line-cap":"round", "line-join":"round", visibility:"none" },
@@ -1099,7 +1098,7 @@ function initMap(gj){
       map.addSource("grid-marks", {type:"geojson", data: EMPTY_FC});
       map.addLayer({id:"grid-marks", type:"symbol", source:"grid-marks",
                     layout:{visibility:"none", "icon-image": ["case", [">", ["get", "d"], 0], "grid-up", "grid-down"], "icon-size": 0.5,
-                            "icon-allow-overlap": false, "icon-padding": 0, "symbol-sort-key": ["-", ["get", "s"]]}});   // overlapping arrows: the larger change wins
+                            "icon-allow-overlap": true, "icon-ignore-placement": true, "symbol-sort-key": ["-", ["get", "s"]]}});   // no collision: gridMarks spaces the arrows
     }
 
     // hover highlight
@@ -1121,13 +1120,21 @@ function initMap(gj){
     applyTime(0, true);
     $("loader").style.display = "none";
 
-    map.on("mousemove", "links-hit", (e) => { if(S.showRoads) onHover(e); });
-    map.on("mouseleave", "links-hit", () => { if(!S.showRoads) return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
-    map.on("click", "links-hit", (e) => { if(S.showRoads) onClick(e); });
-    // Trajectory mode: one throttled hit test per mouse move over all 8 layers (per-layer listeners
-    // would run 8 queries per move over ~100k features). Hover shows the tooltip; a click marks the
-    // one feature under the cursor (feature-state, no re-filtering of layers).
+    // Walking trajectories: one hit test over all 8 layers (per-layer listeners would run 8 queries per move over ~100k features).
+    // Hover shows the tooltip; a click marks the one feature under the cursor (feature-state, no re-filtering of layers).
     const trajHit = (pt) => { const fts = map.queryRenderedFeatures(pt, {layers: TRAJ_LAYERS}); return fts.length ? fts[0] : null; };
+    // With roads and trajectories both shown, a trajectory under the cursor wins over the road under it: no road hover, chart or pin there.
+    const onWalk = (pt) => walkOn() && !!trajHit(pt);
+    map.on("mousemove", "links-hit", (e) => {
+      if(!S.showRoads) return;
+      if(onWalk(e.point)){ if(S.hoverId !== null){ setHover(null); if(S.pinnedId === null) hideChart(); } return; }
+      onHover(e);
+    });
+    map.on("mouseleave", "links-hit", () => { if(!S.showRoads) return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("click", "links-hit", (e) => { if(S.showRoads && !onWalk(e.point)) onClick(e); });
+    // something clickable (a road, an appliance point, an SNS marker) under the cursor: the pointer cursor stays
+    const clickableAt = (pt) => { const ls = [S.showRoads && "links-hit", S.kaden && S.showKaden && "kaden", S.sns && S.showSns && "sns"].filter((l) => l && map.getLayer(l));
+                                  return ls.length > 0 && map.queryRenderedFeatures(pt, {layers: ls}).length > 0; };
     let moveTimer = null, lastMove = null;
     // Tooltip: the walking-trajectory feature under the cursor, else the walker-change cell's value (when those layers are shown).
     let walkCursor = false;
@@ -1139,7 +1146,7 @@ function initMap(gj){
         moveTimer = null;
         const ev = lastMove, ft = walkOn() ? trajHit(ev.point) : null;
         if(ft){ map.getCanvas().style.cursor = "pointer"; walkCursor = true; showTip(ev, ft); return; }
-        if(walkCursor){ map.getCanvas().style.cursor = ""; walkCursor = false; }
+        if(walkCursor){ walkCursor = false; map.getCanvas().style.cursor = clickableAt(ev.point) ? "pointer" : ""; }
         if(!(gridOn() && showGridTip(ev))) hideTip();
       }, 80);
     });
@@ -1271,6 +1278,7 @@ function syncLayers(){
   for(const id of ["links-base", "links-error", "links-hover", "links-hit"]) map.setLayoutProperty(id, "visibility", roads ? "visible" : "none");
   map.setLayoutProperty("links-context", "visibility", walk && !roads ? "visible" : "none");   // trajectories without the anomaly colours: the network as light context
   $("statTraffic").style.display = roads ? "" : "none";
+  $("nearestBtn").disabled = !walk; $("nearestBtn").title = walk ? "現在の時刻のデータのうち、地図中心に最も近いものへ移動" : "徒歩の軌跡を表示すると使えます";
   const shown = {lgRoads: roads, lgWalk: walk, lgGrid: gridOn(), lgKaden: !!S.kaden && S.showKaden, lgRain: !!S.rain && S.showRain, lgSns: !!S.sns && S.showSns};
   for(const [id, on] of Object.entries(shown)) $(id).style.display = on ? "block" : "none";
   $("lgNone").style.display = Object.values(shown).some(Boolean) ? "none" : "block";
@@ -1420,7 +1428,7 @@ function setupOverlays(){
   }
 }
 
-// ---- Grid overlay (trajectory mode): one flag raster per parameter and slot ----
+// ---- Walker-change mesh (徒歩の増減): one raster per layer and slot; ratio layers as arrows, count layers as a colour fill ----
 function setupGrid(){
   const G = S.grid; if(!G) return;
   for(const [k, c] of Object.entries(CONFIG.GRID_COLORS)) document.documentElement.style.setProperty(`--grid-${k}`, c);   // arrows in the legend and the settings
@@ -1459,7 +1467,8 @@ function gridLegend(){
     lg.innerHTML = `<span class="lab">${esc(label.replace("（有事 ÷ 平時）", ""))}（直近 ${win} 分、有事 ÷ 平時。セルの中心に矢印）</span>`
       + `<span class="arr up">↑</span><span class="lab">増加 ${up} % 以上${cells("up")}</span>`
       + `<span class="arr down">↓</span><span class="lab">減少 ${down} % 以下${cells("down")}</span>`
-      + `<span class="lab">その間と平時 0 のセルは矢印なし。縮小表示では重なる矢印を省き、変化の大きいセルを優先</span>`;
+      + `<span class="lab">その間と平時 0 のセルは矢印なし。縮小して矢印がセルより大きくなると、近くの数セルをまとめ、変化の最も大きいセルの矢印をまとまりの中心に 1 つ描く</span>`
+      + (S.gridDown >= S.gridUp ? `<span class="lab" style="color:var(--road-red)">減少の閾値が増加の閾値以上です（両方に当たるセルは増加）</span>` : "");
   }
   lg.style.display = "flex";
 }
@@ -1499,18 +1508,29 @@ function markSize(bb, w, h){
   const [lo, hi] = CONFIG.GRID_MARK_PX;
   return ["interpolate", ["exponential", 2], ["zoom"], Math.log2(lo / (0.8 * cell0)), lo / 24, Math.log2(hi / (0.8 * cell0)), hi / 24];
 }
-// GeoJSON points of the marked cells of slot c inside the current view (d = +1 up / -1 down, s = |log2 ratio| for the overlap priority).
+// GeoJSON points of the marked cells of slot c inside the current view (d = +1 up / -1 down, s = |log2 ratio|).
+// Cells at least as large as the arrow on screen get their own arrow at the cell centre. Zoomed out, when the arrow is larger than a cell,
+// the cells go in blocks of k x k (k = arrow / cell, aligned to the mesh, so panning keeps them) and each block gets one arrow, at the
+// block's centre, for its largest change; blocks are an arrow apart, so arrows never overlap and none is hidden at random.
+// (MapLibre's own symbol collision is not used: it sizes the boxes at the tile's zoom + 1 and drops arrows that do not overlap.)
 function gridMarks(c, bb){
   const [W, Sb, E, Nb] = bb, w = c.w, h = c.h, dx = (E - W) / w, dy = (Nb - Sb) / h, vals = c.vals, up = S.gridUp, down = S.gridDown;
+  const cellPx = Math.min(dx, dy / Math.cos((Sb + Nb) / 2 * Math.PI / 180)) * 512 / 360 * Math.pow(2, map.getZoom());
+  const [lo, hi] = CONFIG.GRID_MARK_PX, k = Math.max(1, Math.ceil(Math.min(hi, Math.max(lo, 0.8 * cellPx)) / cellPx));
   const v = map.getBounds();
-  const x0 = Math.max(0, Math.floor((v.getWest() - W) / dx) - 1), x1 = Math.min(w - 1, Math.ceil((v.getEast() - W) / dx));
-  const y0 = Math.max(0, Math.floor((Nb - v.getNorth()) / dy) - 1), y1 = Math.min(h - 1, Math.ceil((Nb - v.getSouth()) / dy));
-  const out = [];
+  const x0 = Math.max(0, Math.floor((v.getWest() - W) / dx) - k), x1 = Math.min(w - 1, Math.ceil((v.getEast() - W) / dx) + k);
+  const y0 = Math.max(0, Math.floor((Nb - v.getNorth()) / dy) - k), y1 = Math.min(h - 1, Math.ceil((Nb - v.getSouth()) / dy) + k);
+  const best = new Map();   // block -> [strength, cell index]
   for(let y = y0; y <= y1; y++) for(let x = x0; x <= x1; x++){
-    const r = vals[y * w + x];
-    if(Number.isNaN(r) || r === c.nodata) continue;                      // baseline 0 -> no mark
-    const d = r >= up ? 1 : r <= down ? -1 : 0;
-    if(d) out.push({type:"Feature", properties:{d, s: r > 0 ? Math.abs(Math.log2(r)) : 99}, geometry:{type:"Point", coordinates:[W + (x + 0.5) * dx, Nb - (y + 0.5) * dy]}});
+    const i = y * w + x, r = vals[i];
+    if(Number.isNaN(r) || r === c.nodata || (r < up && r > down)) continue;   // baseline 0, or no change beyond the thresholds: no arrow
+    const s = r > 0 ? Math.abs(Math.log2(r)) : 99, b = Math.floor(y / k) * w + Math.floor(x / k), cur = best.get(b);
+    if(!cur || s > cur[0]) best.set(b, [s, i]);
+  }
+  const out = [];
+  for(const [s, i] of best.values()){   // the cell's centre, or the block's (a block at the mesh edge keeps the full block's centre: even spacing)
+    const x = i % w, y = (i - x) / w, cx = k === 1 ? x + 0.5 : x - x % k + k / 2, cy = k === 1 ? y + 0.5 : y - y % k + k / 2;
+    out.push({type:"Feature", properties:{d: vals[i] >= up ? 1 : -1, s}, geometry:{type:"Point", coordinates:[W + cx * dx, Nb - cy * dy]}});
   }
   if(out.length > CONFIG.GRID_MARK_MAX){ out.sort((a, b) => b.properties.s - a.properties.s); out.length = CONFIG.GRID_MARK_MAX; }
   return out;
@@ -1905,7 +1925,10 @@ function setupControls(){
     $(id).addEventListener("change", (e) => { S.show[key] = e.target.checked; e.target.blur(); updateTraj(); });
   $("nearestBtn").addEventListener("click", (e) => { e.target.blur(); flyToNearest(); });
   document.addEventListener("keydown", (e) => {
-    if(e.target.tagName === "INPUT" && ["text","number","search","file"].includes(e.target.type)) return;
+    const el = e.target, tag = el.tagName;
+    if(tag === "INPUT" && ["text","number","search","file"].includes(el.type)) return;
+    if(tag === "SELECT") return;                                                                   // the arrows pick an option
+    if(e.key === " " && (tag === "BUTTON" || tag === "SUMMARY" || (tag === "INPUT" && el.type === "checkbox"))) return;   // Space works the focused control
     if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
     else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
     else if(e.key === " "){ togglePlay(); e.preventDefault(); }

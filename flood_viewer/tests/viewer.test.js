@@ -285,9 +285,30 @@ test("walking-trajectory layer: zoom gating, viewport filtering, hover tooltip, 
   assert.match(await page.textContent("#trajStatus"), /表示範囲内にはありません/, "diagnostic when the view holds no feature");
   await page.click("#nearestBtn"); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
-  // roads back on: anomaly colours instead of the context network; trajectories off: sources cleared, status hidden
+  // roads back on: anomaly colours instead of the context network
   await page.click("#chkRoads"); await page.waitForTimeout(300);
   assert.deepEqual(await page.evaluate(() => ["links-base", "links-context"].map((l) => map.getLayoutProperty(l, "visibility"))), ["visible", "none"]);
+  // both shown: a trajectory lying on a road wins under the cursor (tooltip and marking, no road chart or pin)
+  await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 })); await page.waitForTimeout(1500);
+  const spots = await page.evaluate(() => {
+    const onTraj = [], onRoad = [];
+    for (const f of map.queryRenderedFeatures({ layers: ["traj-event"] })) { const cs = f.geometry.coordinates, p = map.project(cs[Math.floor(cs.length / 2)]);
+      if (map.queryRenderedFeatures(p, { layers: ["links-hit"] }).length) onTraj.push({ x: p.x, y: p.y }); if (onTraj.length) break; }
+    const W = map.getCanvas().clientWidth, H = map.getCanvas().clientHeight;
+    for (let y = 40; y < H - 40 && !onRoad.length; y += 7) for (let x = 40; x < W - 40; x += 7) {
+      const near = map.queryRenderedFeatures([[x - 9, y - 9], [x + 9, y + 9]], { layers: TRAJ_LAYERS }).length;
+      if (!near && map.queryRenderedFeatures([x, y], { layers: ["links-hit"] }).length) { onRoad.push({ x, y }); break; } }
+    return { onTraj: onTraj[0], onRoad: onRoad[0] };
+  });
+  assert.ok(spots.onTraj && spots.onRoad, "a trajectory on a road and a road pixel away from trajectories: " + JSON.stringify(spots));
+  await hover(page, spots.onTraj);
+  assert.deepEqual(await page.evaluate(() => [document.getElementById("tip").style.display, document.getElementById("chartPanel").style.display === "block", S.hoverId]), ["block", false, null], "tooltip only");
+  await page.mouse.click(box.x + spots.onTraj.x, box.y + spots.onTraj.y); await page.waitForTimeout(300);
+  assert.ok(await page.evaluate(() => !!S.trajSel && S.pinnedId === null), "the trajectory is marked, no road chart pinned");
+  await page.mouse.click(box.x + spots.onTraj.x, box.y + spots.onTraj.y); await page.waitForTimeout(300);   // unmark
+  await hover(page, spots.onRoad); await page.waitForTimeout(200);   // off the trajectory onto a road: the road's chart, pointer cursor kept
+  assert.deepEqual(await page.evaluate(() => [document.getElementById("chartPanel").style.display, S.hoverId !== null, map.getCanvas().style.cursor]), ["block", true, "pointer"]);
+  // trajectories off: sources cleared, status hidden
   await page.click("#chkWalk"); await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared when the layer is off");
   assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("trajStatus")).display), "none");
@@ -469,6 +490,21 @@ test("walker-change layer: arrows at the cell centres for ratio layers, a colour
   assert.equal(chk.off, 0, "arrows sit on the cell centres"); assert.equal(chk.wrong, 0, "up for >= 200 %, down for <= 50 %");
   assert.ok(chk.n >= chk.expect, "no arrow dropped at this zoom: " + JSON.stringify(chk));
   await page.screenshot({ path: join(SHOTS, "grid_arrows.png") });
+  const arrowsAt = (zoom) => page.evaluate(async (zoom) => {
+    window.__marksN = -1; map.jumpTo({ center: [139.75, 35.68], zoom });
+    for (let k = 0; k < 60; k++) { await new Promise((r) => setTimeout(r, 250)); const n = map.queryRenderedFeatures({ layers: ["grid-marks"] }).length; if (map.isSourceLoaded("grid-marks") && n > 0 && n === window.__marksN) break; window.__marksN = n; }
+    const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, dx = (E - W) / c.w, dy = (Nb - Sb) / c.h, cw = map.getCanvas().clientWidth, ch = map.getCanvas().clientHeight;
+    const pts = map.queryRenderedFeatures({ layers: ["grid-marks"] }).map((f) => map.project(f.geometry.coordinates)).filter((p) => p.x > 0 && p.y > 0 && p.x < cw && p.y < ch);
+    let minGap = Infinity; for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) minGap = Math.min(minGap, Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y));
+    let marked = 0; for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) { const r = c.vals[y * c.w + x]; if (Number.isNaN(r) || (r < 2 && r > 0.5)) continue;
+      const p = map.project([W + (x + 0.5) * dx, Nb - (y + 0.5) * dy]); if (p.x > 0 && p.y > 0 && p.x < cw && p.y < ch) marked++; }
+    return { n: pts.length, marked, minGap, cellPx: map.project([W + dx, Nb]).x - map.project([W, Nb]).x };
+  }, zoom);
+  const z13 = await arrowsAt(13.3);   // cells ~18 px, arrows 80 % of them: one arrow per marked cell
+  assert.ok(z13.cellPx > 12.5 && z13.n === z13.marked && z13.marked > 100, "every marked cell has its arrow where arrows scale with the cell: " + JSON.stringify(z13));
+  const z12 = await arrowsAt(11.8);   // cells ~6 px, smaller than the 10 px arrow: blocks of cells, one arrow each, never overlapping
+  assert.ok(z12.cellPx < 10 && z12.n > 0 && z12.n < z12.marked && z12.minGap >= 10 - 0.5, "blocks keep the arrows apart when zoomed out: " + JSON.stringify(z12));
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 15 })); await page.waitForTimeout(800);
   // thresholds in 詳細設定 > 徒歩の増減 move the marks and the legend
   await page.click("#dtGrid summary");
   await page.fill("#gridUp", "1.3"); await page.fill("#gridDown", "0.8");   // the sample ratios are 0.25, 0.7-1.4 and 3
@@ -564,6 +600,17 @@ test("walker-change layer reads a mesh folder (input 3) on its own", async () =>
 
 test("sidebar: one checkbox per layer in 表示, every parameter in 詳細設定, legends follow the shown layers", async () => {
   const page = await openViewer();
+  // keyboard: Space on a focused checkbox switches the layer (no playback); the arrows on a focused select pick an option (no time step)
+  await page.focus("#chkRain"); await page.keyboard.press("Space"); await page.waitForTimeout(200);
+  assert.deepEqual(await page.evaluate(() => [S.showRain, S.playing, map.getLayoutProperty("rain", "visibility")]), [false, false, "none"]);
+  await page.focus("#chkRain"); await page.keyboard.press("Space"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => S.showRain), true);
+  await page.click("#dtGrid summary"); await page.focus("#gridParam");
+  const t0 = await page.evaluate(() => S.t);
+  await page.keyboard.press("ArrowRight"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => S.t), t0, "no time step while a select has the focus");
+  assert.equal(await page.evaluate(() => document.getElementById("nearestBtn").disabled), true, "「最寄りの軌跡へ」 needs the trajectory layer");
+  await page.click("#dtGrid summary");
   const s = await page.evaluate(() => ({
     side: document.getElementById("side").getBoundingClientRect().width, mapLeft: document.getElementById("map").getBoundingClientRect().left,
     rows: [...document.querySelectorAll("#layersBlock .lyr")].map((r) => r.textContent.replace("データなし", "").trim()),
