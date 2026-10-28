@@ -89,6 +89,10 @@ const findLink = (page, cls, t) => page.evaluate(([cls, t]) => {
   }
   return best;
 }, [cls, t]);
+// in the page: true once the source is loaded and every arrow of its data with the anchor in the canvas has been placed
+const ARROWS_PLACED = `(() => { const cw = map.getCanvas().clientWidth, ch = map.getCanvas().clientHeight, inside = (f) => { const p = map.project(f.geometry.coordinates); return p.x > 0 && p.y > 0 && p.x < cw && p.y < ch; };
+  const n = map.queryRenderedFeatures({ layers: ["grid-marks"] }).filter(inside).length, want = map.getSource("grid-marks").serialize().data.features.filter(inside).length;
+  return map.isSourceLoaded("grid-marks") && n > 0 && n === want; })()`;
 async function hover(page, pt) {
   const box = await page.locator("#map").boundingBox();
   await page.mouse.move(box.x + pt.x - 3, box.y + pt.y - 3); await page.waitForTimeout(150);
@@ -473,9 +477,9 @@ test("walker-change layer: arrows at the cell centres for ratio layers, a colour
   assert.equal(await page.getAttribute("#legendGrid", "title"), `この時刻: 増加 ${up0} セル、減少 ${down0} セル（直近 60 分）`, "cell counts in the tooltip");
   assert.equal(g.size[0], "interpolate", "arrow size follows the zoom");
   // zoomed in, every marked cell in view has its arrow, on the cell centre, pointing the way of the cell's ratio
-  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 15 }));
-  // the arrows' source loaded and the placed count stable over two polls (not the map's "idle": it waits for basemap tiles too, which may never come offline)
-  await page.waitForFunction(() => { const n = map.queryRenderedFeatures({ layers: ["grid-marks"] }).length, ok = map.isSourceLoaded("grid-marks") && n > 0 && n === window.__marksN; window.__marksN = n; return ok; }, null, { timeout: 15000, polling: 300 });
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 14.6 }));   // cells ~45 px, wider than the 30 px arrows; the 16:9 map still shows both rings
+  // every arrow of the view placed (not the map's "idle": it waits for basemap tiles too, which may never come offline)
+  await page.waitForFunction(ARROWS_PLACED, null, { timeout: 15000, polling: 250 });
   const chk = await page.evaluate(() => {
     const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, dx = (E - W) / c.w, dy = (Nb - Sb) / c.h, b = map.getBounds();
     const fts = map.queryRenderedFeatures({ layers: ["grid-marks"] });
@@ -491,16 +495,18 @@ test("walker-change layer: arrows at the cell centres for ratio layers, a colour
   assert.equal(chk.off, 0, "arrows sit on the cell centres"); assert.equal(chk.wrong, 0, "up for >= 200 %, down for <= 50 %");
   assert.ok(chk.n >= chk.expect, "no arrow dropped at this zoom: " + JSON.stringify(chk));
   await page.screenshot({ path: join(SHOTS, "grid_arrows.png") });
-  const arrowsAt = (zoom) => page.evaluate(async (zoom) => {
-    window.__marksN = -1; map.jumpTo({ center: [139.75, 35.68], zoom });
-    for (let k = 0; k < 60; k++) { await new Promise((r) => setTimeout(r, 250)); const n = map.queryRenderedFeatures({ layers: ["grid-marks"] }).length; if (map.isSourceLoaded("grid-marks") && n > 0 && n === window.__marksN) break; window.__marksN = n; }
-    const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, dx = (E - W) / c.w, dy = (Nb - Sb) / c.h, cw = map.getCanvas().clientWidth, ch = map.getCanvas().clientHeight;
-    const pts = map.queryRenderedFeatures({ layers: ["grid-marks"] }).map((f) => map.project(f.geometry.coordinates)).filter((p) => p.x > 0 && p.y > 0 && p.x < cw && p.y < ch);
-    let minGap = Infinity; for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) minGap = Math.min(minGap, Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y));
-    let marked = 0; for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) { const r = c.vals[y * c.w + x]; if (Number.isNaN(r) || (r < 2 && r > 0.5)) continue;
-      const p = map.project([W + (x + 0.5) * dx, Nb - (y + 0.5) * dy]); if (p.x > 0 && p.y > 0 && p.x < cw && p.y < ch) marked++; }
-    return { n: pts.length, marked, minGap, cellPx: map.project([W + dx, Nb]).x - map.project([W, Nb]).x };
-  }, zoom);
+  const arrowsAt = async (zoom) => {
+    await page.evaluate((zoom) => map.jumpTo({ center: [139.75, 35.68], zoom }), zoom);
+    await page.waitForFunction(ARROWS_PLACED, null, { timeout: 15000, polling: 250 });
+    return page.evaluate(() => {
+      const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, dx = (E - W) / c.w, dy = (Nb - Sb) / c.h, cw = map.getCanvas().clientWidth, ch = map.getCanvas().clientHeight;
+      const pts = map.queryRenderedFeatures({ layers: ["grid-marks"] }).map((f) => map.project(f.geometry.coordinates)).filter((p) => p.x > 0 && p.y > 0 && p.x < cw && p.y < ch);
+      let minGap = Infinity; for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) minGap = Math.min(minGap, Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y));
+      let marked = 0; for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) { const r = c.vals[y * c.w + x]; if (Number.isNaN(r) || (r < 2 && r > 0.5)) continue;
+        const p = map.project([W + (x + 0.5) * dx, Nb - (y + 0.5) * dy]); if (p.x > 0 && p.y > 0 && p.x < cw && p.y < ch) marked++; }
+      return { n: pts.length, marked, minGap, cellPx: map.project([W + dx, Nb]).x - map.project([W, Nb]).x };
+    });
+  };
   const z13 = await arrowsAt(13.3);   // cells ~18 px, arrows 80 % of them: one arrow per marked cell
   assert.ok(z13.cellPx > 12.5 && z13.n === z13.marked && z13.marked > 100, "every marked cell has its arrow where arrows scale with the cell: " + JSON.stringify(z13));
   const z12 = await arrowsAt(11.8);   // cells ~6 px, smaller than the 10 px arrow: blocks of cells, one arrow each, never overlapping
@@ -618,7 +624,7 @@ test("sidebar: one checkbox per layer in 表示, every parameter in 詳細設定
     rows: [...document.querySelectorAll("#layersBlock .lyr")].map((r) => r.textContent.replace("データなし", "").trim()),
     boxes: document.querySelectorAll("#layersBlock input[type=checkbox]").length,
     other: document.querySelectorAll("#layersBlock select, #layersBlock input:not([type=checkbox]), #layersBlock button").length,
-    params: ["pMinCount", "pL1Op", "pL3Count", "pCorrob", "pZeroSpeed", "pDefault", "chkBase", "chkTurn", "nearestBtn", "gridParam", "gridUp", "gridMax", "rainDate", "snsWin"].filter((id) => !document.getElementById(id).closest("#detailBlock")),
+    params: ["pMinCount", "pL1Op", "pL3Count", "pCorrob", "pZeroSpeed", "pDefault", "chkBase", "chkTurn", "nearestBtn", "gridParam", "gridUp", "gridMax", "rainDate", "snsWin", "titleInput"].filter((id) => !document.getElementById(id).closest("#detailBlock")),
     legendInputs: document.querySelectorAll("#legendBlock input, #legendBlock select, #legendBlock button").length,
     closed: [...document.querySelectorAll("#detailBlock details")].filter((d) => !d.open).length,
     kaden: [document.getElementById("chkKaden").disabled, document.getElementById("rowKaden").title],
@@ -627,7 +633,7 @@ test("sidebar: one checkbox per layer in 表示, every parameter in 詳細設定
   assert.deepEqual(s.rows, ["道路の異常（車の流れ）", "徒歩の軌跡", "徒歩の増減（メッシュ）", "家電の接続", "降雨", "SNS 投稿"]);
   assert.equal(s.boxes, 6); assert.equal(s.other, 0, "no parameter in the layer block");
   assert.deepEqual(s.params, [], "every parameter sits in the detail block"); assert.equal(s.legendInputs, 0, "no control in the legend block");
-  assert.equal(s.closed, 5, "detail groups start closed");
+  assert.equal(s.closed, 6, "detail groups start closed");
   assert.equal(s.kaden[0], true, "no appliance data over http in the sample"); assert.match(s.kaden[1], /家電データ.*読み込まれていません/);
   // layers combine freely: roads + trajectories + walker change + rain at once, each with its legend
   await page.click("#chkWalk"); await page.click("#chkGrid"); await page.waitForTimeout(600);
@@ -648,6 +654,81 @@ test("sidebar: one checkbox per layer in 表示, every parameter in 詳細設定
   assert.ok(await page.evaluate(() => S.pinnedId !== null && document.getElementById("chartPanel").style.display === "block"), "link chart pinned");
   await page.click("#chkRoads"); await page.waitForTimeout(200);
   assert.deepEqual(await page.evaluate(() => [S.pinnedId, document.getElementById("chartPanel").style.display]), [null, "none"], "chart dropped with the roads");
+  await page.close();
+});
+
+test("16:9 stage: the whole viewer in the largest exact 16:9 box of the window, the box size in the margin, larger text", async () => {
+  const page = await openViewer();   // window 1400 x 900
+  const geo = () => page.evaluate(() => {
+    const r = (id) => { const b = document.getElementById(id).getBoundingClientRect(); return [b.left, b.top, b.width, b.height]; };
+    const info = document.getElementById("stageInfo");
+    return { stage: r("stage"), side: r("side"), main: r("main"), canvas: [map.getCanvas().width, map.getCanvas().height],
+             info: getComputedStyle(info).display === "none" ? null : info.textContent };
+  });
+  let g = await geo();
+  assert.deepEqual(g.stage, [0, 0, 1392, 783], "k = 87: 1392 x 783 at the top left");
+  assert.deepEqual(g.side, [0, 0, 416, 783]); assert.deepEqual(g.main, [416, 0, 976, 783]); assert.deepEqual(g.canvas, [976, 783]);
+  assert.equal(g.info, "16:9 の枠 1392 × 783 px", "the box size in the margin below the box");
+  // the box follows the window; the size note shows only where the margin has room for it
+  for (const [w, h, stage, info] of [[1280, 800, [0, 0, 1280, 720], "16:9 の枠 1280 × 720 px"], [1920, 1080, [0, 0, 1920, 1080], null],
+                                     [1920, 953, [0, 0, 1680, 945], "16:9 の枠 1680 × 945 px"], [1700, 900, [0, 0, 1600, 900], null]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForFunction(([cw, ch]) => map.getCanvas().width === cw && map.getCanvas().height === ch, [stage[2] - 416, stage[3]], { timeout: 10000 });
+    g = await geo();
+    assert.deepEqual(g.stage, stage, `${w} x ${h}`); assert.equal(g.stage[2] * 9, g.stage[3] * 16, "exactly 16:9");
+    assert.equal(g.info, info, `${w} x ${h}`);
+  }
+  // a display scaled 125 %: k = 81 would be 1620 x 911.25 device px, so k = 80 (1600 x 900 device px)
+  await page.setViewportSize({ width: 1536, height: 730 });
+  const scaled = await page.evaluate(() => {
+    const d = Object.getOwnPropertyDescriptor(window, "devicePixelRatio");
+    Object.defineProperty(window, "devicePixelRatio", { get: () => 1.25, configurable: true }); fitStage();
+    const b = document.getElementById("stage").getBoundingClientRect(), t = document.getElementById("stageInfo").textContent;
+    if (d) Object.defineProperty(window, "devicePixelRatio", d); else delete window.devicePixelRatio;
+    fitStage();
+    return [b.width, b.height, t];
+  });
+  assert.deepEqual(scaled, [1280, 720, "16:9 の枠 1280 × 720 px（画面の画素 1600 × 900）"]);
+  // text two steps larger (body 14 -> 16 px, time 24 -> 28 px, chart 12 -> 14 px); the sidebar keeps one line per layer, no sideways scroll
+  const t = await page.evaluate(() => ({ body: getComputedStyle(document.body).fontSize, time: getComputedStyle(document.getElementById("timeLabel")).fontSize,
+    chart: cssVar("--chart-fs"), over: document.getElementById("side").scrollWidth - document.getElementById("side").clientWidth,
+    rows: [...document.querySelectorAll("#layersBlock .lyr")].map((e) => Math.round(e.getBoundingClientRect().height)) }));
+  assert.deepEqual([t.body, t.time, t.chart, t.over], ["16px", "28px", "14px", 0]);
+  assert.ok(t.rows.every((h) => h <= 32), `one line per layer row: ${t.rows}`);
+  // the chart panel stays under half the map width, so it never opens under the cursor
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.waitForFunction(() => map.getCanvas().width === 864, null, { timeout: 10000 });
+  await page.evaluate(() => applyTime(S.times.indexOf("00:00")));
+  const pt = await findLink(page, 4, await page.evaluate(() => S.t));
+  await hover(page, pt);
+  const cp = await page.evaluate(() => { const p = document.getElementById("chartPanel").getBoundingClientRect(), m = document.getElementById("map").getBoundingClientRect();
+    return { shown: document.getElementById("chartPanel").style.display, w: p.width, mapW: m.width, inside: p.top >= m.top && p.bottom <= m.bottom && p.left >= m.left && p.right <= m.right }; });
+  assert.equal(cp.shown, "block"); assert.ok(cp.w < cp.mapW / 2, `panel ${cp.w} px in a ${cp.mapW} px map`); assert.ok(cp.inside, "the panel inside the map");
+  const box = await page.locator("#map").boundingBox();
+  await page.mouse.click(box.x + pt.x, box.y + pt.y); await page.waitForTimeout(200);
+  assert.ok(await page.evaluate(() => S.pinnedId !== null), "the link under the cursor can be clicked (pinned)");
+  await page.close();
+});
+
+test("title: the heading typed in 詳細設定 > タイトル, the period below it, kept in the browser for the same period", async () => {
+  const page = await openViewer();
+  const auto = "冠水候補 2024-08-21 18:00〜08-22 06:00（平時 08-14 18:00〜08-15 06:00）", own = "2026年8月13日 千葉豪雨 防災情報マップ";
+  const head = () => page.evaluate(() => ({ title: document.getElementById("title").textContent, sub: document.getElementById("subtitle").textContent,
+    subShown: getComputedStyle(document.getElementById("subtitle")).display !== "none", tab: document.title, ph: document.getElementById("titleInput").placeholder }));
+  assert.deepEqual(await head(), { title: auto, sub: "", subShown: false, tab: auto, ph: auto }, "the automatic title until one is typed");
+  await page.click("#dtTitle summary");
+  await page.fill("#titleInput", own);
+  assert.deepEqual(await head(), { title: own, sub: "2024-08-21 18:00〜08-22 06:00\n平時 08-14 18:00〜08-15 06:00", subShown: true, tab: own, ph: auto }, "typed title, the period below it");
+  const t0 = await page.evaluate(() => S.t);
+  await page.focus("#titleInput"); await page.keyboard.press("ArrowLeft"); await page.keyboard.press("Enter");
+  assert.equal(await page.evaluate(() => S.t), t0, "the arrows move the caret, not the time"); assert.equal(await page.evaluate(() => document.activeElement.id), "", "Enter leaves the box");
+  // kept for the same period: after a reload the heading comes back
+  await page.reload(); await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  assert.equal((await head()).title, own); assert.equal(await page.inputValue("#titleInput"), own);
+  // emptied: the automatic title again, nothing kept
+  await page.click("#dtTitle summary"); await page.fill("#titleInput", "");
+  assert.deepEqual(await head(), { title: auto, sub: "", subShown: false, tab: auto, ph: auto });
+  assert.equal(await page.evaluate(() => localStorage.getItem(titleKey())), null);
   await page.close();
 });
 
@@ -735,6 +816,9 @@ test("SNS posts (input 6, FASTALERT layout): CSV parsing, time window, stacked p
   const c = await page.evaluate(() => ({ shown: document.getElementById("snsCallout").style.display, html: document.getElementById("snsCallout").textContent, lead: document.getElementById("snsLead").style.display,
     x1: +document.getElementById("snsLeadLine").getAttribute("x1"), x2: +document.getElementById("snsLeadLine").getAttribute("x2"), sel: S.snsSel }));
   assert.equal(c.shown, "block"); assert.match(c.html, /浸水・冠水.*2024-08-22 00:28:00.*中心地点の投稿 6.*1 \/ 6 件/); assert.equal(c.lead, "block"); assert.notEqual(c.x1, c.x2, "leader line spans from the marker to the box");
+  const inMap = await page.evaluate(() => { const b = document.getElementById("snsCallout").getBoundingClientRect(), m = document.getElementById("map").getBoundingClientRect();
+    return b.top >= m.top && b.bottom <= m.bottom && b.left >= m.left && b.right <= m.right; });
+  assert.ok(inMap, "the callout stays inside the map (the recorded 16:9 box)"); assert.ok(Math.abs(c.x1 - (box.x + px.x)) < 1, "the line starts at the marker");
   await page.click("#snsCallout button[data-d='1']"); await page.waitForTimeout(100);
   assert.match(await page.textContent("#snsCallout"), /00:25:00.*2 \/ 6 件/);
   await page.click("#snsCallout .close"); await page.waitForTimeout(100);

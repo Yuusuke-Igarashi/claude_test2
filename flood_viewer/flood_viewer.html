@@ -17,65 +17,71 @@
   --road-gray:#b4b2ab; --road-black:#1a1a19; --road-red:#d03b3b;
   --lv1:#f0a23a; --lv2:#d03b3b; --lv3:#7a0f3d;   /* error level 1 / 2 / 3 (3 = strongest drop) */
   --font:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
-  --side:360px;   /* sidebar width */
+  --side:416px;   /* sidebar width */
+  --chart-fs:14px;   /* chart text; drawChart sizes the chart margins from it */
+  --margin:#2c2c2a;   /* window area outside the 16:9 stage */
 }
-html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);background:var(--page);font-size:14px}
-#side{position:absolute;left:0;top:0;bottom:0;width:var(--side);box-sizing:border-box;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);box-shadow:2px 0 10px rgba(0,0,0,.06);padding:12px 14px 24px;z-index:7}
-#side h1{font-size:16px;font-weight:600;margin:0 0 10px;line-height:1.45}
-#side h2{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--grid)}
+html,body{margin:0;height:100%;overflow:hidden;font-family:var(--font);color:var(--ink);background:var(--margin);font-size:16px}
+#stage{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;background:var(--page)}   /* sized by fitStage */
+#stageInfo{position:fixed;right:12px;bottom:8px;color:#b4b2ab;font-size:13px;font-variant-numeric:tabular-nums;display:none}
+#side{position:absolute;left:0;top:0;bottom:0;width:var(--side);box-sizing:border-box;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);box-shadow:2px 0 10px rgba(0,0,0,.06);padding:14px 16px 24px;z-index:7}
+#side h1{font-size:18px;font-weight:600;margin:0 0 10px;line-height:1.45}
+#subtitle{display:none;color:var(--ink2);font-size:14px;line-height:1.45;margin:-6px 0 10px;white-space:pre-line}
+#side h2{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--grid)}
 #main{position:absolute;left:var(--side);right:0;top:0;bottom:0}
 #map{position:absolute;inset:0}
 .timeRow{display:flex;align-items:center;gap:12px}
 #statTraffic{display:block;white-space:normal;line-height:1.5}
 .lyr{display:flex;align-items:center;gap:8px;padding:4px 2px;cursor:pointer;color:var(--ink)}
-.lyr input{margin:0;accent-color:var(--ink)}
+.lyr input{margin:0;width:17px;height:17px;accent-color:var(--ink)}
 .lyr.na{color:var(--muted);cursor:not-allowed}
-.lyr .na-note{margin-left:auto;font-size:12px;color:var(--muted)}
+.lyr .na-note{margin-left:auto;font-size:14px;color:var(--muted)}
 .lgBox{display:none;margin:0 0 10px}
 .lgHead{font-weight:600;color:var(--ink);margin-bottom:3px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-.lgHead .stat{font-weight:400;font-size:13px;white-space:normal}
-#lgNone{color:var(--muted);font-size:13px}
+.lgHead .stat{font-weight:400;font-size:15px;white-space:normal}
+#lgNone{color:var(--muted);font-size:15px}
 .det{border-top:1px solid var(--grid);padding:6px 0}
 .det:first-of-type{border-top:0}
 .det summary{cursor:pointer;font-weight:600;color:var(--ink);padding:2px 0}
-.det .grp{margin:8px 0 4px;color:var(--muted);font-size:12px;letter-spacing:.02em;line-height:1.45}
+.det .grp{margin:8px 0 4px;color:var(--muted);font-size:14px;letter-spacing:.02em;line-height:1.45}
 .det .row{display:flex;align-items:center;gap:6px;margin:5px 0;color:var(--ink2);flex-wrap:wrap}
 .det select{font:inherit;padding:2px 4px;border:1px solid var(--axis);border-radius:5px;background:var(--surface);color:inherit;max-width:100%}
-.det input[type=number]{width:62px;font:inherit;padding:3px 6px;border:1px solid var(--axis);border-radius:5px;text-align:right;font-variant-numeric:tabular-nums}
+.det input[type=text]{width:100%;box-sizing:border-box;font:inherit;padding:4px 8px;border:1px solid var(--axis);border-radius:5px;background:var(--surface);color:inherit}
+.det input[type=number]{width:70px;font:inherit;padding:3px 6px;border:1px solid var(--axis);border-radius:5px;text-align:right;font-variant-numeric:tabular-nums}
 .det label{margin-right:8px;color:var(--ink2);cursor:pointer}
-.det .note{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5}
+.det .note{color:var(--muted);font-size:14px;margin-top:8px;line-height:1.5}
 .det .check{margin-top:8px;color:var(--ink2);font-variant-numeric:tabular-nums;line-height:1.45}
 .det .check.ok{color:#006300}
 .det .check.ng{color:var(--road-red)}
 .det .foot{display:flex;gap:8px;margin-top:10px}
-.det .lvGrid{display:grid;grid-template-columns:auto 64px auto 64px;gap:4px 8px;align-items:center;color:var(--ink2);margin:4px 0}
-.det .lvGrid .h{font-size:12px;color:var(--muted)}
+.det .lvGrid{display:grid;grid-template-columns:auto 72px auto 72px;gap:4px 8px;align-items:center;color:var(--ink2);margin:4px 0}
+.det .lvGrid .h{font-size:14px;color:var(--muted)}
 .det .lvGrid input[type=number]{width:100%;box-sizing:border-box}
 .det label.cb{display:flex;gap:6px;align-items:flex-start;margin-right:0;line-height:1.45}
 .det label.cb input{margin:2px 0 0;flex:none}
-.arr{font-weight:700;font-size:16px;line-height:1;margin-right:3px}
+.arr{font-weight:700;font-size:18px;line-height:1;margin-right:3px}
 .arr.up{color:var(--grid-up,#d03b3b)} .arr.down{color:var(--grid-down,#2a78d6)}
 .panel{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.10);padding:10px 12px;z-index:5}
-#timeLabel{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.2em}
+#timeLabel{font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.2em}
 #slider{display:block;width:100%;margin:10px 0 4px;accent-color:var(--ink)}
 button{font:inherit;padding:4px 10px;border:1px solid var(--axis);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{background:#f0efec}
 .stat{color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .stat b{color:var(--ink);font-weight:600}
-.legend{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;color:var(--ink2);white-space:nowrap;font-size:13px}
-.legend span::before{content:"";display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px;background:var(--c)}
-#chartPanel{bottom:24px;left:10px;width:440px;display:none}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;color:var(--ink2);white-space:nowrap;font-size:15px}
+.legend span::before{content:"";display:inline-block;width:20px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px;background:var(--c)}
+#chartPanel{bottom:24px;left:10px;width:min(500px, calc(46% - 26px));max-height:calc(100% - 34px);overflow:auto;display:none}   /* under half the map, so it never covers the cursor (placePanel) */
 #chartPanel.pinned{border-color:var(--ink)}
 #chartPanel header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-#chartPanel header .title{font-weight:600;font-size:15px}
+#chartPanel header .title{font-weight:600;font-size:17px}
 #chartPanel header .sub{color:var(--muted)}
-#chartPanel .status{display:inline-block;padding:1px 8px;border-radius:10px;font-size:13px;color:#fff;margin-left:6px;vertical-align:middle}
+#chartPanel .status{display:inline-block;padding:1px 8px;border-radius:10px;font-size:15px;color:#fff;margin-left:6px;vertical-align:middle}
 .readout{display:grid;grid-template-columns:auto 1fr 1fr;gap:2px 12px;color:var(--ink2);font-variant-numeric:tabular-nums;margin:4px 0 6px}
-.readout .h{color:var(--muted);font-size:12px}
+.readout .h{color:var(--muted);font-size:14px}
 .readout .v{color:var(--ink);text-align:right}
 .chart{display:block;width:100%;height:150px}
-.chart text{font-family:var(--font);font-size:12px;fill:var(--muted)}
-.chart .ttl{fill:var(--ink2);font-size:13px;font-weight:600}
+.chart text{font-family:var(--font);font-size:var(--chart-fs);fill:var(--muted)}
+.chart .ttl{fill:var(--ink2);font-size:calc(var(--chart-fs) + 1px);font-weight:600}
 .chart .grid{stroke:var(--grid);stroke-width:1}
 .chart .axis{stroke:var(--axis);stroke-width:1}
 .chart .l1{stroke:var(--series-1);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
@@ -85,45 +91,49 @@ button:hover{background:#f0efec}
 .chart .err.l1{fill:var(--lv1)} .chart .err.l2{fill:var(--lv2)} .chart .err.l3{fill:var(--lv3)}
 .chart .cross{stroke:var(--muted);stroke-width:1}
 .chart .dot{stroke:var(--surface);stroke-width:2}
-.chart .tip{fill:var(--ink);font-size:12px}
+.chart .tip{fill:var(--ink);font-size:var(--chart-fs)}
 .chart .tipbg{fill:var(--surface);stroke:var(--border)}
-.clegend{display:flex;gap:14px;color:var(--ink2);margin-top:2px}
-.clegend span::before{content:"";display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px;background:var(--c)}
-.hint{color:var(--muted);font-size:12px;margin-top:6px}
-#trajStatus{display:none;color:var(--ink2);font-size:13px;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.5;white-space:pre-line}
-#tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:320px}
+.clegend{display:flex;flex-wrap:wrap;gap:2px 14px;color:var(--ink2);margin-top:2px}
+.clegend span{white-space:nowrap}
+.clegend span::before{content:"";display:inline-block;width:18px;height:2px;vertical-align:middle;margin-right:5px;background:var(--c)}
+.hint{color:var(--muted);font-size:14px;margin-top:6px}
+#trajStatus{display:none;color:var(--ink2);font-size:15px;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.5;white-space:pre-line}
+#tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:360px}
 #tip .k{color:var(--muted)}
 .legend .pt::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--c)}
 .legend .ring::before{width:9px;height:9px;border-radius:50%;background:var(--surface);border:3px solid var(--c);box-shadow:none}
 .legend .turn::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);box-shadow:none}
 .legend .grp{color:var(--muted);margin-left:4px}
-#rainDate{font:inherit;font-size:13px;padding:1px 2px}
-#legendRain,#legendKaden,#legendSns,#legendGrid{display:none;flex-wrap:wrap;gap:4px 0;align-items:center;color:var(--ink2);font-size:13px;padding-top:2px;line-height:1.5}
+#rainDate{font:inherit;font-size:15px;padding:1px 2px}
+#legendRain,#legendKaden,#legendSns,#legendGrid{display:none;flex-wrap:wrap;gap:4px 0;align-items:center;color:var(--ink2);font-size:15px;padding-top:2px;line-height:1.5}
 .lab.cap{flex-basis:100%;color:var(--muted)}
 .it{display:inline-flex;align-items:center;white-space:nowrap;margin-right:10px}
-#legendRain .sw,#legendKaden .sw,#legendSns .sw,#legendGrid .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
+#legendRain .sw,#legendKaden .sw,#legendSns .sw,#legendGrid .sw{display:inline-block;width:28px;height:12px;margin-right:2px;vertical-align:middle}
 #legendRain .lab,#legendKaden .lab,#legendSns .lab,#legendGrid .lab{margin-right:6px}
-#legendKaden .dot,#legendSns .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
-#snsCallout h3{margin:0 18px 4px 0;font-size:14px;line-height:1.3}
-#snsCallout .meta{color:var(--ink2);font-size:12px;margin-bottom:4px}
+#legendKaden .dot,#legendSns .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#snsCallout h3{margin:0 18px 4px 0;font-size:16px;line-height:1.3}
+#snsCallout .meta{color:var(--ink2);font-size:14px;margin-bottom:4px}
 #snsCallout .txt{white-space:pre-wrap;line-height:1.45;word-break:break-word}
-#snsCallout .nav{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:12px;color:var(--ink2)}
-#snsCallout button{font:inherit;font-size:12px;padding:1px 6px;cursor:pointer}
-#snsCallout .close{position:absolute;right:6px;top:4px;border:0;background:none;font-size:16px;line-height:1;color:var(--ink2)}
-#nearestBtn{font-size:13px;padding:2px 8px}
-#loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
-#loader .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:520px;max-width:90vw}
-#loader h2{margin:0 0 8px;font-size:16px}
+#snsCallout .nav{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:14px;color:var(--ink2)}
+#snsCallout button{font:inherit;font-size:14px;padding:1px 6px;cursor:pointer}
+#snsCallout .close{position:absolute;right:6px;top:4px;border:0;background:none;font-size:18px;line-height:1;color:var(--ink2)}
+#nearestBtn{font-size:15px;padding:2px 8px}
+#loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;overflow:auto}
+#loader .box{margin:auto;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:600px;max-width:90vw}
+#loader h2{margin:0 0 8px;font-size:18px}
 #loader ul{margin:6px 0;padding-left:18px;color:var(--ink2)}
 #loader .err{color:var(--road-red)}
 #progress{color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
 #filePick{display:none;margin-top:10px}
-.maplibregl-ctrl-attrib{font-size:11px}
+.maplibregl-ctrl-attrib{font-size:13px}
+.maplibregl-ctrl-scale{font-size:12px}
 </style>
 </head>
 <body>
+<div id="stage">
 <aside id="side">
   <h1 id="title">Tokyo 2024-08-21 Flood Candidates</h1>
+  <div id="subtitle"></div>
   <div class="timeRow"><button id="playBtn" title="Space">▶ 再生</button><span id="timeLabel">--:--</span></div>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
   <div class="stat" id="statTraffic">道路の異常 <b id="stError">-</b> 本（対象 <b id="stTarget">-</b> 本）<br>L1 <b id="stL1">-</b> ・ L2 <b id="stL2">-</b> ・ L3 <b id="stL3">-</b></div>
@@ -200,6 +210,10 @@ button:hover{background:#f0efec}
       <div class="note" id="snsNote" style="margin:4px 0">丸の色は区分、大きさは同じ地点の件数。クリックで本文を開きます。</div>
       <div class="row">表示する投稿 <select id="snsWin"><option value="60">直近 1 時間</option><option value="180">直近 3 時間</option><option value="day">当日 0 時から</option><option value="all">すべて</option></select></div>
     </details>
+    <details class="det" id="dtTitle"><summary>タイトル</summary>
+      <div class="row"><input type="text" id="titleInput" maxlength="80" spellcheck="false" aria-label="タイトル"></div>
+      <div class="note">入力した文字が左上の見出しとブラウザのタブ名になり、データの期間は見出しの下に小さく出ます。空欄に戻すと、データから作る見出しに戻ります。入力はこのブラウザに保存され、同じ期間のデータを開くと再び使われます。</div>
+    </details>
   </section>
 </aside>
 <div id="main">
@@ -228,7 +242,9 @@ button:hover{background:#f0efec}
 <svg id="snsLead" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;display:none">
   <line id="snsLeadLine" x1="0" y1="0" x2="0" y2="0" stroke="#222" stroke-width="1.5"/><circle id="snsLeadDot" cx="0" cy="0" r="3.5" fill="#222"/>
 </svg>
-<div id="snsCallout" class="panel" style="display:none;width:330px;max-height:60vh;overflow:auto;font-size:13px;z-index:6"></div>
+<div id="snsCallout" class="panel" style="display:none;width:380px;max-height:60vh;overflow:auto;font-size:15px;z-index:6"></div>
+</div>
+<div id="stageInfo"></div>
 
 <div id="loader">
   <div class="box">
@@ -354,6 +370,7 @@ const S = {
   period: null,         // viewer/index.json "period": {event:{start:"YYYY-MM-DD HH:MM", hours}, baseline:{...}} when the data span a period
   rain: null,           // {index, sources: Map("YYYYMMDD_HH:MM" -> url|File), cache: Map, date, cur: {key, vals, alpha, w, h}}
   dataDate: null,       // "YYYYMMDD" from the network file name (fallback date of slot 0)
+  autoTitle: "", userTitle: "",   // heading made from the data / typed in 詳細設定 > タイトル
   showRain: true,
   grid: null,           // {sources: Map("param_HH:MM" -> URL|File), index, cache, cur, loading, params} from grid/ or null
   showGrid: false, gridParam: null, gridUp: 2.0, gridDown: 0.5, gridMax: null,   // walker-change mesh (off at start)
@@ -369,7 +386,23 @@ const $ = (id) => document.getElementById(id);
 function setProgress(msg){ $("progress").textContent = msg; }
 // Title from the network file name (tokyo_YYYYMMDD_network.geojson -> "Tokyo YYYY-MM-DD Flood Candidates").
 // Overridden by setTitleFromPeriod() once viewer/index.json with a period is known.
-function setTitle(t){ document.title = t; $("title").textContent = t; }
+// The heading shows the title typed in 詳細設定 > タイトル (kept in this browser per event period), else the automatic one; under a
+// typed title the automatic one, without "冠水候補", gives the period lines (the event, then 平時 on its own line).
+function setTitle(t){ S.autoTitle = t; showTitle(); }
+function showTitle(){
+  const own = S.userTitle.trim(), auto = S.autoTitle;
+  document.title = own || auto; $("title").textContent = own || auto;
+  $("subtitle").textContent = own ? auto.replace(/^冠水候補 /, "").replace(/（平時 (.*)）$/, "\n平時 $1") : ""; $("subtitle").style.display = own && auto ? "block" : "none";
+  $("titleInput").placeholder = auto;
+}
+function titleKey(){ return "floodViewer.title." + ((S.period && S.period.event && S.period.event.start) || S.dataDate || ""); }
+function loadTitle(){   // once the data (and so the key) are known; storage may be unavailable (private window, blocked site data)
+  try{ S.userTitle = localStorage.getItem(titleKey()) || ""; }catch(e){ S.userTitle = ""; }
+  $("titleInput").value = S.userTitle; showTitle();
+}
+function saveTitle(){
+  try{ if(S.userTitle.trim()) localStorage.setItem(titleKey(), S.userTitle); else localStorage.removeItem(titleKey()); }catch(e){}
+}
 function setTitleFrom(name){
   const m = String(name).match(/(\d{4})(\d{2})(\d{2})/);
   if(!m) return;
@@ -902,7 +935,7 @@ function fillParamInputs(){
 async function boot(loaderFn){
   const raw = await loaderFn();
   S.loadInfo = raw.loadInfo || "";
-  setTitleFromPeriod();
+  setTitleFromPeriod(); loadTitle();
   setProgress("CSV を解析中 …");
   await tick();
   S.bs = parseMatrix(raw.bs, {first:true});
@@ -1763,14 +1796,16 @@ function placeSnsCallout(){
   if(!S.snsSel || !map) return;
   const g = S.snsNow && S.snsNow.get(S.snsSel.key); if(!g) return;
   const box = $("snsCallout"), rect = map.getContainer().getBoundingClientRect(), pt = map.project([g.lon, g.lat]);
-  const W = rect.width, H = rect.height, bw = box.offsetWidth || 330, bh = box.offsetHeight || 120, gap = 70;
+  const st = $("stage").getBoundingClientRect(), ox = rect.left - st.left, oy = rect.top - st.top;   // the box and the lead line live in the stage
+  box.style.maxHeight = `${Math.round(Math.min(innerHeight * 0.6, rect.height - 20))}px`;
+  const W = rect.width, H = rect.height, bw = box.offsetWidth || 380, bh = box.offsetHeight || 120, gap = 70;
   const right = pt.x + gap + bw <= W - 10 || pt.x < W / 2;
   let left = right ? pt.x + gap : pt.x - gap - bw, top = pt.y - 30;
   left = Math.max(10, Math.min(left, W - bw - 10)); top = Math.max(10, Math.min(top, H - bh - 10));
-  box.style.left = `${rect.left + left}px`; box.style.top = `${rect.top + top}px`;
+  box.style.left = `${ox + left}px`; box.style.top = `${oy + top}px`;
   const ax = right ? left : left + bw, ay = Math.max(top + 12, Math.min(pt.y, top + bh - 12));   // anchor on the box edge facing the point
-  const L = $("snsLeadLine"); L.setAttribute("x1", rect.left + pt.x); L.setAttribute("y1", rect.top + pt.y); L.setAttribute("x2", rect.left + ax); L.setAttribute("y2", rect.top + ay);
-  const D = $("snsLeadDot"); D.setAttribute("cx", rect.left + pt.x); D.setAttribute("cy", rect.top + pt.y);
+  const L = $("snsLeadLine"); L.setAttribute("x1", ox + pt.x); L.setAttribute("y1", oy + pt.y); L.setAttribute("x2", ox + ax); L.setAttribute("y2", oy + ay);
+  const D = $("snsLeadDot"); D.setAttribute("cx", ox + pt.x); D.setAttribute("cy", oy + pt.y);
 }
 
 function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null; }
@@ -1928,6 +1963,8 @@ function setupControls(){
   for(const [id, key] of [["chkBase","base"],["chkEvent","event"],["chkTraj","traj"],["chkDwell","dwell"],["chkMode","mode"],["chkTurn","turn"]])
     $(id).addEventListener("change", (e) => { S.show[key] = e.target.checked; e.target.blur(); updateTraj(); });
   $("nearestBtn").addEventListener("click", (e) => { e.target.blur(); flyToNearest(); });
+  $("titleInput").addEventListener("input", (e) => { S.userTitle = e.target.value; showTitle(); saveTitle(); });
+  $("titleInput").addEventListener("keydown", (e) => { if(e.key === "Enter") e.target.blur(); });
   document.addEventListener("keydown", (e) => {
     const el = e.target, tag = el.tagName;
     if(tag === "INPUT" && ["text","number","search","file"].includes(el.type)) return;
@@ -2041,14 +2078,15 @@ function niceMax(v){
 
 function drawChart(svg, a, b, errMask, title){
   const W = svg.clientWidth || 416, H = svg.clientHeight || 150;
-  const M = {l:40, r:10, t:20, b:22};
+  const fs = parseFloat(cssVar("--chart-fs")) || 12, d = fs - 12;   // chart text size (CSS --chart-fs); 12 px gives the original margins
+  const M = {l:40 + 5*d, r:10, t:20 + 2*d, b:22 + 2*d};
   const pw = W-M.l-M.r, ph = H-M.t-M.b;
   const T = S.T;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const ns = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(txt !== undefined) e.textContent = txt; return e; };
   while(svg.firstChild) svg.removeChild(svg.firstChild);
-  svg.appendChild(el("text", {x:M.l, y:13, class:"ttl"}, title));
+  svg.appendChild(el("text", {x:M.l, y:13 + d, class:"ttl"}, title));
   if(!a){ svg.appendChild(el("text", {x:M.l+pw/2, y:M.t+ph/2, "text-anchor":"middle"}, "データなし")); return; }
 
   let mx = 0;
@@ -2071,10 +2109,11 @@ function drawChart(svg, a, b, errMask, title){
   for(let g=0; g<=4; g++){
     const v = ymax*g/4, yy = y(v);
     svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: g===0 ? "axis" : "grid"}));
-    svg.appendChild(el("text", {x:M.l-6, y:yy+4, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
+    svg.appendChild(el("text", {x:M.l-6, y:yy + 4 + d/2, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
   }
-  // x ticks: every 8th step (2 h at 15 min) so labels do not collide
-  for(let i=0;i<T;i+=8){
+  // x ticks: every 8th step (2 h at 15 min), or 16th, 32nd, ... when the labels would collide
+  let step = 8; while(step < T && step * pw / Math.max(1, T - 1) < fs * 3.7) step *= 2;
+  for(let i=0;i<T;i+=step){
     svg.appendChild(el("text", {x:x(i), y:H-6, "text-anchor":"middle"}, S.times[i]));
   }
   // series
@@ -2091,7 +2130,7 @@ function drawChart(svg, a, b, errMask, title){
 
   // crosshair tooltip on chart hover
   const cross = el("line", {x1:0, x2:0, y1:M.t, y2:M.t+ph, class:"cross", visibility:"hidden"});
-  const tipbg = el("rect", {x:0, y:0, width:0, height:32, rx:4, class:"tipbg", visibility:"hidden"});
+  const tipbg = el("rect", {x:0, y:0, width:0, height:32 + 2*d, rx:4, class:"tipbg", visibility:"hidden"});
   const tip1 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
   const tip2 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
   svg.append(cross, tipbg, tip1, tip2);
@@ -2105,16 +2144,32 @@ function drawChart(svg, a, b, errMask, title){
     const tw = Math.max(tip1.getComputedTextLength(), tip2.getComputedTextLength()) + 12;
     const tx = xx + 8 + tw > W ? xx - 8 - tw : xx + 8;
     tipbg.setAttribute("x", tx); tipbg.setAttribute("y", M.t+2); tipbg.setAttribute("width", tw); tipbg.setAttribute("visibility","visible");
-    tip1.setAttribute("x", tx+6); tip1.setAttribute("y", M.t+14); tip1.setAttribute("visibility","visible");
-    tip2.setAttribute("x", tx+6); tip2.setAttribute("y", M.t+28); tip2.setAttribute("visibility","visible");
+    tip1.setAttribute("x", tx+6); tip1.setAttribute("y", M.t+14+d); tip1.setAttribute("visibility","visible");
+    tip2.setAttribute("x", tx+6); tip2.setAttribute("y", M.t+28+2*d); tip2.setAttribute("visibility","visible");
   };
   svg.onmouseleave = () => { [cross, tipbg, tip1, tip2].forEach(e => e.setAttribute("visibility","hidden")); };
+}
+
+// The whole viewer (sidebar and map) is drawn in the largest box of exactly 16:9 that fits the window, at its top left, so a screen
+// recording of that box is a 16:9 video. The box is 16k x 9k CSS px; on a scaled display k is lowered by up to 7 when that also
+// makes the box whole in device pixels. The rest of the window is a dark margin that shows the box size when there is room.
+function fitStage(){
+  const dpr = window.devicePixelRatio || 1, whole = (v) => Math.abs(v - Math.round(v)) < 1e-6;
+  let k = Math.max(1, Math.floor(Math.min(innerWidth / 16, innerHeight / 9)));
+  for(let j = k; j > Math.max(0, k - 8); j--) if(whole(16 * j * dpr) && whole(9 * j * dpr)){ k = j; break; }
+  const w = 16 * k, h = 9 * k, st = $("stage"), info = $("stageInfo");
+  st.style.width = `${w}px`; st.style.height = `${h}px`;
+  info.textContent = `16:9 の枠 ${w} × ${h} px` + (dpr === 1 ? "" : `（画面の画素 ${Math.round(w * dpr)} × ${Math.round(h * dpr)}）`);
+  info.style.display = "block";
+  info.style.display = innerHeight - h >= info.offsetHeight + 12 || innerWidth - w >= info.offsetWidth + 24 ? "block" : "none";
+  if(map){ map.resize(); placeSnsCallout(); }
 }
 
 // ============================================================
 // Entry
 // ============================================================
 (async function(){
+  fitStage(); addEventListener("resize", fitStage);
   try{
     await boot(loadViaFetch);
   }catch(e){

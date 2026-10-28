@@ -998,14 +998,15 @@ function niceMax(v){
 }
 function drawChart(svg, a, b, errMask, title){
   const W = svg.clientWidth || 416, H = svg.clientHeight || 150;
-  const M = {l:40, r:10, t:20, b:22};
+  const fs = parseFloat(cssVar("--chart-fs")) || 12, d = fs - 12;   // chart text size (CSS --chart-fs); 12 px gives the original margins
+  const M = {l:40 + 5*d, r:10, t:20 + 2*d, b:22 + 2*d};
   const pw = W-M.l-M.r, ph = H-M.t-M.b;
   const T = S.T;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const ns = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(txt !== undefined) e.textContent = txt; return e; };
   while(svg.firstChild) svg.removeChild(svg.firstChild);
-  svg.appendChild(el("text", {x:M.l, y:13, class:"ttl"}, title));
+  svg.appendChild(el("text", {x:M.l, y:13 + d, class:"ttl"}, title));
   if(!a){ svg.appendChild(el("text", {x:M.l+pw/2, y:M.t+ph/2, "text-anchor":"middle"}, "データなし")); return; }
 
   let mx = 0;
@@ -1028,10 +1029,11 @@ function drawChart(svg, a, b, errMask, title){
   for(let g=0; g<=4; g++){
     const v = ymax*g/4, yy = y(v);
     svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: g===0 ? "axis" : "grid"}));
-    svg.appendChild(el("text", {x:M.l-6, y:yy+4, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
+    svg.appendChild(el("text", {x:M.l-6, y:yy + 4 + d/2, "text-anchor":"end"}, v >= 100 ? Math.round(v).toLocaleString() : (+v.toFixed(1)).toString()));
   }
-  // x ticks: every 8th step (2 h at 15 min) so labels do not collide
-  for(let i=0;i<T;i+=8){
+  // x ticks: every 8th step (2 h at 15 min), or 16th, 32nd, ... when the labels would collide
+  let step = 8; while(step < T && step * pw / Math.max(1, T - 1) < fs * 3.7) step *= 2;
+  for(let i=0;i<T;i+=step){
     svg.appendChild(el("text", {x:x(i), y:H-6, "text-anchor":"middle"}, S.times[i]));
   }
   // series
@@ -1048,7 +1050,7 @@ function drawChart(svg, a, b, errMask, title){
 
   // crosshair tooltip on chart hover
   const cross = el("line", {x1:0, x2:0, y1:M.t, y2:M.t+ph, class:"cross", visibility:"hidden"});
-  const tipbg = el("rect", {x:0, y:0, width:0, height:32, rx:4, class:"tipbg", visibility:"hidden"});
+  const tipbg = el("rect", {x:0, y:0, width:0, height:32 + 2*d, rx:4, class:"tipbg", visibility:"hidden"});
   const tip1 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
   const tip2 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
   svg.append(cross, tipbg, tip1, tip2);
@@ -1062,8 +1064,8 @@ function drawChart(svg, a, b, errMask, title){
     const tw = Math.max(tip1.getComputedTextLength(), tip2.getComputedTextLength()) + 12;
     const tx = xx + 8 + tw > W ? xx - 8 - tw : xx + 8;
     tipbg.setAttribute("x", tx); tipbg.setAttribute("y", M.t+2); tipbg.setAttribute("width", tw); tipbg.setAttribute("visibility","visible");
-    tip1.setAttribute("x", tx+6); tip1.setAttribute("y", M.t+14); tip1.setAttribute("visibility","visible");
-    tip2.setAttribute("x", tx+6); tip2.setAttribute("y", M.t+28); tip2.setAttribute("visibility","visible");
+    tip1.setAttribute("x", tx+6); tip1.setAttribute("y", M.t+14+d); tip1.setAttribute("visibility","visible");
+    tip2.setAttribute("x", tx+6); tip2.setAttribute("y", M.t+28+2*d); tip2.setAttribute("visibility","visible");
   };
   svg.onmouseleave = () => { [cross, tipbg, tip1, tip2].forEach(e => e.setAttribute("visibility","hidden")); };
 }
