@@ -694,7 +694,7 @@ test("16:9 stage: the whole viewer in the largest exact 16:9 box of the window, 
     chart: cssVar("--chart-fs"), over: document.getElementById("side").scrollWidth - document.getElementById("side").clientWidth,
     rows: [...document.querySelectorAll("#layersBlock .lyr")].map((e) => Math.round(e.getBoundingClientRect().height)) }));
   assert.deepEqual([t.body, t.time, t.chart, t.over], ["16px", "28px", "14px", 0]);
-  assert.ok(t.rows.every((h) => h <= 32), `one line per layer row: ${t.rows}`);
+  assert.ok(t.rows.every((h) => h <= 36), `one line per layer row: ${t.rows}`);   // ~30 px (system font) to ~33 px (Noto Sans JP when the web font loads); two lines would be ~50
   // the chart panel stays under half the map width, so it never opens under the cursor
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.waitForFunction(() => map.getCanvas().width === 864, null, { timeout: 10000 });
