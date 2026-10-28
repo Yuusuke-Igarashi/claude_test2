@@ -880,7 +880,6 @@ function pickFeature(fts){
   return best;
 }
 function onHover(e){
-  if(S.mode === "traj") return;   // no traffic information in trajectory mode
   const ft = pickFeature(e.features);
   if(!ft) return;
   map.getCanvas().style.cursor = "pointer";
@@ -888,7 +887,6 @@ function onHover(e){
   if(S.pinnedId === null){ placePanel(e.point); showChart(ft); }
 }
 function onClick(e){
-  if(S.mode === "traj") return;
   const ft = pickFeature(e.features);
   if(!ft) return;
   if(S.pinnedId === ft.id){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }

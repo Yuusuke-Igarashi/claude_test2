@@ -173,7 +173,7 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   const page = await openViewer();
   await page.evaluate((t) => applyTime(t), T_18);
   const base0 = await status(page);
-  await page.click("#settingsBtn");
+  await page.click("#dtRoads summary");   // 詳細設定: the threshold group
   await page.fill("#pL1Speed", "0.5"); await page.fill("#pL1Count", "0.5"); await page.waitForTimeout(500);
   const strict = await status(page);
   assert.ok(strict.error < base0.error, "stricter level-1 thresholds -> fewer errors");
@@ -197,14 +197,19 @@ test("threshold panel recomputes classes and the reference check reacts", async 
   await page.close();
 });
 
-test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffic info", async () => {
+test("walking-trajectory layer: zoom gating, viewport filtering, hover tooltip, roads switched off", async () => {
   const page = await openViewer();
-  await page.click("#modeTraj"); await page.waitForTimeout(500);
-  assert.equal(await page.evaluate(() => S.mode), "traj");
+  assert.equal(await page.evaluate(() => S.showWalk), false, "off at start");
+  await page.click("#chkWalk"); await page.waitForTimeout(500);
+  assert.ok(await page.evaluate(() => walkOn()));
   assert.match(await page.textContent("#trajStatus"), /ズーム 14 以上/);
   assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "nothing drawn below the zoom threshold");
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("links-base", "visibility")), "visible", "the roads stay on next to the trajectories");
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("links-context", "visibility")), "none");
+  await page.click("#chkRoads"); await page.waitForTimeout(300);   // roads off: no traffic information, the network as light context
   assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts hidden");
   assert.equal(await page.evaluate(() => map.getLayoutProperty("links-base", "visibility")), "none", "traffic-coloured network hidden");
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("links-hit", "visibility")), "none", "no link hit-testing");
   assert.equal(await page.evaluate(() => map.getLayoutProperty("links-context", "visibility")), "visible");
   await page.evaluate((t) => { map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page);
@@ -219,13 +224,14 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   assert.ok(+m[7] > 0 && +m[8] > 0, "mode-change and turn points drawn for the flooded event window");
   assert.match(st, /この時刻のデータ全体: 平時 徒歩軌跡 \d+/, "whole-slot diagnostics shown");
   for (const l of ["mode-event", "turn-event", "dwell-event", "traj-event"]) assert.ok(await page.evaluate((l) => map.queryRenderedFeatures({ layers: [l] }).length, l) > 0, l + " rendered");
-  // kind toggles hide their layers
+  // kind toggles (詳細設定 > 徒歩の軌跡) hide their layers
+  await page.click("#dtWalk summary");
   await page.click("#chkMode"); await page.click("#chkTurn"); await page.waitForTimeout(400);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本・滞留 \d+ 点・車→徒歩 0 点・方向転換 0 点/);
   assert.equal(await page.evaluate(() => map.querySourceFeatures("mode-event").length), 0, "mode-change source cleared by its toggle");
   await page.click("#chkMode"); await page.click("#chkTurn"); await page.waitForTimeout(400);
 
-  // hovering a link shows no chart panel in trajectory mode
+  // with the roads off, hovering a link shows no chart panel
   const link = await findLink(page, 4, T_18);   // the flooded block is level 3
   await hover(page, link);
   assert.notEqual(await page.evaluate(() => document.getElementById("chartPanel").style.display), "block", "no time-series panel on link hover");
@@ -261,7 +267,7 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   await page.mouse.click(box.x + 30, box.y + box.height - 30); await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => S.trajSel), null, "empty click clears the selection");
   await page.evaluate(() => map.jumpTo({ zoom: 15.2 })); await page.waitForTimeout(1500);
-  await page.mouse.move(700, 30); await page.waitForTimeout(300);   // onto the top bar: leaves the canvas
+  await page.mouse.move(150, 450); await page.waitForTimeout(300);   // onto the sidebar: leaves the canvas
   assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "none", "tooltip hidden when the mouse leaves the map");
 
   // stepping through time loads other slots and keeps a bounded cache
@@ -279,11 +285,12 @@ test("trajectory mode: zoom gating, viewport filtering, hover tooltip, no traffi
   assert.match(await page.textContent("#trajStatus"), /表示範囲内にはありません/, "diagnostic when the view holds no feature");
   await page.click("#nearestBtn"); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
-  await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
-  await page.mouse.move(50, 400); await page.keyboard.press("m"); await page.waitForTimeout(500);   // traj -> grid -> traffic
-  assert.equal(await page.evaluate(() => S.mode), "grid");
-  await page.keyboard.press("m"); await page.waitForTimeout(500); assert.equal(await page.evaluate(() => S.mode), "traffic");
-  assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared in traffic mode");
+  // roads back on: anomaly colours instead of the context network; trajectories off: sources cleared, status hidden
+  await page.click("#chkRoads"); await page.waitForTimeout(300);
+  assert.deepEqual(await page.evaluate(() => ["links-base", "links-context"].map((l) => map.getLayoutProperty(l, "visibility"))), ["visible", "none"]);
+  await page.click("#chkWalk"); await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => map.querySourceFeatures("traj-event").length), 0, "sources cleared when the layer is off");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("trajStatus")).display), "none");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("statTraffic")).display), "none", "traffic counts back");
   await page.close();
 });
@@ -292,10 +299,10 @@ test("rain slots follow the time slider, toggle and date select", async () => {
   const page = await openViewer();
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "48 rain GeoTIFF slots registered from rain/index.json");
   assert.ok(await page.evaluate(() => !!map.getLayer("rain") && !map.getLayer("lowland")), "rain layer exists, no lowland layer any more");
-  assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none", "overlay controls shown");
+  assert.deepEqual(await page.evaluate(() => [document.getElementById("chkRain").disabled, document.getElementById("chkRain").checked, getComputedStyle(document.getElementById("lgRain")).display]), [false, true, "block"], "rain checkbox on, legend shown");
   assert.match(await page.textContent("#legendRain"), /降雨 mm\/h/);
   assert.deepEqual(await page.evaluate(() => S.period), { event: { start: "2024-08-21 18:00", hours: 12, slot_min: 15 }, baseline: { start: "2024-08-14 18:00", hours: 12, slot_min: 15 } }, "period read from viewer/index.json");
-  assert.equal(await page.evaluate(() => document.querySelector("#topbar h1").textContent), "冠水候補 2024-08-21 18:00〜08-22 06:00（平時 08-14 18:00〜08-15 06:00）", "title from the period, not from the network file name");
+  assert.equal(await page.evaluate(() => document.getElementById("title").textContent), "冠水候補 2024-08-21 18:00〜08-22 06:00（平時 08-14 18:00〜08-15 06:00）", "title from the period, not from the network file name");
   assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821", "date of the first slot (18:00 of the start day)");
   assert.ok(await page.evaluate(() => document.getElementById("rainDate").disabled), "date follows the period automatically");
   assert.equal(await page.evaluate(() => S.adjPrev[24]), 1, "23:45 -> 00:00 counts as consecutive");
@@ -347,8 +354,8 @@ test("rain slots follow the time slider, toggle and date select", async () => {
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "none");
   await page.click("#chkRain"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
-  // rain stays available in trajectory mode
-  await page.click("#modeTraj"); await page.waitForTimeout(300);
+  // rain stays on next to the trajectories
+  await page.click("#chkWalk"); await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => map.getLayoutProperty("rain", "visibility")), "visible");
   await page.screenshot({ path: join(SHOTS, "rain_overlay.png") });
   await page.close();
@@ -364,11 +371,13 @@ test("standalone file:// with the file picker, without optional files", async ()
   await page.evaluate((t) => applyTime(t), T_18);
   const st = await status(page);
   assert.equal(st.error, errorCountsFromCsv()[T_18], "same result without error.csv");
-  assert.ok(await page.evaluate(() => document.getElementById("modeTraj").disabled), "trajectory mode disabled without trajectory files");
+  assert.ok(await page.evaluate(() => document.getElementById("chkWalk").disabled), "trajectory layer disabled without trajectory files");
   assert.equal(await page.evaluate(() => S.rain), null, "no rain without the rain folder");
-  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("overlayOpts")).display), "none");
-  assert.match(await page.textContent("#trajStatus"), /軌跡モードは使えません。選択 5 ファイル: 時刻別ファイル.*なし/, "the reason stays visible in traffic mode");
-  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("trajStatus")).display), "block");
+  const rows = await page.evaluate(() => ["rowWalk", "rowGrid", "rowKaden", "rowRain", "rowSns"].map((id) => { const r = document.getElementById(id); return [r.classList.contains("na"), r.querySelector("input").disabled, r.querySelector(".na-note").textContent]; }));
+  assert.deepEqual(rows, Array(5).fill([true, true, "データなし"]), "rows without data stay listed, disabled");
+  assert.match(await page.evaluate(() => document.getElementById("rowWalk").title), /軌跡ファイルが読み込まれていません。選択 5 ファイル: 時刻別ファイル.*なし/, "the reason is the row's tooltip");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("trajStatus")).display), "none");
+  assert.deepEqual(await page.evaluate(() => ["dtWalk", "dtGrid", "dtRain", "dtSns"].map((id) => getComputedStyle(document.getElementById(id)).display)), ["none", "none", "none", "none"], "no settings for absent layers");
   assert.match(await page.textContent("#pCheck"), /未読み込み/);
   await page.close();
 });
@@ -386,7 +395,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.evaluate((t) => applyTime(t + 2), T_18);
   await page.waitForFunction(() => S.rain.cur && S.rain.cur.key === "20240822_00:30", null, { timeout: 15000 });
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from a File object");
-  await page.evaluate((t) => { setMode("traj"); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
+  await page.evaluate((t) => { setLayer("walk", true); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page); await page.waitForTimeout(1500);
   assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "trajectories drawn from a slot file read via FileReader");
   await page.close();
@@ -421,30 +430,62 @@ test("single-file trajectory GeoJSON (no viewer/ folder) still loads whole-day d
   await page.close();
 });
 
-test("grid overlay in trajectory mode: parameter select, slot follows the slider, legend", async () => {
+test("walker-change layer: arrows at the cell centres for ratio layers, a colour fill for counts, parameter select, legend", async () => {
   const page = await openViewer();
   assert.equal(await page.evaluate(() => S.grid ? S.grid.sources.size : 0), 48 * 5 + 48 * 3, "grid/ ratio rasters + grid_users/ count and ratio rasters registered");
   assert.deepEqual(await page.evaluate(() => S.grid.params.map(p => p[0])), ["walkers", "walk_dist_m", "stays", "turns", "modechanges", "users", "users@baseline", "users@event"]);
   assert.deepEqual(await page.evaluate(() => S.grid.params.filter(p => p[0].startsWith("users")).map(p => [p[1], p[2], p[4]])),
     [["ユニーク ID 数（有事 ÷ 平時）", "ratio", 15], ["ユニーク ID 数 平時（人）", "count", 15], ["ユニーク ID 数 有事（人）", "count", 15]], "labels / kinds / window from grid_users/index.json");
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "hidden in traffic mode");
-  await page.click("#modeTraj"); await page.waitForTimeout(300);
+  const vis = () => page.evaluate(() => [map.getLayoutProperty("grid", "visibility"), map.getLayoutProperty("grid-marks", "visibility")]);
+  assert.deepEqual(await vis(), ["none", "none"], "off at start");
+  await page.click("#chkGrid"); await page.waitForTimeout(300);
   await page.evaluate((t) => applyTime(t + 2), T_18);          // 00:30 = inside the flood window
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "walkers_00:30", null, { timeout: 15000 });
-  const g = await page.evaluate(() => { const v = [...S.grid.cur.vals].filter(x => !Number.isNaN(x)); return { vis: map.getLayoutProperty("grid", "visibility"), max: Math.max(...v), min: Math.min(...v), nan: S.grid.cur.vals.length - v.length,
-    legend: document.getElementById("legendGrid").textContent, opt: getComputedStyle(document.getElementById("gridOpt")).display, url: S.grid.cur.url }; });
-  assert.equal(g.vis, "visible"); assert.equal(g.max, 3); assert.equal(g.min, 0.25); assert.ok(g.nan > 0, "baseline-0 cells are NaN");
-  assert.match(g.legend, /徒歩移動者数.*200 % 以上.*50 % 以下/); assert.notEqual(g.opt, "none");
-  // thresholds typed next to the select repaint the slot and the legend
-  await page.fill("#gridUp", "5"); await page.fill("#gridDown", "0.1"); await page.waitForTimeout(500);
-  const g2 = await page.evaluate(() => ({ legend: document.getElementById("legendGrid").textContent, url: S.grid.cur.url, up: S.gridUp, down: S.gridDown }));
-  assert.match(g2.legend, /500 % 以上.*10 % 以下/); assert.deepEqual([g2.up, g2.down], [5, 0.1]); assert.notEqual(g2.url, g.url, "repainted");
+  const ref = (up, down) => page.evaluate(([up, down]) => { let u = 0, d = 0; for (const r of S.grid.cur.vals) { if (Number.isNaN(r)) continue; if (r >= up) u++; else if (r <= down) d++; } return [u, d]; }, [up, down]);
+  const g = await page.evaluate(() => { const v = [...S.grid.cur.vals].filter(x => !Number.isNaN(x)); return { max: Math.max(...v), min: Math.min(...v), nan: S.grid.cur.vals.length - v.length,
+    legend: document.getElementById("legendGrid").textContent, marks: [S.grid.cur.marks.up, S.grid.cur.marks.down], url: S.grid.cur.url, size: map.getLayoutProperty("grid-marks", "icon-size") }; });
+  assert.deepEqual(await vis(), ["none", "visible"], "ratio layer: arrows only, no colour fill");
+  assert.equal(g.max, 3); assert.equal(g.min, 0.25); assert.ok(g.nan > 0, "baseline-0 cells are NaN"); assert.equal(g.url, undefined, "no raster painted for a ratio layer");
+  const [up0, down0] = await ref(2, 0.5);
+  assert.ok(up0 > 0 && down0 > 0); assert.deepEqual(g.marks, [up0, down0], "legend counts = cells at or beyond the thresholds");
+  assert.match(g.legend, new RegExp(`徒歩移動者数（直近 60 分、有事 ÷ 平時。セルの中心に矢印）.*増加 200 % 以上 ${up0} セル.*減少 50 % 以下 ${down0} セル`));
+  assert.equal(g.size[0], "interpolate", "arrow size follows the zoom");
+  // zoomed in, every marked cell in view has its arrow, on the cell centre, pointing the way of the cell's ratio
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 15 }));
+  // the arrows' source loaded and the placed count stable over two polls (not the map's "idle": it waits for basemap tiles too, which may never come offline)
+  await page.waitForFunction(() => { const n = map.queryRenderedFeatures({ layers: ["grid-marks"] }).length, ok = map.isSourceLoaded("grid-marks") && n > 0 && n === window.__marksN; window.__marksN = n; return ok; }, null, { timeout: 15000, polling: 300 });
+  const chk = await page.evaluate(() => {
+    const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, dx = (E - W) / c.w, dy = (Nb - Sb) / c.h, b = map.getBounds();
+    const fts = map.queryRenderedFeatures({ layers: ["grid-marks"] });
+    let off = 0, wrong = 0, expect = 0;
+    for (const f of fts) { const [lon, lat] = f.geometry.coordinates, x = Math.floor((lon - W) / dx), y = Math.floor((Nb - lat) / dy), r = c.vals[y * c.w + x];
+      if (Math.abs(lon - (W + (x + 0.5) * dx)) > dx * 0.02 || Math.abs(lat - (Nb - (y + 0.5) * dy)) > dy * 0.02) off++;
+      if (f.properties.d > 0 ? !(r >= 2) : !(r <= 0.5)) wrong++; }
+    for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) { const r = c.vals[y * c.w + x]; if (Number.isNaN(r) || (r < 2 && r > 0.5)) continue;
+      const p = map.project([W + (x + 0.5) * dx, Nb - (y + 0.5) * dy]); if (p.x > 20 && p.y > 20 && p.x < map.getCanvas().clientWidth - 20 && p.y < map.getCanvas().clientHeight - 20) expect++; }
+    return { n: fts.length, off, wrong, expect, ups: fts.filter((f) => f.properties.d > 0).length };
+  });
+  assert.ok(chk.n > 0 && chk.ups > 0 && chk.ups < chk.n, "rising and falling cells in view: " + JSON.stringify(chk));
+  assert.equal(chk.off, 0, "arrows sit on the cell centres"); assert.equal(chk.wrong, 0, "up for >= 200 %, down for <= 50 %");
+  assert.ok(chk.n >= chk.expect, "no arrow dropped at this zoom: " + JSON.stringify(chk));
+  await page.screenshot({ path: join(SHOTS, "grid_arrows.png") });
+  // thresholds in 詳細設定 > 徒歩の増減 move the marks and the legend
+  await page.click("#dtGrid summary");
+  await page.fill("#gridUp", "1.3"); await page.fill("#gridDown", "0.8");   // the sample ratios are 0.25, 0.7-1.4 and 3
+  await page.waitForFunction(() => S.grid.cur.marks.th === "1.3/0.8", null, { timeout: 10000 });
+  const [up1, down1] = await ref(1.3, 0.8);
+  const g2 = await page.evaluate(() => ({ legend: document.getElementById("legendGrid").textContent, up: S.gridUp, down: S.gridDown, marks: [S.grid.cur.marks.up, S.grid.cur.marks.down] }));
+  assert.deepEqual([g2.up, g2.down], [1.3, 0.8]); assert.deepEqual(g2.marks, [up1, down1]); assert.ok(up1 > up0 && down1 > down0, "looser thresholds -> more arrows");
+  assert.match(g2.legend, new RegExp(`増加 130 % 以上 ${up1} セル.*減少 80 % 以下 ${down1} セル`));
+  await page.fill("#gridUp", "5"); await page.fill("#gridDown", "0.1");   // nothing beyond 500 % or below 10 % in the sample: the arrows go (setData is applied asynchronously)
+  await page.waitForFunction(() => S.grid.cur.marks.th === "5/0.1" && map.getSource("grid-marks").serialize().data.features.length === 0 && map.queryRenderedFeatures({ layers: ["grid-marks"] }).length === 0, null, { timeout: 15000 });
   await page.fill("#gridUp", "2"); await page.fill("#gridDown", "0.5"); await page.waitForTimeout(500);
   await page.selectOption("#gridParam", "stays");
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "stays_00:30", null, { timeout: 15000 });
   assert.match(await page.textContent("#legendGrid"), /滞留数/);
   await page.click("#chkGrid"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "toggle hides the grid");
+  assert.deepEqual(await vis(), ["none", "none"], "the checkbox hides the layer");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("lgGrid")).display), "none", "legend hidden with it");
   await page.click("#chkGrid"); await page.waitForTimeout(200);
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 14 }));
   assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "300 %", "ratio under the map centre (flood block)");
@@ -453,6 +494,7 @@ test("grid overlay in trajectory mode: parameter select, slot follows the slider
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users@event_00:30", null, { timeout: 15000 });
   const u = await page.evaluate(() => ({ th: getComputedStyle(document.getElementById("gridThOpt")).display, mx: getComputedStyle(document.getElementById("gridMaxOpt")).display,
     legend: document.getElementById("legendGrid").textContent, at: gridAt(map.getCenter()), max: S.grid.cur.max, url: S.grid.cur.url }));
+  assert.deepEqual(await vis(), ["visible", "none"], "count layer: colour fill, no arrows");
   assert.equal(u.th, "none"); assert.notEqual(u.mx, "none"); assert.equal(u.at, "24 人", "centre cell: baseline 8 x 3 in the flood window");
   assert.match(u.legend, /ユニーク ID 数 有事（人）（直近 15 分）.*上限 \d+ 人、自動。0 は透明/); assert.ok(u.max >= 24, "auto limit = the slot's max");
   await page.fill("#gridMax", "10"); await page.waitForTimeout(500);
@@ -463,10 +505,8 @@ test("grid overlay in trajectory mode: parameter select, slot follows the slider
   await page.selectOption("#gridParam", "users");
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users_00:30", null, { timeout: 15000 });
   assert.equal(await page.evaluate(() => gridAt(map.getCenter())), "300 %", "ratio layer of the simple count");
+  assert.deepEqual(await vis(), ["none", "visible"], "arrows again for a ratio layer");
   assert.notEqual(await page.evaluate(() => getComputedStyle(document.getElementById("gridThOpt")).display), "none", "thresholds back for a ratio layer");
-  await page.selectOption("#gridParam", "walkers"); await page.waitForTimeout(300);
-  await page.click("#modeTraffic"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "hidden again in traffic mode");
   await page.close();
 });
 
@@ -479,12 +519,12 @@ test("two folders: traffic (tomtom_out) and probe (probe_out: viewer/ + grid/)",
   assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・メッシュ 0 枚 \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, rain: S.rain, grid: S.grid, trajOff: document.getElementById("modeTraj").disabled, gridOff: document.getElementById("modeGrid").disabled }));
+  const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, rain: S.rain, grid: S.grid, trajOff: document.getElementById("chkWalk").disabled, gridOff: document.getElementById("chkGrid").disabled }));
   assert.deepEqual(st, { lazy: SLOT_FILES, rain: null, grid: null, trajOff: false, gridOff: true });
   await page.close();
 });
 
-test("walker-change tab reads a mesh folder (input 3) on its own", async () => {
+test("walker-change layer reads a mesh folder (input 3) on its own", async () => {
   const page = await newPage();
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
@@ -494,16 +534,17 @@ test("walker-change tab reads a mesh folder (input 3) on its own", async () => {
   assert.match(await page.textContent("#pickNote"), /3: メッシュ 144 枚 \/ 4: なし \/ 5: なし \/ 6: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const reg = await page.evaluate(() => ({ params: S.grid.params.map((p) => p[0]), n: S.grid.sources.size, mode: S.mode, gridBtn: document.getElementById("modeGrid").disabled, trajOff: document.getElementById("modeTraj").disabled }));
-  assert.deepEqual(reg.params, ["users", "users@baseline", "users@event"]); assert.equal(reg.n, 144); assert.equal(reg.mode, "traffic"); assert.equal(reg.gridBtn, false);
+  const reg = await page.evaluate(() => ({ params: S.grid.params.map((p) => p[0]), n: S.grid.sources.size, on: S.showGrid, gridOff: document.getElementById("chkGrid").disabled, trajOff: document.getElementById("chkWalk").disabled }));
+  assert.deepEqual(reg.params, ["users", "users@baseline", "users@event"]); assert.equal(reg.n, 144); assert.equal(reg.on, false); assert.equal(reg.gridOff, false);
   await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
-  assert.equal(await page.evaluate(() => map.getLayer("sns") || map.getLayer("flood") || map.getLayer("links-truck-base") || document.getElementById("modeDefault") || document.getElementById("modeTruck")), null, "dropped layers and tabs are gone");
-  // grid: the rasters alone, with the parameter select and inputs
-  await page.click("#modeGrid"); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => map.getLayer("sns") || map.getLayer("flood") || map.getLayer("links-truck-base") || ["modeDefault", "modeTruck", "modeTraffic", "modeTraj", "modeGrid", "settingsBtn", "topbar"].map((id) => document.getElementById(id)).find(Boolean)), undefined, "dropped layers, tabs and the top bar are gone");
+  // the mesh alone: roads off, grid on
+  await page.click("#chkRoads"); await page.click("#chkGrid"); await page.waitForTimeout(300);
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users_00:30", null, { timeout: 15000 });
-  const g = await page.evaluate(() => ({ mode: S.mode, grid: map.getLayoutProperty("grid", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), ctx: map.getLayoutProperty("links-context", "visibility"),
-    gridOpts: getComputedStyle(document.getElementById("gridOpts")).display, legend: document.getElementById("legendGrid").textContent }));
-  assert.equal(g.mode, "grid"); assert.equal(g.grid, "visible"); assert.deepEqual([g.base, g.ctx], ["none", "none"]); assert.notEqual(g.gridOpts, "none"); assert.match(g.legend, /ユニーク ID 数/);
+  const g = await page.evaluate(() => ({ marks: map.getLayoutProperty("grid-marks", "visibility"), base: map.getLayoutProperty("links-base", "visibility"), ctx: map.getLayoutProperty("links-context", "visibility"),
+    legend: document.getElementById("legendGrid").textContent }));
+  assert.equal(g.marks, "visible"); assert.deepEqual([g.base, g.ctx], ["none", "none"]); assert.match(g.legend, /ユニーク ID 数/);
+  await page.click("#dtGrid summary");
   await page.selectOption("#gridParam", "users@event");
   await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === "users@event_00:30", null, { timeout: 15000 });
   await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 14 }));
@@ -515,9 +556,49 @@ test("walker-change tab reads a mesh folder (input 3) on its own", async () => {
   const outside = await page.evaluate(() => map.project([139.69, 35.68]));                        // west of the mesh (bbox starts at 139.70): no tooltip
   await page.mouse.move(mb.x + outside.x, mb.y + outside.y); await page.waitForTimeout(400);
   assert.equal(await page.evaluate(() => document.getElementById("tip").style.display), "none");
-  await page.click("#modeTraffic"); await page.waitForTimeout(200);
-  assert.equal(await page.evaluate(() => map.getLayoutProperty("grid", "visibility")), "none", "grid hidden again in the traffic tab");
   await page.screenshot({ path: join(SHOTS, "grid_tab.png") });
+  await page.click("#chkGrid"); await page.click("#chkRoads"); await page.waitForTimeout(200);
+  assert.deepEqual(await page.evaluate(() => [map.getLayoutProperty("grid", "visibility"), map.getLayoutProperty("links-base", "visibility")]), ["none", "visible"], "grid hidden, roads back");
+  await page.close();
+});
+
+test("sidebar: one checkbox per layer in 表示, every parameter in 詳細設定, legends follow the shown layers", async () => {
+  const page = await openViewer();
+  const s = await page.evaluate(() => ({
+    side: document.getElementById("side").getBoundingClientRect().width, mapLeft: document.getElementById("map").getBoundingClientRect().left,
+    rows: [...document.querySelectorAll("#layersBlock .lyr")].map((r) => r.textContent.replace("データなし", "").trim()),
+    boxes: document.querySelectorAll("#layersBlock input[type=checkbox]").length,
+    other: document.querySelectorAll("#layersBlock select, #layersBlock input:not([type=checkbox]), #layersBlock button").length,
+    params: ["pMinCount", "pL1Op", "pL3Count", "pCorrob", "pZeroSpeed", "pDefault", "chkBase", "chkTurn", "nearestBtn", "gridParam", "gridUp", "gridMax", "rainDate", "snsWin"].filter((id) => !document.getElementById(id).closest("#detailBlock")),
+    legendInputs: document.querySelectorAll("#legendBlock input, #legendBlock select, #legendBlock button").length,
+    closed: [...document.querySelectorAll("#detailBlock details")].filter((d) => !d.open).length,
+    kaden: [document.getElementById("chkKaden").disabled, document.getElementById("rowKaden").title],
+  }));
+  assert.equal(s.mapLeft, s.side, "the map starts right of the sidebar");
+  assert.deepEqual(s.rows, ["道路の異常（車の流れ）", "徒歩の軌跡", "徒歩の増減（メッシュ）", "家電の接続", "降雨", "SNS 投稿"]);
+  assert.equal(s.boxes, 6); assert.equal(s.other, 0, "no parameter in the layer block");
+  assert.deepEqual(s.params, [], "every parameter sits in the detail block"); assert.equal(s.legendInputs, 0, "no control in the legend block");
+  assert.equal(s.closed, 5, "detail groups start closed");
+  assert.equal(s.kaden[0], true, "no appliance data over http in the sample"); assert.match(s.kaden[1], /家電データ.*読み込まれていません/);
+  // layers combine freely: roads + trajectories + walker change + rain at once, each with its legend
+  await page.click("#chkWalk"); await page.click("#chkGrid"); await page.waitForTimeout(600);
+  const on = await page.evaluate(() => ({ layers: ["links-base", "grid-marks", "rain"].map((l) => map.getLayoutProperty(l, "visibility")), walk: walkOn(),
+    legends: ["lgRoads", "lgWalk", "lgGrid", "lgRain", "lgNone"].map((id) => getComputedStyle(document.getElementById(id)).display) }));
+  assert.deepEqual(on.layers, ["visible", "visible", "visible"]); assert.ok(on.walk); assert.deepEqual(on.legends, ["block", "block", "block", "block", "none"]);
+  await page.screenshot({ path: join(SHOTS, "sidebar.png") });
+  for (const id of ["#chkRoads", "#chkWalk", "#chkGrid", "#chkRain"]) await page.click(id);
+  const off = await page.evaluate(() => ({ layers: ["links-base", "links-hit", "links-context", "grid-marks", "rain"].map((l) => map.getLayoutProperty(l, "visibility")), none: getComputedStyle(document.getElementById("lgNone")).display }));
+  assert.deepEqual(off.layers, ["none", "none", "none", "none", "none"]); assert.equal(off.none, "block", "the legend block says nothing is shown");
+  // a pinned link chart goes away with the roads
+  await page.click("#chkRoads");
+  await page.evaluate((t) => applyTime(t), T_18);
+  const pt = await findLink(page, 4, T_18);
+  await hover(page, pt);
+  const box = await page.locator("#map").boundingBox();
+  await page.mouse.click(box.x + pt.x, box.y + pt.y); await page.waitForTimeout(200);
+  assert.ok(await page.evaluate(() => S.pinnedId !== null && document.getElementById("chartPanel").style.display === "block"), "link chart pinned");
+  await page.click("#chkRoads"); await page.waitForTimeout(200);
+  assert.deepEqual(await page.evaluate(() => [S.pinnedId, document.getElementById("chartPanel").style.display]), [null, "none"], "chart dropped with the roads");
   await page.close();
 });
 
@@ -535,9 +616,9 @@ test("appliance points (input 4): time-series CSVs, classes per slot, always vis
   assert.match(await page.textContent("#pickNote"), /4: 家電 時系列 2 本/);
   await page.click("#loadBtn");
   await page.waitForFunction(() => typeof S !== "undefined" && S.kaden && typeof map !== "undefined" && map && map.getSource("kaden") && S.kadenFeats, null, { timeout: 60000 });
-  const info = await page.evaluate(() => ({ n: S.kaden.n, matched: S.kaden.matched, cols: S.kaden.cols, zip: S.kaden.zip[0], opt: getComputedStyle(document.getElementById("kadenOpt")).display,
+  const info = await page.evaluate(() => ({ n: S.kaden.n, matched: S.kaden.matched, cols: S.kaden.cols, zip: S.kaden.zip[0], opt: !document.getElementById("chkKaden").disabled,
                                             vis: map.getLayoutProperty("kaden", "visibility"), feats: S.kadenFeats.length }));
-  assert.equal(info.n, 40); assert.equal(info.matched, 48); assert.equal(info.cols, 48); assert.equal(info.zip, "150-0000"); assert.notEqual(info.opt, "none");
+  assert.equal(info.n, 40); assert.equal(info.matched, 48); assert.equal(info.cols, 48); assert.equal(info.zip, "150-0000"); assert.equal(info.opt, true);
   assert.equal(info.vis, "visible"); assert.equal(info.feats, 40);
   // 20:30: two surge points (x3.5) are "high"; 00:00: the six points around the flood centre are at 10 % -> "low"
   await page.evaluate(() => applyTime(S.times.indexOf("20:30")));
@@ -548,10 +629,10 @@ test("appliance points (input 4): time-series CSVs, classes per slot, always vis
   assert.equal(cls.filter((c) => c === 3).length, 6); assert.ok(cls.filter((c) => c === 0).length >= 3, "baseline below 5 is not judged");
   assert.match(await page.textContent("#kadenVal"), /^40 地点（減少 6 \/ 増加 0）$/);
   assert.match(await page.textContent("#legendKaden"), /減少（平時の 1\/3 以下） 6/);
-  // the layer stays visible in every tab; the chart panel shows the point's series
-  for (const m of ["traj", "grid", "traffic"]) {
-    await page.evaluate((mm) => setMode(mm), m);
-    assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "visible", m);
+  // the layer is independent of the others; the chart panel shows the point's series
+  for (const [id, label] of [["#chkWalk", "with trajectories"], ["#chkRoads", "without roads"], ["#chkRoads", "roads back"], ["#chkWalk", "trajectories off"]]) {
+    await page.click(id);
+    assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "visible", label);
   }
   const low = cls.indexOf(3);
   const chart = await page.evaluate((i) => { showKadenChart(i); return { shown: document.getElementById("chartPanel").style.display, title: document.getElementById("cpTitle").textContent,
@@ -565,6 +646,7 @@ test("appliance points (input 4): time-series CSVs, classes per slot, always vis
   assert.equal(await page.textContent("#roL1"), "速度 km/h"); assert.equal(await page.evaluate(() => S.kadenChartIdx), null);
   await page.click("#chkKaden");
   assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "none"); assert.equal(await page.textContent("#kadenVal"), "");
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("lgKaden")).display), "none", "legend hidden with the layer");
   await page.click("#chkKaden");
   assert.equal(await page.evaluate(() => map.getLayoutProperty("kaden", "visibility")), "visible");
   await page.close();
@@ -580,9 +662,9 @@ test("SNS posts (input 6, FASTALERT layout): CSV parsing, time window, stacked p
   assert.match(await page.textContent("#pickNote"), /5: なし \/ 6: SNS 1 ファイル$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
-  const info = await page.evaluate(() => ({ n: S.sns.posts.length, noCoord: S.sns.noCoord, groups: S.sns.groups.size, dates: S.sns.dates, formats: S.sns.formats, opt: getComputedStyle(document.getElementById("snsOpt")).display,
+  const info = await page.evaluate(() => ({ n: S.sns.posts.length, noCoord: S.sns.noCoord, groups: S.sns.groups.size, dates: S.sns.dates, formats: S.sns.formats, opt: !document.getElementById("chkSns").disabled,
     text: S.sns.posts.find((p) => p.id === "340100000").text, quoted: S.sns.posts.find((p) => p.id === "340000000").text }));
-  assert.equal(info.n, 40); assert.equal(info.noCoord, 5); assert.equal(info.groups, 35); assert.deepEqual(info.dates, ["2024-08-21", "2024-08-22"]); assert.deepEqual(info.formats, ["FASTALERT"]); assert.notEqual(info.opt, "none");
+  assert.equal(info.n, 40); assert.equal(info.noCoord, 5); assert.equal(info.groups, 35); assert.deepEqual(info.dates, ["2024-08-21", "2024-08-22"]); assert.deepEqual(info.formats, ["FASTALERT"]); assert.equal(info.opt, true);
   assert.equal(info.text, '中心地点の投稿 1。"膝まで水" と言っている人も、いる', "quotes and commas inside a quoted field");
   assert.equal(info.quoted, "投稿 0: 道路が冠水、車が通れない\n#新宿区, 要注意", "¥n becomes a line break");
   // window (23:30, 00:30] at the 00:30 slot: 6 stacked posts at the centre + 4 singles
@@ -590,6 +672,7 @@ test("SNS posts (input 6, FASTALERT layout): CSV parsing, time window, stacked p
   const w = await page.evaluate(() => ({ feats: S.snsFeats.map((f) => f.properties), val: document.getElementById("snsVal").textContent, legend: document.getElementById("legendSns").textContent }));
   assert.equal(w.feats.length, 5); assert.equal(w.feats.reduce((a, f) => a + f.n, 0), 10); assert.ok(w.feats.some((f) => f.n === 6 && f.cat === "浸水・冠水"));
   assert.match(w.val, /^10 件・5 地点（直近 1 時間）$/); assert.match(w.legend, /浸水・冠水 \d+.*座標なし 5 件/);
+  await page.click("#dtSns summary");   // 詳細設定 > SNS 投稿
   await page.selectOption("#snsWin", "all"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => S.snsFeats.length), 35, "all posts regardless of time");
   await page.selectOption("#snsWin", "60"); await page.waitForTimeout(200);

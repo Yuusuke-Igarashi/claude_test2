@@ -116,8 +116,8 @@ after(async () => { await browser?.close(); server?.close(); });
 test("flood_viewer_simple.html is the build of its template and flood_viewer.html, without the full viewer's tabs and overlays", () => {
   assert.equal(readFileSync(TARGET, "utf8"), buildSimple(), "flood_viewer_simple.html is stale: run npm run build and commit it");
   const html = readFileSync(join(DIST, HTML), "utf8");
-  for (const id of ["modeTraj", "modeGrid", "probeInput", "gridInput", "kadenInput", "snsInput", "kadenOpt", "snsOpt", "gridOpts", "trajOpts", "snsCallout"]) assert.doesNotMatch(html, new RegExp(` id="${id}"`), id);
-  for (const fn of ["updateTraj", "updateKaden", "updateSns", "updateGrid", "setMode", "parseSns", "parseKaden", "parseTraj", "alignAxisToPeriod"]) assert.doesNotMatch(html, new RegExp(`function ${fn}\\(`), fn);
+  for (const id of ["side", "layersBlock", "detailBlock", "chkWalk", "chkGrid", "chkKaden", "chkSns", "probeInput", "gridInput", "kadenInput", "snsInput", "snsCallout"]) assert.doesNotMatch(html, new RegExp(` id="${id}"`), id);
+  for (const fn of ["updateTraj", "updateKaden", "updateSns", "updateGrid", "setLayer", "syncLayers", "drawGridMarks", "parseSns", "parseKaden", "parseTraj", "alignAxisToPeriod"]) assert.doesNotMatch(html, new RegExp(`function ${fn}\\(`), fn);
   for (const fn of ["parseMatrix", "recompute", "parseGeoTiff", "paintRain", "updateRain", "drawChart", "showChart", "periodSpan"]) assert.match(html, new RegExp(`\\nfunction ${fn}\\(`), fn + " copied from the full viewer");
   assert.match(html, /GENERATED FILE/);
 });
