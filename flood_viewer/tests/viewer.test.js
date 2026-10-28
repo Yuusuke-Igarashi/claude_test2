@@ -217,17 +217,17 @@ test("walking-trajectory layer: zoom gating, viewport filtering, hover tooltip, 
   assert.equal(await page.evaluate(() => S.lazy.loaded), "00:00", "only the 00:00 slot is parsed");
   assert.equal(await page.evaluate(() => Object.values(S.traj).filter(Boolean).length), 8, "4 kinds x baseline+event for the slot");
   const st = await page.textContent("#trajStatus");
-  const m = st.match(/平時 徒歩軌跡 (\d+) 本・滞留 (\d+) 点・車→徒歩 (\d+) 点・方向転換 (\d+) 点 \/ イベント時 徒歩軌跡 (\d+) 本・滞留 (\d+) 点・車→徒歩 (\d+) 点・方向転換 (\d+) 点/);
+  const m = st.match(/平時: 軌跡 (\d+)・滞留 (\d+)・車→徒歩 (\d+)・方向転換 (\d+)\nイベント時: 軌跡 (\d+)・滞留 (\d+)・車→徒歩 (\d+)・方向転換 (\d+)/);
   assert.ok(m, "status lists counts: " + st);
   assert.ok(+m[1] > 0 && +m[5] > 0, "trajectories drawn at zoom 15");
   assert.ok(+m[2] > 0 && +m[6] > 0, "dwell points drawn from the slot files");
   assert.ok(+m[7] > 0 && +m[8] > 0, "mode-change and turn points drawn for the flooded event window");
-  assert.match(st, /この時刻のデータ全体: 平時 徒歩軌跡 \d+/, "whole-slot diagnostics shown");
+  assert.match(await page.getAttribute("#trajStatus", "title"), /この時刻のデータ全体: 平時 軌跡 \d+/, "whole-slot diagnostics in the tooltip");
   for (const l of ["mode-event", "turn-event", "dwell-event", "traj-event"]) assert.ok(await page.evaluate((l) => map.queryRenderedFeatures({ layers: [l] }).length, l) > 0, l + " rendered");
   // kind toggles (詳細設定 > 徒歩の軌跡) hide their layers
   await page.click("#dtWalk summary");
   await page.click("#chkMode"); await page.click("#chkTurn"); await page.waitForTimeout(400);
-  assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本・滞留 \d+ 点・車→徒歩 0 点・方向転換 0 点/);
+  assert.match(await page.textContent("#trajStatus"), /イベント時: 軌跡 [1-9]\d*・滞留 \d+・車→徒歩 0・方向転換 0/);
   assert.equal(await page.evaluate(() => map.querySourceFeatures("mode-event").length), 0, "mode-change source cleared by its toggle");
   await page.click("#chkMode"); await page.click("#chkTurn"); await page.waitForTimeout(400);
 
@@ -278,13 +278,13 @@ test("walking-trajectory layer: zoom gating, viewport filtering, hover tooltip, 
   await page.evaluate((t) => applyTime(t), T_18); await waitSlot(page); await page.waitForTimeout(800);
 
   await page.click("#chkBase"); await page.waitForTimeout(500);
-  assert.match(await page.textContent("#trajStatus"), /平時 徒歩軌跡 0 本・滞留 0 点・車→徒歩 0 点・方向転換 0 点/);
+  assert.match(await page.textContent("#trajStatus"), /平時: 軌跡 0・滞留 0・車→徒歩 0・方向転換 0/);
   await page.click("#chkBase"); await page.waitForTimeout(300);
   // "nearest" button: from an empty corner of the grid the map flies to the nearest feature of the slot
   await page.evaluate(() => map.jumpTo({ center: [139.70 + 2 * 0.0025, 35.65 + 2 * 0.002], zoom: 15.2 })); await page.waitForTimeout(800);
   assert.match(await page.textContent("#trajStatus"), /表示範囲内にはありません/, "diagnostic when the view holds no feature");
   await page.click("#nearestBtn"); await page.waitForTimeout(1500);
-  assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "features visible after flying to the nearest one");
+  assert.match(await page.textContent("#trajStatus"), /イベント時: 軌跡 [1-9]\d*/, "features visible after flying to the nearest one");
   // roads back on: anomaly colours instead of the context network
   await page.click("#chkRoads"); await page.waitForTimeout(300);
   assert.deepEqual(await page.evaluate(() => ["links-base", "links-context"].map((l) => map.getLayoutProperty(l, "visibility"))), ["visible", "none"]);
@@ -321,7 +321,7 @@ test("rain slots follow the time slider, toggle and date select", async () => {
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "48 rain GeoTIFF slots registered from rain/index.json");
   assert.ok(await page.evaluate(() => !!map.getLayer("rain") && !map.getLayer("lowland")), "rain layer exists, no lowland layer any more");
   assert.deepEqual(await page.evaluate(() => [document.getElementById("chkRain").disabled, document.getElementById("chkRain").checked, getComputedStyle(document.getElementById("lgRain")).display]), [false, true, "block"], "rain checkbox on, legend shown");
-  assert.match(await page.textContent("#legendRain"), /降雨 mm\/h/);
+  assert.match(await page.textContent("#legendRain"), /^mm\/h1–5/, "unit and colour steps only");
   assert.deepEqual(await page.evaluate(() => S.period), { event: { start: "2024-08-21 18:00", hours: 12, slot_min: 15 }, baseline: { start: "2024-08-14 18:00", hours: 12, slot_min: 15 } }, "period read from viewer/index.json");
   assert.equal(await page.evaluate(() => document.getElementById("title").textContent), "冠水候補 2024-08-21 18:00〜08-22 06:00（平時 08-14 18:00〜08-15 06:00）", "title from the period, not from the network file name");
   assert.equal(await page.evaluate(() => document.getElementById("rainDate").value), "20240821", "date of the first slot (18:00 of the start day)");
@@ -418,7 +418,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   assert.ok(await page.evaluate(() => Math.max(...S.rain.cur.vals) > 80), "rain GeoTIFF decoded from a File object");
   await page.evaluate((t) => { setLayer("walk", true); map.jumpTo({ center: [139.70 + 20 * 0.0025, 35.65 + 15 * 0.002], zoom: 15.2 }); applyTime(t); }, T_18);
   await waitSlot(page); await page.waitForTimeout(1500);
-  assert.match(await page.textContent("#trajStatus"), /イベント時 徒歩軌跡 [1-9]\d* 本/, "trajectories drawn from a slot file read via FileReader");
+  assert.match(await page.textContent("#trajStatus"), /イベント時: 軌跡 [1-9]\d*/, "trajectories drawn from a slot file read via FileReader");
   await page.close();
 });
 
@@ -469,7 +469,8 @@ test("walker-change layer: arrows at the cell centres for ratio layers, a colour
   assert.equal(g.max, 3); assert.equal(g.min, 0.25); assert.ok(g.nan > 0, "baseline-0 cells are NaN"); assert.equal(g.url, undefined, "no raster painted for a ratio layer");
   const [up0, down0] = await ref(2, 0.5);
   assert.ok(up0 > 0 && down0 > 0); assert.deepEqual(g.marks, [up0, down0], "legend counts = cells at or beyond the thresholds");
-  assert.match(g.legend, new RegExp(`徒歩移動者数（直近 60 分、有事 ÷ 平時。セルの中心に矢印）.*増加 200 % 以上 ${up0} セル.*減少 50 % 以下 ${down0} セル`));
+  assert.match(g.legend, /^徒歩移動者数（有事 ÷ 平時）↑増加 200 % 以上↓減少 50 % 以下$/, "layer name, then the two arrows with their thresholds");
+  assert.equal(await page.getAttribute("#legendGrid", "title"), `この時刻: 増加 ${up0} セル、減少 ${down0} セル（直近 60 分）`, "cell counts in the tooltip");
   assert.equal(g.size[0], "interpolate", "arrow size follows the zoom");
   // zoomed in, every marked cell in view has its arrow, on the cell centre, pointing the way of the cell's ratio
   await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 15 }));
@@ -512,7 +513,8 @@ test("walker-change layer: arrows at the cell centres for ratio layers, a colour
   const [up1, down1] = await ref(1.3, 0.8);
   const g2 = await page.evaluate(() => ({ legend: document.getElementById("legendGrid").textContent, up: S.gridUp, down: S.gridDown, marks: [S.grid.cur.marks.up, S.grid.cur.marks.down] }));
   assert.deepEqual([g2.up, g2.down], [1.3, 0.8]); assert.deepEqual(g2.marks, [up1, down1]); assert.ok(up1 > up0 && down1 > down0, "looser thresholds -> more arrows");
-  assert.match(g2.legend, new RegExp(`増加 130 % 以上 ${up1} セル.*減少 80 % 以下 ${down1} セル`));
+  assert.match(g2.legend, /増加 130 % 以上.*減少 80 % 以下/);
+  assert.equal(await page.getAttribute("#legendGrid", "title"), `この時刻: 増加 ${up1} セル、減少 ${down1} セル（直近 60 分）`);
   await page.fill("#gridUp", "5"); await page.fill("#gridDown", "0.1");   // nothing beyond 500 % or below 10 % in the sample: the arrows go (setData is applied asynchronously)
   await page.waitForFunction(() => S.grid.cur.marks.th === "5/0.1" && map.getSource("grid-marks").serialize().data.features.length === 0 && map.queryRenderedFeatures({ layers: ["grid-marks"] }).length === 0, null, { timeout: 15000 });
   await page.fill("#gridUp", "2"); await page.fill("#gridDown", "0.5"); await page.waitForTimeout(500);
@@ -532,7 +534,7 @@ test("walker-change layer: arrows at the cell centres for ratio layers, a colour
     legend: document.getElementById("legendGrid").textContent, at: gridAt(map.getCenter()), max: S.grid.cur.max, url: S.grid.cur.url }));
   assert.deepEqual(await vis(), ["visible", "none"], "count layer: colour fill, no arrows");
   assert.equal(u.th, "none"); assert.notEqual(u.mx, "none"); assert.equal(u.at, "24 人", "centre cell: baseline 8 x 3 in the flood window");
-  assert.match(u.legend, /ユニーク ID 数 有事（人）（直近 15 分）.*上限 \d+ 人、自動。0 は透明/); assert.ok(u.max >= 24, "auto limit = the slot's max");
+  assert.match(u.legend, /ユニーク ID 数 有事（人）.*（上限 \d+ 人、自動）/); assert.ok(u.max >= 24, "auto limit = the slot's max");
   await page.fill("#gridMax", "10"); await page.waitForTimeout(500);
   const u2 = await page.evaluate(() => ({ legend: document.getElementById("legendGrid").textContent, url: S.grid.cur.url, mx: S.gridMax }));
   assert.match(u2.legend, /上限 10 人、指定/); assert.equal(u2.mx, 10); assert.notEqual(u2.url, u.url, "repainted with the new limit");
@@ -675,7 +677,7 @@ test("appliance points (input 4): time-series CSVs, classes per slot, always vis
   cls = await page.evaluate(() => S.kadenFeats.map((f) => f.properties.cls));
   assert.equal(cls.filter((c) => c === 3).length, 6); assert.ok(cls.filter((c) => c === 0).length >= 3, "baseline below 5 is not judged");
   assert.match(await page.textContent("#kadenVal"), /^40 地点（減少 6 \/ 増加 0）$/);
-  assert.match(await page.textContent("#legendKaden"), /減少（平時の 1\/3 以下） 6/);
+  assert.equal(await page.textContent("#legendKaden"), "平時比1/3 以下2/3 以下平時並み3 倍以上判定なし", "five classes, short labels");
   // the layer is independent of the others; the chart panel shows the point's series
   for (const [id, label] of [["#chkWalk", "with trajectories"], ["#chkRoads", "without roads"], ["#chkRoads", "roads back"], ["#chkWalk", "trajectories off"]]) {
     await page.click(id);
@@ -718,7 +720,8 @@ test("SNS posts (input 6, FASTALERT layout): CSV parsing, time window, stacked p
   await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
   const w = await page.evaluate(() => ({ feats: S.snsFeats.map((f) => f.properties), val: document.getElementById("snsVal").textContent, legend: document.getElementById("legendSns").textContent }));
   assert.equal(w.feats.length, 5); assert.equal(w.feats.reduce((a, f) => a + f.n, 0), 10); assert.ok(w.feats.some((f) => f.n === 6 && f.cat === "浸水・冠水"));
-  assert.match(w.val, /^10 件・5 地点（直近 1 時間）$/); assert.match(w.legend, /浸水・冠水 \d+.*座標なし 5 件/);
+  assert.match(w.val, /^10 件・5 地点（直近 1 時間）$/); assert.match(w.legend, /^浸水・冠水 \d+/); assert.doesNotMatch(w.legend, /座標なし|クリック/, "no explanations in the legend");
+  assert.match(await page.textContent("#snsNote"), /座標のない 5 件は地図に出せない/, "the posts without coordinates are noted in 詳細設定");
   await page.click("#dtSns summary");   // 詳細設定 > SNS 投稿
   await page.selectOption("#snsWin", "all"); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => S.snsFeats.length), 35, "all posts regardless of time");

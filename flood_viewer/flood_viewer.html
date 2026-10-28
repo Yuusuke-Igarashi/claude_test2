@@ -17,12 +17,12 @@
   --road-gray:#b4b2ab; --road-black:#1a1a19; --road-red:#d03b3b;
   --lv1:#f0a23a; --lv2:#d03b3b; --lv3:#7a0f3d;   /* error level 1 / 2 / 3 (3 = strongest drop) */
   --font:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
-  --side:340px;   /* sidebar width */
+  --side:360px;   /* sidebar width */
 }
-html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);background:var(--page);font-size:13px}
+html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);background:var(--page);font-size:14px}
 #side{position:absolute;left:0;top:0;bottom:0;width:var(--side);box-sizing:border-box;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);box-shadow:2px 0 10px rgba(0,0,0,.06);padding:12px 14px 24px;z-index:7}
-#side h1{font-size:14px;font-weight:600;margin:0 0 10px;line-height:1.45}
-#side h2{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--grid)}
+#side h1{font-size:16px;font-weight:600;margin:0 0 10px;line-height:1.45}
+#side h2{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--grid)}
 #main{position:absolute;left:var(--side);right:0;top:0;bottom:0}
 #map{position:absolute;inset:0}
 .timeRow{display:flex;align-items:center;gap:12px}
@@ -30,52 +30,52 @@ html,body{margin:0;height:100%;font-family:var(--font);color:var(--ink);backgrou
 .lyr{display:flex;align-items:center;gap:8px;padding:4px 2px;cursor:pointer;color:var(--ink)}
 .lyr input{margin:0;accent-color:var(--ink)}
 .lyr.na{color:var(--muted);cursor:not-allowed}
-.lyr .na-note{margin-left:auto;font-size:11px;color:var(--muted)}
+.lyr .na-note{margin-left:auto;font-size:12px;color:var(--muted)}
 .lgBox{display:none;margin:0 0 10px}
 .lgHead{font-weight:600;color:var(--ink);margin-bottom:3px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-.lgHead .stat{font-weight:400;font-size:12px;white-space:normal}
-#lgNone{color:var(--muted);font-size:12px}
+.lgHead .stat{font-weight:400;font-size:13px;white-space:normal}
+#lgNone{color:var(--muted);font-size:13px}
 .det{border-top:1px solid var(--grid);padding:6px 0}
 .det:first-of-type{border-top:0}
 .det summary{cursor:pointer;font-weight:600;color:var(--ink);padding:2px 0}
-.det .grp{margin:8px 0 4px;color:var(--muted);font-size:11px;letter-spacing:.02em;line-height:1.45}
+.det .grp{margin:8px 0 4px;color:var(--muted);font-size:12px;letter-spacing:.02em;line-height:1.45}
 .det .row{display:flex;align-items:center;gap:6px;margin:5px 0;color:var(--ink2);flex-wrap:wrap}
 .det select{font:inherit;padding:2px 4px;border:1px solid var(--axis);border-radius:5px;background:var(--surface);color:inherit;max-width:100%}
 .det input[type=number]{width:62px;font:inherit;padding:3px 6px;border:1px solid var(--axis);border-radius:5px;text-align:right;font-variant-numeric:tabular-nums}
 .det label{margin-right:8px;color:var(--ink2);cursor:pointer}
-.det .note{color:var(--muted);font-size:11px;margin-top:8px;line-height:1.5}
+.det .note{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5}
 .det .check{margin-top:8px;color:var(--ink2);font-variant-numeric:tabular-nums;line-height:1.45}
 .det .check.ok{color:#006300}
 .det .check.ng{color:var(--road-red)}
 .det .foot{display:flex;gap:8px;margin-top:10px}
 .det .lvGrid{display:grid;grid-template-columns:auto 64px auto 64px;gap:4px 8px;align-items:center;color:var(--ink2);margin:4px 0}
-.det .lvGrid .h{font-size:11px;color:var(--muted)}
+.det .lvGrid .h{font-size:12px;color:var(--muted)}
 .det .lvGrid input[type=number]{width:100%;box-sizing:border-box}
 .det label.cb{display:flex;gap:6px;align-items:flex-start;margin-right:0;line-height:1.45}
 .det label.cb input{margin:2px 0 0;flex:none}
-.arr{font-weight:700;font-size:15px;line-height:1;margin-right:3px}
+.arr{font-weight:700;font-size:16px;line-height:1;margin-right:3px}
 .arr.up{color:var(--grid-up,#d03b3b)} .arr.down{color:var(--grid-down,#2a78d6)}
 .panel{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.10);padding:10px 12px;z-index:5}
-#timeLabel{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.2em}
+#timeLabel{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;min-width:5.2em}
 #slider{display:block;width:100%;margin:10px 0 4px;accent-color:var(--ink)}
 button{font:inherit;padding:4px 10px;border:1px solid var(--axis);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
 button:hover{background:#f0efec}
 .stat{color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .stat b{color:var(--ink);font-weight:600}
-.legend{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;color:var(--ink2);white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;color:var(--ink2);white-space:nowrap;font-size:13px}
 .legend span::before{content:"";display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px;background:var(--c)}
 #chartPanel{bottom:24px;left:10px;width:440px;display:none}
 #chartPanel.pinned{border-color:var(--ink)}
 #chartPanel header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-#chartPanel header .title{font-weight:600;font-size:14px}
+#chartPanel header .title{font-weight:600;font-size:15px}
 #chartPanel header .sub{color:var(--muted)}
-#chartPanel .status{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;color:#fff;margin-left:6px;vertical-align:middle}
+#chartPanel .status{display:inline-block;padding:1px 8px;border-radius:10px;font-size:13px;color:#fff;margin-left:6px;vertical-align:middle}
 .readout{display:grid;grid-template-columns:auto 1fr 1fr;gap:2px 12px;color:var(--ink2);font-variant-numeric:tabular-nums;margin:4px 0 6px}
-.readout .h{color:var(--muted);font-size:11px}
+.readout .h{color:var(--muted);font-size:12px}
 .readout .v{color:var(--ink);text-align:right}
 .chart{display:block;width:100%;height:150px}
-.chart text{font-family:var(--font);font-size:11px;fill:var(--muted)}
-.chart .ttl{fill:var(--ink2);font-size:12px;font-weight:600}
+.chart text{font-family:var(--font);font-size:12px;fill:var(--muted)}
+.chart .ttl{fill:var(--ink2);font-size:13px;font-weight:600}
 .chart .grid{stroke:var(--grid);stroke-width:1}
 .chart .axis{stroke:var(--axis);stroke-width:1}
 .chart .l1{stroke:var(--series-1);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
@@ -85,38 +85,40 @@ button:hover{background:#f0efec}
 .chart .err.l1{fill:var(--lv1)} .chart .err.l2{fill:var(--lv2)} .chart .err.l3{fill:var(--lv3)}
 .chart .cross{stroke:var(--muted);stroke-width:1}
 .chart .dot{stroke:var(--surface);stroke-width:2}
-.chart .tip{fill:var(--ink);font-size:11px}
+.chart .tip{fill:var(--ink);font-size:12px}
 .chart .tipbg{fill:var(--surface);stroke:var(--border)}
 .clegend{display:flex;gap:14px;color:var(--ink2);margin-top:2px}
 .clegend span::before{content:"";display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px;background:var(--c)}
-.hint{color:var(--muted);font-size:11px;margin-top:6px}
-#trajStatus{display:none;color:var(--ink2);font-size:12px;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.5}
-#tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:320px}
+.hint{color:var(--muted);font-size:12px;margin-top:6px}
+#trajStatus{display:none;color:var(--ink2);font-size:13px;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.5;white-space:pre-line}
+#tip{position:absolute;z-index:8;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-width:320px}
 #tip .k{color:var(--muted)}
 .legend .pt::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--c)}
 .legend .ring::before{width:9px;height:9px;border-radius:50%;background:var(--surface);border:3px solid var(--c);box-shadow:none}
 .legend .turn::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);box-shadow:none}
 .legend .grp{color:var(--muted);margin-left:4px}
-#rainDate{font:inherit;font-size:12px;padding:1px 2px}
-#legendRain,#legendKaden,#legendSns,#legendGrid{display:none;flex-wrap:wrap;gap:3px 0;align-items:center;color:var(--ink2);font-size:11px;padding-top:2px;line-height:1.5}
+#rainDate{font:inherit;font-size:13px;padding:1px 2px}
+#legendRain,#legendKaden,#legendSns,#legendGrid{display:none;flex-wrap:wrap;gap:4px 0;align-items:center;color:var(--ink2);font-size:13px;padding-top:2px;line-height:1.5}
+.lab.cap{flex-basis:100%;color:var(--muted)}
+.it{display:inline-flex;align-items:center;white-space:nowrap;margin-right:10px}
 #legendRain .sw,#legendKaden .sw,#legendSns .sw,#legendGrid .sw{display:inline-block;width:26px;height:10px;margin-right:2px;vertical-align:middle}
 #legendRain .lab,#legendKaden .lab,#legendSns .lab,#legendGrid .lab{margin-right:6px}
 #legendKaden .dot,#legendSns .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
-#snsCallout h3{margin:0 18px 4px 0;font-size:13px;line-height:1.3}
-#snsCallout .meta{color:var(--ink2);font-size:11px;margin-bottom:4px}
+#snsCallout h3{margin:0 18px 4px 0;font-size:14px;line-height:1.3}
+#snsCallout .meta{color:var(--ink2);font-size:12px;margin-bottom:4px}
 #snsCallout .txt{white-space:pre-wrap;line-height:1.45;word-break:break-word}
-#snsCallout .nav{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:11px;color:var(--ink2)}
-#snsCallout button{font:inherit;font-size:11px;padding:1px 6px;cursor:pointer}
-#snsCallout .close{position:absolute;right:6px;top:4px;border:0;background:none;font-size:15px;line-height:1;color:var(--ink2)}
-#nearestBtn{font-size:12px;padding:2px 8px}
+#snsCallout .nav{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:12px;color:var(--ink2)}
+#snsCallout button{font:inherit;font-size:12px;padding:1px 6px;cursor:pointer}
+#snsCallout .close{position:absolute;right:6px;top:4px;border:0;background:none;font-size:16px;line-height:1;color:var(--ink2)}
+#nearestBtn{font-size:13px;padding:2px 8px}
 #loader{position:absolute;inset:0;background:rgba(249,249,247,.92);z-index:20;display:flex;align-items:center;justify-content:center}
 #loader .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;width:520px;max-width:90vw}
-#loader h2{margin:0 0 8px;font-size:15px}
+#loader h2{margin:0 0 8px;font-size:16px}
 #loader ul{margin:6px 0;padding-left:18px;color:var(--ink2)}
 #loader .err{color:var(--road-red)}
 #progress{color:var(--ink2);margin-top:8px;font-variant-numeric:tabular-nums}
 #filePick{display:none;margin-top:10px}
-.maplibregl-ctrl-attrib{font-size:10px}
+.maplibregl-ctrl-attrib{font-size:11px}
 </style>
 </head>
 <body>
@@ -124,7 +126,7 @@ button:hover{background:#f0efec}
   <h1 id="title">Tokyo 2024-08-21 Flood Candidates</h1>
   <div class="timeRow"><button id="playBtn" title="Space">▶ 再生</button><span id="timeLabel">--:--</span></div>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
-  <div class="stat" id="statTraffic">道路: 対象 <b id="stTarget">-</b> 本 / 異常 <b id="stError">-</b> 本（L1 <b id="stL1">-</b> / L2 <b id="stL2">-</b> / L3 <b id="stL3">-</b>）</div>
+  <div class="stat" id="statTraffic">道路の異常 <b id="stError">-</b> 本（対象 <b id="stTarget">-</b> 本）<br>L1 <b id="stL1">-</b> ・ L2 <b id="stL2">-</b> ・ L3 <b id="stL3">-</b></div>
 
   <section id="layersBlock">
     <h2>表示</h2>
@@ -146,7 +148,7 @@ button:hover{background:#f0efec}
     <div class="lgBox" id="lgWalk"><div class="lgHead">徒歩の軌跡</div>
       <div class="legend" id="legendTraj">
         <span style="--c:var(--series-1)">平時</span><span style="--c:var(--series-2)">イベント時</span>
-        <span style="--c:var(--ink2)">徒歩軌跡</span><span class="pt" style="--c:var(--ink2)">滞留</span><span class="ring" style="--c:var(--ink2)">車→徒歩</span><span class="turn" style="--c:var(--ink2)">方向転換</span>
+        <span style="--c:var(--ink2)">軌跡</span><span class="pt" style="--c:var(--ink2)">滞留</span><span class="ring" style="--c:var(--ink2)">車→徒歩</span><span class="turn" style="--c:var(--ink2)">方向転換</span>
       </div>
       <div id="trajStatus"></div>
     </div>
@@ -188,13 +190,14 @@ button:hover{background:#f0efec}
       <div class="row">表示する値 <select id="gridParam"></select></div>
       <div class="row" id="gridThOpt"><span class="arr up">↑</span>比 ≥ <input type="number" id="gridUp" step="0.1" min="0"> <span class="arr down">↓</span>比 ≤ <input type="number" id="gridDown" step="0.05" min="0"></div>
       <div class="row" id="gridMaxOpt" style="display:none">色の上限 <input type="number" id="gridMax" step="1" min="0" placeholder="自動"></div>
-      <div class="note">比（有事 ÷ 平時）の値は、増えたセルと減ったセルの中心に矢印を描きます。人数の値は色の濃さで塗ります。</div>
+      <div class="note">比（有事 ÷ 平時）の値は、増えたセルと減ったセルの中心に矢印を描きます（その間と平時 0 のセルは矢印なし）。縮小して矢印がセルより大きくなると、近くの数セルをまとめ、変化の最も大きいセルの矢印をまとまりの中心に 1 つ描きます。人数の値は色の濃さで塗ります（0 は透明）。</div>
     </details>
     <details class="det" id="dtRain"><summary>降雨</summary>
       <div class="row">日付 <select id="rainDate"></select></div>
       <div class="note" id="rainDateNote"></div>
     </details>
     <details class="det" id="dtSns"><summary>SNS 投稿</summary>
+      <div class="note" id="snsNote" style="margin:4px 0">丸の色は区分、大きさは同じ地点の件数。クリックで本文を開きます。</div>
       <div class="row">表示する投稿 <select id="snsWin"><option value="60">直近 1 時間</option><option value="180">直近 3 時間</option><option value="day">当日 0 時から</option><option value="all">すべて</option></select></div>
     </details>
   </section>
@@ -225,7 +228,7 @@ button:hover{background:#f0efec}
 <svg id="snsLead" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;display:none">
   <line id="snsLeadLine" x1="0" y1="0" x2="0" y2="0" stroke="#222" stroke-width="1.5"/><circle id="snsLeadDot" cx="0" cy="0" r="3.5" fill="#222"/>
 </svg>
-<div id="snsCallout" class="panel" style="display:none;width:330px;max-height:60vh;overflow:auto;font-size:12px;z-index:6"></div>
+<div id="snsCallout" class="panel" style="display:none;width:330px;max-height:60vh;overflow:auto;font-size:13px;z-index:6"></div>
 
 <div id="loader">
   <div class="box">
@@ -599,6 +602,7 @@ function kadenCls(base, ev){
 }
 const KADEN_LABEL = {0:"平時の台数が少ない / データなし", 1:"平時並み", 2:"減少（平時の 2/3 以下）", 3:"減少（平時の 1/3 以下）", 4:"増加（平時の 3 倍以上）"};
 const KADEN_COLOR = {0:"#9aa3ad", 1:"#4b5563", 2:"#f59e0b", 3:"#dc2626", 4:"#2563eb"};
+const KADEN_SHORT = {0:"判定なし", 1:"平時並み", 2:"2/3 以下", 3:"1/3 以下", 4:"3 倍以上"};   // legend labels (the chart panel keeps KADEN_LABEL)
 
 function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], snsList = []){
   const want = CONFIG.files;
@@ -1289,14 +1293,14 @@ function windowLabel(t){
   return `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}–${S.times[t]}`;
 }
 
-// Status line of the walking-trajectory layer (凡例 block): zoom gate, loading, the counts in view.
-function trajStatus(text){
+// Status of the walking-trajectory layer (凡例 block): zoom gate, loading, the counts in view; details in the tooltip (title).
+function trajStatus(text, title = ""){
   const el = $("trajStatus");
   if(!walkOn()){ el.style.display = "none"; return; }
   el.style.display = "block";
-  if(text !== undefined){ el.textContent = text; return; }
+  if(text !== undefined){ el.textContent = text; el.title = title; return; }
   const z = map.getZoom();
-  if(z < CONFIG.TRAJ_MIN_ZOOM) el.textContent = `軌跡はズーム ${CONFIG.TRAJ_MIN_ZOOM} 以上で表示されます（現在 ${z.toFixed(1)}）`;
+  if(z < CONFIG.TRAJ_MIN_ZOOM){ el.textContent = `ズーム ${CONFIG.TRAJ_MIN_ZOOM} 以上で表示（現在 ${z.toFixed(1)}）`; el.title = ""; }
 }
 
 const hasTraj = () => !!(S.traj || S.lazy);
@@ -1310,7 +1314,7 @@ function ensureSlot(t){
   if(L.cache.has(key)){ S.traj = L.cache.get(key); L.loaded = key; return true; }
   if(L.loading === key) return false;
   L.loading = key;
-  trajStatus(`${key} の軌跡を読み込み中 …`);
+  trajStatus(`${key} を読み込み中…`);
   const files = [["baseline","base"],["event","event"]];
   Promise.all(files.map(([fr]) => { const src = L.sources.get(`${fr}_${key}`); return src ? readSource(src).then(JSON.parse) : Promise.resolve(null); }))
     .then(results => {
@@ -1353,7 +1357,7 @@ function updateTraj(){
     }
     return {type:"FeatureCollection", features:out};
   };
-  const parts = [], totals = [];
+  const lines = [], totals = [], short = (K) => K.src === "traj" ? "軌跡" : K.label;
   let shown = 0, total = 0;
   for(const role of ROLES){
     const seg = [], tot = [];
@@ -1363,16 +1367,15 @@ function updateTraj(){
       map.getSource(`${K.src}-${role}`).setData(fc);
       const all = ds ? ds.byTime[S.t].length : 0;
       shown += fc.features.length; total += all;
-      seg.push(`${K.label} ${fc.features.length} ${K.unit}`);
-      if(all) tot.push(`${K.label} ${all}`);
+      seg.push(`${short(K)} ${fc.features.length}`);
+      if(all) tot.push(`${short(K)} ${all}`);
     }
-    parts.push(`${ROLE_LABEL[role]} ${seg.join("・")}`);
+    lines.push(`${ROLE_LABEL[role]}: ${seg.join("・")}`);
     totals.push(`${ROLE_LABEL[role]} ${tot.length ? tot.join("・") : "なし"}`);
   }
-  let diag = `　｜ この時刻のデータ全体: ${totals.join(" / ")}`;
-  if(S.traj._missing && S.traj._missing.length) diag += `　｜ ファイルなし: ${S.traj._missing.join(", ")}`;
-  if(total && !shown) diag += "　｜ 表示範囲内にはありません（「最寄りの軌跡へ」で移動）";
-  trajStatus(`${windowLabel(S.t)} の軌跡（表示範囲内）: ${parts.join(" / ")}${diag}　｜ クリックで強調（もう一度クリックか空白で解除）`);
+  if(total && !shown) lines.push("表示範囲内にはありません（詳細設定の「最寄りの軌跡へ」で移動）");
+  const missing = S.traj._missing && S.traj._missing.length ? `。ファイルなし: ${S.traj._missing.join(", ")}` : "";
+  trajStatus(lines.join("\n"), `${windowLabel(S.t)}（直近 ${CONFIG.TRAJ_WINDOW_MIN} 分）の表示範囲内の件数。この時刻のデータ全体: ${totals.join(" / ")}${missing}。クリックで強調（もう一度クリックか空白で解除）`);
 }
 
 // Fly to the feature of the current slot (visible roles / kinds) nearest to the map centre.
@@ -1389,7 +1392,7 @@ function flyToNearest(){
       if(!best || d < best.d) best = {d, x, y};
     }
   }
-  if(!best){ trajStatus(`${windowLabel(S.t)}: 表示中の種類・平時/イベント時に該当するデータがありません`); return; }
+  if(!best){ trajStatus("表示する種類・平時／イベント時に当たる軌跡がありません（詳細設定を確認）"); return; }
   map.flyTo({center:[best.x, best.y], zoom: Math.max(map.getZoom(), CONFIG.TRAJ_MIN_ZOOM + 1), duration: 600});
 }
 
@@ -1404,6 +1407,7 @@ const RAIN_CACHE = 8;
 function setupOverlays(){
   if(S.sns){
     $("snsWin").value = S.snsWin;
+    if(S.sns.noCoord) $("snsNote").textContent += `座標のない ${S.sns.noCoord} 件は地図に出せないため表示しません。`;
     $("snsWin").addEventListener("change", (e) => { S.snsWin = e.target.value; e.target.blur(); updateSns(); });
   }
   if(S.rain){
@@ -1416,10 +1420,10 @@ function setupOverlays(){
       $("rainDateNote").textContent = "期間に合わせて時刻ごとに自動で選びます（日付をまたいだ時刻は翌日）。";
     }
     const lg = $("legendRain");
-    const unit = (S.rain.index.unit || "").startsWith("mm (") ? "降雨量 mm（15 分）" : "降雨 mm/h（15 分平均）";
+    const unit = (S.rain.index.unit || "").startsWith("mm (") ? "mm（15 分）" : "mm/h";
     lg.innerHTML = `<span class="lab">${unit}</span>` + CONFIG.RAIN_SCALE.map(([v, c], i) => {
       const next = CONFIG.RAIN_SCALE[i+1];
-      return `<span class="sw" style="background:${c}"></span><span class="lab">${v}${next ? "–" + next[0] : "+"}</span>`;
+      return `<span class="it"><span class="sw" style="background:${c}"></span>${v}${next ? "–" + next[0] : "+"}</span>`;
     }).join("");
     lg.style.display = "flex";
     // value under the cursor
@@ -1457,18 +1461,18 @@ function gridLegend(){
   const [, label, kind, unit, win] = L;
   if(kind === "count"){
     const mx = S.gridMax || (G.cur && G.cur.max) || 0, auto = S.gridMax ? "指定" : "自動";
+    lg.title = `直近 ${win} 分。0 は透明`;
     const fmt = (v) => Number.isInteger(v) ? String(v) : v.toFixed(1);
-    lg.innerHTML = `<span class="lab">${esc(label)}（直近 ${win} 分）</span>`
-      + CONFIG.GRID_COUNT_COLORS.map((c, i) => `<span class="sw" style="background:${c}"></span><span class="lab">${fmt(mx * i / 5)}–${i === 4 ? "" : fmt(mx * (i + 1) / 5)}${i === 4 ? "+" : ""}</span>`).join("")
-      + `<span class="lab">（上限 ${fmt(mx)}${unit ? " " + esc(unit) : ""}、${auto}。0 は透明）</span>`;
+    lg.innerHTML = `<span class="lab cap">${esc(label)}</span>`
+      + CONFIG.GRID_COUNT_COLORS.map((c, i) => `<span class="it"><span class="sw" style="background:${c}"></span>${fmt(mx * i / 5)}${i === 4 ? "+" : ""}</span>`).join("")
+      + `<span class="lab">（上限 ${fmt(mx)}${unit ? " " + esc(unit) : ""}、${auto}）</span>`;
   } else {
-    const up = Math.round(S.gridUp * 100), down = Math.round(S.gridDown * 100);
-    const n = G.cur && G.cur.key === gridKey() ? G.cur.marks : null, cells = (k) => n ? ` ${n[k].toLocaleString()} セル` : "";
-    lg.innerHTML = `<span class="lab">${esc(label.replace("（有事 ÷ 平時）", ""))}（直近 ${win} 分、有事 ÷ 平時。セルの中心に矢印）</span>`
-      + `<span class="arr up">↑</span><span class="lab">増加 ${up} % 以上${cells("up")}</span>`
-      + `<span class="arr down">↓</span><span class="lab">減少 ${down} % 以下${cells("down")}</span>`
-      + `<span class="lab">その間と平時 0 のセルは矢印なし。縮小して矢印がセルより大きくなると、近くの数セルをまとめ、変化の最も大きいセルの矢印をまとまりの中心に 1 つ描く</span>`
-      + (S.gridDown >= S.gridUp ? `<span class="lab" style="color:var(--road-red)">減少の閾値が増加の閾値以上です（両方に当たるセルは増加）</span>` : "");
+    const n = G.cur && G.cur.key === gridKey() ? G.cur.marks : null;   // cells of the whole slot, in the tooltip
+    lg.title = n ? `この時刻: 増加 ${n.up.toLocaleString()} セル、減少 ${n.down.toLocaleString()} セル（直近 ${win} 分）` : "";
+    lg.innerHTML = `<span class="lab cap">${esc(label)}</span>`
+      + `<span class="it"><span class="arr up">↑</span>増加 ${Math.round(S.gridUp * 100)} % 以上</span>`
+      + `<span class="it"><span class="arr down">↓</span>減少 ${Math.round(S.gridDown * 100)} % 以下</span>`
+      + (S.gridDown >= S.gridUp ? `<span class="lab cap" style="color:var(--road-red)">減少の閾値が増加の閾値以上です（両方に当たるセルは増加）</span>` : "");
   }
   lg.style.display = "flex";
 }
@@ -1727,9 +1731,9 @@ function updateSns(){
   const lg = $("legendSns");
   if(S.showSns && cats.size){
     const top = [...cats.entries()].sort((a, b) => b[1] - a[1]);
-    lg.innerHTML = `<span class="lab">SNS 投稿（区分、丸の大きさ = 同じ地点の件数。クリックで本文）</span>` + top.slice(0, 8).map(([c, n]) =>
-      `<span class="dot" style="background:${CONFIG.SNS_COLORS[c] || CONFIG.SNS_DEFAULT_COLOR}"></span><span class="lab">${esc(c)} ${n}</span>`).join("")
-      + (top.length > 8 ? `<span class="lab">他 ${top.length - 8} 区分</span>` : "") + (S.sns.noCoord ? `<span class="lab">（座標なし ${S.sns.noCoord} 件は非表示）</span>` : "");
+    lg.innerHTML = top.slice(0, 8).map(([c, n]) =>
+      `<span class="it"><span class="dot" style="background:${CONFIG.SNS_COLORS[c] || CONFIG.SNS_DEFAULT_COLOR}"></span>${esc(c)} ${n}</span>`).join("")
+      + (top.length > 8 ? `<span class="lab">他 ${top.length - 8} 区分</span>` : "");
     lg.style.display = "flex";
   } else lg.style.display = "none";
   if(S.snsSel){ const g = S.snsNow.get(S.snsSel.key); if(!g) closeSnsCallout(); else openSnsCallout(S.snsSel.key, Math.min(S.snsSel.idx, g.posts.length - 1)); }
@@ -1964,8 +1968,8 @@ function updateKaden(){
   $("kadenVal").textContent = S.showKaden ? `${n.toLocaleString()} 地点（減少 ${(cnt[2] + cnt[3]).toLocaleString()} / 増加 ${cnt[4].toLocaleString()}）` : "";
   const lg = $("legendKaden");
   if(S.showKaden){
-    lg.innerHTML = `<span class="lab">家電の接続台数（郵便番号。丸の大きさ = 平時の台数、色 = 発災日 / 平時）</span>` +
-      [3, 2, 1, 4, 0].map(k => `<span class="dot" style="background:${KADEN_COLOR[k]}"></span><span class="lab">${KADEN_LABEL[k]} ${cnt[k]}</span>`).join("");
+    lg.innerHTML = `<span class="lab">平時比</span>` +
+      [3, 2, 1, 4, 0].map(k => `<span class="it"><span class="dot" style="background:${KADEN_COLOR[k]}"></span>${KADEN_SHORT[k]}</span>`).join("");
     lg.style.display = "flex";
   } else lg.style.display = "none";
   if(S.kadenChartIdx !== null && $("chartPanel").style.display !== "none") showKadenChart(S.kadenChartIdx);
