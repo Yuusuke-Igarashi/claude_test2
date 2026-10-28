@@ -126,7 +126,7 @@ button:hover{background:#f0efec}
 
 <div id="chartPanel" class="panel">
   <header>
-    <span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
+    <span><span class="kind" id="cpKind"></span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
     <span class="sub" id="cpSub"></span>
   </header>
   <div class="readout">
@@ -142,6 +142,7 @@ button:hover{background:#f0efec}
     <span style="--c:var(--lv1)">異常 L1</span><span style="--c:var(--lv2)">L2</span><span style="--c:var(--lv3)">L3</span>
   </div>
   <div class="hint" id="cpHint">クリックで固定 / もう一度クリックで解除</div>
+  <div id="cpNote"></div>
 </div>
 
 <div id="loader">
@@ -474,7 +475,7 @@ function initMap(gj){
     map.on("click", "links-hit", onClick);
     map.on("click", (e) => {   // a click beside the links releases a pinned chart
       const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
-      if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
+      if(!fts.length && S.pinnedId !== null){ clearPin(); hideChart(); }
     });
     setupOverlays();
     updateRain();
@@ -514,6 +515,12 @@ function rainDateFor(t){ return S.rain ? slotDate(t) : null; }
 // ============================================================
 // @from flood_viewer.html: setHover, placePanel, pickFeature, onHover, onClick
 function hideChart(){ $("chartPanel").style.display = "none"; }
+// The shared chart functions call these hooks of the full viewer's presentation mode (プレゼン表示); the simple viewer has none.
+function clearPin(){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
+function setSelLink(){}
+function renderDetail(){}
+function chartNote(){}
+const layerOn = (key) => key === "rain" ? !!S.rain && S.showRain : true;   // the shared updateRain / rainAt ask the full viewer's layer state
 
 // ============================================================
 // Time

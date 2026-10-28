@@ -732,6 +732,107 @@ test("title: the heading typed in 詳細設定 > タイトル, the period below 
   await page.close();
 });
 
+test("プレゼン表示 (P): header / map 60 % + detail 40 % / subtitle band at 1920 x 1080, scenes 1-6, selection highlight, panel, keys", async () => {
+  const page = await newPage();
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));
+  await page.setInputFiles("#gridInput", join(DATA, "grid"));
+  await page.setInputFiles("#kadenInput", join(DATA, "kaden"));
+  await page.setInputFiles("#rainInput", join(DATA, "rain"));
+  await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  await page.evaluate(() => applyTime(S.times.indexOf("00:30")));
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 13.6 })); await page.waitForTimeout(600);
+  const geo = () => page.evaluate(() => {
+    const r = (id) => { const b = document.getElementById(id).getBoundingClientRect(); return [b.left, b.top, b.width, b.height].map(Math.round); };
+    const band = document.getElementById("pzSub").getBoundingClientRect(), over = [];
+    for (const e of document.querySelectorAll("#stage *")) {   // content over the subtitle band (the band and the operator bar excepted)
+      if (e.closest("#pzSub, #pzBar")) continue;
+      const b = e.getBoundingClientRect(); if (!b.width || !b.height) continue;
+      if (b.bottom > band.top + 1 && b.top < band.bottom && getComputedStyle(e).visibility !== "hidden") over.push(e.id || e.className || e.tagName);
+    }
+    return { present: S.present, cls: document.documentElement.className, side: getComputedStyle(document.getElementById("side")).display, head: r("pzHead"), map: r("map"), detail: r("detail"), sub: r("pzSub"), bar: r("pzBar"),
+             heading: document.getElementById("pzHeading").textContent, chips: [...document.querySelectorAll("#pzChips span")].map((e) => e.className + ":" + e.textContent), clock: document.getElementById("pzClock").textContent,
+             overBand: [...new Set(over)], chartIn: !!document.querySelector("#dsChart > #chartPanel"), chartShown: document.getElementById("chartPanel").style.display,
+             vis: Object.fromEntries(["links-base", "rain", "kaden", "sns", "grid-marks"].map((l) => [l, map.getLayoutProperty(l, "visibility")])), rainOp: map.getPaintProperty("rain", "raster-opacity"),
+             roadOp: JSON.stringify(map.getPaintProperty("links-error", "line-opacity")), sel: [S.selLink, S.selPoint && S.selPoint.kind, S.detail], other: document.getElementById("dsOther").textContent };
+  });
+  // P: the presentation at 1920 x 1080 — header, the map 60 % and the detail panel 40 % of the width, the subtitle band below both, nothing over the band
+  await page.keyboard.press("p"); await page.waitForTimeout(700);
+  let g = await geo();
+  assert.equal(g.present, true); assert.equal(g.side, "none"); assert.deepEqual(g.head.slice(0, 3), [0, 0, 1920]);
+  assert.ok(Math.abs(g.map[2] - 1920 * 0.6) <= 2 && Math.abs(g.detail[2] - 1920 * 0.4) <= 2, `map / panel 60 / 40: ${g.map} ${g.detail}`);
+  assert.equal(g.map[1], g.head[3]); assert.equal(g.detail[0], g.map[0] + g.map[2]); assert.equal(g.map[1] + g.map[3], g.sub[1], "the map ends where the subtitle band starts");
+  assert.equal(g.sub[1] + g.sub[3], 1080); assert.ok(g.sub[3] >= 120, "a subtitle band of at least 120 px"); assert.deepEqual(g.overBand, [], "nothing but the operator bar over the subtitle band");
+  assert.equal(g.heading, "交通量の変化から、冠水が疑われる道路を絞り込む"); assert.equal(g.clock, "2024年8月22日00:30");
+  assert.deepEqual(g.chips, ["lab:表示中", "faint:降雨 ・ 薄く", "focus:道路の異常"]);
+  assert.deepEqual(g.vis, { "links-base": "visible", rain: "visible", kaden: "none", sns: "none", "grid-marks": "none" }, "traffic: roads in focus, rain faint, the rest hidden");
+  assert.ok(Math.abs(g.rainOp - 0.55 * 0.3) < 1e-6, "rain dimmed"); assert.ok(g.chartIn, "the chart panel sits in the detail column"); assert.match(g.other, /交通.*1,057.*本/);
+  // a click pins a level-3 link: the navy highlight on the map (feature-state sel), the chart in the panel named as the selected road, direct line labels and the time tag
+  const pt = await findLink(page, 4, await page.evaluate(() => S.t));
+  await hover(page, pt);
+  const box = await page.locator("#map").boundingBox();
+  await page.mouse.click(box.x + pt.x, box.y + pt.y); await page.waitForTimeout(400);
+  await page.mouse.move(box.x + 40, box.y + 40); await page.waitForTimeout(300);
+  const c = await page.evaluate(() => ({ pinned: S.pinnedId, sel: S.selLink, state: map.getFeatureState({ source: "links", id: S.pinnedId }), kind: document.getElementById("cpKind").textContent, title: document.getElementById("cpTitle").textContent,
+    pinnedLink: S.gj.features[S.pinnedId].properties.id,   // the opposing link sits 1 m away: the picked one is the higher class under the cursor
+    h: [document.getElementById("roH1").textContent, document.getElementById("roH2").textContent], labels: [...document.querySelectorAll("#chartSpeed .slab")].map((e) => e.textContent), tlab: document.querySelector("#chartSpeed .tlab").textContent,
+    note: document.getElementById("cpNote").textContent, chartH: document.getElementById("chartSpeed").getBoundingClientRect().height, fs: getComputedStyle(document.documentElement).getPropertyValue("--chart-fs").trim() }));
+  assert.equal(c.pinned, c.sel); assert.deepEqual(c.state, { cls: 4, hover: 0, sel: 1 }); assert.equal(c.kind, "選択中の道路"); assert.equal(c.title, `Link ${c.pinnedLink}`, "the panel names the highlighted road");
+  assert.deepEqual(c.h, ["平時", "対象日"]); assert.deepEqual(c.labels.sort(), ["対象日", "平時"]); assert.equal(c.tlab, "00:30"); assert.match(c.note, /帯 = 異常と判定した時間帯/);
+  assert.ok(c.chartH >= 220 && c.fs === "17px", `chart ${c.chartH} px, text ${c.fs}`);
+  // R: rain 薄い -> 非表示 -> 通常 -> 薄い (the checkbox state of the normal view is untouched)
+  const levels = [];
+  for (let i = 0; i < 3; i++) { await page.keyboard.press("r"); await page.waitForTimeout(200); levels.push(await page.evaluate(() => [S.rainLevel, map.getLayoutProperty("rain", "visibility"), map.getPaintProperty("rain", "raster-opacity"), S.showRain])); }
+  assert.deepEqual(levels, [["off", "none", 0.165, true], ["full", "visible", 0.55, true], ["dim", "visible", 0.165, true]]);
+  // scene 1 (rain): the pinned road goes, rain at full strength, a click probes the rain (faint roads are not clickable)
+  await page.keyboard.press("1"); await page.waitForTimeout(500);
+  g = await geo();
+  assert.equal(g.heading, "降雨の分布から、強い雨の範囲と時刻をつかむ"); assert.equal(g.chartShown, "none"); assert.deepEqual(g.sel, [null, null, null]); assert.equal(g.rainOp, 0.55); assert.match(g.roadOp, /0\.3/);
+  await page.mouse.click(box.x + pt.x, box.y + pt.y); await page.waitForTimeout(400);
+  const probe = await page.evaluate(() => ({ pinned: S.pinnedId, detail: S.detail, kind: S.selPoint && S.selPoint.kind, text: document.getElementById("dsOther").textContent, v: rainAt(S.rainSel) }));
+  assert.equal(probe.pinned, null, "the faint road under the click is not picked"); assert.equal(probe.detail, "rain"); assert.equal(probe.kind, "rain"); assert.ok(probe.text.includes(probe.v) && /表示範囲の最大/.test(probe.text), probe.text);
+  // scene 3 (walk): the mesh arrows in focus; a click on a cell shows its ratio
+  await page.keyboard.press("3"); await page.waitForFunction(() => S.grid.cur && S.grid.cur.key === gridKey() && map.queryRenderedFeatures({ layers: ["grid-marks"] }).length > 0, null, { timeout: 15000 });
+  g = await geo(); assert.equal(g.vis["grid-marks"], "visible"); assert.deepEqual(g.sel, [null, null, null], "the rain probe went with the scene");
+  const cell = await page.evaluate(() => { const f = map.queryRenderedFeatures({ layers: ["grid-marks"] })[0], p = map.project(f.geometry.coordinates); return { x: p.x, y: p.y }; });
+  await page.mouse.click(box.x + cell.x, box.y + cell.y); await page.waitForTimeout(400);
+  const gd = await page.evaluate(() => ({ sel: S.gridSel, detail: S.detail, text: document.getElementById("dsOther").textContent, cellDrawn: map.getSource("sel-cell").serialize().data.features.length }));
+  assert.ok(gd.sel && gd.detail === "grid" && gd.cellDrawn === 1, JSON.stringify(gd)); assert.match(gd.text, /選択中のメッシュのセル.*徒歩移動者数.*%/);
+  // scene 4 (kaden) and 5 (sns): the point / marker ring and the panel; scene 6 (all): every layer on
+  await page.keyboard.press("4"); await page.waitForTimeout(400);
+  const kp = await page.evaluate(() => { const f = S.kadenFeats.find((f) => f.properties.cls === 3 && map.getBounds().contains(f.geometry.coordinates)); const p = map.project(f.geometry.coordinates); return { x: p.x, y: p.y, i: f.properties.i }; });
+  await page.mouse.click(box.x + kp.x, box.y + kp.y); await page.waitForTimeout(400); await page.mouse.move(box.x + 40, box.y + 40); await page.waitForTimeout(300);
+  const kd = await page.evaluate(() => ({ pinned: S.pinnedId, kind: S.selPoint && S.selPoint.kind, cp: document.getElementById("cpKind").textContent, l1: document.getElementById("roL1").textContent, labels: [...document.querySelectorAll("#chartCount .slab")].map((e) => e.textContent).sort() }));
+  assert.deepEqual(kd, { pinned: "k" + kp.i, kind: "kaden", cp: "選択中の地点（家電の接続台数、郵便番号）", l1: "比（対象日 ÷ 平時）", labels: ["対象日", "平時"] });
+  await page.keyboard.press("5"); await page.waitForTimeout(400);
+  const sp = await page.evaluate(() => { const f = S.snsFeats.find((f) => f.properties.n > 1); const p = map.project(f.geometry.coordinates); return { x: p.x, y: p.y, n: f.properties.n }; });
+  await page.mouse.click(box.x + sp.x, box.y + sp.y); await page.waitForTimeout(400);
+  const sd = await page.evaluate(() => ({ sel: !!S.snsSel, kind: S.selPoint && S.selPoint.kind, detail: S.detail, callout: getComputedStyle(document.getElementById("snsCallout")).display, text: document.getElementById("dsOther").textContent, pinned: S.pinnedId }));
+  assert.equal(sd.pinned, null, "the appliance pin went with the scene"); assert.deepEqual([sd.sel, sd.kind, sd.detail, sd.callout], [true, "sns", "sns", "none"]); assert.match(sd.text, new RegExp(`選択中の投稿地点.*${sp.n} 件.*1 / ${sp.n} 件`));
+  await page.click("#dsOther button[data-d='1']"); await page.waitForTimeout(150);
+  assert.match(await page.textContent("#dsOther"), new RegExp(`2 / ${sp.n} 件`), "前 / 次 work in the panel");
+  await page.keyboard.press("6"); await page.waitForTimeout(500);
+  g = await geo();
+  assert.deepEqual(g.vis, { "links-base": "visible", rain: "visible", kaden: "visible", sns: "visible", "grid-marks": "visible" }); assert.deepEqual(g.sel.slice(1), ["sns", "sns"], "the post stays selected in 統合"); assert.deepEqual(g.overBand, []);
+  // H hides the operator bar; typing in an input does not switch scenes; Esc returns to the normal view with everything back in place
+  await page.keyboard.press("h"); await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById("pzBar")).display), "none");
+  await page.keyboard.press("h"); await page.waitForTimeout(150);
+  await page.keyboard.press("Escape"); await page.waitForTimeout(600);
+  const n = await page.evaluate(() => ({ present: S.present, side: getComputedStyle(document.getElementById("side")).display, slider: !!document.querySelector("#side > #slider"), play: !!document.querySelector("#side .timeRow > #playBtn"),
+    chart: !!document.querySelector("#main > #chartPanel"), callout: document.getElementById("snsCallout").style.display, h2: document.getElementById("roH2").textContent, mapW: document.getElementById("map").getBoundingClientRect().width,
+    op: map.getPaintProperty("rain", "raster-opacity"), pzHead: getComputedStyle(document.getElementById("pzHead")).display }));
+  assert.deepEqual(n, { present: false, side: "block", slider: true, play: true, chart: true, callout: "block", h2: "イベント時", mapW: 1920 - 416, op: 0.55, pzHead: "none" });
+  await page.click("#dtTitle summary"); await page.focus("#titleInput"); await page.keyboard.press("p"); await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => S.present), false, "P typed into the title box is text, not the switch");
+  await page.close();
+});
+
 test("no JavaScript errors were raised", () => {
   assert.deepEqual(errors, []);
 });

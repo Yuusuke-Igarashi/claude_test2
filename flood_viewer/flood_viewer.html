@@ -127,6 +127,108 @@ button:hover{background:#f0efec}
 #filePick{display:none;margin-top:10px}
 .maplibregl-ctrl-attrib{font-size:13px}
 .maplibregl-ctrl-scale{font-size:12px}
+#presentRow{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+#presentRow button{font-size:14px;padding:3px 10px}
+#presentRow .k{color:var(--muted);font-size:13px}
+/* ---- プレゼン表示 (html.present): a header band, the map (left) and the detail panel (right), a subtitle band at the bottom.
+   Designed for a 1920 x 1080 recording; the numbers are CSS variables so other sizes scale the same way. ---- */
+:root{--pz-head:108px;--pz-sub:150px;--pz-pad:28px;--pz-panel:40%;--navy:#15233b;--pz-bg:#f3f5f8;--pz-line:#d5dbe4;--pz-line2:#e6eaf0;--pz-accent:#d03b3b;--pz-chart-h:272px;
+      --pz-fs-heading:34px;--pz-fs-clock:42px;--pz-fs-date:22px;--pz-fs-body:18px;--pz-fs-small:16px;--pz-fs-title:26px;--pz-fs-legend:17px}
+html.present{--chart-fs:17px;--font:"Noto Sans JP","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;--ink:#15233b;--ink2:#3d4a60;--muted:#6b778a;--page:var(--pz-bg);--surface:#ffffff}
+html.present body{font-size:var(--pz-fs-body)}
+html.present #side,html.present #tip,html.present #snsCallout,html.present #snsLead{display:none !important}
+html.present #main{left:0;top:var(--pz-head);bottom:var(--pz-sub);display:grid;grid-template-columns:calc(100% - var(--pz-panel)) var(--pz-panel);background:var(--pz-bg)}
+html.present #map{position:relative;inset:auto;width:100%;height:100%;box-sizing:border-box;border-right:1px solid var(--pz-line)}
+#pzHead,#pzSub,#pzBar,#detail,#pzLegend{display:none}
+html.present #pzHead{display:flex;position:absolute;left:0;right:0;top:0;height:var(--pz-head);box-sizing:border-box;padding:0 var(--pz-pad);align-items:center;justify-content:space-between;gap:24px;background:#fff;border-bottom:1px solid var(--pz-line);color:var(--navy)}
+#pzHead .hl{min-width:0;flex:1}
+#pzHeading{font-size:var(--pz-fs-heading);font-weight:700;line-height:1.3;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pzHeading::before{content:"";display:inline-block;width:8px;height:.9em;background:var(--pz-accent);border-radius:2px;margin:0 14px -2px 0}
+#pzChips{display:flex;gap:8px;margin-top:8px;font-size:var(--pz-fs-small);color:var(--ink2);flex-wrap:wrap}
+#pzChips span{display:inline-flex;align-items:center;gap:6px;padding:1px 10px;border:1px solid var(--pz-line);border-radius:999px;background:#fff;white-space:nowrap}
+#pzChips span.focus{border-color:var(--navy);color:var(--navy);font-weight:600}
+#pzChips span.faint{color:var(--muted)}
+#pzChips span.lab{border:0;padding-left:0;color:var(--muted)}
+#pzHead .hr{text-align:right;flex:none}
+#pzTitle{font-size:var(--pz-fs-small);color:var(--ink2);white-space:nowrap}
+#pzClock{font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap}
+#pzDate{font-size:var(--pz-fs-date);color:var(--ink2);margin-right:12px}
+#pzTime{font-size:var(--pz-fs-clock);font-weight:700;color:var(--navy)}
+#pzPeriod{font-size:var(--pz-fs-small);color:var(--muted);margin-top:4px;white-space:nowrap}
+html.present #detail{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#fff;padding:20px var(--pz-pad) 16px;box-sizing:border-box}
+#dsChart,#dsOther{min-height:0}
+html.present #chartPanel{position:static;width:auto;max-height:none;border:0;box-shadow:none;border-radius:0;padding:0;background:transparent;overflow:visible}
+html.present #chartPanel header{display:block;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--navy)}
+html.present #chartPanel header .title{font-size:var(--pz-fs-title);font-weight:700;color:var(--navy)}
+html.present #chartPanel header .kind{display:block;font-size:var(--pz-fs-small);color:var(--ink2);margin-bottom:2px}
+html.present #chartPanel header .kind::before{content:"";display:inline-block;width:14px;height:14px;border-radius:50%;border:4px solid var(--navy);box-sizing:border-box;margin:0 8px -1px 0}
+html.present #chartPanel header .status{font-size:var(--pz-fs-small);padding:2px 12px;margin-left:12px;vertical-align:middle}
+html.present #chartPanel header .sub{display:block;font-size:var(--pz-fs-small);color:var(--muted);margin-top:4px}
+html.present .readout{grid-template-columns:auto 1fr 1fr;gap:4px 18px;font-size:var(--pz-fs-body);margin:6px 0 10px;padding:8px 12px;background:var(--pz-bg);border-radius:8px}
+html.present .readout .h{font-size:var(--pz-fs-small);font-weight:600}
+html.present .readout .h.s1{color:var(--series-1)} html.present .readout .h.s2{color:var(--series-2)}
+html.present .readout .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+html.present .chart{height:var(--pz-chart-h)}
+html.present .chart .ttl{font-size:calc(var(--chart-fs) + 3px)}
+html.present .chart .l1,html.present .chart .l2{stroke-width:3}
+html.present .chart .now{stroke:var(--navy);stroke-width:2;stroke-dasharray:5 4}
+html.present .chart .dot{r:6}
+.chart .slab{font-weight:700;font-size:var(--chart-fs)}
+.chart .slab.s1{fill:var(--series-1)} .chart .slab.s2{fill:var(--series-2)}
+.chart .tlab{fill:#fff;font-weight:700;font-size:calc(var(--chart-fs) - 1px)}
+.chart .tlabbg{fill:var(--navy)}
+html.present .clegend{display:none}
+html.present .pzNote{font-size:var(--pz-fs-small);color:var(--muted);margin-top:4px;line-height:1.5}
+html.present .pzNote .band{display:inline-block;width:18px;height:12px;background:var(--lv2);opacity:.3;vertical-align:middle;margin-right:4px}
+html.present #cpHint{display:none}
+#dsOther{display:none;line-height:1.55}
+#dsOther .dhead{margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--navy)}
+#dsOther .dhead .kind{display:block;font-size:var(--pz-fs-small);color:var(--ink2);margin-bottom:2px}
+#dsOther .dhead .kind.sel::before{content:"";display:inline-block;width:14px;height:14px;border-radius:50%;border:4px solid var(--navy);box-sizing:border-box;margin:0 8px -1px 0}
+#dsOther .dhead .ttl{font-size:var(--pz-fs-title);font-weight:700;color:var(--navy)}
+#dsOther .dhead .ttl .when{font-weight:400;color:var(--ink2);font-size:var(--pz-fs-body);margin-left:12px}
+#dsOther .big{font-size:40px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1.2}
+#dsOther .big small{font-size:var(--pz-fs-body);font-weight:400;color:var(--ink2);margin-left:6px}
+#dsOther .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:var(--pz-fs-body);margin:8px 0}
+#dsOther .kv .k{color:var(--ink2)}
+#dsOther .kv .v{font-weight:600;font-variant-numeric:tabular-nums}
+#dsOther .txt{font-size:21px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin:10px 0;padding:14px 16px;background:var(--pz-bg);border-radius:8px;max-height:46%;overflow:auto}
+#dsOther .meta{font-size:var(--pz-fs-small);color:var(--ink2)}
+#dsOther .meta a{color:var(--series-1)}
+#dsOther .nav{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:var(--pz-fs-small);color:var(--ink2)}
+#dsOther .nav button{font-size:var(--pz-fs-small);padding:3px 12px}
+#dsOther .hint{color:var(--muted);font-size:var(--pz-fs-body);margin-top:14px}
+#dsOther .sum{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;font-size:var(--pz-fs-body);margin-top:10px}
+#dsOther .sum .n{font-size:26px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;text-align:right}
+#dsOther .sum .n small{font-size:var(--pz-fs-small);font-weight:400;color:var(--ink2);margin-left:4px}
+#dsOther .sum .l{align-self:center;color:var(--ink2)}
+#dsOther .sum .l b{color:var(--navy)}
+#dsOther .cat{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:8px;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+html.present #pzLegend{display:block;position:absolute;left:16px;bottom:16px;z-index:5;max-width:calc(100% - var(--pz-panel) - 120px);background:rgba(255,255,255,.94);border:1px solid var(--pz-line);border-radius:8px;padding:10px 16px;font-size:var(--pz-fs-legend);color:var(--ink2)}
+#pzLegend .row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:3px 0}
+#pzLegend .row .nm{font-weight:700;color:var(--navy);white-space:nowrap}
+#pzLegend .row .nm small{font-weight:400;color:var(--muted);margin-left:6px}
+#pzLegend .legend{font-size:var(--pz-fs-legend);gap:4px 14px}
+#pzLegend .legend span::before{width:24px;height:4px}
+#pzLegend .legend .pt::before,#pzLegend .legend .ring::before,#pzLegend .legend .turn::before{width:11px;height:11px}
+#pzLegend .lg{display:flex;flex-wrap:wrap;gap:4px 0;align-items:center;font-size:var(--pz-fs-legend)}
+#pzLegend .lg .sw{display:inline-block;width:30px;height:14px;margin-right:4px;vertical-align:middle}
+#pzLegend .lg .it{margin-right:14px}
+#pzLegend .lg .dot{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#pzLegend .lg .lab{margin-right:8px}
+#pzLegend .lg .arr{font-size:22px}
+#pzLegend .cur{color:var(--navy);font-weight:600;margin-left:6px}
+html.present #pzSub{display:block;position:absolute;left:0;right:0;bottom:0;height:var(--pz-sub);box-sizing:border-box;background:#fff;border-top:1px solid var(--pz-line)}
+html.present #pzBar{display:flex;position:absolute;left:0;right:0;bottom:0;height:60px;box-sizing:border-box;padding:0 var(--pz-pad);align-items:center;gap:10px;background:#eef1f5;border-top:1px solid var(--pz-line);font-size:15px;color:var(--ink2);z-index:9}
+html.present.barhidden #pzBar{display:none}
+#pzBar button{font-size:15px;padding:5px 12px;border-radius:6px}
+#pzBar .scenes button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+#pzBar .scenes button b{font-weight:600;margin-right:4px;opacity:.75}
+#pzBar .scenes{display:flex;gap:6px}
+#pzBar .timeCtl{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+#pzBar .timeCtl #slider{margin:0;flex:1}
+#pzBar .k{color:var(--muted);font-size:13px}
+html.present .maplibregl-ctrl-attrib{font-size:13px}
 </style>
 </head>
 <body>
@@ -134,6 +236,7 @@ button:hover{background:#f0efec}
 <aside id="side">
   <h1 id="title">Tokyo 2024-08-21 Flood Candidates</h1>
   <div id="subtitle"></div>
+  <div id="presentRow"><button id="presentBtn" title="P キー">プレゼン表示</button><span class="k">録画用の画面（P で切替、Esc で戻る）</span></div>
   <div class="timeRow"><button id="playBtn" title="Space">▶ 再生</button><span id="timeLabel">--:--</span></div>
   <input id="slider" type="range" min="0" max="0" value="0" step="1">
   <div class="stat" id="statTraffic">道路の異常 <b id="stError">-</b> 本（対象 <b id="stTarget">-</b> 本）<br>L1 <b id="stL1">-</b> ・ L2 <b id="stL2">-</b> ・ L3 <b id="stL3">-</b></div>
@@ -216,15 +319,21 @@ button:hover{background:#f0efec}
     </details>
   </section>
 </aside>
+<header id="pzHead">
+  <div class="hl"><div id="pzHeading"></div><div id="pzChips"></div></div>
+  <div class="hr"><div id="pzTitle"></div><div id="pzClock"><span id="pzDate"></span><b id="pzTime"></b></div><div id="pzPeriod"></div></div>
+</header>
 <div id="main">
 <div id="map"></div>
+<section id="detail" aria-label="選択対象の詳細"><div id="dsChart"></div><div id="dsOther"></div></section>
+<div id="pzLegend"></div>
 <div id="chartPanel" class="panel">
   <header>
-    <span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
+    <span><span class="kind" id="cpKind"></span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
     <span class="sub" id="cpSub"></span>
   </header>
   <div class="readout">
-    <span class="h"></span><span class="h">平時</span><span class="h">イベント時</span>
+    <span class="h"></span><span class="h s1" id="roH1">平時</span><span class="h s2" id="roH2">イベント時</span>
     <span id="roL1">速度 km/h</span><span class="v" id="roBS">-</span><span class="v" id="roES">-</span>
     <span id="roL2">台数 /窓</span><span class="v" id="roBC">-</span><span class="v" id="roEC">-</span>
   </div>
@@ -236,8 +345,17 @@ button:hover{background:#f0efec}
     <span style="--c:var(--lv1)">異常 L1</span><span style="--c:var(--lv2)">L2</span><span style="--c:var(--lv3)">L3</span>
   </div>
   <div class="hint" id="cpHint">クリックで固定 / もう一度クリックで解除</div>
+  <div class="pzNote" id="cpNote"></div>
 </div>
 <div id="tip"></div>
+</div>
+<div id="pzSub" aria-hidden="true"></div>
+<div id="pzBar">
+  <div class="scenes" id="pzScenes"></div>
+  <button id="pzRain" title="R キー">降雨</button>
+  <div class="timeCtl" id="pzTimeCtl"></div>
+  <button id="pzHide" title="H キー">操作バーを隠す</button>
+  <button id="pzExit" title="Esc キー">通常表示</button>
 </div>
 <svg id="snsLead" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;display:none">
   <line id="snsLeadLine" x1="0" y1="0" x2="0" y2="0" stroke="#222" stroke-width="1.5"/><circle id="snsLeadDot" cx="0" cy="0" r="3.5" fill="#222"/>
@@ -334,7 +452,30 @@ const CONFIG = {
                "降雹・降霰": "#b58900", "停電": "#8d6e63", "交通事故": "#e07b2a", "鉄道トラブル": "#9c6ad6", "混雑情報": "#9c9c9c", "火災": "#d03b3b", "緊急車両出動": "#c2185b"},
   SNS_DEFAULT_COLOR: "#6e6e6e",   // appliance points: ratio classes (event / baseline), baseline below minBase is not judged
   playIntervalMs: 600,
-  lineWidth: { gray: 1.0, black: 1.6, red: 3.0 }
+  lineWidth: { gray: 1.0, black: 1.6, red: 3.0 },
+  // プレゼン表示 (P): the scenes (keys 1-6). focus = the layers of the scene at full strength, faint = shown dimmed (PRESENT.dim; rain by its
+  // level, R), everything else hidden. The headings are the one message of each scene (short, within what the data shows).
+  SCENES: [
+    {key: "rain",    label: "降雨", heading: "降雨の分布から、強い雨の範囲と時刻をつかむ",              focus: ["rain"],  faint: ["roads"],
+     hint: "地図をクリックすると、その地点の降雨強度をここに表示します。"},
+    {key: "traffic", label: "交通", heading: "交通量の変化から、冠水が疑われる道路を絞り込む",            focus: ["roads"], faint: ["rain"],
+     hint: "色のついた道路をクリックすると、その道路の速度と台数の推移を平時と比べてここに表示します。"},
+    {key: "walk",    label: "人流", heading: "徒歩移動者の増減から、人の動きが変わった場所を見つける",      focus: ["grid", "walk"], faint: ["rain", "roads"],
+     hint: "矢印のセルをクリックすると、そのセルの徒歩移動者数の比をここに表示します。"},
+    {key: "kaden",   label: "家電", heading: "家電の接続台数の変化から、影響が疑われる地域を絞り込む",      focus: ["kaden"], faint: ["rain", "roads"],
+     hint: "点をクリックすると、その郵便番号の接続台数の推移を平時と比べてここに表示します。"},
+    {key: "sns",     label: "SNS",  heading: "SNS の投稿から、現地の状況を確かめる",                    focus: ["sns"],   faint: ["rain", "roads"],
+     hint: "投稿の地点をクリックすると、本文をここに表示します。"},
+    {key: "all",     label: "統合", heading: "複数のデータを重ね、冠水が疑われる場所を絞り込む",          focus: ["roads", "walk", "grid", "kaden", "sns"], faint: ["rain"],
+     hint: "道路・点・投稿をクリックすると、その詳細をここに表示します。"},
+  ],
+  PRESENT: {
+    dim: 0.3,          // opacity factor of the faint layers
+    rainDim: 0.3,      // opacity factor of the rain when it is faint (R: 通常 / 薄い / 非表示)
+    navy: "#15233b",   // selection highlight (decoration colour, not a data colour)
+    scene: "traffic",  // scene at the first switch to the presentation
+    seriesLabels: ["平時", "対象日"],   // the two lines of the charts in the presentation (normal view: 平時 / イベント時)
+  }
 };
 
 // ============================================================
@@ -375,6 +516,12 @@ const S = {
   grid: null,           // {sources: Map("param_HH:MM" -> URL|File), index, cache, cur, loading, params} from grid/ or null
   showGrid: false, gridParam: null, gridUp: 2.0, gridDown: 0.5, gridMax: null,   // walker-change mesh (off at start)
   hoverId: null, pinnedId: null,
+  selLink: null,        // feature id of the highlighted (pinned) link; selPoint: {lon, lat, r, kind} of the highlighted point (kaden / sns / rain probe)
+  selPoint: null,
+  present: false, scene: "traffic", rainLevel: "dim", barHidden: false,   // プレゼン表示 (P): scene key, rain level in the scenes where rain is faint, operator bar
+  detail: null,         // what the detail panel shows besides the chart panel: "sns" | "grid" | "rain" | "traj" | null
+  gridSel: null,        // {x, y} of the selected mesh cell (presentation); rainSel: {lng, lat} of the rain probe (presentation)
+  rainSel: null, kadenCnt: null,
   playing: false, timer: null
 };
 let map = null;
@@ -1147,6 +1294,14 @@ function initMap(gj){
         "line-width": 7, "line-opacity": ["case", ["==", hov, 1], 0.45, 0], "line-blur": 1
       }
     });
+    // the selected (pinned) link, feature-state sel: navy casing, white gap, the link's own class colour on top
+    const sel = ["==", ["coalesce", ["feature-state", "sel"], 0], 1];
+    const selW = (a, b, c) => ["interpolate", ["linear"], ["zoom"], 10, a, 14, b, 17, c];
+    const selLine = (id, color, width) => map.addLayer({id, type:"line", source:"links", layout:{"line-cap":"round", "line-join":"round"},
+                                                        paint:{"line-color": color, "line-width": width, "line-opacity": ["case", sel, 1, 0]}});
+    selLine("links-sel-casing", CONFIG.PRESENT.navy, selW(12, 18, 28));
+    selLine("links-sel-gap", "#ffffff", selW(8, 13, 21));
+    selLine("links-sel", ["match", cls, 0, cssVar("--road-gray"), 1, cssVar("--road-black"), 2, cssVar("--lv1"), 3, cssVar("--lv2"), cssVar("--lv3")], selW(3.5, 6.5, 12));
     // wide invisible hit layer
     map.addLayer({
       id:"links-hit", type:"line", source:"links",
@@ -1163,14 +1318,14 @@ function initMap(gj){
     // With roads and trajectories both shown, a trajectory under the cursor wins over the road under it: no road hover, chart or pin there.
     const onWalk = (pt) => walkOn() && !!trajHit(pt);
     map.on("mousemove", "links-hit", (e) => {
-      if(!S.showRoads) return;
+      if(!layerActive("roads")) return;
       if(onWalk(e.point)){ if(S.hoverId !== null){ setHover(null); if(S.pinnedId === null) hideChart(); } return; }
       onHover(e);
     });
-    map.on("mouseleave", "links-hit", () => { if(!S.showRoads) return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
-    map.on("click", "links-hit", (e) => { if(S.showRoads && !onWalk(e.point)) onClick(e); });
+    map.on("mouseleave", "links-hit", () => { if(!layerActive("roads")) return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
+    map.on("click", "links-hit", (e) => { if(layerActive("roads") && !onWalk(e.point)) onClick(e); });
     // something clickable (a road, an appliance point, an SNS marker) under the cursor: the pointer cursor stays
-    const clickableAt = (pt) => { const ls = [S.showRoads && "links-hit", S.kaden && S.showKaden && "kaden", S.sns && S.showSns && "sns"].filter((l) => l && map.getLayer(l));
+    const clickableAt = (pt) => { const ls = [layerActive("roads") && "links-hit", layerActive("kaden") && "kaden", layerActive("sns") && "sns"].filter((l) => l && map.getLayer(l));
                                   return ls.length > 0 && map.queryRenderedFeatures(pt, {layers: ls}).length > 0; };
     let moveTimer = null, lastMove = null;
     // Tooltip: the walking-trajectory feature under the cursor, else the walker-change cell's value (when those layers are shown).
@@ -1189,17 +1344,17 @@ function initMap(gj){
     });
     map.getCanvas().addEventListener("mouseleave", () => { if(walkCursor){ map.getCanvas().style.cursor = ""; walkCursor = false; } hideTip(); });
     map.on("click", (e) => {
-      if(S.kaden && S.showKaden && map.getLayer("kaden")){
+      if(layerActive("kaden") && map.getLayer("kaden")){
         const hit = map.queryRenderedFeatures(e.point, {layers: ["kaden"]});
         if(hit.length){
           const i = hit[0].properties.i, key = "k" + i;
-          if(S.pinnedId === key){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
-          else { S.pinnedId = key; $("chartPanel").classList.add("pinned"); }
+          if(S.pinnedId === key) clearPin();
+          else { clearPin(); S.pinnedId = key; $("chartPanel").classList.add("pinned"); setSelPoint(S.kaden.lon[i], S.kaden.lat[i], kadenRadius(S.kadenFeats[i].properties.base), "kaden"); }
           placePanel(e.point); showKadenChart(i); return;
         }
       }
       if(S.sns && map.getLayer("sns")){
-        const hit = S.showSns ? map.queryRenderedFeatures(e.point, {layers: ["sns"]}) : [];
+        const hit = layerActive("sns") ? map.queryRenderedFeatures(e.point, {layers: ["sns"]}) : [];
         if(hit.length){ openSnsCallout(hit[0].properties.key, 0); return; }
         if(S.snsSel) closeSnsCallout();
       }
@@ -1209,8 +1364,10 @@ function initMap(gj){
         if(ft || S.trajSel) setTrajSel(ft && !same ? {source: ft.layer.id, id: ft.id, ds: S.traj && S.traj[ft.layer.id]} : null);
         if(ft) return;
       }
-      const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
-      if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
+      const fts = layerActive("roads") ? map.queryRenderedFeatures(e.point, {layers:["links-hit"]}) : [];
+      if(fts.length) return;
+      if(S.pinnedId !== null){ clearPin(); hideChart(); }
+      if(S.present) presentClick(e);   // a mesh cell or a rain probe point for the detail panel
     });
     map.on("moveend", () => { updateTraj(); drawGridMarks(); });
     if(S.sns){
@@ -1220,7 +1377,7 @@ function initMap(gj){
                      paint:{ "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 5.5, 3, 9, 8, 15],
                              "circle-color": ["match", ["get", "cat"], ...pairs, CONFIG.SNS_DEFAULT_COLOR],
                              "circle-opacity": 0.85, "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.5 } });
-      map.on("mouseenter", "sns", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseenter", "sns", () => { if(layerActive("sns")) map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "sns", () => { map.getCanvas().style.cursor = ""; });
       map.on("move", placeSnsCallout);
     }
@@ -1231,19 +1388,28 @@ function initMap(gj){
                              "circle-color": ["match", ["get", "cls"], 0, KADEN_COLOR[0], 1, KADEN_COLOR[1], 2, KADEN_COLOR[2], 3, KADEN_COLOR[3], 4, KADEN_COLOR[4], KADEN_COLOR[0]],
                              "circle-opacity": ["case", ["==", ["get", "cls"], 0], 0.35, 0.85], "circle-stroke-color": "#ffffff", "circle-stroke-width": 1 } });
       map.on("mousemove", "kaden", (e) => {
-        if(!e.features.length) return;
+        if(!e.features.length || !layerActive("kaden")) return;
         map.getCanvas().style.cursor = "pointer";
         if(S.pinnedId === null){ placePanel(e.point); showKadenChart(e.features[0].properties.i); }
       });
       map.on("mouseleave", "kaden", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null && S.kadenChartIdx !== null) hideChart(); });
     }
+    // the selected point (appliance point, SNS marker, rain probe) and the selected mesh cell: a navy ring / frame with a white gap (above the data layers)
+    map.addSource("sel-point", {type:"geojson", data: EMPTY_FC});
+    map.addLayer({id:"sel-point-gap", type:"circle", source:"sel-point", paint:{"circle-radius": ["+", ["get", "r"], 5], "circle-opacity": 0, "circle-stroke-color": "#ffffff", "circle-stroke-width": 4}});
+    map.addLayer({id:"sel-point", type:"circle", source:"sel-point", paint:{"circle-radius": ["+", ["get", "r"], 9], "circle-opacity": 0, "circle-stroke-color": CONFIG.PRESENT.navy, "circle-stroke-width": 4}});
+    map.addSource("sel-cell", {type:"geojson", data: EMPTY_FC});
+    map.addLayer({id:"sel-cell-gap", type:"line", source:"sel-cell", layout:{"line-join":"round"}, paint:{"line-color": "#ffffff", "line-width": 10}});
+    map.addLayer({id:"sel-cell", type:"line", source:"sel-cell", layout:{"line-join":"round"}, paint:{"line-color": CONFIG.PRESENT.navy, "line-width": 4}});
     setupOverlays();
     setupGrid();
     setupLayers();
+    setupPresent();
     updateRain();
     updateKaden();
     updateSns();
     updateGrid();
+    applyEmphasis();
     map.on("zoom", () => { if(walkOn() && map.getZoom() < CONFIG.TRAJ_MIN_ZOOM) trajStatus(); });
   });
 }
@@ -1273,8 +1439,27 @@ const MODE_LABEL = {walk:"徒歩", vehicle:"車両", other:"その他"};
 //   kaden / rain / sns = appliance points, rain raster, SNS posts. A layer without data keeps its row, disabled, with the reason as tooltip.
 // Legends and live values follow the shown layers (凡例 block); parameters are in the 詳細設定 block only.
 const LAYER_FLAG = {roads: "showRoads", walk: "showWalk", grid: "showGrid", kaden: "showKaden", rain: "showRain", sns: "showSns"};
-const walkOn = () => hasTraj() && S.showWalk;
-const gridOn = () => !!S.grid && S.showGrid;
+const walkOn = () => layerOn("walk");
+const gridOn = () => layerOn("grid");
+// Effective visibility of a layer: its checkbox (表示) and its data; in the presentation also the scene (focus or faint) and the rain level (R).
+const LAYER_DATA = {roads: () => true, walk: () => hasTraj(), grid: () => !!S.grid, kaden: () => !!S.kaden, rain: () => !!S.rain, sns: () => !!S.sns};
+function layerOn(key){
+  if(!LAYER_DATA[key]() || !S[LAYER_FLAG[key]]) return false;
+  if(!S.present) return true;
+  const sc = sceneDef(), inScene = sc.focus.includes(key) || sc.faint.includes(key);
+  if(key === "rain") return inScene && (sc.focus.includes("rain") || S.rainLevel !== "off");
+  return inScene;
+}
+// A layer the cursor can pick (hover, click): shown, and in the presentation one of the scene's focus layers (faint layers are context only).
+const layerActive = (key) => layerOn(key) && (!S.present || sceneDef().focus.includes(key));
+// Opacity factor of a layer: 1 in the normal view and for the scene's focus layers, PRESENT.dim for the faint ones (rain by its level).
+function layerDim(key){
+  if(!S.present) return 1;
+  const sc = sceneDef();
+  if(sc.focus.includes(key)) return 1;
+  if(key === "rain") return S.rainLevel === "full" ? 1 : CONFIG.PRESENT.rainDim;
+  return CONFIG.PRESENT.dim;
+}
 function setupLayers(){
   const rows = [   // [key, data present, reason when absent]
     ["roads", true, ""],
@@ -1297,12 +1482,12 @@ function setupLayers(){
 function setLayer(key, on){
   S[LAYER_FLAG[key]] = on;
   const dropChart = (kaden) => {   // the chart panel of a feature of the layer just hidden goes with it
-    if(S.pinnedId !== null && (typeof S.pinnedId === "string") === kaden){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }   // kaden pins are "k<i>", links their feature id
+    if(S.pinnedId !== null && (typeof S.pinnedId === "string") === kaden) clearPin();   // kaden pins are "k<i>", links their feature id
     if($("chartPanel").style.display === "block" && (S.kadenChartIdx !== null) === kaden) hideChart();
   };
   if(key === "roads"){ if(!on){ dropChart(false); setHover(null); map.getCanvas().style.cursor = ""; } }
   else if(key === "walk"){ if(!on){ setTrajSel(null); hideTip(); } updateTraj(); }
-  else if(key === "grid"){ if(!on) hideTip(); updateGrid(); }
+  else if(key === "grid"){ if(!on){ hideTip(); setSelCell(null); } updateGrid(); }
   else if(key === "kaden"){ if(!on) dropChart(true); updateKaden(); }
   else if(key === "rain") updateRain();
   else if(key === "sns") updateSns();
@@ -1311,12 +1496,12 @@ function setLayer(key, on){
 // Map layers, road counts and legend boxes after a change of the layer checkboxes.
 function syncLayers(){
   if(!map || !map.getLayer("links-base")) return;
-  const roads = S.showRoads, walk = walkOn();
-  for(const id of ["links-base", "links-error", "links-hover", "links-hit"]) map.setLayoutProperty(id, "visibility", roads ? "visible" : "none");
+  const roads = layerOn("roads"), walk = walkOn();
+  for(const id of ["links-base", "links-error", "links-hover", "links-hit", "links-sel-casing", "links-sel-gap", "links-sel"]) map.setLayoutProperty(id, "visibility", roads ? "visible" : "none");
   map.setLayoutProperty("links-context", "visibility", walk && !roads ? "visible" : "none");   // trajectories without the anomaly colours: the network as light context
   $("statTraffic").style.display = roads ? "" : "none";
   $("nearestBtn").disabled = !walk; $("nearestBtn").title = walk ? "現在の時刻のデータのうち、地図中心に最も近いものへ移動" : "徒歩の軌跡を表示すると使えます";
-  const shown = {lgRoads: roads, lgWalk: walk, lgGrid: gridOn(), lgKaden: !!S.kaden && S.showKaden, lgRain: !!S.rain && S.showRain, lgSns: !!S.sns && S.showSns};
+  const shown = {lgRoads: roads, lgWalk: walk, lgGrid: gridOn(), lgKaden: layerOn("kaden"), lgRain: layerOn("rain"), lgSns: layerOn("sns")};
   for(const [id, on] of Object.entries(shown)) $(id).style.display = on ? "block" : "none";
   $("lgNone").style.display = Object.values(shown).some(Boolean) ? "none" : "block";
 }
@@ -1620,7 +1805,7 @@ function updateGrid(){
 }
 // Flag of the current grid slot under a lng/lat, as text.
 function gridAt(ll){
-  const G = S.grid; if(!G || !G.cur || !S.showGrid || !G.cur.bounds) return "";
+  const G = S.grid; if(!G || !G.cur || !gridOn() || !G.cur.bounds) return "";
   const [W, Sb, E, Nb] = G.cur.bounds;
   if(ll.lng < W || ll.lng >= E || ll.lat <= Sb || ll.lat > Nb) return "";
   const x = Math.floor((ll.lng - W) / (E - W) * G.cur.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * G.cur.h);
@@ -1748,8 +1933,9 @@ function snsVisible(){   // groups with their posts inside the current window
 }
 function updateSns(){
   if(!map || !S.sns || !map.getSource("sns")) return;
-  map.setLayoutProperty("sns", "visibility", S.showSns ? "visible" : "none");
-  const vis = S.showSns ? snsVisible() : [];
+  const snsOn = layerOn("sns");
+  map.setLayoutProperty("sns", "visibility", snsOn ? "visible" : "none");
+  const vis = snsOn ? snsVisible() : [];
   S.snsNow = new Map(vis.map(g => [g.key, g]));
   const cats = new Map();
   const feats = vis.map(g => {
@@ -1760,9 +1946,10 @@ function updateSns(){
   S.snsFeats = feats;
   map.getSource("sns").setData({type:"FeatureCollection", features: feats});
   const nPosts = vis.reduce((a, g) => a + g.posts.length, 0), label = snsWindow()[2];
-  $("snsVal").textContent = S.showSns ? `${nPosts.toLocaleString()} 件・${vis.length.toLocaleString()} 地点（${label}）` : "";
+  $("snsVal").textContent = snsOn ? `${nPosts.toLocaleString()} 件・${vis.length.toLocaleString()} 地点（${label}）` : "";
+  S.snsCount = {posts: nPosts, spots: vis.length, label};
   const lg = $("legendSns");
-  if(S.showSns && cats.size){
+  if(snsOn && cats.size){
     const top = [...cats.entries()].sort((a, b) => b[1] - a[1]);
     lg.innerHTML = top.slice(0, 8).map(([c, n]) =>
       `<span class="it"><span class="dot" style="background:${CONFIG.SNS_COLORS[c] || CONFIG.SNS_DEFAULT_COLOR}"></span>${esc(c)} ${n}</span>`).join("")
@@ -1788,10 +1975,16 @@ function openSnsCallout(key, idx){
     + `<div class="nav">${g.posts.length > 1 ? `<button data-d="-1">前</button><span>${idx + 1} / ${g.posts.length} 件（この地点）</span><button data-d="1">次</button>` : `<span>この地点の投稿 1 件</span>`}</div>`;
   box.querySelector(".close").onclick = closeSnsCallout;
   for(const b of box.querySelectorAll("button[data-d]")) b.onclick = () => openSnsCallout(key, (S.snsSel.idx + +b.dataset.d + g.posts.length) % g.posts.length);
+  setSelPoint(g.lon, g.lat, snsRadius(g.posts.length), "sns");
+  if(S.present){ S.detail = "sns"; renderDetail(); return; }   // the detail panel instead of a callout on the map
   box.style.display = "block"; $("snsLead").style.display = "block";
   placeSnsCallout();
 }
-function closeSnsCallout(){ S.snsSel = null; $("snsCallout").style.display = "none"; $("snsLead").style.display = "none"; }
+function closeSnsCallout(){
+  S.snsSel = null; $("snsCallout").style.display = "none"; $("snsLead").style.display = "none";
+  if(S.selPoint && S.selPoint.kind === "sns") setSelPoint(null);
+  if(S.detail === "sns"){ S.detail = null; renderDetail(); }
+}
 function placeSnsCallout(){
   if(!S.snsSel || !map) return;
   const g = S.snsNow && S.snsNow.get(S.snsSel.key); if(!g) return;
@@ -1813,8 +2006,9 @@ function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null
 function updateRain(){
   if(!map || !S.rain || !map.getSource("rain")) return;
   const R = S.rain, key = rainKey();
-  map.setLayoutProperty("rain", "visibility", S.showRain ? "visible" : "none");
-  if(!S.showRain) return;
+  const rainOn = layerOn("rain");
+  map.setLayoutProperty("rain", "visibility", rainOn ? "visible" : "none");
+  if(!rainOn) return;
   if(!R.sources.has(key)){ R.cur = null; map.getSource("rain").updateImage({url: BLANK_PNG}); $("rainVal").textContent = "（この時刻の降雨なし）"; return; }
   const show = (c) => { R.cur = {key, ...c}; map.getSource("rain").updateImage(c.bounds ? {url: c.url, coordinates: [[c.bounds[0], c.bounds[3]], [c.bounds[2], c.bounds[3]], [c.bounds[2], c.bounds[1]], [c.bounds[0], c.bounds[1]]]} : {url: c.url}); $("rainVal").textContent = ""; };
   if(S.period && S.period.event && $("rainDate").value !== rainDateFor(S.t)) $("rainDate").value = rainDateFor(S.t);
@@ -1831,7 +2025,7 @@ function updateRain(){
 
 // Rain intensity [mm/h] of the current slot under a lng/lat, as text.
 function rainAt(ll){
-  const R = S.rain; if(!R || !R.cur || !S.showRain || !R.cur.bounds) return "";
+  const R = S.rain; if(!R || !R.cur || !layerOn("rain") || !R.cur.bounds) return "";
   const [W, Sb, E, Nb] = R.cur.bounds;
   if(ll.lng < W || ll.lng >= E || ll.lat <= Sb || ll.lat > Nb) return "";
   const x = Math.floor((ll.lng - W) / (E - W) * R.cur.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * R.cur.h);
@@ -1845,6 +2039,7 @@ function setTrajSel(sel){
   if(S.trajSel) map.removeFeatureState({source: S.trajSel.source, id: S.trajSel.id});
   S.trajSel = sel;
   if(sel) map.setFeatureState({source: sel.source, id: sel.id}, {sel: true});
+  if(S.present){ S.detail = sel ? "traj" : (S.detail === "traj" ? null : S.detail); renderDetail(); }
 }
 
 function showTip(e, ft){
@@ -1856,7 +2051,7 @@ function showTip(e, ft){
 }
 // Mesh cell under the cursor: layer name, window and the cell's value (count or event / baseline ratio). False when there is nothing to show.
 function showGridTip(e){
-  const G = S.grid; if(!G || !S.showGrid || !G.cur || !G.cur.bounds) return false;
+  const G = S.grid; if(!G || !gridOn() || !G.cur || !G.cur.bounds) return false;
   const v = gridAt(e.lngLat); if(!v) return false;
   const L = gridLayer() || [S.gridParam, S.gridParam, "ratio", "", 60];
   const what = L[2] === "count" ? "" : "有事 ÷ 平時、";
@@ -1864,6 +2059,7 @@ function showGridTip(e){
   return true;
 }
 function placeTip(e, html){
+  if(S.present) return;
   const tip = $("tip");
   tip.innerHTML = html;
   tip.style.display = "block";
@@ -1913,11 +2109,31 @@ function onHover(e){
 function onClick(e){
   const ft = pickFeature(e.features);
   if(!ft) return;
-  if(S.pinnedId === ft.id){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
-  else { S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); }
+  if(S.pinnedId === ft.id) clearPin();
+  else { clearPin(); S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); setSelLink(ft.id); }
   showChart(ft);
 }
-function hideChart(){ $("chartPanel").style.display = "none"; S.kadenChartIdx = null; }
+function hideChart(){ $("chartPanel").style.display = "none"; S.kadenChartIdx = null; renderDetail(); }
+// Drop the pin (link or appliance point) and its highlight on the map.
+function clearPin(){
+  S.pinnedId = null; $("chartPanel").classList.remove("pinned");
+  setSelLink(null);
+  if(S.selPoint && S.selPoint.kind === "kaden") setSelPoint(null);
+}
+function setSelLink(fid){
+  if(!map || !map.getSource("links")) return;
+  if(S.selLink !== null) map.setFeatureState({source:"links", id:S.selLink}, {sel:0});
+  S.selLink = fid;
+  if(fid !== null) map.setFeatureState({source:"links", id:fid}, {sel:1});
+}
+function setSelPoint(lon, lat, r, kind){
+  S.selPoint = lon === null ? null : {lon, lat, r, kind};
+  if(map && map.getSource("sel-point")) map.getSource("sel-point").setData(S.selPoint ? {type:"FeatureCollection", features:[{type:"Feature", properties:{r, kind}, geometry:{type:"Point", coordinates:[lon, lat]}}]} : EMPTY_FC);
+}
+// Marker radii on screen, as the circle layers draw them (for the highlight ring around a marker).
+const interp = (stops, v) => { if(v <= stops[0][0]) return stops[0][1]; for(let i = 1; i < stops.length; i++) if(v <= stops[i][0]){ const [a, fa] = stops[i-1], [b, fb] = stops[i]; return fa + (fb - fa) * (v - a) / (b - a); } return stops[stops.length-1][1]; };
+const kadenRadius = (base) => interp([[0, 3], [3, 5], [10, 9], [30, 14]], Math.sqrt(Math.max(0, base)));
+const snsRadius = (n) => interp([[1, 5.5], [3, 9], [8, 15]], Math.sqrt(Math.max(1, n)));
 
 // ============================================================
 // Time
@@ -1944,6 +2160,7 @@ function applyTime(t, force=false){
   updateKaden();
   updateSns();
   updateGrid();
+  if(S.present){ renderHeader(); renderDetail(); }
 }
 
 function setupControls(){
@@ -1973,7 +2190,13 @@ function setupControls(){
     if(e.key === "ArrowRight"){ applyTime(Math.min(S.T-1, S.t+1)); e.preventDefault(); }
     else if(e.key === "ArrowLeft"){ applyTime(Math.max(0, S.t-1)); e.preventDefault(); }
     else if(e.key === " "){ togglePlay(); e.preventDefault(); }
+    else if(e.key === "p" || e.key === "P"){ setPresent(!S.present); e.preventDefault(); }
+    else if(S.present && e.key === "Escape") setPresent(false);
+    else if(S.present && e.key >= "1" && e.key <= "6" && CONFIG.SCENES[+e.key - 1]) setScene(CONFIG.SCENES[+e.key - 1].key);
+    else if(S.present && (e.key === "h" || e.key === "H")) setBarHidden(!S.barHidden);
+    else if(S.present && (e.key === "r" || e.key === "R")) cycleRain();
   });
+  $("presentBtn").addEventListener("click", (e) => { e.target.blur(); setPresent(true); });
 }
 function togglePlay(){
   S.playing = !S.playing;
@@ -1994,17 +2217,19 @@ function fmt(v, d=1){ return Number.isNaN(v) || v === undefined ? "–" : v.toFi
 
 function updateKaden(){
   if(!map || !S.kaden || !map.getSource("kaden")) return;
-  map.setLayoutProperty("kaden", "visibility", S.showKaden ? "visible" : "none");
+  const kadenOn = layerOn("kaden");
+  map.setLayoutProperty("kaden", "visibility", kadenOn ? "visible" : "none");
   const K = S.kaden, T = S.T, t = S.t, n = K.n, cnt = [0, 0, 0, 0, 0], feats = new Array(n);
   for(let i=0;i<n;i++){
     const base = K.base[i*T + t], ev = K.ev[i*T + t], k = kadenCls(base, ev); cnt[k]++;
     feats[i] = {type:"Feature", properties:{i, cls:k, base: Number.isNaN(base) ? 0 : base}, geometry:{type:"Point", coordinates:[K.lon[i], K.lat[i]]}};
   }
-  S.kadenFeats = feats;
+  S.kadenFeats = feats; S.kadenCnt = cnt;
   map.getSource("kaden").setData({type:"FeatureCollection", features: feats});
-  $("kadenVal").textContent = S.showKaden ? `${n.toLocaleString()} 地点（減少 ${(cnt[2] + cnt[3]).toLocaleString()} / 増加 ${cnt[4].toLocaleString()}）` : "";
+  if(S.selPoint && S.selPoint.kind === "kaden" && typeof S.pinnedId === "string"){ const i = +S.pinnedId.slice(1); setSelPoint(K.lon[i], K.lat[i], kadenRadius(feats[i].properties.base), "kaden"); }
+  $("kadenVal").textContent = kadenOn ? `${n.toLocaleString()} 地点（減少 ${(cnt[2] + cnt[3]).toLocaleString()} / 増加 ${cnt[4].toLocaleString()}）` : "";
   const lg = $("legendKaden");
-  if(S.showKaden){
+  if(kadenOn){
     lg.innerHTML = `<span class="lab">平時比</span>` +
       [3, 2, 1, 4, 0].map(k => `<span class="it"><span class="dot" style="background:${KADEN_COLOR[k]}"></span>${KADEN_SHORT[k]}</span>`).join("");
     lg.style.display = "flex";
@@ -2016,11 +2241,12 @@ function showKadenChart(i){
   const T = S.T, t = S.t, b = i*T;
   lastFeature = null; S.kadenChartIdx = i;
   $("chartPanel").style.display = "block";
+  $("cpKind").textContent = S.present ? (S.pinnedId === "k" + i ? "選択中の地点（家電の接続台数、郵便番号）" : "カーソル位置の地点（家電の接続台数、郵便番号）") : "";
   $("cpTitle").textContent = `〒${K.zip[i]} ${K.city[i]} ${K.place[i]}`.trim();
   $("cpSub").textContent = "家電の接続台数（郵便番号）";
   const k = kadenCls(K.base[b+t], K.ev[b+t]);
   $("cpStatus").textContent = KADEN_LABEL[k]; $("cpStatus").style.background = KADEN_COLOR[k];
-  $("roL1").textContent = "比 (発災日/平時)"; $("roL2").textContent = "台数 /15分";
+  $("roL1").textContent = S.present ? "比（対象日 ÷ 平時）" : "比 (発災日/平時)"; $("roL2").textContent = "台数 /15分";
   const ratio = K.base[b+t] >= CONFIG.KADEN.minBase ? K.ev[b+t] / K.base[b+t] : NaN;
   $("roBS").textContent = "–"; $("roES").textContent = fmt(ratio, 2);
   $("roBC").textContent = fmt(K.base[b+t]); $("roEC").textContent = fmt(K.ev[b+t]);
@@ -2029,8 +2255,17 @@ function showKadenChart(i){
     const kc = kadenCls(K.base[b+c], K.ev[b+c]); mask[c] = kc === 3 ? 3 : kc === 2 ? 1 : kc === 4 ? 2 : 0;
     ratios[c] = K.base[b+c] >= CONFIG.KADEN.minBase ? K.ev[b+c] / K.base[b+c] : NaN;
   }
-  drawChart($("chartSpeed"), ratios, none, mask, "比（発災日 / 平時）");
-  drawChart($("chartCount"), K.base.subarray(b, b+T), K.ev.subarray(b, b+T), mask, "接続台数 /15分");
+  const [L0, L1] = S.present ? CONFIG.PRESENT.seriesLabels : ["平時", "イベント時"];
+  drawChart($("chartSpeed"), ratios, none, mask, S.present ? `接続台数の比（${L1} ÷ ${L0}）` : "比（発災日 / 平時）", [S.present ? "比" : null, null]);
+  drawChart($("chartCount"), K.base.subarray(b, b+T), K.ev.subarray(b, b+T), mask, "接続台数 /15分", [L0, L1]);
+  chartNote([K.base.subarray(b, b+T), K.ev.subarray(b, b+T)], "帯 = 判定の時間帯（赤 1/3 以下、橙 2/3 以下、青 3 倍以上）");
+  renderDetail();
+}
+// Under the charts in the presentation: the meaning of the bands, and the gaps when a series has missing windows.
+function chartNote(series, bands){
+  const el = $("cpNote"); if(!el) return;
+  const gap = series.some(s => { for(let i = 0; i < s.length; i++) if(Number.isNaN(s[i])) return true; return false; });
+  el.textContent = S.present ? `${bands}${gap ? "。線の切れ目は欠測（0 ではない）" : ""}` : "";
 }
 
 // Event speed of one link as judged: with the ⚙ rule on, windows with count 0 and no speed are 0 (drawn and read out as 0)
@@ -2047,12 +2282,14 @@ function showChart(ft){
   const r = p._row;
   const T = S.T, t = S.t;
   $("chartPanel").style.display = "block";
+  $("cpKind").textContent = S.present ? (S.pinnedId === ft.id ? "選択中の道路" : "カーソル位置の道路") : "";
   $("cpTitle").textContent = `Link ${p.id}`;
   $("cpSub").textContent = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? `対向: ${p.pair_id}` : "対向なし";
   if(r < 0){
     $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0];
     ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
     drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, `台数 /${slotMin()}分`);
+    chartNote([], ""); renderDetail();
     return;
   }
   const b = r*T;
@@ -2063,9 +2300,11 @@ function showChart(ft){
   const es = eventSpeedSeries(b);
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(es[t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
-  const errMask = S.err.subarray(b, b+T);
-  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, "速度 km/h");
-  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`);
+  const errMask = S.err.subarray(b, b+T), labels = S.present ? CONFIG.PRESENT.seriesLabels : ["平時", "イベント時"];
+  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, "速度 km/h", labels);
+  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`, labels);
+  chartNote([S.bs.subarray(b,b+T), es, S.bc.subarray(b,b+T), S.ec.subarray(b,b+T)], "帯 = 異常と判定した時間帯（色はレベル L1 橙・L2 赤・L3 暗赤）");
+  renderDetail();
 }
 
 function niceMax(v){
@@ -2076,10 +2315,10 @@ function niceMax(v){
   return n*p;
 }
 
-function drawChart(svg, a, b, errMask, title){
-  const W = svg.clientWidth || 416, H = svg.clientHeight || 150;
+function drawChart(svg, a, b, errMask, title, labels){
+  const W = svg.clientWidth || 416, H = svg.clientHeight || 150, pz = S.present;
   const fs = parseFloat(cssVar("--chart-fs")) || 12, d = fs - 12;   // chart text size (CSS --chart-fs); 12 px gives the original margins
-  const M = {l:40 + 5*d, r:10, t:20 + 2*d, b:22 + 2*d};
+  const M = {l:40 + 5*d, r: pz ? 12 + fs * 3.6 : 10, t: 20 + 2*d + (pz ? fs : 0), b:22 + 2*d};   // presentation: room for the line labels (right) and the time label (top)
   const pw = W-M.l-M.r, ph = H-M.t-M.b;
   const T = S.T;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
@@ -2122,9 +2361,21 @@ function drawChart(svg, a, b, errMask, title){
     return d; };
   svg.appendChild(el("path", {d:path(a), class:"l1"}));
   svg.appendChild(el("path", {d:path(b), class:"l2"}));
+  // presentation: each line is named at its last value (平時 / 対象日), the names pushed apart when the ends are close
+  if(pz && labels){
+    const last = (arr) => { for(let i = T-1; i >= 0; i--) if(!Number.isNaN(arr[i])) return i; return -1; };
+    const ends = [[a, labels[0], "s1"], [b, labels[1], "s2"]].map(([arr, text, c]) => { const i = text ? last(arr) : -1; return i < 0 ? null : {x: x(i), y: y(arr[i]), text, c}; }).filter(Boolean);
+    if(ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < fs * 1.2){ const mid = (ends[0].y + ends[1].y) / 2, up = ends[0].y <= ends[1].y ? ends[0] : ends[1], dn = up === ends[0] ? ends[1] : ends[0]; up.y = mid - fs * 0.6; dn.y = mid + fs * 0.6; }
+    for(const e of ends) svg.appendChild(el("text", {x: e.x + 8, y: e.y + fs * 0.36, class: "slab " + e.c}, e.text));
+  }
   // current time marker + dots
   const xt = x(S.t);
   svg.appendChild(el("line", {x1:xt, x2:xt, y1:M.t, y2:M.t+ph, class:"now"}));
+  if(pz){   // the time of the marker, in a navy tag on top of the line
+    const tw = fs * 3.2, th = fs * 1.4, tx = Math.max(M.l, Math.min(xt - tw / 2, W - M.r - tw));
+    svg.appendChild(el("rect", {x: tx, y: M.t - th - 2, width: tw, height: th, rx: 4, class: "tlabbg"}));
+    svg.appendChild(el("text", {x: tx + tw / 2, y: M.t - 2 - th * 0.3, "text-anchor": "middle", class: "tlab"}, S.times[S.t]));
+  }
   if(!Number.isNaN(a[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill:"var(--series-1)", class:"dot"}));
   if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
 
@@ -2148,6 +2399,226 @@ function drawChart(svg, a, b, errMask, title){
     tip2.setAttribute("x", tx+6); tip2.setAttribute("y", M.t+28+2*d); tip2.setAttribute("visibility","visible");
   };
   svg.onmouseleave = () => { [cross, tipbg, tip1, tip2].forEach(e => e.setAttribute("visibility","hidden")); };
+}
+
+// ============================================================
+// プレゼン表示 (presentation, P): header band, map (left) + detail panel (right), subtitle band; scenes 1-6
+// ============================================================
+function sceneDef(){ return CONFIG.SCENES.find(s => s.key === S.scene) || CONFIG.SCENES[0]; }
+const LAYER_NAME = {rain: "降雨", roads: "道路の異常（車の流れ）", walk: "徒歩の軌跡", grid: "徒歩の増減", kaden: "家電の接続", sns: "SNS 投稿"};
+const LAYER_SHORT = {rain: "降雨", roads: "道路の異常", walk: "徒歩の軌跡", grid: "徒歩の増減", kaden: "家電の接続", sns: "SNS 投稿"};
+function setupPresent(){
+  S.scene = CONFIG.PRESENT.scene;
+  const sc = $("pzScenes"); sc.innerHTML = "";
+  CONFIG.SCENES.forEach((s, i) => { const b = document.createElement("button"); b.innerHTML = `<b>${i + 1}</b>${esc(s.label)}`; b.dataset.key = s.key; b.title = `${s.heading}（キー ${i + 1}）`;
+                                    b.addEventListener("click", () => { b.blur(); setScene(s.key); }); sc.appendChild(b); });
+  $("pzRain").addEventListener("click", (e) => { e.target.blur(); cycleRain(); });
+  $("pzHide").addEventListener("click", (e) => { e.target.blur(); setBarHidden(true); });
+  $("pzExit").addEventListener("click", (e) => { e.target.blur(); setPresent(false); });
+}
+// Switch the presentation on or off: the play button, slider and chart panel move between the sidebar / map and the presentation's bar / panel.
+function setPresent(on){
+  if(on === S.present || !map) return;
+  S.present = on;
+  document.documentElement.classList.toggle("present", on);
+  if(on){
+    $("pzTimeCtl").append($("playBtn"), $("slider")); $("dsChart").appendChild($("chartPanel"));
+    hideTip(); if(S.snsSel){ $("snsCallout").style.display = "none"; $("snsLead").style.display = "none"; S.detail = "sns"; }
+    $("roH1").textContent = CONFIG.PRESENT.seriesLabels[0]; $("roH2").textContent = CONFIG.PRESENT.seriesLabels[1];
+    setBarHidden(false);
+    setScene(S.scene);
+  }else{
+    const row = document.querySelector("#side .timeRow"); row.insertBefore($("playBtn"), $("timeLabel")); $("side").insertBefore($("slider"), $("statTraffic"));
+    $("main").insertBefore($("chartPanel"), $("tip"));
+    setSelCell(null); S.gridSel = null; if(S.selPoint && S.selPoint.kind === "rain") setSelPoint(null); S.rainSel = null; S.detail = null;
+    $("cpKind").textContent = ""; $("cpNote").textContent = ""; $("roH1").textContent = "平時"; $("roH2").textContent = "イベント時";
+    syncAll();
+    if(S.snsSel) openSnsCallout(S.snsSel.key, S.snsSel.idx);
+  }
+  map.resize();
+  if(lastFeature && $("chartPanel").style.display === "block") showChart(lastFeature); else if(S.kadenChartIdx !== null && $("chartPanel").style.display === "block") showKadenChart(S.kadenChartIdx);
+}
+function setBarHidden(hidden){ S.barHidden = hidden; document.documentElement.classList.toggle("barhidden", hidden); }
+// A scene: its focus layers are switched on (their 表示 checkbox too), the faint ones dimmed, the rest hidden; the rain level resets to the scene's default.
+function setScene(key){
+  if(!CONFIG.SCENES.some(s => s.key === key)) return;
+  S.scene = key;
+  const sc = sceneDef();
+  for(const k of sc.focus) if(LAYER_DATA[k]() && !S[LAYER_FLAG[k]]){ S[LAYER_FLAG[k]] = true; const cb = $("chk" + k[0].toUpperCase() + k.slice(1)); if(cb) cb.checked = true; }
+  S.rainLevel = sc.focus.includes("rain") ? "full" : "dim";
+  // the selections of the other scenes go, so the panel shows this scene's data
+  const focus = (k) => sc.focus.includes(k);
+  if(S.pinnedId !== null && !focus(typeof S.pinnedId === "string" ? "kaden" : "roads")) clearPin();
+  if($("chartPanel").style.display === "block" && (S.pinnedId === null || !focus(typeof S.pinnedId === "string" ? "kaden" : "roads"))) hideChart();
+  if(S.snsSel && !focus("sns")) closeSnsCallout();
+  if(S.gridSel && !focus("grid")) setSelCell(null);
+  if(S.rainSel && !focus("rain")){ S.rainSel = null; if(S.selPoint && S.selPoint.kind === "rain") setSelPoint(null); if(S.detail === "rain") S.detail = null; }
+  if(S.trajSel && !focus("walk")) setTrajSel(null);
+  for(const b of $("pzScenes").querySelectorAll("button")) b.classList.toggle("on", b.dataset.key === key);
+  syncAll();
+}
+function cycleRain(){
+  if(!S.rain || sceneDef().focus.includes("rain")) return;
+  S.rainLevel = S.rainLevel === "dim" ? "off" : S.rainLevel === "off" ? "full" : "dim";
+  syncAll();
+}
+// Everything that depends on the layer state: map layers, emphasis, header, legend, detail panel.
+function syncAll(){
+  if(!map || !map.getLayer("links-base")) return;
+  syncLayers(); updateTraj(); updateRain(); updateKaden(); updateSns(); updateGrid(); applyEmphasis();
+  if(S.pinnedId !== null && typeof S.pinnedId !== "string" && !layerOn("roads")){ clearPin(); hideChart(); }
+  if(S.pinnedId !== null && typeof S.pinnedId === "string" && !layerOn("kaden")){ clearPin(); hideChart(); }
+  if(S.snsSel && !layerOn("sns")) closeSnsCallout();
+  if(S.gridSel && !gridOn()) setSelCell(null);
+  if(S.rainSel && !layerOn("rain")){ S.rainSel = null; if(S.selPoint && S.selPoint.kind === "rain") setSelPoint(null); if(S.detail === "rain") S.detail = null; }
+  if(S.present){ renderHeader(); renderLegend(); renderDetail(); }
+}
+// Opacity of every data layer from layerDim: the scene's focus layers at full strength, the faint ones dimmed (the normal view: all 1).
+function applyEmphasis(){
+  if(!map || !map.getLayer("links-base")) return;
+  const f = layerDim("roads"), cls = CLS_EXPR;
+  map.setPaintProperty("links-base", "line-opacity", ["case", [">=", cls, 2], 0, f]);
+  map.setPaintProperty("links-error", "line-opacity", ["case", [">=", cls, 2], f, 0]);
+  if(map.getLayer("rain")) map.setPaintProperty("rain", "raster-opacity", CONFIG.RAIN_OPACITY * layerDim("rain"));
+  if(map.getLayer("kaden")){ const k = layerDim("kaden"); map.setPaintProperty("kaden", "circle-opacity", ["case", ["==", ["get", "cls"], 0], 0.35 * k, 0.85 * k]); map.setPaintProperty("kaden", "circle-stroke-opacity", k); }
+  if(map.getLayer("sns")){ const k = layerDim("sns"); map.setPaintProperty("sns", "circle-opacity", 0.85 * k); map.setPaintProperty("sns", "circle-stroke-opacity", k); }
+  if(map.getLayer("grid-marks")){ const k = layerDim("grid"); map.setPaintProperty("grid-marks", "icon-opacity", k); map.setPaintProperty("grid", "raster-opacity", CONFIG.GRID_OPACITY * k); }
+}
+function renderHeader(){
+  const sc = sceneDef();
+  $("pzHeading").textContent = sc.heading;
+  const chips = [`<span class="lab">表示中</span>`];
+  for(const k of ["rain", "roads", "walk", "grid", "kaden", "sns"]){
+    if(!layerOn(k)) continue;
+    const focus = sc.focus.includes(k), faint = !focus && !(k === "rain" && S.rainLevel === "full");
+    chips.push(`<span class="${focus ? "focus" : "faint"}">${esc(LAYER_SHORT[k])}${faint ? " ・ 薄く" : ""}</span>`);
+  }
+  $("pzChips").innerHTML = chips.join("");
+  $("pzTitle").textContent = S.userTitle.trim() || "";
+  const ymd = slotDateFor(S.t, S.dataDate);
+  $("pzDate").textContent = ymd ? `${ymd.slice(0, 4)}年${+ymd.slice(4, 6)}月${+ymd.slice(6, 8)}日` : "";
+  $("pzTime").textContent = S.times[S.t] || "";
+  $("pzPeriod").textContent = S.autoTitle.replace(/^冠水候補 /, "対象 ").replace("（平時 ", "　平時 ").replace(/）$/, "");
+}
+// Legend of the layers of the scene (focus first), from the sidebar's legend markup, over the bottom-left of the map.
+function renderLegend(){
+  const sc = sceneDef(), rows = [];
+  const src = {roads: ["legendTraffic", "legend"], walk: ["legendTraj", "legend"], grid: ["legendGrid", "lg"], kaden: ["legendKaden", "lg"], rain: ["legendRain", "lg"], sns: ["legendSns", "lg"]};
+  for(const k of [...sc.focus, ...sc.faint]){
+    if(!layerOn(k)) continue;
+    const [id, cls] = src[k], faint = !sc.focus.includes(k);
+    let html = $(id).innerHTML;
+    if(k === "grid") html = html.replace(/<span class="lab cap">[^<]*<\/span>/, "");   // the layer name is the row's name
+    const name = k === "grid" ? ((gridLayer() || [0, S.gridParam])[1] || LAYER_NAME[k]) : LAYER_NAME[k];
+    const cur = k === "rain" && $("rainVal").textContent && !/読み込み|なし|できません/.test($("rainVal").textContent) ? `<span class="cur">カーソル位置 ${esc($("rainVal").textContent)}</span>` : "";
+    rows.push(`<div class="row"><span class="nm">${esc(name)}${faint ? "<small>薄く表示</small>" : ""}</span><div class="${cls}">${html}</div>${cur}</div>`);
+  }
+  $("pzLegend").innerHTML = rows.join("");
+  $("pzLegend").style.display = rows.length ? "block" : "none";
+  $("pzRain").textContent = `降雨: ${!S.rain ? "データなし" : sceneDef().focus.includes("rain") ? "通常" : {full: "通常", dim: "薄い", off: "非表示"}[S.rainLevel]}`;
+  $("pzRain").disabled = !S.rain || sceneDef().focus.includes("rain");
+}
+// The detail panel besides the chart panel: the SNS post, the mesh cell, the rain probe, the clicked trajectory feature, or the scene's hint / summary.
+function renderDetail(){
+  if(!S.present) return;
+  const other = $("dsOther");
+  if($("chartPanel").style.display === "block"){ other.style.display = "none"; return; }
+  other.style.display = "block";
+  let html = "";
+  if(S.detail === "sns" && S.snsSel && S.snsNow && S.snsNow.get(S.snsSel.key)) html = snsDetailHtml();
+  else if(S.detail === "grid" && S.gridSel && gridOn()) html = gridDetailHtml();
+  else if(S.detail === "rain" && S.rainSel && layerOn("rain")) html = rainDetailHtml();
+  else if(S.detail === "traj" && S.trajSel && walkOn()) html = trajDetailHtml();
+  else html = emptyDetailHtml();
+  other.innerHTML = html;
+  for(const b of other.querySelectorAll("button[data-d]")) b.onclick = () => { const g = S.snsNow.get(S.snsSel.key); openSnsCallout(S.snsSel.key, (S.snsSel.idx + +b.dataset.d + g.posts.length) % g.posts.length); };
+}
+function snsDetailHtml(){
+  const g = S.snsNow.get(S.snsSel.key), idx = Math.min(S.snsSel.idx, g.posts.length - 1), p = g.posts[idx];
+  const who = [p.platform, p.author ? "@" + p.author : ""].filter(Boolean).join(" ");
+  const meta = [p.ev, p.place, p.range && p.range !== "0" ? `範囲 ${p.range} m` : "", who, p.id ? `投稿ID ${p.id}` : ""].filter(Boolean);
+  const note = [p.evidence, p.level, p.conf, p.status, p.flags, p.notes].filter(Boolean);
+  const links = [p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">投稿を開く</a>` : "", p.media ? `<a href="${esc(p.media)}" target="_blank" rel="noopener">写真・動画を開く</a>` : ""].filter(Boolean);
+  return `<div class="dhead"><span class="kind sel">選択中の投稿地点（${esc(snsWindow()[2])}の投稿 ${g.posts.length} 件）</span>`
+    + `<span class="ttl"><span class="cat" style="background:${CONFIG.SNS_COLORS[p.cat] || CONFIG.SNS_DEFAULT_COLOR}"></span>${esc(p.cat)}<span class="when">${esc(p.time)}</span></span></div>`
+    + `<div class="meta">${meta.map(esc).join(" ／ ")}</div><div class="txt">${esc(p.text)}</div>`
+    + (note.length ? `<div class="meta">${note.map(esc).join(" ／ ")}</div>` : "") + (links.length ? `<div class="meta">${links.join(" ｜ ")}</div>` : "")
+    + `<div class="nav">${g.posts.length > 1 ? `<button data-d="-1">前</button><span>${idx + 1} / ${g.posts.length} 件（この地点）</span><button data-d="1">次</button>` : `<span>この地点の投稿 1 件</span>`}</div>`;
+}
+function gridDetailHtml(){
+  const G = S.grid, c = G.cur, L = gridLayer() || [S.gridParam, S.gridParam, "ratio", "", 60], {x, y} = S.gridSel;
+  const v = c && c.key === gridKey() ? c.vals[y * c.w + x] : NaN, count = L[2] === "count", nodata = Number.isNaN(v) || (c && v === c.nodata);
+  const big = nodata ? `<div class="big">–<small>${count ? "データなし" : "平時 0（比は出せない）"}</small></div>`
+    : count ? `<div class="big">${Number.isInteger(v) ? v : v.toFixed(1)}<small>${esc(L[3] || "")}</small></div>`
+    : `<div class="big">${Math.round(v * 100)} %<small>${v >= S.gridUp ? "増加（閾値 " + Math.round(S.gridUp * 100) + " % 以上）" : v <= S.gridDown ? "減少（閾値 " + Math.round(S.gridDown * 100) + " % 以下）" : "閾値の間（矢印なし）"}</small></div>`;
+  const m = c && c.key === gridKey() ? c.marks : null;
+  return `<div class="dhead"><span class="kind sel">選択中のメッシュのセル</span><span class="ttl">${esc(L[1])}<span class="when">直近 ${L[4]} 分（${S.times[S.t]} まで）</span></span></div>`
+    + big + `<div class="kv"><span class="k">${count ? "値" : "比"}</span><span class="v">${count ? "セル内の値" : "対象日 ÷ 平時 の徒歩移動者数"}</span>`
+    + (m && !count ? `<span class="k">この時刻の全セル</span><span class="v">増加 ${m.up.toLocaleString()} セル・減少 ${m.down.toLocaleString()} セル</span>` : "") + `</div>`
+    + `<div class="hint">別のセルをクリックすると切り替わります。</div>`;
+}
+function rainDetailHtml(){
+  const v = rainAt(S.rainSel), R = S.rain, unit = (R.index.unit || "").startsWith("mm (") ? "mm（15 分）" : "mm/h";
+  let mx = null;
+  if(R.cur && R.cur.bounds){   // the strongest rain in the current view
+    const [W, Sb, E, Nb] = R.cur.bounds, b = map.getBounds(), w = R.cur.w, h = R.cur.h;
+    const x0 = Math.max(0, Math.floor((b.getWest() - W) / (E - W) * w)), x1 = Math.min(w - 1, Math.floor((b.getEast() - W) / (E - W) * w));
+    const y0 = Math.max(0, Math.floor((Nb - b.getNorth()) / (Nb - Sb) * h)), y1 = Math.min(h - 1, Math.floor((Nb - b.getSouth()) / (Nb - Sb) * h));
+    mx = 0; for(let yy = y0; yy <= y1; yy++) for(let xx = x0; xx <= x1; xx++){ const q = R.cur.vals[yy * w + xx]; if(q > mx && q !== R.cur.nodata) mx = q; }
+  }
+  return `<div class="dhead"><span class="kind sel">選択中の地点</span><span class="ttl">降雨強度<span class="when">${S.times[S.t]} の 15 分</span></span></div>`
+    + `<div class="big">${v && v !== "–" ? esc(v) : "–"}${!v ? `<small>この地点の値なし</small>` : v === "–" ? `<small>欠測</small>` : ""}</div>`
+    + `<div class="kv"><span class="k">地点</span><span class="v">${S.rainSel.lat.toFixed(4)}, ${S.rainSel.lng.toFixed(4)}</span>`
+    + (mx !== null ? `<span class="k">表示範囲の最大</span><span class="v">${mx.toFixed(1)} ${unit}</span>` : "") + `</div>`
+    + `<div class="hint">別の地点をクリックすると切り替わります。</div>`;
+}
+function trajDetailHtml(){
+  const sel = S.trajSel, ds = sel.ds, f = ds && ds.feats[sel.id], p = f ? f.properties : {};
+  const val = (k) => k === "mode" ? String(p[k]).split(",").map(m => MODE_LABEL[m] || m).join(",") : p[k];
+  const rows = Object.keys(p).filter(k => !["time", "kind"].includes(k) && p[k] !== null && p[k] !== "null").map(k => `<span class="k">${esc(PROP_LABEL[k] || k)}</span><span class="v">${esc(val(k))}</span>`).join("");
+  return `<div class="dhead"><span class="kind sel">選択中の徒歩データ</span><span class="ttl">${esc(TRAJ_KIND[sel.source])}<span class="when">${esc(windowLabel(S.t))}</span></span></div><div class="kv">${rows}</div>`;
+}
+function emptyDetailHtml(){
+  const sc = sceneDef(), rows = [];
+  const n = (v) => Number(v).toLocaleString();
+  const f = (k) => sc.focus.includes(k) && layerOn(k);
+  if(f("roads")) rows.push([`${n(S.countsError[S.t])}<small>本</small>`, `<b>道路の異常</b>（対象 ${n(S.countsTarget[S.t])} 本のうち。L1 ${n(S.countsLevel[0][S.t])}・L2 ${n(S.countsLevel[1][S.t])}・L3 ${n(S.countsLevel[2][S.t])}）`]);
+  if(f("kaden") && S.kadenCnt) rows.push([`${n(S.kadenCnt[2] + S.kadenCnt[3])}<small>地点</small>`, `<b>家電の接続台数の減少</b>（${n(S.kaden.n)} 地点のうち。1/3 以下 ${n(S.kadenCnt[3])}・2/3 以下 ${n(S.kadenCnt[2])}・増加 ${n(S.kadenCnt[4])}）`]);
+  if(f("grid") && S.grid.cur && S.grid.cur.key === gridKey() && S.grid.cur.marks) rows.push([`${n(S.grid.cur.marks.up)}<small>↑</small> ${n(S.grid.cur.marks.down)}<small>↓</small>`, `<b>徒歩の増減</b>（増加 ${Math.round(S.gridUp * 100)} % 以上・減少 ${Math.round(S.gridDown * 100)} % 以下のセル）`]);
+  if(f("sns") && S.snsCount) rows.push([`${n(S.snsCount.posts)}<small>件</small>`, `<b>SNS 投稿</b>（${n(S.snsCount.spots)} 地点、${esc(S.snsCount.label)}）`]);
+  const sum = rows.length ? `<div class="sum">${rows.map(([a, b]) => `<span class="n">${a}</span><span class="l">${b}</span>`).join("")}</div>` : "";
+  return `<div class="dhead"><span class="kind">${esc(S.times[S.t])} の状況</span><span class="ttl">${esc(sc.label)}</span></div>${sum}<div class="hint">${esc(sc.hint)}</div>`;
+}
+// A click on the map in the presentation with nothing clickable under it: a mesh cell (walker change) or a rain probe point for the detail panel.
+function presentClick(e){
+  if(gridOn() && S.grid.cur && S.grid.cur.bounds && S.grid.cur.key === gridKey()){
+    const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, ll = e.lngLat;
+    if(ll.lng >= W && ll.lng < E && ll.lat > Sb && ll.lat <= Nb){
+      const x = Math.floor((ll.lng - W) / (E - W) * c.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * c.h);
+      if(S.gridSel && S.gridSel.x === x && S.gridSel.y === y){ setSelCell(null); return true; }
+      setSelCell({x, y}); return true;
+    }
+  }
+  if(layerOn("rain") && S.rain.cur && S.rain.cur.bounds){
+    const [W, Sb, E, Nb] = S.rain.cur.bounds, ll = e.lngLat;
+    if(ll.lng >= W && ll.lng < E && ll.lat > Sb && ll.lat <= Nb){
+      S.rainSel = {lng: ll.lng, lat: ll.lat}; S.detail = "rain"; setSelPoint(ll.lng, ll.lat, 4, "rain"); renderDetail(); return true;
+    }
+  }
+  return false;
+}
+function setSelCell(cell){
+  S.gridSel = cell;
+  if(map && map.getSource("sel-cell")){
+    let fc = EMPTY_FC;
+    if(cell && S.grid && S.grid.cur && S.grid.cur.bounds){
+      const c = S.grid.cur, [W, Sb, E, Nb] = c.bounds, dx = (E - W) / c.w, dy = (Nb - Sb) / c.h, x0 = W + cell.x * dx, y0 = Nb - cell.y * dy;
+      fc = {type:"FeatureCollection", features:[{type:"Feature", properties:{}, geometry:{type:"Polygon", coordinates:[[[x0, y0], [x0 + dx, y0], [x0 + dx, y0 - dy], [x0, y0 - dy], [x0, y0]]]}}]};
+    }
+    map.getSource("sel-cell").setData(fc);
+  }
+  if(cell) S.detail = "grid"; else if(S.detail === "grid") S.detail = null;
+  renderDetail();
 }
 
 // The whole viewer (sidebar and map) is drawn in the largest box of exactly 16:9 that fits the window, at its top left, so a screen

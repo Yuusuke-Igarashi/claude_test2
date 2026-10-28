@@ -127,7 +127,7 @@ button:hover{background:#f0efec}
 
 <div id="chartPanel" class="panel">
   <header>
-    <span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
+    <span><span class="kind" id="cpKind"></span><span class="title" id="cpTitle">link</span><span class="status" id="cpStatus"></span></span>
     <span class="sub" id="cpSub"></span>
   </header>
   <div class="readout">
@@ -143,6 +143,7 @@ button:hover{background:#f0efec}
     <span style="--c:var(--lv1)">異常 L1</span><span style="--c:var(--lv2)">L2</span><span style="--c:var(--lv3)">L3</span>
   </div>
   <div class="hint" id="cpHint">クリックで固定 / もう一度クリックで解除</div>
+  <div id="cpNote"></div>
 </div>
 
 <div id="loader">
@@ -733,7 +734,7 @@ function initMap(gj){
     map.on("click", "links-hit", onClick);
     map.on("click", (e) => {   // a click beside the links releases a pinned chart
       const fts = map.queryRenderedFeatures(e.point, {layers:["links-hit"]});
-      if(!fts.length && S.pinnedId !== null){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); hideChart(); }
+      if(!fts.length && S.pinnedId !== null){ clearPin(); hideChart(); }
     });
     setupOverlays();
     updateRain();
@@ -828,8 +829,9 @@ function rainKey(){ return S.rain ? `${rainDateFor(S.t)}_${S.times[S.t]}` : null
 function updateRain(){
   if(!map || !S.rain || !map.getSource("rain")) return;
   const R = S.rain, key = rainKey();
-  map.setLayoutProperty("rain", "visibility", S.showRain ? "visible" : "none");
-  if(!S.showRain) return;
+  const rainOn = layerOn("rain");
+  map.setLayoutProperty("rain", "visibility", rainOn ? "visible" : "none");
+  if(!rainOn) return;
   if(!R.sources.has(key)){ R.cur = null; map.getSource("rain").updateImage({url: BLANK_PNG}); $("rainVal").textContent = "（この時刻の降雨なし）"; return; }
   const show = (c) => { R.cur = {key, ...c}; map.getSource("rain").updateImage(c.bounds ? {url: c.url, coordinates: [[c.bounds[0], c.bounds[3]], [c.bounds[2], c.bounds[3]], [c.bounds[2], c.bounds[1]], [c.bounds[0], c.bounds[1]]]} : {url: c.url}); $("rainVal").textContent = ""; };
   if(S.period && S.period.event && $("rainDate").value !== rainDateFor(S.t)) $("rainDate").value = rainDateFor(S.t);
@@ -844,7 +846,7 @@ function updateRain(){
   }).catch(e => { console.error(e); R.loading = null; $("rainVal").textContent = `降雨を読み込めません: ${e.message}`; });
 }
 function rainAt(ll){
-  const R = S.rain; if(!R || !R.cur || !S.showRain || !R.cur.bounds) return "";
+  const R = S.rain; if(!R || !R.cur || !layerOn("rain") || !R.cur.bounds) return "";
   const [W, Sb, E, Nb] = R.cur.bounds;
   if(ll.lng < W || ll.lng >= E || ll.lat <= Sb || ll.lat > Nb) return "";
   const x = Math.floor((ll.lng - W) / (E - W) * R.cur.w), y = Math.floor((Nb - ll.lat) / (Nb - Sb) * R.cur.h);
@@ -889,11 +891,17 @@ function onHover(e){
 function onClick(e){
   const ft = pickFeature(e.features);
   if(!ft) return;
-  if(S.pinnedId === ft.id){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
-  else { S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); }
+  if(S.pinnedId === ft.id) clearPin();
+  else { clearPin(); S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); setSelLink(ft.id); }
   showChart(ft);
 }
 function hideChart(){ $("chartPanel").style.display = "none"; }
+// The shared chart functions call these hooks of the full viewer's presentation mode (プレゼン表示); the simple viewer has none.
+function clearPin(){ S.pinnedId = null; $("chartPanel").classList.remove("pinned"); }
+function setSelLink(){}
+function renderDetail(){}
+function chartNote(){}
+const layerOn = (key) => key === "rain" ? !!S.rain && S.showRain : true;   // the shared updateRain / rainAt ask the full viewer's layer state
 
 // ============================================================
 // Time
@@ -969,12 +977,14 @@ function showChart(ft){
   const r = p._row;
   const T = S.T, t = S.t;
   $("chartPanel").style.display = "block";
+  $("cpKind").textContent = S.present ? (S.pinnedId === ft.id ? "選択中の道路" : "カーソル位置の道路") : "";
   $("cpTitle").textContent = `Link ${p.id}`;
   $("cpSub").textContent = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? `対向: ${p.pair_id}` : "対向なし";
   if(r < 0){
     $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0];
     ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
     drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, `台数 /${slotMin()}分`);
+    chartNote([], ""); renderDetail();
     return;
   }
   const b = r*T;
@@ -985,9 +995,11 @@ function showChart(ft){
   const es = eventSpeedSeries(b);
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(es[t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
-  const errMask = S.err.subarray(b, b+T);
-  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, "速度 km/h");
-  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`);
+  const errMask = S.err.subarray(b, b+T), labels = S.present ? CONFIG.PRESENT.seriesLabels : ["平時", "イベント時"];
+  drawChart($("chartSpeed"), S.bs.subarray(b,b+T), es, errMask, "速度 km/h", labels);
+  drawChart($("chartCount"), S.bc.subarray(b,b+T), S.ec.subarray(b,b+T), errMask, `台数 /${slotMin()}分`, labels);
+  chartNote([S.bs.subarray(b,b+T), es, S.bc.subarray(b,b+T), S.ec.subarray(b,b+T)], "帯 = 異常と判定した時間帯（色はレベル L1 橙・L2 赤・L3 暗赤）");
+  renderDetail();
 }
 function niceMax(v){
   if(!(v > 0)) return 1;
@@ -996,10 +1008,10 @@ function niceMax(v){
   const n = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10;
   return n*p;
 }
-function drawChart(svg, a, b, errMask, title){
-  const W = svg.clientWidth || 416, H = svg.clientHeight || 150;
+function drawChart(svg, a, b, errMask, title, labels){
+  const W = svg.clientWidth || 416, H = svg.clientHeight || 150, pz = S.present;
   const fs = parseFloat(cssVar("--chart-fs")) || 12, d = fs - 12;   // chart text size (CSS --chart-fs); 12 px gives the original margins
-  const M = {l:40 + 5*d, r:10, t:20 + 2*d, b:22 + 2*d};
+  const M = {l:40 + 5*d, r: pz ? 12 + fs * 3.6 : 10, t: 20 + 2*d + (pz ? fs : 0), b:22 + 2*d};   // presentation: room for the line labels (right) and the time label (top)
   const pw = W-M.l-M.r, ph = H-M.t-M.b;
   const T = S.T;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
@@ -1042,9 +1054,21 @@ function drawChart(svg, a, b, errMask, title){
     return d; };
   svg.appendChild(el("path", {d:path(a), class:"l1"}));
   svg.appendChild(el("path", {d:path(b), class:"l2"}));
+  // presentation: each line is named at its last value (平時 / 対象日), the names pushed apart when the ends are close
+  if(pz && labels){
+    const last = (arr) => { for(let i = T-1; i >= 0; i--) if(!Number.isNaN(arr[i])) return i; return -1; };
+    const ends = [[a, labels[0], "s1"], [b, labels[1], "s2"]].map(([arr, text, c]) => { const i = text ? last(arr) : -1; return i < 0 ? null : {x: x(i), y: y(arr[i]), text, c}; }).filter(Boolean);
+    if(ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < fs * 1.2){ const mid = (ends[0].y + ends[1].y) / 2, up = ends[0].y <= ends[1].y ? ends[0] : ends[1], dn = up === ends[0] ? ends[1] : ends[0]; up.y = mid - fs * 0.6; dn.y = mid + fs * 0.6; }
+    for(const e of ends) svg.appendChild(el("text", {x: e.x + 8, y: e.y + fs * 0.36, class: "slab " + e.c}, e.text));
+  }
   // current time marker + dots
   const xt = x(S.t);
   svg.appendChild(el("line", {x1:xt, x2:xt, y1:M.t, y2:M.t+ph, class:"now"}));
+  if(pz){   // the time of the marker, in a navy tag on top of the line
+    const tw = fs * 3.2, th = fs * 1.4, tx = Math.max(M.l, Math.min(xt - tw / 2, W - M.r - tw));
+    svg.appendChild(el("rect", {x: tx, y: M.t - th - 2, width: tw, height: th, rx: 4, class: "tlabbg"}));
+    svg.appendChild(el("text", {x: tx + tw / 2, y: M.t - 2 - th * 0.3, "text-anchor": "middle", class: "tlab"}, S.times[S.t]));
+  }
   if(!Number.isNaN(a[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(a[S.t]), r:4, fill:"var(--series-1)", class:"dot"}));
   if(!Number.isNaN(b[S.t])) svg.appendChild(el("circle", {cx:xt, cy:y(b[S.t]), r:4, fill:"var(--series-2)", class:"dot"}));
 
