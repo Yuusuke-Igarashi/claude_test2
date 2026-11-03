@@ -20,7 +20,7 @@ function rpChart(box, { series, yFmt = (v) => fmtUSD(v), yLabel = '損失', xLab
   const lx = Math.log10(rps[0]) - 0.1, hx = Math.log10(rps[rps.length - 1]) + 0.1; const X = (rp) => ML + (Math.log10(rp) - lx) / (hx - lx) * pw;
   const maxV = Math.max(1e-9, ...series.flatMap((s) => s.points.map((p) => p[1]))); const ticks = niceTicks(maxV); const maxT = ticks[ticks.length - 1]; const Y = (v) => MT + ph - (v / maxT) * ph;
   let h = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yLabel)}の再現期間曲線">`;
-  ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${yFmt(t)}</text>`; });
+  ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(yFmt(t))}</text>`; });
   rps.forEach((rp) => { h += `<text class="ax" x="${X(rp).toFixed(1)}" y="${H - MB + 16}" text-anchor="middle">${rp}</text><line class="axis-l" x1="${X(rp).toFixed(1)}" x2="${X(rp).toFixed(1)}" y1="${MT + ph}" y2="${MT + ph + 4}"/>`; });
   h += `<line class="axis-l" x1="${ML}" x2="${W - MR}" y1="${MT + ph}" y2="${MT + ph}"/><text class="ax-t" x="${ML + pw / 2}" y="${H - 6}" text-anchor="middle">${esc(xLabel)}</text>`;
   series.forEach((s, si) => {
@@ -28,11 +28,11 @@ function rpChart(box, { series, yFmt = (v) => fmtUSD(v), yLabel = '損失', xLab
     const d = pts.map(([rp, v], i) => (i ? 'L' : 'M') + X(rp).toFixed(1) + ' ' + Y(v).toFixed(1)).join('');
     if (!s.dashed) h += `<path class="area" d="${d}L${X(pts[pts.length - 1][0]).toFixed(1)} ${MT + ph}L${X(pts[0][0]).toFixed(1)} ${MT + ph}Z" fill="${col}"/>`;
     h += `<path class="ln" d="${d}" stroke="${col}"${s.dashed ? ' stroke-dasharray="5 4"' : ''}/>`;
-    pts.forEach(([rp, v], i) => { h += `<circle class="pt" cx="${X(rp).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="4.5" fill="${col}" data-s="${si}" data-i="${i}"/>`; if (i === pts.length - 1 || i === 0) h += `<text class="lbl${i === pts.length - 1 ? ' on' : ''}" x="${(X(rp) + (i === pts.length - 1 ? -6 : 8)).toFixed(1)}" y="${(Y(v) - 8).toFixed(1)}" text-anchor="${i === pts.length - 1 ? 'end' : 'start'}">${yFmt(v)}</text>`; });
+    pts.forEach(([rp, v], i) => { h += `<circle class="pt" cx="${X(rp).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="4.5" fill="${col}" data-s="${si}" data-i="${i}"/>`; if (i === pts.length - 1 || i === 0) h += `<text class="lbl${i === pts.length - 1 ? ' on' : ''}" x="${(X(rp) + (i === pts.length - 1 ? -6 : 8)).toFixed(1)}" y="${(Y(v) - 8).toFixed(1)}" text-anchor="${i === pts.length - 1 ? 'end' : 'start'}">${esc(yFmt(v))}</text>`; });
   });
   h += '</svg>';
   box.innerHTML = h; const tip = chartTip(box); const svg = box.querySelector('svg');
-  svg.onmousemove = (e) => { const c = e.target.closest('circle.pt'); if (!c) { tip.hidden = true; return; } const s = series[+c.dataset.s]; const pts = s.points.slice().sort((a, b) => a[0] - b[0]); const [rp, v] = pts[+c.dataset.i]; tip.innerHTML = `<b>再現期間 ${rp} 年（年超過確率 ${(100 / rp).toFixed(rp >= 100 ? 1 : 0)}%）</b><div class="r"><i style="background:${s.color || CAT[+c.dataset.s % CAT.length]}"></i>${esc(s.name)}：${yFmt(v)}</div>`; tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
+  svg.onmousemove = (e) => { const c = e.target.closest('circle.pt'); if (!c) { tip.hidden = true; return; } const s = series[+c.dataset.s]; const pts = s.points.slice().sort((a, b) => a[0] - b[0]); const [rp, v] = pts[+c.dataset.i]; tip.innerHTML = `<b>再現期間 ${rp} 年（年超過確率 ${(100 / rp).toFixed(rp >= 100 ? 1 : 0)}%）</b><div class="r"><i style="background:${s.color || CAT[+c.dataset.s % CAT.length]}"></i>${esc(s.name)}：${esc(yFmt(v))}</div>`; tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
   svg.onmouseleave = () => { tip.hidden = true; };
 }
 
@@ -45,7 +45,7 @@ function barChart(box, { cats, series, yFmt = (v) => fmt(v), yLabel = '', height
   const ticks = niceTicks(Math.max(1e-9, ...tot)); const maxT = ticks[ticks.length - 1]; const Y = (v) => MT + ph - (v / maxT) * ph;
   const bw = pw / n; const gw = Math.min(46, bw * 0.62); const sw = stacked ? gw : gw / series.length;
   let h = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yLabel)}">`;
-  ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${yFmt(t)}</text>`; });
+  ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(yFmt(t))}</text>`; });
   cats.forEach((c, i) => {
     const cx = ML + bw * i + bw / 2; h += `<text class="ax" x="${cx.toFixed(1)}" y="${H - MB + 16}" text-anchor="middle">${esc(c)}</text>`;
     let acc = 0;
@@ -66,7 +66,7 @@ function lineChart(box, { series, now, yFmt = (v) => fmt(v), xFmt = (t) => fmtHo
   const maxV = Math.max(1e-9, ...series.flatMap((s) => s.values.map((p) => p[1]))); const ticks = niceTicks(maxV, 3); const maxT = ticks[ticks.length - 1];
   const X = (t) => ML + (t / xMax) * pw, Y = (v) => MT + ph - (v / maxT) * ph;
   let h = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yLabel)}">`;
-  ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${yFmt(t)}</text>`; });
+  ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(yFmt(t))}</text>`; });
   for (let d = 0; d <= xMax / 24; d++) h += `<text class="ax" x="${X(d * 24).toFixed(1)}" y="${H - MB + 16}" text-anchor="${d * 24 >= xMax ? 'end' : d === 0 ? 'start' : 'middle'}">D+${d}</text>`;
   series.forEach((s, si) => { const col = s.color || CAT[si % CAT.length]; const past = s.values.filter((p) => p[0] <= now), fut = s.values.filter((p) => p[0] >= now); const d = (arr) => arr.map(([t, v], i) => (i ? 'L' : 'M') + X(t).toFixed(1) + ' ' + Y(v).toFixed(1)).join(''); if (past.length > 1) { h += `<path class="area" d="${d(past)}L${X(past[past.length - 1][0]).toFixed(1)} ${MT + ph}L${X(past[0][0]).toFixed(1)} ${MT + ph}Z" fill="${col}"/><path class="ln" d="${d(past)}" stroke="${col}"/>`; } if (fut.length > 1) h += `<path class="ln" d="${d(fut)}" stroke="${col}" stroke-dasharray="3 4" opacity=".55"/>`; const cur = s.values.reduce((b, p) => Math.abs(p[0] - now) < Math.abs(b[0] - now) ? p : b, s.values[0]); const flip = X(cur[0]) > W - 70; h += `<circle class="pt" cx="${X(cur[0]).toFixed(1)}" cy="${Y(cur[1]).toFixed(1)}" r="4.5" fill="${col}"/><text class="lbl on" x="${(X(cur[0]) + (flip ? -7 : 7)).toFixed(1)}" y="${(Y(cur[1]) - 6).toFixed(1)}" text-anchor="${flip ? 'end' : 'start'}">${yFmt(cur[1])}</text>`; });
   h += `<line class="hover-l" x1="${X(now).toFixed(1)}" x2="${X(now).toFixed(1)}" y1="${MT}" y2="${MT + ph}"/><text class="ax" x="${X(now).toFixed(1)}" y="${MT - 3}" text-anchor="middle">${esc(xFmt(now))}</text>`;

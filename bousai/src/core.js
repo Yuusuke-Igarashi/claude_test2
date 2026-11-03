@@ -10,13 +10,13 @@ const fmt = (n, d = 0) => (n == null || isNaN(n)) ? '—' : Number(n).toLocaleSt
 /* 百万USD → 表示文字列 */
 const fmtUSD = (m) => {
   if (m == null || isNaN(m)) return '—';
-  if (m >= 1000) return `US$${(m / 1000).toFixed(m >= 10000 ? 0 : 1)}B`;
-  if (m >= 1) return `US$${m.toFixed(m >= 100 ? 0 : 1)}M`;
-  if (m > 0.0005) return `US$${Math.round(m * 1000)}k`;
-  return m === 0 ? '≈0' : `<US$1k`;
+  if (m >= 999.95) return `US$${(m / 1000).toFixed(m >= 9999.5 ? 0 : 1)}B`;
+  if (m >= 0.9995) return `US$${m.toFixed(m >= 99.95 ? 0 : 1)}M`;
+  if (m >= 0.0005) return `US$${Math.round(m * 1000)}k`;
+  return m > 0 ? 'US$1k未満' : '≈0';
 };
 const fmtPct = (v, d = 0) => (v == null || isNaN(v)) ? '—' : `${(v * 100).toFixed(d)}%`;
-const fmtHours = (h) => { const d = Math.floor(h / 24), hh = Math.round(h % 24); return d > 0 ? `D+${d} ${String(hh).padStart(2, '0')}:00` : `+${hh}h`; };
+const fmtHours = (h) => { const H = Math.round(h); const d = Math.floor(H / 24), hh = H % 24; return d > 0 ? `D+${d} ${String(hh).padStart(2, '0')}:00` : `+${hh}h`; };
 const hashStr = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const mulberry32 = (a) => function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const sum = (arr, f = (x) => x) => arr.reduce((s, x, i) => s + (f(x, i) || 0), 0);
@@ -63,17 +63,23 @@ const App = { views: {}, current: null, inited: new Set() };
 function currentView() { const h = (location.hash || '').replace('#', ''); return VIEWS.includes(h) ? h : 'region'; }
 function showView(name) {
   App.current = name;
+  /* 発災画面の再生は画面を離れたら止める */
+  if (!/^live/.test(name) && typeof Live !== 'undefined' && Live.st.playing) { clearInterval(Live.st.timer); Live.st.playing = false; }
   $$('.view').forEach((v) => { v.hidden = v.dataset.view !== name; });
   $$('#nav a, #navM a').forEach((a) => { if (a.dataset.view === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   const v = App.views[name];
   if (v) {
     const el = $(`#v-${name}`);
     if (!App.inited.has(name)) { App.inited.add(name); v.init(el); }
-    if (v.show) v.show(el);
+    else if (v.show) v.show(el);
   }
   window.scrollTo({ top: 0 });
 }
-function route() { showView(currentView()); }
+function route() {
+  const h = (location.hash || '').replace('#', '');
+  if (h && !VIEWS.includes(h)) { if (!App.current) showView('region'); return; } /* 未知のハッシュ（#main など）は無視 */
+  showView(currentView());
+}
 
 /* 要素生成 */
 function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }

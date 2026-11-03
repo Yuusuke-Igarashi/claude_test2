@@ -54,7 +54,7 @@
 <symbol id="i-bug" viewBox="0 0 24 24"><path d="M8 9a4 4 0 0 1 8 0v6a4 4 0 0 1-8 0z"/><path d="M8 11H4M8 15H5l-2 3M16 11h4M16 15h3l2 3M10 5l-2-2M14 5l2-2M12 9v10"/></symbol>
 </svg>
 
-<div class="skip"><a href="#main">本文へ</a></div>
+<div class="skip"><a href="#main" onclick="event.preventDefault();document.getElementById('main').focus()">本文へ</a></div>
 
 <header class="top" id="top">
   <div class="top-in">
@@ -76,7 +76,7 @@
   <nav class="nav-m" aria-label="画面切替（モバイル）" id="navM"></nav>
 </header>
 
-<main id="main">
+<main id="main" tabindex="-1" style="outline:none">
   <section class="view" id="v-region" data-view="region" hidden></section>
   <section class="view" id="v-site" data-view="site" hidden></section>
   <section class="view" id="v-personal" data-view="personal" hidden></section>

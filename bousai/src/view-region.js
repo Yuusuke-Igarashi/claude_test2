@@ -28,7 +28,8 @@ App.views.region = {
       <section class="sec" id="rgSrc"></section>`;
     $('#rgSel', root).value = st.region;
     $('#rgSel', root).onchange = (e) => { st.region = e.target.value; Store.set('region', st.region); self.update(root); };
-    $('#hzSeg', root).onclick = (e) => { const b = e.target.closest('button'); if (!b) return; st.hz = b.dataset.hz; $$('#hzSeg button', root).forEach((x) => x.setAttribute('aria-pressed', x === b)); self.drawMap(root); };
+    this.setHz = (k) => { st.hz = k; $$('#hzSeg button', root).forEach((x) => x.setAttribute('aria-pressed', x.dataset.hz === k)); $$('#hzCards .hz', root).forEach((x) => x.setAttribute('aria-pressed', x.dataset.hzCard === k)); self.drawMap(root); };
+    $('#hzSeg', root).onclick = (e) => { const b = e.target.closest('button'); if (!b) return; self.setHz(b.dataset.hz); };
     $('#focusSeg', root).onclick = (e) => { const b = e.target.closest('button'); if (!b) return; st.focus = b.dataset.focus; $$('#focusSeg button', root).forEach((x) => x.setAttribute('aria-pressed', x === b)); self.drawMap(root); };
     root.addEventListener('click', (e) => { const h = e.target.closest('[data-rphz]'); if (h) { st.rpHz = h.dataset.rphz; self.drawRp(root); } });
     this.update(root);
@@ -36,8 +37,8 @@ App.views.region = {
   show(root) { /* 他画面からの地域変更を反映 */ const r = Store.get('region', this.st.region); if (r !== this.st.region) { this.st.region = r; $('#rgSel', root).value = r; this.update(root); } },
   levelOf(f, hz) {
     const id = f.properties.id; const th = HAZ[hz].th;
-    const reg = M.regions().find((r) => (r.adm1_ids || []).includes(id));
-    if (reg && reg.hazards && reg.hazards[th] && reg.hazards[th].level) return { level: reg.hazards[th].level, scope: reg.name_ja, src: reg.hazards[th].src };
+    const reg = M.regions().find((r) => (r.hazard_adm1_ids || r.adm1_ids || []).includes(id));
+    if (reg && reg.hazards && reg.hazards[th] && reg.hazards[th].level) return { level: reg.hazards[th].level, scope: reg.hazard_scope_ja || reg.name_ja, src: reg.hazards[th].src };
     const c = D.regions && D.regions.countries && D.regions.countries[f.properties.c];
     if (c && c.hazards && c.hazards[th]) return { level: c.hazards[th].level, scope: `${COUNTRY_JA[f.properties.c]}（国レベル）`, src: c.hazards[th].src };
     return { level: 'unknown', scope: '' };
@@ -68,13 +69,13 @@ App.views.region = {
       { v: fmt(reg.pop_m, 1), u: '百万人', l: '都市圏人口', s: reg.pop_src || '出典：地域データ', url: reg.pop_url, asm: true },
       { v: c.jp_residents != null ? fmt(c.jp_residents) : NA, u: c.jp_residents != null ? '人' : '', l: '在留邦人（国全体）', s: c.jp_residents != null ? (c.residents_src || '外務省 海外在留邦人数調査統計') : '外務省 海外在留邦人数調査統計を参照（本セッション未取得）', url: c.residents_url || 'https://www.mofa.go.jp/mofaj/toko/tokei/hojin/index.html' },
       { v: c.jp_companies != null ? fmt(c.jp_companies) : NA, u: c.jp_companies != null ? '拠点' : '', l: '日系企業拠点（国全体）', s: c.jp_companies != null ? (c.companies_src || '外務省 日系企業拠点数調査') : '外務省 海外進出日系企業拠点数調査を参照（本セッション未取得）', url: c.companies_url || 'https://www.mofa.go.jp/mofaj/toko/page22_000043.html' },
-      { v: c.wri != null ? fmt(c.wri, 2) : NA, u: c.wri_rank ? `世界${c.wri_rank}位${c.wri_rank_note && /2024/.test(c.wri_rank_note) ? '（2024年版）' : ''}` : '', l: 'WorldRiskIndex 2025', s: c.wri_src || 'WorldRiskReport', url: c.wri_url, snip: c.wri_confirmed === 'search_snippet' },
+      { v: c.wri != null ? fmt(c.wri, 2) : NA, u: c.wri_rank && !(c.wri_rank_note && /2024/.test(c.wri_rank_note)) ? `世界${c.wri_rank}位` : '', l: 'WorldRiskIndex 2025 スコア', s: (c.wri_src || 'WorldRiskReport') + (c.wri_rank && c.wri_rank_note && /2024/.test(c.wri_rank_note) ? `。順位は 2025 年版未確認（2024 年版 ${c.wri_rank} 位）` : c.wri_rank ? '' : '。順位は未確認'), url: c.wri_url, snip: c.wri_confirmed === 'search_snippet' },
       { v: c.inform != null ? fmt(c.inform, 1) : NA, u: c.inform != null ? '/10' : '', l: 'INFORM Risk 2025', s: c.inform != null ? (c.inform_src || 'EC JRC INFORM') : 'EC JRC INFORM（本セッション未取得）', url: c.inform_url || 'https://drmkc.jrc.ec.europa.eu/inform-index', snip: c.inform_confirmed === 'search_snippet' },
     ];
     $('#rgSide', root).innerHTML = `
       <div class="card"><div class="card-h"><h2>${esc(reg.name_ja)}のハザード水準</h2><span class="r">${srcTag('ThinkHazard', reg.th_url, 'GFDRR ThinkHazard! 州・県レベルの定性的水準')}</span><span class="sub">${esc(reg.desc_ja || '')}</span></div><div class="hz-grid" id="hzCards">${hzCards}</div>${reg.hz_note_ja ? `<div class="note" style="margin-top:10px">${ic('info')}<span>${esc(reg.hz_note_ja)}</span></div>` : ''}</div>
       <div class="kpis">${kpis.map((k) => `<div class="kpi"><span class="v">${k.v}<small>${esc(k.u)}</small></span><span class="l">${esc(k.l)}${k.asm ? ' ' + asmTag() : ''}${k.snip ? ' <span class="tag warn" style="font-size:10px">検索要約</span>' : ''}</span><span class="s">${k.url ? `<a href="${esc(k.url)}" target="_blank" rel="noopener" style="color:inherit">${esc(k.s)}</a>` : esc(k.s)}</span></div>`).join('')}</div>`;
-    $('#hzCards', root).onclick = (e) => { const b = e.target.closest('[data-hz-card]'); if (!b) return; if (!HAZ[b.dataset.hzCard] || b.dataset.hzCard === 'water') return; st.hz = b.dataset.hzCard; $$('#hzSeg button', root).forEach((x) => x.setAttribute('aria-pressed', x.dataset.hz === st.hz)); $$('#hzCards .hz', root).forEach((x) => x.setAttribute('aria-pressed', x.dataset.hzCard === st.hz)); this.drawMap(root); };
+    $('#hzCards', root).onclick = (e) => { const b = e.target.closest('[data-hz-card]'); if (!b) return; if (!HAZ[b.dataset.hzCard] || b.dataset.hzCard === 'water') return; this.setHz(b.dataset.hzCard); };
     /* 02 再現期間 */
     const rpHzs = Object.keys(reg.rp || {}); if (!rpHzs.includes(st.rpHz)) st.rpHz = rpHzs[0];
     this.drawRp(root);
@@ -93,8 +94,8 @@ App.views.region = {
     const hist = (reg.history || []).slice().sort((a, b) => (isDate(b.date) ? String(b.date) : '0').localeCompare(isDate(a.date) ? String(a.date) : '0'));
     const dateLabel = (d) => isDate(d) ? esc(d) : '<span style="font-family:var(--f-body)">毎年<span class="sub">乾季</span></span>';
     $('#rgHist', root).innerHTML = `<div class="sec-h"><span class="no">03</span><h2>過去の主な災害</h2><span class="r"><span class="tag neutral">${hist.length} 件</span></span><p>この地域・国で記録に残る主要災害。死者・被害額は出典の値をそのまま示し、推計の幅がある場合は注記します。</p></div>
-      <div class="tbl-wrap"><table><thead><tr><th>年月</th><th>災害</th><th>種別</th><th class="n">死者</th><th class="n">被害額</th><th>日系企業・在留邦人への影響</th><th>出典</th></tr></thead><tbody>${hist.map((h) => `<tr><td class="num" style="white-space:nowrap">${dateLabel(h.date)}</td><td><b>${esc(h.name_ja)}</b>${h.note_ja ? `<span class="sub">${esc(h.note_ja)}</span>` : ''}</td><td>${esc(HAZ[h.hazard] ? HAZ[h.hazard].short : h.hazard)}</td><td class="n">${h.deaths != null ? fmt(h.deaths) : '—'}</td><td class="n">${h.damage_usd_m != null ? fmtUSD(h.damage_usd_m) : '—'}</td><td style="font-size:12.5px;color:var(--fg2)">${esc(h.jp_ja || '—')}</td><td>${srcTag(h.src_name || '出典', h.src, h.confirmed_by === 'search_snippet' ? '検索結果の要約に基づく（原典ページ未取得）' : h.confirmed_by === 'unverified' ? '未検証の概数。公開前に出典確認が必要' : '')}${h.confirmed_by === 'unverified' ? ' <span class="tag warn">要確認</span>' : ''}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">記録なし</td></tr>'}</tbody></table></div>
-      <div class="note">${ic('info')}<span>EM-DAT（OWID 集計）の値は「国×年×災害種別」の年間合計で、個別事象の公式値とは一致しないことがあります（例：2013 年フィリピンの嵐の死者はハイエン以外の台風を含む）。被害額は発生当時の名目 USD。</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>年月</th><th>災害</th><th>種別</th><th>数値の範囲</th><th class="n">死者</th><th class="n">被害額</th><th>日系企業・在留邦人への影響</th><th>出典</th></tr></thead><tbody>${hist.map((h) => `<tr><td class="num" style="white-space:nowrap">${dateLabel(h.date)}</td><td><b>${esc(h.name_ja)}</b>${h.note_ja ? `<span class="sub">${esc(h.note_ja)}</span>` : ''}</td><td>${esc(HAZ[h.hazard] ? HAZ[h.hazard].short : h.hazard)}</td><td style="font-size:12px;color:var(--fg2);white-space:nowrap">${esc(h.scope_ja || (h.scope === 'country' ? `${COUNTRY_JA[reg.country] || ''}全国` : '当該地域'))}${h.multi ? ' <span class="tag warn">複数国合計</span>' : h.other_country ? ' <span class="tag neutral">他国中心</span>' : ''}</td><td class="n">${h.deaths != null ? fmt(h.deaths) : '—'}</td><td class="n">${h.damage_usd_m != null ? fmtUSD(h.damage_usd_m) : '—'}</td><td style="font-size:12.5px;color:var(--fg2)">${esc(h.jp_ja || '—')}</td><td>${srcTag(h.src_name || '出典', h.src, h.confirmed_by === 'search_snippet' ? '検索結果の要約に基づく（原典ページ未取得）' : h.confirmed_by === 'unverified' ? '未検証の概数。公開前に出典確認が必要' : '')}${h.confirmed_by === 'unverified' ? ' <span class="tag warn">要確認</span>' : ''}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">記録なし</td></tr>'}</tbody></table></div>
+      <div class="note">${ic('info')}<span>「数値の範囲」は死者・被害額が指す範囲です。EM-DAT（OWID 集計）の値は「国×年×災害種別」の年間合計で、個別事象の公式値とは一致しないことがあります（例：2013 年フィリピンの嵐の死者はハイエン以外の台風を含む）。「複数国合計」は列挙した国の年間合計の和、「他国中心」は主な被災国が別の国で当該国にも影響した事象です。被害額は発生当時の名目 USD。</span></div>
       ${gem && gem.major_eq.length ? `<div class="note">${ic('info')}<span><b>GEM 地震リスクプロファイルが挙げる主な地震（${esc(gem.name_ja)}）：</b>${gem.major_eq.map((e) => `${e[0]}年 ${e[1]} ${e[2]}（死者 ${fmt(e[3])}）`).join('／')}。＊は国外震源。${srcTag('GEM', D.gem._source.url)}</span></div>` : ''}`;
     /* 04 季節性 */
     const months = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];

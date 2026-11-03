@@ -1,5 +1,14 @@
 /* データモデル：地域・拠点・個人・発災シミュレーション（デモ）。出典付きの値と仮定値を区別して保持する。 */
 const D = window.DATA || {};
+/* ハザード水準の解決：地域 → 国レベル → 未取得（3 画面で共用） */
+function hazardLevel(region, hzKey) {
+  const th = HAZ[hzKey] ? HAZ[hzKey].th : hzKey;
+  const v = region && region.hazards && region.hazards[th];
+  if (v && v.level) return Object.assign({ scope: 'region' }, v);
+  const c = D.regions && D.regions.countries && region && D.regions.countries[region.country];
+  if (c && c.hazards && c.hazards[th] && c.hazards[th].level) return Object.assign({ scope: 'country' }, c.hazards[th]);
+  return { level: 'unknown', scope: 'none' };
+}
 const M = {
   regions: () => (D.regions && D.regions.regions) || [],
   region: (id) => M.regions().find((r) => r.id === id) || M.regions()[0],
@@ -22,8 +31,9 @@ function rpRows(region, hz) {
   const cfg = region.rp && region.rp[hz]; if (!cfg) return null;
   const gem = hz === 'quake' ? M.gem(region.country) : null;
   return RPS.map((rp) => {
-    const k = cfg.k[String(rp)] ?? 0; /* 0..1 相対強度 */
-    const row = { rp, p: 1 / rp, scen: (cfg.scen && cfg.scen[String(rp)]) || '', depth: cfg.depth_max != null ? +(cfg.depth_max * k).toFixed(1) : null, area_pct: cfg.area_max != null ? Math.round(cfg.area_max * k) : null, pop: Math.round((region.pop_m || 0) * 1e6 * (cfg.pop_max || 0) * k), downtime: Math.round((cfg.downtime_max || 0) * k) };
+    const k = cfg.k[String(rp)] ?? 0; /* 0..1 相対強度（損失は k に比例） */
+    const kp = Math.pow(k, cfg.pop_exp ?? 2.5); /* 影響人口・操業停止は小さな事象で急減する（仮定） */
+    const row = { rp, p: 1 / rp, scen: (cfg.scen && cfg.scen[String(rp)]) || '', depth: cfg.depth_max != null ? +(cfg.depth_max * k).toFixed(1) : null, area_pct: cfg.area_max != null ? Math.round(cfg.area_max * k) : null, pop: Math.round((region.pop_m || 0) * 1e6 * (cfg.pop_max || 0) * kp), downtime: Math.round((cfg.downtime_max || 0) * kp) };
     if (hz === 'quake' && gem) { const nat = gem.loss_curve_m[String(rp)] || 0; row.loss_nat = nat; row.loss = +(nat * (cfg.share || 0)).toFixed(1); row.loss_src = 'GEM'; }
     else row.loss = cfg.loss_max != null ? +(cfg.loss_max * k).toFixed(0) : null;
     return row;
@@ -64,7 +74,7 @@ function personalPlan(f) {
     { k: '飲料水', v: `${water}<small>L</small>`, why: `3L×${n}人×${days}日（内閣府の目安）`, src: 'naikakufu' },
     { k: '食料', v: `${meals}<small>食</small>`, why: `3食×${n}人×${days}日。火を使わず食べられるもの中心`, src: 'naikakufu' },
     { k: '経口補水・塩分', v: `${Math.max(1, Math.ceil(n * days / 3))}<small>袋</small>`, why: '高温多湿環境での脱水対策（仮定）', asm: true },
-    { k: '常備薬', v: `${Math.max(7, days)}<small>日分</small>`, why: `処方薬は薬名を英語でメモ。持病${needs}名`, src: 'naikakufu' },
+    { k: '常備薬', v: `${Math.max(7, days)}<small>日分</small>`, why: `処方薬は薬名を英語でメモ。持病${needs}名。日数は備蓄日数に合わせた仮定`, asm: true },
     { k: '現金（現地通貨）', v: `${n * 100}<small>USD相当</small>`, why: '停電時はカード・QR決済が使えない前提（仮定）', asm: true },
     { k: 'モバイル電源', v: `${Math.max(1, Math.ceil(n / 2))}<small>台</small>`, why: '1台で2人×3日を目安（仮定）', asm: true },
   ];
@@ -73,12 +83,14 @@ function personalPlan(f) {
   if (elders) items.push({ k: '高齢者用品', v: `${elders}<small>人分</small>`, why: '眼鏡・入れ歯・杖・紙パンツ、エレベーター停止時の移動手段', src: 'naikakufu' });
   if (f.pets) items.push({ k: 'ペット用', v: `${days}<small>日分</small>`, why: '多くの避難所は同伴不可。預け先を事前に決める', asm: true });
   items.push({ k: '書類の写し', v: '1<small>式</small>', why: 'パスポート・ビザ・労働許可・保険証・在留届控え（紙とクラウド）', src: 'mofa' });
-  items.push({ k: 'N95/KF94 マスク', v: `${n * 5}<small>枚</small>`, why: '煙霧（PM2.5）・火山灰・粉じん対策', src: 'who' });
+  items.push({ k: 'N95/KF94 マスク', v: `${n * 5}<small>枚</small>`, why: '煙霧（PM2.5）・火山灰・粉じん対策。枚数は仮定', asm: true });
   /* 避難先の適合条件 */
   const cons = [];
-  if (elders || needs) cons.push({ k: 'walk', ja: '徒歩 15 分以内（高齢者・要配慮者あり）', maxWalk: 1200, speed: 3.0 });
-  else if (infants || kids) cons.push({ k: 'walk', ja: '徒歩 25 分以内（子ども連れ）', maxWalk: 2000, speed: 3.5 });
-  else cons.push({ k: 'walk', ja: '徒歩 35 分以内', maxWalk: 2800, speed: 4.0 });
+  /* 徒歩の上限：分数 × 速度から距離を導く（表示と計算を一致させる） */
+  const walkCap = (min, speed) => Math.round(min * speed * 1000 / 60);
+  if (elders || needs) cons.push({ k: 'walk', ja: '徒歩 15 分以内・時速 3 km（高齢者・要配慮者あり）', maxWalk: walkCap(15, 3.0), speed: 3.0 });
+  else if (infants || kids) cons.push({ k: 'walk', ja: '徒歩 25 分以内・時速 3.5 km（子ども連れ）', maxWalk: walkCap(25, 3.5), speed: 3.5 });
+  else cons.push({ k: 'walk', ja: '徒歩 35 分以内・時速 4 km', maxWalk: walkCap(35, 4.0), speed: 4.0 });
   if (f.home === 'highrise' && f.floor >= 4) cons.push({ k: 'vertical', ja: `洪水時は自室（${f.floor}階）に留まる「垂直避難」が第一候補。ただし電気・水・エレベーター停止に備える` });
   if (f.home === 'lowrise' || f.home === 'house') cons.push({ k: 'horizontal', ja: '洪水時は早めに高層建物・高台へ「水平避難」。浸水後の移動は危険' });
   if (f.car) cons.push({ k: 'car', ja: '車は冠水 30cm で動かなくなる（FEMA）。洪水時の車避難は水が来る前だけ' });
@@ -101,9 +113,11 @@ function sim(sc, t) {
     const evac = Math.round(affected * (type === 'flood' ? 0.22 : 0.15) * (type === 'quake' ? S((t - 6) / 6) : 1));
     const jp = Math.round((d.jp || 0) * clamp(I * 1.1, 0, 0.95));
     const vuln = Math.round(affected * 0.14);
-    const dead = type === 'quake' ? Math.round(d.pop * (d.exposure || 0) * (sc.fatality_rate || 0.002) * S((t - 2) / 4)) : Math.round(affected * 0.0002 * S((t - 24) / 24));
-    const inj = type === 'quake' ? Math.round(dead * 3.3) : Math.round(affected * 0.001 * S((t - 12) / 12));
-    return Object.assign({}, d, { I, depth, affected, evac, jp, vuln, dead, inj });
+    /* 死者・負傷：確認済みの値として 0 から立ち上がる（地震は 3 日で 9 割、洪水は週〜月単位で累積） */
+    const deadFinal = type === 'quake' ? d.pop * (d.exposure || 0) * (sc.fatality_rate || 0.002) : affected * 0.0002;
+    const dead = Math.round(deadFinal * (type === 'quake' ? (t <= 0 ? 0 : 1 - Math.exp(-t / 18)) : (t <= 0 ? 0 : 1 - Math.exp(-t / 400))));
+    const inj = type === 'quake' ? Math.round(dead * 3.3) : Math.round(affected * 0.001 * (t <= 0 ? 0 : 1 - Math.exp(-t / 120)));
+    return Object.assign({}, d, { I, depth, affected, evac, jp, vuln, dead, inj, deadFinal: Math.round(deadFinal) });
   });
   /* 拠点 */
   out.sites = (sc.sites || []).map((s) => {
@@ -115,7 +129,7 @@ function sim(sc, t) {
   });
   /* 避難所 */
   const totalEvac = sum(out.districts, (d) => d.evac);
-  out.shelters = (sc.shelters || []).map((sh) => { const d = out.districts.find((x) => x.id === sh.district) || { evac: 0 }; const occ = Math.min(Math.round(sh.cap * 1.25), Math.round(d.evac * (sh.share || 0.3))); return Object.assign({}, sh, { occ, rate: occ / sh.cap, open: t >= (sh.open_h || 0) }); });
+  out.shelters = (sc.shelters || []).map((sh) => { const d = out.districts.find((x) => x.id === sh.district) || { evac: 0 }; const open = t >= (sh.open_h || 0); const demand = Math.round(d.evac * (sh.share || 0.3)); const occ = open ? Math.min(Math.round(sh.cap * 1.25), demand) : 0; return Object.assign({}, sh, { occ, demand, over: Math.max(0, occ - sh.cap), rate: occ / sh.cap, open }); });
   /* 物資需給：需要＝避難者×単位、供給＝到着曲線 */
   out.supplies = (sc.supplies || []).map((it) => {
     const need = Math.round(totalEvac * it.per_person * (it.per_day ? Math.max(1, Math.ceil(Math.max(0, t) / 24)) : 1) + (it.base || 0));
@@ -124,13 +138,15 @@ function sim(sc, t) {
   });
   /* ライフライン（地域平均と区別） */
   const utilDef = sc.utilities || [];
+  /* 復旧率は 0 から連続に立ち上がる正規化ロジスティック（地震：発災後 rest_h を中心に／洪水：ピーク後 rest_h から） */
+  const rise = (x, x0) => { const s0 = S(x0); return clamp((S(x) - s0) / (1 - s0), 0, 1); };
   out.util = utilDef.map((u) => {
-    const per = out.districts.map((d) => { const outage = type === 'flood' ? clamp((d.depth || 0) / (u.th_m || 0.3), 0, 1) : clamp(d.I * (u.q_mult || 1), 0, 1); const tr = (d.peak_h || 0) + (d.recede_h || 0) * 0.4 + (u.rest_h || 24); const rest = type === 'flood' ? (t > tr ? S((t - tr) / (u.rest_tau || 24)) : 0) : S((t - (u.rest_h || 24)) / (u.rest_tau || 24)); return { id: d.id, avail: clamp(1 - outage * (1 - rest), 0, 1) }; });
+    const per = out.districts.map((d) => { const outage = type === 'flood' ? clamp((d.depth || 0) / (u.th_m || 0.3), 0, 1) : clamp(d.I * (u.q_mult || 1), 0, 1); const tau = u.rest_tau || 24; let rest; if (type === 'flood') { const tr = (d.peak_h || 0) + (u.rest_h || 24); rest = t > tr ? rise((t - tr) / tau, 0) : 0; } else { const x0 = (0 - (u.rest_h || 24)) / tau; rest = t <= 0 ? 0 : rise((t - (u.rest_h || 24)) / tau, x0); } return { id: d.id, avail: clamp(1 - outage * (1 - rest), 0, 1) }; });
     const pop = sum(out.districts, (d) => d.pop); const avail = sum(out.districts, (d, i) => d.pop * per[i].avail) / pop;
     return Object.assign({}, u, { avail, per: by(per, 'id') });
   });
   /* KPI */
-  out.kpi = { affected: sum(out.districts, (d) => d.affected), evac: totalEvac, jp: sum(out.districts, (d) => d.jp), dead: sum(out.districts, (d) => d.dead), inj: sum(out.districts, (d) => d.inj), vuln: sum(out.districts, (d) => d.vuln), staff: sum(out.sites, (s) => s.staff), confirmed: sum(out.sites, (s) => s.confirmed), sitesDown: out.sites.filter((s) => s.status === 'crit').length, shelterOcc: sum(out.shelters, (s) => s.occ), shelterCap: sum(out.shelters, (s) => s.cap), fulfil: out.supplies.length ? sum(out.supplies, (s) => Math.min(1, s.rate)) / out.supplies.length : 1 };
+  out.kpi = { affected: sum(out.districts, (d) => d.affected), evac: totalEvac, jp: sum(out.districts, (d) => d.jp), dead: sum(out.districts, (d) => d.dead), deadFinal: sum(out.districts, (d) => d.deadFinal), inj: sum(out.districts, (d) => d.inj), vuln: sum(out.districts, (d) => d.vuln), staff: sum(out.sites, (s) => s.staff), confirmed: sum(out.sites, (s) => s.confirmed), sitesDown: out.sites.filter((s) => s.status === 'crit').length, shelterOcc: sum(out.shelters, (s) => s.occ), shelterCap: sum(out.shelters.filter((s) => s.open), (s) => s.cap), shelterOver: sum(out.shelters, (s) => s.over), fulfil: out.supplies.length ? sum(out.supplies, (s) => Math.min(1, s.rate)) / out.supplies.length : 1 };
   out.log = (sc.timeline || []).filter((e) => e.t <= t);
   out.upcoming = (sc.timeline || []).filter((e) => e.t > t).slice(0, 3);
   return out;

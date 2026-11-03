@@ -815,36 +815,6 @@
    "risk_ja": "感電",
    "advice_ja": "浸水した建物ではブレーカーを落とす。水に浸かった電気機器に触れない",
    "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods"
-  },
-  {
-   "hazard": "quake",
-   "risk_ja": "余震と建物の再入館",
-   "advice_ja": "外観が無事でも構造の安全が確認されるまで入らない。余震は数日〜数週間続く",
-   "source_url": "https://www.who.int/health-topics/earthquakes"
-  },
-  {
-   "hazard": "quake",
-   "risk_ja": "一酸化炭素中毒",
-   "advice_ja": "発電機・炭火を屋内やベランダで使わない",
-   "source_url": "https://www.who.int/health-topics/earthquakes"
-  },
-  {
-   "hazard": "quake",
-   "risk_ja": "外傷の二次感染・破傷風",
-   "advice_ja": "傷はきれいな水で洗い、10 年以内の破傷風ワクチン接種がなければ受診",
-   "source_url": "https://www.who.int/health-topics/earthquakes"
-  },
-  {
-   "hazard": "quake",
-   "risk_ja": "こころの不調",
-   "advice_ja": "睡眠・食事のリズムを保ち、子どもには安心できる説明を。長引く場合は相談窓口へ",
-   "source_url": "https://www.who.int/health-topics/earthquakes"
-  },
-  {
-   "hazard": "all",
-   "risk_ja": "熱中症",
-   "advice_ja": "屋外避難・停電時は日陰と水分・塩分。乳幼児・高齢者を優先して涼しい場所へ",
-   "source_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health"
   }
  ],
  "_guidance_gaps": [
