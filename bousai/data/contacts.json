@@ -68,28 +68,28 @@
    ],
    "disaster_hotlines": [
     {
-     "agency": "DDPM 防災減災局（กรมป้องกันและบรรเทาสาธารณภัย ",
+     "agency": "DDPM 防災減災局（กรมป้องกันและบรรเทา",
      "number": "1784",
      "note_ja": "内務省防災減災局の災害ホットライン。第三者の洪水監視プロジェクト資料（および chalaivate/flood-moni",
      "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/README.md",
      "confirmed_by": "unverified"
     },
     {
-     "agency": "バンコク都（BMA）ホットライン",
+     "agency": "バンコク都ホットライン",
      "number": "1555",
      "note_ja": "バンコク都の総合ホットライン。第三者資料は Thairath 記事を根拠に「確認済み」と記載。",
      "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/docs/KNOWLEDGE.md",
      "confirmed_by": "unverified"
     },
     {
-     "agency": "バンコク都 洪水防止センター（ศูนย์ป้องกันน้ำท่วม กทม.）",
+     "agency": "バンコク都 洪水防止センター",
      "number": "02-248-5115",
-     "note_ja": "第三者資料の「Official contacts」欄に掲載。公式確認なし。",
+     "note_ja": "第三者資料の「Official contacts」欄に掲載。",
      "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/README.md",
      "confirmed_by": "unverified"
     },
     {
-     "agency": "王室灌漑局（RID / กรมชลประทาน）",
+     "agency": "王室灌漑局",
      "number": "1460",
      "note_ja": "同資料の KNOWLEDGE.md では「今回の調査では未確認」と注記されている番号。利用前に要確認。",
      "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/README.md",
@@ -202,7 +202,7 @@
     {
      "agency": "BMKG 気象気候地球物理庁 情報センター",
      "number": "196",
-     "note_ja": "第三者アプリ README に「196: Informasi BMKG Pusat」として掲載。公式確認なし。",
+     "note_ja": "第三者アプリ README に「196: Informasi BMKG Pusat」として掲載。",
      "source_url": "https://github.com/synectra-jasa-digital/NusantaraAlert-portofolio/blob/59782f0bbe684b329c498b51fad75c1eda4b327f/README.md",
      "confirmed_by": "unverified"
     }
@@ -299,14 +299,14 @@
      "confirmed_by": "third_party"
     },
     {
-     "service_ja": "警察（PNP 旧番号。911 に統合済み、未対応地域向け）",
+     "service_ja": "警察",
      "number": "117",
      "note_ja": "",
      "source_url": "https://github.com/rockyru/regov/blob/9b64711e97ac25f151afe970a1c284bfbaa1abf2/src/lib/civic.ts",
      "confirmed_by": "third_party"
     },
     {
-     "service_ja": "消防（BFP 本部直通）",
+     "service_ja": "消防",
      "number": "(02) 8426-0219 / (02) 8426-0246",
      "note_ja": "",
      "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
@@ -329,7 +329,7 @@
    ],
    "disaster_hotlines": [
     {
-     "agency": "NDRRMC Operations Center（国家災害リスク軽減管理評議会）",
+     "agency": "NDRRMC Operations Center",
      "number": "(02) 8911-1406 / (02) 8912-2665 / (02) 8912-5668 / (02) 8911-1873",
      "note_ja": "第三者ガイド（出典として ehotlines.e.gov.ph を明記）および Kyaee/teamrtu-devcam",
      "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
@@ -343,16 +343,16 @@
      "confirmed_by": "unverified"
     },
     {
-     "agency": "Philippine Coast Guard（海難・捜索救助）",
+     "agency": "Philippine Coast Guard",
      "number": "(02) 8527-8481",
-     "note_ja": "第三者アプリ設定に掲載。公式確認なし。",
+     "note_ja": "第三者アプリ設定に掲載。",
      "source_url": "https://github.com/rhaprace/Yanig/blob/69363dfeb8bf8a5e9ff215dda21f42592064c21e/src/config/countries.ts",
      "confirmed_by": "unverified"
     },
     {
-     "agency": "MMDA 交通緊急（マニラ首都圏）",
+     "agency": "MMDA 交通緊急",
      "number": "136",
-     "note_ja": "第三者データセットに掲載。公式確認なし。",
+     "note_ja": "第三者データセットに掲載。",
      "source_url": "https://github.com/Kyaee/teamrtu-devcamp-manila/blob/3496cb5627913843b2f3cdcb62f4af9e28198445/dataset/hotlines.txt",
      "confirmed_by": "unverified"
     }
@@ -366,14 +366,14 @@
      "confirmed_by": "third_party"
     },
     {
-     "name_ja": "在セブ日本国総領事館（管轄: ビサヤ地方の各州）",
+     "name_ja": "在セブ日本国総領事館",
      "address": "8/F 2 Quad Building, Cardinal Rosales Ave., Cebu Business Park, Cebu City",
      "phone": "",
      "url": "https://www.cebu.ph.emb-japan.go.jp/",
      "confirmed_by": "third_party"
     },
     {
-     "name_ja": "在ダバオ日本国総領事館（管轄: ミンダナオ地方の各州）",
+     "name_ja": "在ダバオ日本国総領事館",
      "address": "4/F BI Zone Building, J.P. Laurel Avenue, Bajada, Davao City",
      "phone": "",
      "url": "https://www.davao.ph.emb-japan.go.jp/",
@@ -549,19 +549,19 @@
     {
      "agency": "NADMA 国家災害管理庁",
      "number": "03-8870 0150",
-     "note_ja": "第三者の市民向けガイドに掲載。NADMA の緊急連絡先インフォグラフィック（https://www.nadma.gov.",
+     "note_ja": "NADMA の緊急連絡先インフォグラフィック（https://www.nadma.gov.",
      "source_url": "https://github.com/pizofreude/edulaluan/blob/fbbb4fd817c63e081eb9c7ef59632062349d4450/docs/peoples-guide/section-01/1.4-disaster-response.md",
      "confirmed_by": "unverified"
     },
     {
-     "agency": "MetMalaysia 気象局（警報問い合わせ）",
+     "agency": "MetMalaysia 気象局",
      "number": "1-300-22-1638",
-     "note_ja": "第三者の防災ガイドに掲載（myCuaca アプリと併記）。",
+     "note_ja": "",
      "source_url": "https://github.com/negaraku-md/NegaraKu.md/blob/703570df11d2dc0f02099a7ea8d1ab87263a5d50/knowledge/public-safety/household-disaster-preparedness-malaysia.md",
      "confirmed_by": "unverified"
     },
     {
-     "agency": "Talian Kasih（24時間相談・被災者支援）",
+     "agency": "Talian Kasih",
      "number": "15999",
      "note_ja": "第三者ガイドに掲載。",
      "source_url": "https://github.com/pizofreude/edulaluan/blob/fbbb4fd817c63e081eb9c7ef59632062349d4450/docs/peoples-guide/section-01/1.4-disaster-response.md",
@@ -669,16 +669,16 @@
    ],
    "disaster_hotlines": [
     {
-     "agency": "PUB（公益事業庁）洪水通報 1800-CALL-PUB",
+     "agency": "PUB洪水通報 1800-CALL-PUB",
      "number": "1800-2255-782",
-     "note_ja": "第三者の洪水シミュレーション教材に掲載。公式確認なし。",
+     "note_ja": "",
      "source_url": "https://github.com/dontwakeupben/FloodSimSG/blob/29a576fcb1de359672554a354dc2034feeeb2adc/rag_documents/EMERGENCY_RESPONSE_PROCEDURES.txt",
      "confirmed_by": "unverified"
     },
     {
-     "agency": "SP Group（電気・ガス障害）",
+     "agency": "SP Group",
      "number": "1800-778-8888",
-     "note_ja": "第三者教材に掲載。公式確認なし。",
+     "note_ja": "第三者教材に掲載。",
      "source_url": "https://github.com/dontwakeupben/FloodSimSG/blob/29a576fcb1de359672554a354dc2034feeeb2adc/rag_documents/EMERGENCY_RESPONSE_PROCEDURES.txt",
      "confirmed_by": "unverified"
     }

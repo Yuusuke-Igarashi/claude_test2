@@ -525,22 +525,30 @@
     {
      "name_ja": "スクンビット Soi 24（プロンポン）・高層コンド",
      "lat": 13.728,
-     "lon": 100.566
+     "lon": 100.566,
+     "type": "highrise",
+     "floor": 18
     },
     {
      "name_ja": "トンロー Soi 13・高層コンド",
      "lat": 13.73,
-     "lon": 100.581
+     "lon": 100.581,
+     "type": "highrise",
+     "floor": 18
     },
     {
      "name_ja": "アソーク Soi 23・サービスアパート",
      "lat": 13.742,
-     "lon": 100.564
+     "lon": 100.564,
+     "type": "highrise",
+     "floor": 18
     },
     {
      "name_ja": "ラーマ4世通り南側（クロントゥーイ）・低層アパート",
      "lat": 13.719,
-     "lon": 100.565
+     "lon": 100.565,
+     "type": "lowrise",
+     "floor": 2
     }
    ],
    "zones": {
@@ -1099,18 +1107,40 @@
      "source_url": "https://github.com/cstorm125/hosmap/blob/master/data/hospital_latlon.csv",
      "coord_src": "page_read",
      "why_ja": "バンパイン郡の公立病院（60 床）"
+    },
+    {
+     "name": "Rojana assembly point (plant yard)",
+     "name_ja": "工場敷地内の集合地点（駐車場）",
+     "kind": "other",
+     "assembly": true,
+     "lat": 14.3245,
+     "lon": 100.634,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 900,
+     "why_ja": "地震・火災時の一次集合場所（自社敷地内、仮定）",
+     "source_url": "",
+     "coord_src": "unverified",
+     "label_dx": 9,
+     "label_dy": -8
     }
    ],
    "homes": [
     {
      "name_ja": "アユタヤ市内 サービスアパート（市街島東部）",
      "lat": 14.352,
-     "lon": 100.585
+     "lon": 100.585,
+     "type": "highrise",
+     "floor": 18
     },
     {
      "name_ja": "ロジャナ近接の戸建て（団地東側）",
      "lat": 14.32,
-     "lon": 100.648
+     "lon": 100.648,
+     "type": "house",
+     "floor": 1
     }
    ],
    "zones": {
@@ -1654,17 +1684,23 @@
     {
      "name_ja": "クニンガン・サービスアパート（高層）",
      "lat": -6.22,
-     "lon": 106.83
+     "lon": 106.83,
+     "type": "highrise",
+     "floor": 18
     },
     {
      "name_ja": "SCBD／スナヤン・高層コンド",
      "lat": -6.226,
-     "lon": 106.808
+     "lon": 106.808,
+     "type": "highrise",
+     "floor": 18
     },
     {
      "name_ja": "メンテン・戸建て",
      "lat": -6.195,
-     "lon": 106.835
+     "lon": 106.835,
+     "type": "house",
+     "floor": 1
     }
    ],
    "zones": {
@@ -2238,17 +2274,23 @@
     {
      "name_ja": "BGC・高層コンド",
      "lat": 14.5485,
-     "lon": 121.051
+     "lon": 121.051,
+     "type": "highrise",
+     "floor": 18
     },
     {
      "name_ja": "マカティ・レガスピ村・中層",
      "lat": 14.5535,
-     "lon": 121.02
+     "lon": 121.02,
+     "type": "lowrise",
+     "floor": 4
     },
     {
      "name_ja": "ロックウェル・高層コンド",
      "lat": 14.566,
-     "lon": 121.037
+     "lon": 121.037,
+     "type": "highrise",
+     "floor": 18
     }
    ],
    "zones": {

@@ -528,35 +528,45 @@
      "from": "アユタヤ工場",
      "what": "ボート 4 隻・排水ポンプ 2 台",
      "detail": "団地堤防の越水に備え、金型と電装品の退避を開始",
-     "cls": "crit"
+     "cls": "crit",
+     "ack_t": 23,
+     "resolved_t": 44
     },
     {
      "t": 34,
      "from": "駐在員家族（アユタヤ）",
      "what": "バンコク市内ホテルへの退避手配 6 名",
      "detail": "通学先の日本人学校バスは運休",
-     "cls": "warn"
+     "cls": "warn",
+     "ack_t": 37,
+     "resolved_t": 70
     },
     {
      "t": 60,
      "from": "タンマサート避難センター（NGO 経由）",
      "what": "医薬品・乳幼児用品",
      "detail": "収容 3,200 名。小児科医が不足",
-     "cls": "warn"
+     "cls": "warn",
+     "ack_t": 63,
+     "resolved_t": 96
     },
     {
      "t": 100,
      "from": "バンコク本社",
      "what": "衛星通信端末 3 台・燃料 200L",
      "detail": "北部変電所停止に伴う停電対策",
-     "cls": "warn"
+     "cls": "warn",
+     "ack_t": 103,
+     "resolved_t": 136
     },
     {
      "t": 140,
      "from": "バンナー倉庫",
      "what": "トラック 5 台の高所退避先",
      "detail": "周辺道路の冠水予測 0.4m",
-     "cls": "warn"
+     "cls": "warn",
+     "ack_t": 143,
+     "resolved_t": 176
     }
    ],
    "actions": [
@@ -1473,42 +1483,54 @@
      "from": "マニラ事務所",
      "what": "建物の構造安全点検（技術者）",
      "detail": "外装パネルの落下あり。再入館の可否判断が必要",
-     "cls": "crit"
+     "cls": "crit",
+     "ack_t": 4,
+     "resolved_t": 25
     },
     {
      "t": 3,
      "from": "BGC 在留邦人（家族）",
      "what": "水・乳幼児用品・簡易トイレ",
      "detail": "コンド停電でエレベーター停止、高層階に取り残され",
-     "cls": "crit"
+     "cls": "crit",
+     "ack_t": 6,
+     "resolved_t": 27
     },
     {
      "t": 8,
      "from": "マリキナ市（NGO 経由）",
      "what": "捜索救助チーム・外傷キット",
      "detail": "倒壊家屋多数",
-     "cls": "crit"
+     "cls": "crit",
+     "ack_t": 11,
+     "resolved_t": 32
     },
     {
      "t": 20,
      "from": "ラグナ工場",
      "what": "燃料 500L・衛星電話",
      "detail": "停電継続。通信不安定",
-     "cls": "warn"
+     "cls": "warn",
+     "ack_t": 23,
+     "resolved_t": 56
     },
     {
      "t": 40,
      "from": "大使館",
      "what": "安否未確認者リストの照合",
      "detail": "在留届ベースで約 600 名が未確認",
-     "cls": "warn"
+     "cls": "warn",
+     "ack_t": 43,
+     "resolved_t": 76
     },
     {
      "t": 72,
      "from": "マニラ事務所",
      "what": "一時帰国希望者 23 名の航空券",
      "detail": "NAIA 民間便再開に合わせ",
-     "cls": "warn"
+     "cls": "warn",
+     "ack_t": 75,
+     "resolved_t": 108
     }
    ],
    "actions": [

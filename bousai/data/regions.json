@@ -761,7 +761,7 @@
      "confirmed_by": "search_snippet"
     }
    },
-   "hz_note_ja": "ThinkHazard の「サイクロン High」は強風ハザードの区分で、バンコクへの台風直撃は歴史的に稀です。沿岸浸水 High は高潮と地盤沈下を反映しています。極端な暑さ・煙霧は未取得。",
+   "hz_note_ja": "ThinkHazard の「サイクロン High」は強風ハザードの区分で、バンコクへの台風直撃は歴史的に稀です。沿岸浸水 High は高潮と地盤沈下を反映。地震「低」は GEM の 475 年 PGA（0.02g 未満）からは「極めて低い」寄りですが、軟弱地盤による長周期の揺れ（2025 年に実証）は別途考慮が必要です。周辺 5 県は州・県値が未取得のため国レベル（国内の最大値）で補完。",
    "rp": {
     "flood": {
      "anchor_ja": "アンカー：2011 年タイ大洪水。世界銀行の被害・損失推計 465 億 USD（約 1.43 兆バーツ）と政府発表の死者 815 人は二次資料ベースで本セッション未検証。EM-DAT（OWID 集計）では直接被害 403 億 USD・死者 877 人。2011 年を再現期間 70〜100 年の事象と仮定し、首都圏（BMR）の分担を約 55% と置く。",
@@ -924,7 +924,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "タイ全国（年間合計）"
     },
     {
      "date": "2004-12-26",
@@ -937,7 +938,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "タイ全国（年間合計）"
     },
     {
      "date": "annual",
@@ -1165,7 +1167,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "タイ全国（年間合計）"
     },
     {
      "date": "2004-12-26",
@@ -1178,7 +1181,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "タイ全国（年間合計）"
     },
     {
      "date": "annual",
@@ -1400,7 +1404,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "2018-12-22",
@@ -1413,7 +1418,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "2018-09-28",
@@ -1424,7 +1430,8 @@
      "note_ja": "M7.5。津波と液状化（GEM プロファイルの値）",
      "src": "https://github.com/gem/risk-profiles",
      "src_name": "GEM",
-     "confirmed_by": "page_read"
+     "confirmed_by": "page_read",
+     "scope_ja": "インドネシア国内"
     },
     {
      "date": "2015-09",
@@ -1437,7 +1444,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "2013-01-17",
@@ -1450,7 +1458,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "2010-10-26",
@@ -1463,7 +1472,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "2009-09-30",
@@ -1476,7 +1486,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "2007-02-01",
@@ -1489,7 +1500,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "2006-05-27",
@@ -1500,7 +1512,8 @@
      "note_ja": "M6.3（GEM プロファイルの値）",
      "src": "https://github.com/gem/risk-profiles",
      "src_name": "GEM",
-     "confirmed_by": "page_read"
+     "confirmed_by": "page_read",
+     "scope_ja": "インドネシア国内"
     },
     {
      "date": "2004-12-26",
@@ -1513,7 +1526,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     },
     {
      "date": "1997-09",
@@ -1526,7 +1540,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "インドネシア全国（年間合計）"
     }
    ],
    "season": {
@@ -1646,7 +1661,7 @@
      "confirmed_by": "search_snippet"
     }
    },
-   "hz_note_ja": "NCR（首都圏）の水準。地震「中」は ThinkHazard の区分で、西バレー断層の存在は別途 PHIVOLCS の評価を参照してください。",
+   "hz_note_ja": "NCR（首都圏）の水準（検索要約）。地震「中」は ThinkHazard の表示値ですが、GEM の 475 年再現期間 PGA（0.2〜0.5g、西バレー断層近傍）を ThinkHazard の閾値に当てはめると「高」相当です。表示値は原典ページで要確認。",
    "rp": {
     "quake": {
      "anchor_ja": "GEM 全国曲線に NCR の按分 19%（GEM の地域別 AAL 5,290 万 USD ÷ 全国 2.76 億 USD）。西バレー断層の M7.2 は MMEIRS（2004 年）が想定し、断層の活動間隔は 400〜600 年とされる。",
@@ -1799,7 +1814,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "2020-01-12",
@@ -1812,7 +1828,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "2014-07-15",
@@ -1825,7 +1842,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "2013-11-08",
@@ -1838,7 +1856,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "2013-10-15",
@@ -1851,7 +1870,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "2009-09-26",
@@ -1864,7 +1884,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "1991-11-05",
@@ -1877,7 +1898,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "1991-06-15",
@@ -1890,7 +1912,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "フィリピン全国（年間合計）"
     },
     {
      "date": "1990-07-16",
@@ -1901,7 +1924,8 @@
      "note_ja": "M7.8（GEM プロファイルの値）",
      "src": "https://github.com/gem/risk-profiles",
      "src_name": "GEM",
-     "confirmed_by": "page_read"
+     "confirmed_by": "page_read",
+     "scope_ja": "フィリピン国内"
     }
    ],
    "season": {
@@ -1988,7 +2012,7 @@
      "confirmed_by": "search_snippet"
     }
    },
-   "hz_note_ja": "検索結果に表示されなかった項目（沿岸浸水・津波・サイクロン等）は国レベルの水準で補完しています。",
+   "hz_note_ja": "検索結果に表示されなかった項目（沿岸浸水・津波・サイクロン等）は国レベルの水準で補完しています。 2025 年の省級行政区再編（周辺省の統合）前の境界に基づく表示です（未検証）。",
    "rp": {
     "urban_flood": {
      "anchor_ja": "アンカー：大潮と豪雨の重なりで市内の幹線道路が冠水する年数回の事象。損失は仮定。",
@@ -2098,7 +2122,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2017-11-04",
@@ -2111,7 +2136,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2011-09",
@@ -2124,7 +2150,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2009-09-26",
@@ -2137,7 +2164,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2008-10-31",
@@ -2150,7 +2178,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "1997-11-02",
@@ -2163,7 +2192,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     }
    ],
    "season": {
@@ -2209,9 +2239,9 @@
    "pop_m": 8.5,
    "pop_src": "市人口の概数（仮定）",
    "desc_ja": "紅河デルタ。2024 年 9 月の台風ヤギでは紅河の水位上昇で市内の低地が浸水した。北部山地の断層による地震リスクは国内では高い方。",
-   "th_url": "https://thinkhazard.org/en/report/2781-viet-nam-ha-noi",
+   "th_url": null,
    "hazards": {},
-   "hz_note_ja": "ハノイ市の ThinkHazard ページは検索結果に表示されず、国レベルの水準で補完しています。",
+   "hz_note_ja": "ハノイ市の ThinkHazard ページは本セッションで特定できず、国レベルの水準（国内の最大値）で補完しています。過大評価の可能性があります。2025 年の省級行政区再編前の境界に基づく表示です（未検証）。",
    "rp": {
     "flood": {
      "anchor_ja": "アンカー：2024 年台風ヤギ（ベトナム北部）。損失は仮定。",
@@ -2319,7 +2349,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2017-11-04",
@@ -2332,7 +2363,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2011-09",
@@ -2345,7 +2377,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2009-09-26",
@@ -2358,7 +2391,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "2008-10-31",
@@ -2371,7 +2405,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     },
     {
      "date": "1997-11-02",
@@ -2384,7 +2419,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ベトナム全国（年間合計）"
     }
    ],
    "season": {
@@ -2597,7 +2633,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "マレーシア全国（年間合計）"
     },
     {
      "date": "2006-12-19",
@@ -2610,7 +2647,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "マレーシア全国（年間合計）"
     },
     {
      "date": "2004-12-26",
@@ -2623,7 +2661,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "マレーシア全国（年間合計）"
     },
     {
      "date": "1997-09",
@@ -2636,7 +2675,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "マレーシア全国（年間合計）"
     }
    ],
    "season": {
@@ -2743,7 +2783,7 @@
      "confirmed_by": "search_snippet"
     }
    },
-   "hz_note_ja": "ThinkHazard のシンガポールの水準は調査中。",
+   "hz_note_ja": "シンガポールの都市型浸水は検索結果のキャッシュ時点により「中」「高」が混在しており要確認。地震・津波はいずれも低水準。",
    "rp": {
     "urban_flood": {
      "anchor_ja": "アンカー：オーチャード通りなどの短時間の鉄砲水（数時間で解消）。損失は仮定。",
@@ -2806,7 +2846,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "シンガポール全国（年間合計）"
     }
    ],
    "season": {
@@ -2878,7 +2919,7 @@
      "confirmed_by": "search_snippet"
     }
    },
-   "hz_note_ja": "ThinkHazard のヤンゴン管区の水準は調査中。",
+   "hz_note_ja": "ヤンゴン管区の水準（検索要約）。地震「中」は 2025 年 3 月のサガイン地震以前のデータの可能性があり、GEM の 475 年 PGA（サガイン断層沿い 0.5〜1.0g）からは「高」相当です。未取得の項目は国レベルで補完。",
    "rp": {
     "cyclone": {
      "anchor_ja": "アンカー：2008 年サイクロン・ナルギス（死者・行方不明約 13.8 万人）。損失は仮定。",
@@ -2997,7 +3038,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ミャンマー全国（年間合計）"
     },
     {
      "date": "2008-05-02",
@@ -3010,7 +3052,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ミャンマー全国（年間合計）"
     },
     {
      "date": "2004-12-26",
@@ -3023,7 +3066,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "ミャンマー全国（年間合計）"
     }
    ],
    "season": {
@@ -3162,7 +3206,8 @@
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT（OWID 集計）",
      "confirmed_by": "page_read",
-     "scope": "country"
+     "scope": "country",
+     "scope_ja": "カンボジア全国（年間合計）"
     }
    ],
    "season": {
@@ -3212,5 +3257,6 @@
   "シンガポールはEM-DAT（OWID集計）に国として収録されておらず、2015年煙霧のシンガポール側の被害（PSI値、休校等）は未検証。バンコク／チェンマイPM2.5は死者・被害額の統計自体が存在せず、定性的記載のみ。",
   "件数上限（40件）のため未収録だがEM-DAT CSVから同様に取得可能な候補事象：1992年フローレス地震津波（死者2,500）、2000年メコン洪水（カンボジア死者347）、2006年台風ドリアン／レミン（比）、2012年台風ボーファ／パブロ（比・嵐年間死者2,039）、2014年クランタン洪水（馬）、2016年ピディ・ジャヤ地震（アチェ）、2018年台風マンクット／オンポン（比）、2019年ミンダナオ群発地震、2020年南カリマンタン洪水。2021年以降では2024年10〜11月フィリピン連続台風（トラミ／クリスティン、マンニィ／ペピート）、2024年5月西スマトラ・マラピ山ラハール洪水、2025年9月バリ洪水、2025年9〜10月台風ブアロイ（比名オポン、越）等が未収録。",
   "参考（ローカル）：取得済みCSVは /home/user/owid/owid-datasets/datasets/Natural disasters (EMDAT)/Natural disasters (EMDAT).csv（コミット6155d4ca）、抽出スクリプトは /tmp/claude-0/-home-user-claude-test2/e1fdc55a-0330-57a5-a5b4-f3afd5d82091/scratchpad/extract_emdat.py。同リポジトリのNOAA/NGDC地震・火山死者集計CSVも併用（note_jaに記載）。"
- ]
+ ],
+ "_country_level_note": "国レベルの ThinkHazard 値は国内の行政区域の最大値（閾値超過画素が 1 つでもあれば該当水準）で、州・県値のない地域に補完表示した場合は過大評価の可能性がある。"
 }

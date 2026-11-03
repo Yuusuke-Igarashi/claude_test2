@@ -39,7 +39,7 @@ App.views.personal = {
     renderMembers();
     const save = () => { Store.set('personal', st); self.update(root); };
     $('#psSite', root).onchange = (e) => { st.site = e.target.value; st.homeIdx = 0; Store.set('site', st.site); self.form(root); self.update(root); };
-    $('#psHome', root).onchange = (e) => { st.homeIdx = +e.target.value; save(); };
+    $('#psHome', root).onchange = (e) => { st.homeIdx = +e.target.value; const h = homes[st.homeIdx]; if (h && h.type) { st.home = h.type; $('#psType', root).value = h.type; if (h.floor) { st.floor = h.floor; $('#psFloor', root).value = h.floor; } } save(); };
     $('#psType', root).onchange = (e) => { st.home = e.target.value; save(); };
     $('#psFloor', root).onchange = (e) => { st.floor = clamp(+e.target.value || 1, 1, 80); save(); };
     $('#psMembers', root).onchange = (e) => { const t = e.target; const i = +t.dataset.m, k = t.dataset.k; if (k === 'cond') st.members[i].cond = t.checked; else if (k === 'age') st.members[i].age = clamp(+t.value || 0, 0, 110); else st.members[i].sex = t.value; save(); };
@@ -71,6 +71,8 @@ App.views.personal = {
     let cands = [], best = null, within = null;
     if (A) { const from = nearestNode(A, me.x, me.y); cands = shelterCandidates(A, area, st.scen, from, speed); within = cands.find((x) => x.reach && (!cons || x.len <= cons.maxWalk)); best = within || cands.find((x) => x.reach); }
     const outOfCond = best && !within && cons;
+    /* 自宅地点の想定浸水深（概略図のゾーンから） */
+    const homeDepth = A ? { flood: zoneDepthAt(A, 'flood', hxy[0], hxy[1]), urban: zoneDepthAt(A, 'urban_flood', hxy[0], hxy[1]) } : { flood: 0, urban: 0 };
     const vertical = st.scen === 'flood' && st.home === 'highrise' && st.floor >= 4;
     const floodBest = (() => { if (!A) return null; const from = nearestNode(A, me.x, me.y); const cs = shelterCandidates(A, area, 'flood', from, speed); return cs.find((x) => x.reach && (!cons || x.len <= cons.maxWalk)) || cs.find((x) => x.reach); })();
     const quakeBest = (() => { if (!A) return null; const from = nearestNode(A, me.x, me.y); const cs = shelterCandidates(A, area, 'quake', from, speed); return cs.find((x) => x.reach && (!cons || x.len <= cons.maxWalk)) || cs.find((x) => x.reach); })();
@@ -79,12 +81,15 @@ App.views.personal = {
       <li><b>洪水のとき：</b>${vert ? `自宅 ${st.floor} 階に留まる垂直避難が第一候補。長期化なら ${floodBest ? esc(floodBest.poi.name_ja || floodBest.poi.name) + `（徒歩 ${walkMin(floodBest.len, speed)} 分）` : '徒歩圏の高層施設'} へ。` : floodBest ? `${esc(floodBest.poi.name_ja || floodBest.poi.name)} へ早めに移動（徒歩 ${walkMin(floodBest.len, speed)} 分）。` : '徒歩圏の高層施設を確認。'}<b>地震のとき：</b>${quakeBest ? `揺れが収まったら ${esc(quakeBest.poi.name_ja || quakeBest.poi.name)} へ（徒歩 ${walkMin(quakeBest.len, speed)} 分）。` : '近くの広場へ。'}</li>
       <li><b>備蓄：</b>${plan.n} 人 × ${plan.days} 日で飲料水 ${plan.water} L・食料 ${plan.meals} 食${plan.infants ? '・粉ミルク／おむつ' : ''}${plan.elders ? '・高齢者用品' : ''}${plan.needs ? '・持病の薬 ' + Math.max(7, plan.days) + ' 日分' : ''}（内閣府の目安 3L/人/日）。</li>
       <li><b>日頃の登録：</b>在留届・たびレジ、家族の集合場所 3 段階と域外連絡先、緊急連絡先カード（下の行動チェック）。</li></ul>`;
+    const condNotes = plan.cons.filter((x) => x.k !== 'walk');
     $('#psOut', root).innerHTML = `
-      <div class="card"><div class="card-h"><h2>住まいのリスク（${esc(reg.name_ja)}）</h2><span class="r">${srcTag('ThinkHazard', reg.th_url)}</span></div>${risks.length ? `<div style="display:flex;flex-direction:column;gap:8px">${risks.map((r) => `<div class="note ${r.lv >= 4 ? 'warn' : ''}">${ic(HAZ[r.k].icon)}<span><b>${esc(HAZ[r.k].short)}（${lvInfo(['unknown', 'Very low', 'Low', 'Medium', 'High'][r.lv]).ja}）：</b>${esc(r.ja)}</span></div>`).join('')}</div>` : '<div class="empty">この地域の主要ハザードは低水準です</div>'}</div>
+      <div class="card"><div class="card-h"><h2>住まいのリスク（${esc(reg.name_ja)}）</h2><span class="r">${srcTag('ThinkHazard', reg.th_url)}</span></div>${risks.length ? `<div style="display:flex;flex-direction:column;gap:8px">${risks.map((r) => `<div class="note ${r.lv >= 4 ? 'warn' : ''}">${ic(HAZ[r.k].icon)}<span><b>${esc(HAZ[r.k].short)}（${lvInfo(['unknown', 'Very low', 'Low', 'Medium', 'High'][r.lv]).ja}）：</b>${esc(r.ja)}</span></div>`).join('')}</div>` : '<div class="empty">この地域の主要ハザードは低水準です</div>'}
+        <div class="note" style="margin-top:8px">${ic('pin')}<span><b>自宅地点（${esc(home ? home.name_ja : '代表地点')}）の想定浸水深：</b>河川洪水 ${homeDepth.flood > 0 ? homeDepth.flood + ' m' : '想定域外'}、都市型浸水 ${homeDepth.urban > 0 ? homeDepth.urban + ' m' : '想定域外'} ${asmTag('概略図の仮定')}。住居：${esc({ highrise: '高層コンド', lowrise: '低層アパート', house: '一戸建て' }[st.home] || st.home)} ${st.floor} 階。${homeDepth.flood >= 0.5 && st.home !== 'highrise' ? '<b>浸水想定域内の低層住居のため、垂直避難は提示しません。</b>' : ''}</span></div></div>
       <div class="card flush"><div style="padding:12px 16px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="font-size:15px;margin:0;font-weight:600">避難先と避難路</h2><div class="seg" id="psScen">${scenKeys.map((k) => `<button data-scen="${k}" aria-pressed="${k === st.scen}">${ic(HAZ[k].icon)}${esc(HAZ[k].short)}</button>`).join('')}</div><span class="tag neutral">${esc(cons ? cons.ja : '')}</span></div>
+        ${condNotes.length ? `<div style="padding:8px 16px 0;display:flex;flex-direction:column;gap:6px">${condNotes.map((x) => `<div class="note" style="padding:6px 10px">${ic(x.k === 'car' ? 'car' : 'home')}<span>${esc(x.ja)}</span></div>`).join('')}</div>` : ''}
         <div style="padding:10px 16px 12px">${vertical ? `<div class="note ok">${ic('home')}<span><b>第一候補は自宅に留まる「垂直避難」です。</b>${st.floor} 階は浸水しませんが、停電・断水・エレベーター停止が ${plan.days} 日以上続く前提で備蓄します。水や物流が長期に途絶する見込みなら、下の水平避難先へ早めに移動します。</span></div>` : best ? `<div class="note ${outOfCond ? 'warn' : 'ok'}">${ic('route')}<span><b>推奨避難先：${esc(best.poi.name_ja || best.poi.name)}</b>（${fmt(best.len)} m・徒歩 ${walkMin(best.len, speed)} 分）。${esc(best.poi.why_ja || '')}${outOfCond ? `<br><b>条件（${esc(cons.ja)}）内に候補がなく、最寄りを表示しています。</b>移動手段（車・送迎）の確保が必要です。` : ''}</span></div>` : `<div class="note warn">${ic('alert')}<span>条件に合う避難先が見つかりません。徒歩圏の高層建物を個別に確認してください。</span></div>`}</div>
         <div class="map-box" style="border-radius:0;border:0;border-top:1px solid var(--line)"><svg id="psMap" role="img" aria-label="自宅周辺の避難経路"></svg><div class="attr">概略図・デモ</div></div>
-        ${best ? `<div style="padding:10px 16px 14px;font-size:12.5px;color:var(--fg2)">代替：${cands.filter((x) => x.reach && x !== best).slice(0, 2).map((x) => `${esc(x.poi.name_ja || x.poi.name)}（${walkMin(x.len, speed)} 分）`).join('、') || 'なし'}。家族の集合場所は「自宅 → ${esc(best.poi.name_ja || best.poi.name)} → ${esc(site.label)} 拠点」の順で決めておきます。</div>` : ''}
+        ${best ? `<div style="padding:10px 16px 14px;font-size:12.5px;color:var(--fg2)">代替：${cands.filter((x) => x.reach && x !== best).slice(0, 2).map((x) => `${esc(x.poi.name_ja || x.poi.name)}（${walkMin(x.len, speed)} 分）`).join('、') || 'なし'}。${st.lang ? '' : '現地語での会話が難しい場合は、日本語対応のある病院・日本人会・大使館の位置を家族全員が地図で確認しておきます。'}</div>` : ''}
       </div>`;
     $('#psScen', root).onclick = (e) => { const b = e.target.closest('button'); if (!b) return; st.scen = b.dataset.scen; Store.set('personal', st); self.update(root); };
     if (A) renderAreaMap($('#psMap', root), A, area, { scenario: st.scen === 'quake' ? 'quake' : 'flood', zoneCls: st.scen === 'quake' ? 'sm-shake' : 'sm-flood', me, routes: best && !vertical ? [{ path: best.route.path }].concat(cands.filter((x) => x.reach && x !== best).slice(0, 2).map((x) => ({ path: x.route.path, cls: 'alt' }))) : [], dest: best && !vertical ? best.poi.name : null, site: { x: localXY(area, site.lon, site.lat)[0], y: localXY(area, site.lon, site.lat)[1], name: site.label + ' 拠点' }, onPoi: (n) => toast(n) });
@@ -107,9 +112,9 @@ App.views.personal = {
     $('#psCard', root).innerHTML = `<div class="sec-h"><span class="no">04</span><h2>家族防災カード</h2><p>この内容を印刷またはスクリーンショットして、家族全員が持ち歩けるようにします。</p></div>
       <div class="fam-card"><span class="eb">Family emergency card · ${esc(reg.name_ja)}</span><h3>${esc(home ? home.name_ja : site.name_ja)} の ${plan.n} 人家族</h3>
         <dl><dt>家族</dt><dd>${st.members.map((m) => `${m.age}歳${m.cond ? '（要配慮）' : ''}`).join('、')}${st.pets ? '、ペット' : ''}</dd>
-        <dt>洪水のとき</dt><dd>${vertical ? `自宅 ${st.floor} 階に留まる（垂直避難）。長期化なら ${best ? esc(best.poi.name_ja || best.poi.name) : '高層施設'} へ` : best ? `${esc(best.poi.name_ja || best.poi.name)}（徒歩 ${walkMin(best.len, speed)} 分）へ早めに移動` : '徒歩圏の高層建物へ'}</dd>
-        <dt>地震のとき</dt><dd>揺れが収まったら非常階段で外へ。開けた場所（公園・広場）に集合。余震に注意</dd>
-        <dt>集合場所</dt><dd>① 自宅前 → ② ${best ? esc(best.poi.name_ja || best.poi.name) : '避難先'} → ③ ${esc(site.label)} 拠点（${esc(site.short_ja)}）</dd>
+        <dt>洪水のとき</dt><dd>${vert ? `自宅 ${st.floor} 階に留まる（垂直避難）。長期化なら ${floodBest ? esc(floodBest.poi.name_ja || floodBest.poi.name) + `（徒歩 ${walkMin(floodBest.len, speed)} 分）` : '高層施設'} へ` : floodBest ? `${esc(floodBest.poi.name_ja || floodBest.poi.name)}（徒歩 ${walkMin(floodBest.len, speed)} 分）へ早めに移動` : '徒歩圏の高層建物へ'}</dd>
+        <dt>地震のとき</dt><dd>揺れが収まったら非常階段で外へ。${quakeBest ? `${esc(quakeBest.poi.name_ja || quakeBest.poi.name)}（徒歩 ${walkMin(quakeBest.len, speed)} 分）に集合` : '開けた場所（公園・広場）に集合'}。余震に注意</dd>
+        <dt>集合場所</dt><dd>① 自宅前 → ② ${quakeBest ? esc(quakeBest.poi.name_ja || quakeBest.poi.name) : '近くの広場'}（洪水時は ${floodBest ? esc(floodBest.poi.name_ja || floodBest.poi.name) : '高層施設'}） → ③ ${esc(site.label)} 拠点（${esc(site.short_ja)}）</dd>
         <dt>緊急電話</dt><dd class="num">${(c.emergency_numbers || []).slice(0, 3).map((n) => `${esc(n.service_ja)} ${esc(n.number)}`).join(' / ') || '—'} <span class="tag warn" style="font-family:var(--f-body)">要確認</span></dd>
         <dt>在外公館</dt><dd>${emb ? `${esc(emb.name_ja)} ${esc(emb.phone || '')}` : '—'} <span class="tag warn">要確認</span></dd>
         <dt>域外連絡先</dt><dd>（日本の親族の氏名・電話番号を記入）</dd></dl>
