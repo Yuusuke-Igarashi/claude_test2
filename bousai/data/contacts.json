@@ -1,44 +1,944 @@
 {
-  "_note": "緊急連絡先・在外公館・警報チャネル。confirmed_by が unverified の項目は本セッションで原典を確認できていないため、利用前に公式サイトで確認が必要。",
-  "mofa_services": [
-    { "key": "orr", "name_ja": "在留届（ORRnet）", "url": "https://www.ezairyu.mofa.go.jp/RRnet/", "what_ja": "3 か月以上滞在する人の届出義務。緊急時の安否確認・情報提供の基礎", "confirmed_by": "unverified" },
-    { "key": "tabireg", "name_ja": "たびレジ", "url": "https://www.ezairyu.mofa.go.jp/tabireg/", "what_ja": "短期出張者・旅行者向けの登録。滞在先の危険情報・緊急時メールを受信", "confirmed_by": "unverified" },
-    { "key": "consular_mail", "name_ja": "領事メール・緊急一斉通報", "url": "https://www.anzen.mofa.go.jp/", "what_ja": "在外公館が在留届・たびレジ登録者へ送る注意喚起と緊急連絡", "confirmed_by": "unverified" },
-    { "key": "mofa_app", "name_ja": "海外安全アプリ", "url": "https://www.anzen.mofa.go.jp/", "what_ja": "海外安全ホームページの情報をプッシュ通知で受け取る", "confirmed_by": "unverified" }
-  ],
-  "countries": [
+ "_note": "緊急連絡先・在外公館・警報チャネル。confirmed_by: third_party＝GitHub 上の第三者データセット（公式サイトの保存コピー等）から転記、unverified＝未検証。いずれも利用前に公式サイトで確認が必要。",
+ "mofa_services": [
+  {
+   "key": "orr",
+   "name_ja": "在留届（ORRnet）",
+   "url": "https://www.ezairyu.mofa.go.jp/RRnet/",
+   "what_ja": "3 か月以上滞在する人の届出義務。緊急時の安否確認・情報提供の基礎",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "tabireg",
+   "name_ja": "たびレジ",
+   "url": "https://www.ezairyu.mofa.go.jp/tabireg/",
+   "what_ja": "短期出張者・旅行者向けの登録。滞在先の危険情報・緊急時メールを受信",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "consular_mail",
+   "name_ja": "領事メール・緊急一斉通報",
+   "url": "https://www.anzen.mofa.go.jp/",
+   "what_ja": "在外公館が在留届・たびレジ登録者へ送る注意喚起と緊急連絡",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "mofa_app",
+   "name_ja": "海外安全アプリ",
+   "url": "https://www.anzen.mofa.go.jp/",
+   "what_ja": "海外安全ホームページの情報をプッシュ通知で受け取る",
+   "confirmed_by": "unverified"
+  }
+ ],
+ "countries": [
+  {
+   "country": "Thailand",
+   "iso3": "THA",
+   "jp_residents": null,
+   "jp_companies": null,
+   "emergency_numbers": [
     {
-      "country": "Thailand", "iso3": "THA", "jp_residents": null, "jp_companies": null,
-      "emergency_numbers": [ { "service_ja": "警察", "number": "191", "source_url": "https://www.th.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "救急（医療緊急）", "number": "1669", "source_url": "https://www.th.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "消防", "number": "199", "source_url": "https://www.th.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "ツーリストポリス", "number": "1155", "note_ja": "英語対応", "source_url": "https://www.th.emb-japan.go.jp/", "confirmed_by": "unverified" } ],
-      "disaster_hotlines": [ { "agency": "DDPM（防災減災局）ホットライン", "number": "1784", "note_ja": "災害情報・救援要請", "source_url": "https://www.disaster.go.th/", "confirmed_by": "unverified" }, { "agency": "バンコク都（BMA）", "number": "1555", "note_ja": "都のサービス・洪水通報", "source_url": "https://www.bangkok.go.th/", "confirmed_by": "unverified" } ],
-      "japanese_missions": [ { "name_ja": "在タイ日本国大使館（バンコク）", "address": "177 Witthayu Road, Lumphini, Pathumwan, Bangkok 10330", "phone": "+66-2-207-8500", "url": "https://www.th.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "name_ja": "在チェンマイ日本国総領事館", "address": "Airport Business Park, 90 Mahidol Rd, Chiang Mai", "phone": "+66-52-012500", "url": "https://www.chiangmai.th.emb-japan.go.jp/", "confirmed_by": "unverified" } ],
-      "national_dm_agency": { "name": "Department of Disaster Prevention and Mitigation (DDPM)", "name_ja": "防災減災局（DDPM・内務省）", "url": "https://www.disaster.go.th/" },
-      "alert_channels": [ { "key": "cell_broadcast", "name_ja": "携帯の緊急速報（セルブロードキャスト）", "desc_ja": "政府が 2025 年に本格運用を開始した携帯向け一斉警報。端末の設定で受信を有効にする", "confirmed_by": "unverified" }, { "key": "ddpm_app", "name_ja": "DDPM 公式アプリ（Thai Disaster Alert）", "desc_ja": "災害警報・避難情報。タイ語中心", "confirmed_by": "unverified" }, { "key": "bma_line", "name_ja": "バンコク都の公式 LINE・SNS", "desc_ja": "区ごとの冠水・排水情報", "confirmed_by": "unverified" }, { "key": "embassy_mail", "name_ja": "在タイ日本国大使館 領事メール", "desc_ja": "在留届・たびレジ登録者に日本語で配信", "confirmed_by": "unverified" } ],
-      "alert_note_ja": "タイ語の警報は翻訳アプリでも読めるよう、警報チャネルの通知は切らずに置く。", "alert_src": "https://www.disaster.go.th/", "alert_src_name": "DDPM"
+     "service_ja": "警察（緊急）",
+     "number": "191",
+     "note_ja": "",
+     "source_url": "https://github.com/google/libphonenumber/blob/master/resources/ShortNumberMetadata.xml",
+     "confirmed_by": "third_party"
     },
     {
-      "country": "Indonesia", "iso3": "IDN",
-      "emergency_numbers": [ { "service_ja": "総合緊急番号", "number": "112", "source_url": "https://www.id.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "警察", "number": "110", "source_url": "https://www.id.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "救急", "number": "118 / 119", "source_url": "https://www.id.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "消防", "number": "113", "source_url": "https://www.id.emb-japan.go.jp/", "confirmed_by": "unverified" } ],
-      "disaster_hotlines": [ { "agency": "BNPB（国家防災庁）", "number": "117", "note_ja": "災害情報", "source_url": "https://bnpb.go.id/", "confirmed_by": "unverified" } ],
-      "japanese_missions": [ { "name_ja": "在インドネシア日本国大使館（ジャカルタ）", "address": "Jl. M.H. Thamrin 24, Jakarta 10350", "phone": "+62-21-3192-4308", "url": "https://www.id.emb-japan.go.jp/", "confirmed_by": "unverified" } ],
-      "national_dm_agency": { "name": "BNPB", "name_ja": "国家防災庁（BNPB）", "url": "https://bnpb.go.id/" },
-      "alert_channels": [ { "key": "ddpm_app", "name_ja": "BMKG 公式アプリ（InfoBMKG）", "desc_ja": "地震・津波・気象警報のプッシュ通知", "confirmed_by": "unverified" }, { "key": "bma_line", "name_ja": "BPBD DKI Jakarta の洪水早期警報（SNS・サイト）", "desc_ja": "水門の水位と浸水地区", "confirmed_by": "unverified" }, { "key": "cell_broadcast", "name_ja": "携帯の緊急速報（津波・地震）", "desc_ja": "InaTEWS と連動した SMS／セルブロードキャスト", "confirmed_by": "unverified" }, { "key": "embassy_mail", "name_ja": "在インドネシア日本国大使館 領事メール", "desc_ja": "在留届・たびレジ登録者に配信", "confirmed_by": "unverified" } ],
-      "alert_src": "https://www.bmkg.go.id/", "alert_src_name": "BMKG"
+     "service_ja": "消防",
+     "number": "199",
+     "note_ja": "",
+     "source_url": "https://github.com/psyduckler/tabiji/blob/HEAD/api/v1/safety/th.json",
+     "confirmed_by": "third_party"
     },
     {
-      "country": "Philippines", "iso3": "PHL",
-      "emergency_numbers": [ { "service_ja": "総合緊急番号（警察・消防・救急）", "number": "911", "source_url": "https://www.ph.emb-japan.go.jp/", "confirmed_by": "unverified" } ],
-      "disaster_hotlines": [ { "agency": "NDRRMC（国家災害リスク軽減管理評議会）", "number": "(02) 8911-1406", "note_ja": "災害対応の中枢", "source_url": "https://ndrrmc.gov.ph/", "confirmed_by": "unverified" } ],
-      "japanese_missions": [ { "name_ja": "在フィリピン日本国大使館（マニラ）", "address": "2627 Roxas Boulevard, Pasay City", "phone": "+63-2-8551-5710", "url": "https://www.ph.emb-japan.go.jp/", "confirmed_by": "unverified" } ],
-      "national_dm_agency": { "name": "NDRRMC / Office of Civil Defense", "name_ja": "国家災害リスク軽減管理評議会（NDRRMC）", "url": "https://ndrrmc.gov.ph/" },
-      "alert_channels": [ { "key": "cell_broadcast", "name_ja": "NDRRMC 緊急アラート（携帯一斉送信）", "desc_ja": "法律（RA 10639）に基づく無料の災害アラート", "confirmed_by": "unverified" }, { "key": "ddpm_app", "name_ja": "PHIVOLCS・PAGASA の速報", "desc_ja": "地震速報、台風シグナル", "confirmed_by": "unverified" }, { "key": "bma_line", "name_ja": "市（タギッグ・マカティ）の公式 SNS", "desc_ja": "避難命令・避難センター", "confirmed_by": "unverified" }, { "key": "embassy_mail", "name_ja": "在フィリピン日本国大使館 領事メール", "desc_ja": "在留届・たびレジ登録者に配信", "confirmed_by": "unverified" } ],
-      "alert_src": "https://ndrrmc.gov.ph/", "alert_src_name": "NDRRMC"
+     "service_ja": "救急（医療緊急）",
+     "number": "1669",
+     "note_ja": "",
+     "source_url": "https://github.com/google/libphonenumber/blob/master/resources/ShortNumberMetadata.xml",
+     "confirmed_by": "third_party"
     },
-    { "country": "Viet Nam", "iso3": "VNM", "emergency_numbers": [ { "service_ja": "警察", "number": "113", "source_url": "https://www.vn.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "消防", "number": "114", "source_url": "https://www.vn.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "救急", "number": "115", "source_url": "https://www.vn.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "disaster_hotlines": [], "japanese_missions": [ { "name_ja": "在ベトナム日本国大使館（ハノイ）", "address": "27 Lieu Giai, Ba Dinh, Ha Noi", "phone": "+84-24-3846-3000", "url": "https://www.vn.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "name_ja": "在ホーチミン日本国総領事館", "address": "261 Dien Bien Phu, District 3, Ho Chi Minh City", "phone": "+84-28-3933-3510", "url": "https://www.hcmcgj.vn.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "alert_channels": [ { "key": "ddpm_app", "name_ja": "VNDMA（防災総局）の警報", "desc_ja": "台風・洪水の警報", "confirmed_by": "unverified" }, { "key": "embassy_mail", "name_ja": "在外公館 領事メール", "desc_ja": "日本語", "confirmed_by": "unverified" } ] },
-    { "country": "Malaysia", "iso3": "MYS", "emergency_numbers": [ { "service_ja": "総合緊急番号", "number": "999", "source_url": "https://www.my.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "disaster_hotlines": [ { "agency": "NADMA（国家災害管理庁）", "number": "03-8064 2400", "source_url": "https://www.nadma.gov.my/", "confirmed_by": "unverified" } ], "japanese_missions": [ { "name_ja": "在マレーシア日本国大使館（クアラルンプール）", "address": "11 Persiaran Stonor, Kuala Lumpur", "phone": "+60-3-2177-2600", "url": "https://www.my.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "alert_channels": [ { "key": "ddpm_app", "name_ja": "MyNADMA／気象局（MET Malaysia）アプリ", "desc_ja": "洪水・煙霧（API）の警報", "confirmed_by": "unverified" }, { "key": "embassy_mail", "name_ja": "在外公館 領事メール", "desc_ja": "日本語", "confirmed_by": "unverified" } ] },
-    { "country": "Singapore", "iso3": "SGP", "emergency_numbers": [ { "service_ja": "警察", "number": "999", "source_url": "https://www.sg.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "救急・消防（SCDF）", "number": "995", "source_url": "https://www.sg.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "disaster_hotlines": [], "japanese_missions": [ { "name_ja": "在シンガポール日本国大使館", "address": "16 Nassim Road, Singapore 258390", "phone": "+65-6235-8855", "url": "https://www.sg.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "alert_channels": [ { "key": "ddpm_app", "name_ja": "SCDF・NEA（myENV）アプリ", "desc_ja": "鉄砲水・煙霧（PSI）の通知", "confirmed_by": "unverified" }, { "key": "embassy_mail", "name_ja": "在外公館 領事メール", "desc_ja": "日本語", "confirmed_by": "unverified" } ] },
-    { "country": "Myanmar", "iso3": "MMR", "emergency_numbers": [ { "service_ja": "警察", "number": "199", "source_url": "https://www.mm.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "消防", "number": "191", "source_url": "https://www.mm.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "救急", "number": "192", "source_url": "https://www.mm.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "disaster_hotlines": [], "japanese_missions": [ { "name_ja": "在ミャンマー日本国大使館（ヤンゴン）", "address": "No.100, Natmauk Road, Bahan Township, Yangon", "phone": "+95-1-549644", "url": "https://www.mm.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "alert_channels": [ { "key": "embassy_mail", "name_ja": "在外公館 領事メール", "desc_ja": "日本語", "confirmed_by": "unverified" } ] },
-    { "country": "Cambodia", "iso3": "KHM", "emergency_numbers": [ { "service_ja": "警察", "number": "117", "source_url": "https://www.kh.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "消防", "number": "118", "source_url": "https://www.kh.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "救急", "number": "119", "source_url": "https://www.kh.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "disaster_hotlines": [], "japanese_missions": [ { "name_ja": "在カンボジア日本国大使館（プノンペン）", "address": "No.194, Moha Vithei Preah Norodom, Phnom Penh", "phone": "+855-23-217161", "url": "https://www.kh.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "alert_channels": [ { "key": "embassy_mail", "name_ja": "在外公館 領事メール", "desc_ja": "日本語", "confirmed_by": "unverified" } ] },
-    { "country": "Laos", "iso3": "LAO", "emergency_numbers": [ { "service_ja": "警察", "number": "1191", "source_url": "https://www.la.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "消防", "number": "1190", "source_url": "https://www.la.emb-japan.go.jp/", "confirmed_by": "unverified" }, { "service_ja": "救急", "number": "1195", "source_url": "https://www.la.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "disaster_hotlines": [], "japanese_missions": [ { "name_ja": "在ラオス日本国大使館（ビエンチャン）", "address": "Sisangvone Road, Vientiane", "phone": "+856-21-414400", "url": "https://www.la.emb-japan.go.jp/", "confirmed_by": "unverified" } ], "alert_channels": [ { "key": "embassy_mail", "name_ja": "在外公館 領事メール", "desc_ja": "日本語", "confirmed_by": "unverified" } ] }
-  ]
+    {
+     "service_ja": "ツーリストポリス（英語対応・24時間）",
+     "number": "1155",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Thailand/Overview.md",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "DDPM 防災減災局（กรมป้องกันและบรรเทาสาธารณภัย ",
+     "number": "1784",
+     "note_ja": "内務省防災減災局の災害ホットライン。第三者の洪水監視プロジェクト資料（および chalaivate/flood-moni",
+     "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/README.md",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "バンコク都（BMA）ホットライン",
+     "number": "1555",
+     "note_ja": "バンコク都の総合ホットライン。第三者資料は Thairath 記事を根拠に「確認済み」と記載。",
+     "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/docs/KNOWLEDGE.md",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "バンコク都 洪水防止センター（ศูนย์ป้องกันน้ำท่วม กทม.）",
+     "number": "02-248-5115",
+     "note_ja": "第三者資料の「Official contacts」欄に掲載。公式確認なし。",
+     "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/README.md",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "王室灌漑局（RID / กรมชลประทาน）",
+     "number": "1460",
+     "note_ja": "同資料の KNOWLEDGE.md では「今回の調査では未確認」と注記されている番号。利用前に要確認。",
+     "source_url": "https://github.com/bejranonda/flood2026/blob/dfd0228c9488775db6b8069ba8d8481163de2955/README.md",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "在タイ日本国大使館",
+     "address": "177 Witthayu Road, Lumphini, Pathum Wan, Bangkok 10330",
+     "phone": "+66-2-207-8500",
+     "url": "https://www.th.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在チェンマイ日本国総領事館（管轄: チェンマイ、ランパーン、ランプーン、チェンラ",
+     "address": "Airport Business Park, 90 Mahidol Rd, Chiang Mai",
+     "phone": "+66-52-012500",
+     "url": "https://www.chiangmai.th.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "national_dm_agency": {
+    "name": "Department of Disaster Prevention and Mitigation (DDPM), Ministry of Interior",
+    "name_ja": "防災減災局（内務省）",
+    "url": "https://www.disaster.go.th/",
+    "warning_channels_ja": "①公式アプリ「THAI DISASTER ALERT」（The Nation 記事の GitHub コピーでも DDPM が利用を呼びかけ）②Cell Broadcast（DE省・NBTC・DDPM・AIS/True/NT が連携し2025年初頭に全国運用予定と第三者レポートが記載。2026年9月26日にバンコク東部洪水で DDPM が CB を送信した記録あり）③タイ気象局（TMD）の CAP 警報フィード（www.tmd.go.th/api/xml/CAP）と気象警報 ④ホットライン1784。出典: chalaivate/flood-monitor SOURCES-CATALOG.md、Ponlponl123-Labs/openthaisos README、bejranonda/flood2026 KNOWLEDGE.md、stanfordnlp/en-worldwide-newswi"
+   },
+   "alert_channels": [
+    {
+     "key": "cell_broadcast",
+     "name_ja": "携帯の緊急速報（セルブロードキャスト）",
+     "desc_ja": "政府が 2025 年に本格運用を開始した携帯向け一斉警報。端末の設定で受信を有効にする",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "ddpm_app",
+     "name_ja": "DDPM 公式アプリ（Thai Disaster Alert）",
+     "desc_ja": "災害警報・避難情報。タイ語中心",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "bma_line",
+     "name_ja": "バンコク都の公式 LINE・SNS",
+     "desc_ja": "区ごとの冠水・排水情報",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "在タイ日本国大使館 領事メール",
+     "desc_ja": "在留届・たびレジ登録者に日本語で配信",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "alert_note_ja": "THAI DISASTER ALERT アプリ、Cell Broadcast（DDPM/NBTC、2025年から段階導入とされる）、TMD 気象警報（CAP）、ホットライン 1784（DDPM）/1555（バンコク都）。公式サイト disaster.go.th はドメインが政府サイト一覧に含まれることのみ確認。",
+   "alert_src": "https://www.disaster.go.th/",
+   "alert_src_name": "DDPM",
+   "wri": 20.03,
+   "wri_src": "WorldRiskIndex 2025（二次集計サイト経由・検索要約）",
+   "wri_url": "https://worldpopulationreview.com/country-rankings/natural-disasters-by-country",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 21,
+   "wri_rank_note": "2024 年版の順位。2025年版の順位は検索で確認できず。2024年版は21位（スコア21.70）。",
+   "aal_flood_m": 2600.0,
+   "aal_src": "ADB/World Bank Climate Risk Country Profile: Thailand (2021) citing UNISDR",
+   "aal_url": "https://www.adb.org/sites/default/files/publication/722251/climate-risk-country-profile-thailand.pdf",
+   "aal_note": "UNISDR推計の洪水AAL約26億米ドル。タイ銀行資料では洪水がハザードAALのほぼ100%。別推計: OECD東南アジア経済見通し2025はAAL 8.21億米ドル、世銀Thailand Economic Monitorは極端河川洪水の年平均被害16億米ドル。GAR15のハザード別AAL表は未取得。"
+  },
+  {
+   "country": "Indonesia",
+   "iso3": "IDN",
+   "emergency_numbers": [
+    {
+     "service_ja": "警察",
+     "number": "110",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Indonesia/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "統合緊急番号（警察・消防・救急）",
+     "number": "112",
+     "note_ja": "",
+     "source_url": "https://github.com/google/libphonenumber/blob/master/resources/ShortNumberMetadata.xml",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "消防",
+     "number": "113",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Indonesia/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "救急",
+     "number": "118 / 119",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Indonesia/Overview.md",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "BNPB 国家防災庁 コールセンター",
+     "number": "117",
+     "note_ja": "第三者の防災アプリ設定ファイル（および NusantaraAlert README「117: Call Center B",
+     "source_url": "https://github.com/rhaprace/Yanig/blob/69363dfeb8bf8a5e9ff215dda21f42592064c21e/src/config/countries.ts",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "BMKG 気象気候地球物理庁 情報センター",
+     "number": "196",
+     "note_ja": "第三者アプリ README に「196: Informasi BMKG Pusat」として掲載。公式確認なし。",
+     "source_url": "https://github.com/synectra-jasa-digital/NusantaraAlert-portofolio/blob/59782f0bbe684b329c498b51fad75c1eda4b327f/README.md",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "在インドネシア日本国大使館",
+     "address": "Jl. M.H. Thamrin No.24, Jakarta 10350",
+     "phone": "+62-21-3192-4308",
+     "url": "https://www.id.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在スラバヤ日本国総領事館（管轄: 東ジャワ州、東・北・南カリマンタン州、スラウェ",
+     "address": "",
+     "phone": "",
+     "url": "https://www.surabaya.id.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在デンパサール日本国総領事館（管轄: バリ州、西ヌサトゥンガラ州、東ヌサトゥンガ",
+     "address": "",
+     "phone": "",
+     "url": "https://www.denpasar.id.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在メダン日本国総領事館（管轄: アチェ州、北スマトラ州、西スマトラ州、ジャンビ州",
+     "address": "",
+     "phone": "",
+     "url": "https://www.medan.id.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "national_dm_agency": {
+    "name": "Badan Nasional Penanggulangan Bencana (BNPB)",
+    "name_ja": "国家防災庁",
+    "url": "https://bnpb.go.id/",
+    "warning_channels_ja": "地震・津波は BMKG の InaTEWS が発表（目標: 地震後5分以内）。伝達経路は BPBD・州県庁・軍警察向け Warning Receiver System（衛星/インターネット）、SMS ブロードキャスト、メール、Web、InfoBMKG アプリ、TV/ラジオ連動、沿岸部の津波サイレン、モスク拡声器、コミュニティラジオ（belajarcarabelajar/dawnbook の InaTEWS 解説章より）。警戒レベルは Awas（3m以上）/Siaga/Waspada の3段階。BNPB は InaRISK（inarisk.bnpb.go.id）でハザード情報を提供（GitHub 上のクライアント実装で存在確認）。BMKG: https://www.bmkg.go.id/（カナダ政府渡航情報コピー・政府サイト一覧で確認）"
+   },
+   "alert_channels": [
+    {
+     "key": "ddpm_app",
+     "name_ja": "BMKG 公式アプリ（InfoBMKG）",
+     "desc_ja": "地震・津波・気象警報のプッシュ通知",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "bma_line",
+     "name_ja": "BPBD DKI Jakarta の洪水早期警報（SNS・サイト）",
+     "desc_ja": "水門の水位と浸水地区",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "cell_broadcast",
+     "name_ja": "携帯の緊急速報（津波・地震）",
+     "desc_ja": "InaTEWS と連動した SMS／セルブロードキャスト",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "在インドネシア日本国大使館 領事メール",
+     "desc_ja": "在留届・たびレジ登録者に配信",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "alert_src": "https://www.bmkg.go.id/",
+   "alert_src_name": "BMKG",
+   "wri": 39.8,
+   "wri_src": "WorldRiskIndex 2025（検索要約）",
+   "wri_url": "https://www.misereor.org/fileadmin/user_upload_misereororg/publication/en/worldriskreport-2025.pdf",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 3,
+   "wri_rank_note": "2025年はインドと順位が入れ替わり3位。2024年は2位。",
+   "inform": 4.6,
+   "inform_src": "INFORM Risk 2025（検索要約）",
+   "inform_url": "https://nationsinquiry.com/countries/indonesia",
+   "inform_confirmed": "search_snippet",
+   "aal_flood_m": 1370.0,
+   "aal_src": "OECD Economic Outlook for Southeast Asia, China and India 2025 (citing UNDP 2025)",
+   "aal_url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/12/economic-outlook-for-southeast-asia-china-and-india-2025_76f5e022/6fc95782-en.pdf",
+   "aal_note": "年間約2,900件の災害、年平均損失約13.7億米ドル。GFDRR 2011年報告は年平均損失をGDPの約0.3%と推計。GAR15ハザード別AALは未取得。",
+   "alert_note_ja": "InaTEWS（BMKG）津波・地震警報: SMS ブロードキャスト、InfoBMKG アプリ、TV/ラジオ、沿岸サイレン。BNPB コールセンター 117、InaRISK ハザード地図。火山は MAGMA Indonesia（magma.vsi.esdm.go.id）。"
+  },
+  {
+   "country": "Philippines",
+   "iso3": "PHL",
+   "emergency_numbers": [
+    {
+     "service_ja": "統合緊急番号（警察・消防・救急）",
+     "number": "911",
+     "note_ja": "",
+     "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "警察（PNP 旧番号。911 に統合済み、未対応地域向け）",
+     "number": "117",
+     "note_ja": "",
+     "source_url": "https://github.com/rockyru/regov/blob/9b64711e97ac25f151afe970a1c284bfbaa1abf2/src/lib/civic.ts",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "消防（BFP 本部直通）",
+     "number": "(02) 8426-0219 / (02) 8426-0246",
+     "note_ja": "",
+     "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "フィリピン赤十字（救急・災害支援）",
+     "number": "143 / (02) 8790-2300",
+     "note_ja": "",
+     "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "警察 PNP テキストホットライン",
+     "number": "0917-847-5757",
+     "note_ja": "",
+     "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "NDRRMC Operations Center（国家災害リスク軽減管理評議会）",
+     "number": "(02) 8911-1406 / (02) 8912-2665 / (02) 8912-5668 / (02) 8911-1873",
+     "note_ja": "第三者ガイド（出典として ehotlines.e.gov.ph を明記）および Kyaee/teamrtu-devcam",
+     "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "PAGASA 気象庁",
+     "number": "(02) 8284-0800",
+     "note_ja": "台風・気象警報の問い合わせ先。公式サイト https://www.pagasa.dost.gov.ph/（政府サイト一覧",
+     "source_url": "https://github.com/lyle-leif/OFFGRID/blob/b31d96c054cca91d573abbe10a1df77fff039c78/data/guides/hotlines.md",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "Philippine Coast Guard（海難・捜索救助）",
+     "number": "(02) 8527-8481",
+     "note_ja": "第三者アプリ設定に掲載。公式確認なし。",
+     "source_url": "https://github.com/rhaprace/Yanig/blob/69363dfeb8bf8a5e9ff215dda21f42592064c21e/src/config/countries.ts",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "MMDA 交通緊急（マニラ首都圏）",
+     "number": "136",
+     "note_ja": "第三者データセットに掲載。公式確認なし。",
+     "source_url": "https://github.com/Kyaee/teamrtu-devcamp-manila/blob/3496cb5627913843b2f3cdcb62f4af9e28198445/dataset/hotlines.txt",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "在フィリピン日本国大使館",
+     "address": "2627 Roxas Boulevard, Pasay City 1300, Metro Manila",
+     "phone": "+63-2-8551-5710",
+     "url": "https://www.ph.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在セブ日本国総領事館（管轄: ビサヤ地方の各州）",
+     "address": "8/F 2 Quad Building, Cardinal Rosales Ave., Cebu Business Park, Cebu City",
+     "phone": "",
+     "url": "https://www.cebu.ph.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在ダバオ日本国総領事館（管轄: ミンダナオ地方の各州）",
+     "address": "4/F BI Zone Building, J.P. Laurel Avenue, Bajada, Davao City",
+     "phone": "",
+     "url": "https://www.davao.ph.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "national_dm_agency": {
+    "name": "National Disaster Risk Reduction and Management Council (NDRRMC)",
+    "name_ja": "国家災害リスク軽減管理評議会",
+    "url": "https://ndrrmc.gov.ph/",
+    "warning_channels_ja": "RA 10639「Free Mobile Disaster Alerts Act」により携帯事業者は NDRRMC 等の災害警報を無料で配信する義務（法名は RA 11831 第5条の引用文 https://github.com/lexifina/philippines-law/blob/HEAD/ra-11831/sec-005.md で確認。条文本文は未読）。気象警報は PAGASA（bagong.pagasa.dost.gov.ph）、地震・火山・津波は PHIVOLCS（phivolcs.dost.gov.ph、HazardHunter）、UP NOAH（カナダ政府渡航情報の GitHub コピーより）。2025年9月以降 DILG の統一 911 が地方の緊急番号を置換（OFFGRID hotlines.md）。"
+   },
+   "alert_channels": [
+    {
+     "key": "cell_broadcast",
+     "name_ja": "NDRRMC 緊急アラート（携帯一斉送信）",
+     "desc_ja": "法律（RA 10639）に基づく無料の災害アラート",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "ddpm_app",
+     "name_ja": "PHIVOLCS・PAGASA の速報",
+     "desc_ja": "地震速報、台風シグナル",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "bma_line",
+     "name_ja": "市（タギッグ・マカティ）の公式 SNS",
+     "desc_ja": "避難命令・避難センター",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "在フィリピン日本国大使館 領事メール",
+     "desc_ja": "在留届・たびレジ登録者に配信",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "alert_src": "https://ndrrmc.gov.ph/",
+   "alert_src_name": "NDRRMC",
+   "wri": 46.56,
+   "wri_src": "WorldRiskIndex 2025（検索要約）",
+   "wri_url": "https://www.misereor.org/fileadmin/user_upload_misereororg/publication/en/worldriskreport-2025.pdf",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 1,
+   "wri_rank_note": "連続1位。",
+   "inform": 5.2,
+   "inform_src": "INFORM Risk 2025（検索要約）",
+   "inform_url": "https://www.bworldonline.com/infographics/2025/09/19/699506/philippines-2nd-worst-in-region-for-crisis-preparedness/",
+   "inform_confirmed": "search_snippet",
+   "aal_flood_m": 3500.0,
+   "aal_src": "World Bank/GFDRR Philippines Catastrophe Risk Assessment and Modeling (Jan 2018, AIR model)",
+   "aal_url": "https://www.financialprotectionforum.org/third-party/microsite_3/pdf/National_Brochure.pdf",
+   "aal_note": "年平均損失PHP1,768億（台風75%=PHP1,330億、地震25%）。ADBプロファイルは同値をPHP1,770億/年と引用。米ドル換算約35億ドルはManila Bulletin 2024報道の表現。",
+   "alert_note_ja": "携帯向け緊急警報（RA 10639 に基づく事業者配信）、PAGASA 台風シグナル・豪雨警報、PHIVOLCS 地震・津波情報、NDRRMC Operations Center ホットライン。"
+  },
+  {
+   "country": "Viet Nam",
+   "iso3": "VNM",
+   "emergency_numbers": [
+    {
+     "service_ja": "捜索・救難（cứu nạn, cứu hộ）",
+     "number": "112",
+     "note_ja": "",
+     "source_url": "https://github.com/newnol/vn-legal-corpus/blob/dc850a282a1c3a22f276474b02a12eb9f3cc0a59/vn/22-2014-tt-btttt--47433.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "警察（公安）",
+     "number": "113",
+     "note_ja": "",
+     "source_url": "https://github.com/newnol/vn-legal-corpus/blob/dc850a282a1c3a22f276474b02a12eb9f3cc0a59/vn/22-2014-tt-btttt--47433.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "消防",
+     "number": "114",
+     "note_ja": "",
+     "source_url": "https://github.com/newnol/vn-legal-corpus/blob/dc850a282a1c3a22f276474b02a12eb9f3cc0a59/vn/22-2014-tt-btttt--47433.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "救急",
+     "number": "115",
+     "note_ja": "",
+     "source_url": "https://github.com/newnol/vn-legal-corpus/blob/dc850a282a1c3a22f276474b02a12eb9f3cc0a59/vn/22-2014-tt-btttt--47433.md",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [],
+   "japanese_missions": [
+    {
+     "name_ja": "在ベトナム日本国大使館（ハノイ）",
+     "address": "27 Liễu Giai, Ba Đình, Hà Nội",
+     "phone": "+84-24-3846-3000",
+     "url": "https://www.vn.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在ホーチミン日本国総領事館（管轄: ホーチミン市、フーイエン、カインホア、ニント",
+     "address": "261 Dien Bien Phu, District 3, Ho Chi Minh City",
+     "phone": "+84-28-3933-3510",
+     "url": "https://www.hcmcgj.vn.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在ダナン日本国総領事館（管轄: ダナン市、トゥアティエン・フエ、クアンナム、クア",
+     "address": "",
+     "phone": "",
+     "url": "https://www.danang.vn.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "alert_channels": [
+    {
+     "key": "ddpm_app",
+     "name_ja": "VNDMA（防災総局）の警報",
+     "desc_ja": "台風・洪水の警報",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "在外公館 領事メール",
+     "desc_ja": "日本語",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "wri": 25.92,
+   "wri_src": "WorldRiskIndex 2025（検索要約）",
+   "wri_url": "https://www.misereor.org/fileadmin/user_upload_misereororg/publication/en/worldriskreport-2025.pdf",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 13,
+   "wri_rank_note": "",
+   "aal_flood_m": 2400.0,
+   "aal_src": "ADB/WB Climate Risk Country Profile: Viet Nam (2021) citing UNISDR",
+   "aal_url": "https://www.adb.org/sites/default/files/publication/653596/climate-risk-country-profile-viet-nam.pdf",
+   "aal_note": "洪水がAALの約97%。別推計: OECD/UNDP 2023は年平均損失27億ドル（GDP0.42%）、世銀2017は年平均直接損失14億ドル（UNDP IRFF 2024引用）。",
+   "national_dm_agency": {
+    "name": "Vietnam Disaster and Dyke Management Authority (VNDMA) / Cục Quản lý đê điều và Phòng, chống thiên tai",
+    "name_ja": "堤防管理・自然災害防止統制局（農業環境省。2025年の省庁再編前は農業農村開発省 MARD 所管）",
+    "url": "http://phongchongthientai.mard.gov.vn/",
+    "warning_channels_ja": "台風・洪水の予報警報は国家水文気象予報センター NCHMF（nchmf.gov.vn）、災害監視は VNDMS（vndms.dmc.gov.vn、カナダ政府渡航情報の GitHub コピーに「Directorate of Dike Management and Natural Disaster Prevention and Control」として掲載）。ドメイン phongchongthientai.mard.gov.vn / vndma.gov.vn / dmc.gov.vn はベトナム政府サイト一覧データ（nayanamana/et_tu_brute_thewebconf_22）で存在確認。携帯 SMS 一斉警報の運用は未検証。"
+   },
+   "alert_note_ja": "NCHMF の台風・洪水警報、VNDMA/VNDMS 災害情報、省庁再編後の名称と URL は未検証。携帯向け警報（SMS）は未確認。"
+  },
+  {
+   "country": "Malaysia",
+   "iso3": "MYS",
+   "emergency_numbers": [
+    {
+     "service_ja": "統合緊急番号（警察・救急・消防・民間防衛）",
+     "number": "999",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Malaysia/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "携帯電話からの緊急番号",
+     "number": "112",
+     "note_ja": "",
+     "source_url": "https://github.com/google/libphonenumber/blob/master/resources/ShortNumberMetadata.xml",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "消防（Bomba）",
+     "number": "994",
+     "note_ja": "",
+     "source_url": "https://github.com/psyduckler/tabiji/blob/HEAD/api/v1/safety/my.json",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "NADMA 国家災害管理庁",
+     "number": "03-8870 0150",
+     "note_ja": "第三者の市民向けガイドに掲載。NADMA の緊急連絡先インフォグラフィック（https://www.nadma.gov.",
+     "source_url": "https://github.com/pizofreude/edulaluan/blob/fbbb4fd817c63e081eb9c7ef59632062349d4450/docs/peoples-guide/section-01/1.4-disaster-response.md",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "MetMalaysia 気象局（警報問い合わせ）",
+     "number": "1-300-22-1638",
+     "note_ja": "第三者の防災ガイドに掲載（myCuaca アプリと併記）。",
+     "source_url": "https://github.com/negaraku-md/NegaraKu.md/blob/703570df11d2dc0f02099a7ea8d1ab87263a5d50/knowledge/public-safety/household-disaster-preparedness-malaysia.md",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "Talian Kasih（24時間相談・被災者支援）",
+     "number": "15999",
+     "note_ja": "第三者ガイドに掲載。",
+     "source_url": "https://github.com/pizofreude/edulaluan/blob/fbbb4fd817c63e081eb9c7ef59632062349d4450/docs/peoples-guide/section-01/1.4-disaster-response.md",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "在マレーシア日本国大使館",
+     "address": "11 Persiaran Stonor, 50450 Kuala Lumpur",
+     "phone": "+60-3-2177-2600",
+     "url": "https://www.my.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在ペナン日本国総領事館（管轄: ペナン、ケダ、ペルリス、ペラ、クランタン、トレン",
+     "address": "",
+     "phone": "",
+     "url": "https://www.penang.my.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在コタキナバル領事事務所",
+     "address": "",
+     "phone": "",
+     "url": "https://www.kotakinabalu.my.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "alert_channels": [
+    {
+     "key": "ddpm_app",
+     "name_ja": "MyNADMA／気象局（MET Malaysia）アプリ",
+     "desc_ja": "洪水・煙霧（API）の警報",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "在外公館 領事メール",
+     "desc_ja": "日本語",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "wri": 14.28,
+   "wri_src": "WorldRiskIndex 2025（二次集計サイト経由・検索要約）",
+   "wri_url": "https://worldpopulationreview.com/country-rankings/natural-disasters-by-country",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 34,
+   "wri_rank_note": "2024 年版の順位。2025年版の順位は未確認。",
+   "inform": 2.6,
+   "inform_src": "INFORM Risk 2025（検索要約）",
+   "inform_url": "https://cpbrd.congress.gov.ph/wp-content/uploads/2025/11/FF2025-60-INFORM-RISK-INDEX.pdf",
+   "inform_confirmed": "search_snippet",
+   "aal_flood_m": 225.0,
+   "aal_src": "OECD Economic Outlook for Southeast Asia, China and India 2025",
+   "aal_url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/12/economic-outlook-for-southeast-asia-china-and-india-2025_76f5e022/6fc95782-en.pdf",
+   "aal_note": "ADB/WB気候リスク国別プロファイル(2021)は「期待年間被害18億ドル」と記載するがハザード区分がスニペットでは不明（洪水が損失の大半）。",
+   "national_dm_agency": {
+    "name": "Agensi Pengurusan Bencana Negara (NADMA), Jabatan Perdana Menteri",
+    "name_ja": "国家災害管理庁（首相府）",
+    "url": "https://www.nadma.gov.my",
+    "warning_channels_ja": "Portal Bencana（portalbencana.nadma.gov.my）で災害状況・避難所（PPS）を公表。MetMalaysia の連続降雨警報は Waspada（<150mm/24h）・Buruk（>150mm）・Bahaya（>250mm）の3段階で、myCuaca アプリ・Web で配信。JPS の InfoBanjir（publicinfobanjir.water.gov.my）で河川水位。NADMA 発表（2024年10月）では全国に 543 基の洪水警報サイレン、KL では25基のテレメトリ連動サイレン（NADMA 記事 2026-01-09）。全国 Cell Broadcast System は「最終段階」（NST 2026-10-11 報道、virtual-kl 資料経由）。出典はいずれも GitHub 上の第三者資料（NegaraKu.md、edulalua"
+   },
+   "alert_note_ja": "MetMalaysia 気象警報（myCuaca）、InfoBanjir 河川水位、洪水サイレン、Portal Bencana、Cell Broadcast（導入最終段階・運用開始日は未確認）、緊急通報 999/112。「MyNADMA」というアプリの存在は確認できず。"
+  },
+  {
+   "country": "Singapore",
+   "iso3": "SGP",
+   "emergency_numbers": [
+    {
+     "service_ja": "消防・救急（SCDF）",
+     "number": "995",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Singapore/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "警察",
+     "number": "999",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Singapore/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "警察 緊急SMS（通話できない場合）",
+     "number": "70999",
+     "note_ja": "",
+     "source_url": "https://github.com/BULLS192/SGBuddy/blob/1f7fcda9d84bd993e49d8fb70df076c16475e894/lib/essentials-v424.mjs",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "非緊急救急車",
+     "number": "1777",
+     "note_ja": "",
+     "source_url": "https://github.com/kaihendry/natalian/blob/6af385cef6b1c22128e218f657eacc0f90a209b2/2019/08/26/Civil_communication.mdwn",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "警察 非緊急ホットライン",
+     "number": "1800-255-0000",
+     "note_ja": "",
+     "source_url": "https://github.com/dontwakeupben/FloodSimSG/blob/29a576fcb1de359672554a354dc2034feeeb2adc/rag_documents/EMERGENCY_RESPONSE_PROCEDURES.txt",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "PUB（公益事業庁）洪水通報 1800-CALL-PUB",
+     "number": "1800-2255-782",
+     "note_ja": "第三者の洪水シミュレーション教材に掲載。公式確認なし。",
+     "source_url": "https://github.com/dontwakeupben/FloodSimSG/blob/29a576fcb1de359672554a354dc2034feeeb2adc/rag_documents/EMERGENCY_RESPONSE_PROCEDURES.txt",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "SP Group（電気・ガス障害）",
+     "number": "1800-778-8888",
+     "note_ja": "第三者教材に掲載。公式確認なし。",
+     "source_url": "https://github.com/dontwakeupben/FloodSimSG/blob/29a576fcb1de359672554a354dc2034feeeb2adc/rag_documents/EMERGENCY_RESPONSE_PROCEDURES.txt",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "在シンガポール日本国大使館",
+     "address": "16 Nassim Road, Singapore",
+     "phone": "+65-6235-8855",
+     "url": "https://www.sg.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "alert_channels": [
+    {
+     "key": "ddpm_app",
+     "name_ja": "SCDF・NEA（myENV）アプリ",
+     "desc_ja": "鉄砲水・煙霧（PSI）の通知",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "在外公館 領事メール",
+     "desc_ja": "日本語",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "wri": 0.67,
+   "wri_src": "WorldRiskIndex 2025（検索要約）",
+   "wri_url": "https://www.misereor.org/fileadmin/user_upload_misereororg/publication/en/worldriskreport-2025.pdf",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 188,
+   "wri_rank_note": "",
+   "inform": 0.6,
+   "inform_src": "INFORM Risk 2025（検索要約）",
+   "inform_url": "https://cpbrd.congress.gov.ph/wp-content/uploads/2025/11/FF2025-60-INFORM-RISK-INDEX.pdf",
+   "inform_confirmed": "search_snippet",
+   "national_dm_agency": {
+    "name": "Singapore Civil Defence Force (SCDF)",
+    "name_ja": "シンガポール民間防衛庁（内務省）",
+    "url": "https://www.scdf.gov.sg",
+    "warning_channels_ja": "全島の Public Warning System（PWS）サイレン（鳴動時はラジオ・SGSecure で確認。第三者教材では広域災害時に30秒トーン）、SGSecure アプリ（sgsecure.gov.sg）の警報・SMS 配信、SCDF の myResponder アプリ（近隣の火災・救急事案を市民ファーストレスポンダーに通知。出典: SCDF ページを引用した GitHub メモ https://github.com/adoreblvnk/1stSight/blob/6b19aab94d08946281883352d2c97095bbda193a/resources/myResponder.md）、NEA の気象 SMS。出典は kaihendry/natalian、dontwakeupben/FloodSimSG、BULLS192/SGBuddy（いずれも第三者）。"
+   },
+   "alert_note_ja": "PWS サイレン＋SGSecure アプリ/SMS、myResponder（SCDF）、気象は Meteorological Service Singapore（weather.gov.sg）、ヘイズは haze.gov.sg。"
+  },
+  {
+   "country": "Myanmar",
+   "iso3": "MMR",
+   "emergency_numbers": [
+    {
+     "service_ja": "警察",
+     "number": "199",
+     "note_ja": "",
+     "source_url": "https://github.com/google/libphonenumber/blob/master/resources/ShortNumberMetadata.xml",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "消防",
+     "number": "191",
+     "note_ja": "",
+     "source_url": "https://registry.npmjs.org/emergency-numbers/-/emergency-numbers-1.0.2.tgz",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "救急",
+     "number": "192",
+     "note_ja": "",
+     "source_url": "https://registry.npmjs.org/emergency-numbers/-/emergency-numbers-1.0.2.tgz",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [],
+   "japanese_missions": [
+    {
+     "name_ja": "在ミャンマー日本国大使館",
+     "address": "No.100, Natmauk Road, Bahan Township, Yangon",
+     "phone": "+95-1-549644〜8",
+     "url": "https://www.mm.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "alert_channels": [
+    {
+     "key": "embassy_mail",
+     "name_ja": "在外公館 領事メール",
+     "desc_ja": "日本語",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "wri": 36.91,
+   "wri_src": "WorldRiskIndex 2025（検索要約）",
+   "wri_url": "https://www.misereor.org/fileadmin/user_upload_misereororg/publication/en/worldriskreport-2025.pdf",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 6,
+   "wri_rank_note": "公式表でも6位。",
+   "national_dm_agency": {
+    "name": "Department of Disaster Management (DDM), Ministry of Social Welfare, Relief and Resettlement",
+    "name_ja": "災害管理局（社会福祉・救済・復興省）",
+    "url": "https://www.ddm.gov.mm/",
+    "warning_channels_ja": "ドメイン ddm.gov.mm はミャンマー政府サイト一覧データおよび citizenlab/test-lists に収録（別資料では rrdmyanmar.gov.mm を DDM/RRD サイトとして掲載、2026年8月時点でタイムアウト）。気象・サイクロン警報は気象水文局 DMH（moezala.gov.mm/en/cyclone-warning）が発表、人道情報は MIMU（themimu.info）。携帯一斉警報・サイレン等の運用は未確認（出典: Aikozzzz/safe_myanmar report.md、第三者）。"
+   },
+   "alert_note_ja": "DMH の気象・サイクロン警報、DDM の状況報告、MIMU/OCHA の人道情報。公的な携帯警報の仕組みは確認できず。緊急番号は資料間で不一致（libphonenumber は 199 のみ、Wikipedia 由来データは 999）。"
+  },
+  {
+   "country": "Cambodia",
+   "iso3": "KHM",
+   "emergency_numbers": [
+    {
+     "service_ja": "警察",
+     "number": "117",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Cambodia/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "消防",
+     "number": "118",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Cambodia/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "救急",
+     "number": "119",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Cambodia/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "ツーリストポリス（プノンペン）",
+     "number": "+855-23-724-793",
+     "note_ja": "",
+     "source_url": "https://github.com/psyduckler/tabiji/blob/HEAD/api/v1/safety/kh.json",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [],
+   "japanese_missions": [
+    {
+     "name_ja": "在カンボジア日本国大使館",
+     "address": "No.194, Moha Vithei Preah Norodom, Phnom Penh",
+     "phone": "+855-23-217161",
+     "url": "https://www.kh.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name_ja": "在シェムリアップ領事事務所（在カンボジア大使館の所管）",
+     "address": "",
+     "phone": "",
+     "url": "https://www.kh.emb-japan.go.jp/itpr_ja/00_000091.html",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "alert_channels": [
+    {
+     "key": "embassy_mail",
+     "name_ja": "在外公館 領事メール",
+     "desc_ja": "日本語",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "wri": 8.14,
+   "wri_src": "WorldRiskIndex 2025（二次集計サイト経由・検索要約）",
+   "wri_url": "https://worldpopulationreview.com/country-rankings/natural-disasters-by-country",
+   "wri_confirmed": "search_snippet",
+   "wri_rank": 65,
+   "wri_rank_note": "2024 年版の順位。2025年版の順位は未確認。",
+   "aal_flood_m": 250.0,
+   "aal_src": "ADB/WB Climate Risk Country Profile: Cambodia (2021) citing UNISDR",
+   "aal_url": "https://www.adb.org/sites/default/files/publication/722236/climate-risk-country-profile-cambodia.pdf",
+   "aal_note": "世銀PAD(2017)は年平均の緊急対応費用を5,400万ドルと推計。GFDRR ASEAN DRFI 2012はカンボジアの年平均期待損失をGDP0.7%以上に分類。",
+   "national_dm_agency": {
+    "name": "National Committee for Disaster Management (NCDM)",
+    "name_ja": "国家災害管理委員会",
+    "url": "http://ncdm.gov.kh/",
+    "warning_channels_ja": "NCDM の公式サイト・連絡先（administration@ncdm.gov.kh）は WFP の PRISM カンボジア説明ページ https://github.com/WFP-VAM/prism-app/blob/e17c80eb2994ddb50ff0ec50685ad61d821676cd/frontend/public/data/cambodia/about.md とカナダ政府渡航情報コピーで確認。メコン川の水位はメコン川委員会（mrcmekong.org）。携帯音声・SMS 早期警報（EWS1294 等）やサイレンの運用は未検証。"
+   },
+   "alert_note_ja": "NCDM/PRISM の災害監視、メコン川委員会の河川水位。住民向け携帯警報の仕組みは未検証。"
+  },
+  {
+   "country": "Laos",
+   "iso3": "LAO",
+   "emergency_numbers": [
+    {
+     "service_ja": "警察",
+     "number": "1191（他 241162, 241163, 241164, 212703）",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Laos/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "消防",
+     "number": "1190",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Laos/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "救急",
+     "number": "1195",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Laos/Overview.md",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "ツーリストポリス（ビエンチャン）",
+     "number": "021-251-128",
+     "note_ja": "",
+     "source_url": "https://github.com/marcolussetti/travel-advisories/blob/HEAD/ireland/Laos/Overview.md",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "disaster_hotlines": [],
+   "japanese_missions": [
+    {
+     "name_ja": "在ラオス日本国大使館",
+     "address": "Sisangvone Road, Vientiane",
+     "phone": "+856-21-414400",
+     "url": "https://www.la.emb-japan.go.jp/",
+     "confirmed_by": "third_party"
+    }
+   ],
+   "alert_channels": [
+    {
+     "key": "embassy_mail",
+     "name_ja": "在外公館 領事メール",
+     "desc_ja": "日本語",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "wri": 3.0,
+   "wri_src": "WorldRiskIndex 2025（二次集計サイト経由・検索要約）",
+   "wri_url": "https://worldpopulationreview.com/country-rankings/natural-disasters-by-country",
+   "wri_confirmed": "search_snippet",
+   "aal_flood_m": 159.0,
+   "aal_src": "ADB/WB Climate Risk Country Profile: Lao PDR (2021)",
+   "aal_url": "https://www.adb.org/sites/default/files/publication/709846/climate-risk-country-profile-lao-pdr.pdf",
+   "aal_note": "年間洪水影響人口約48,000人。GFDRR ASEAN DRFI 2012はラオスの年平均期待損失をGDP0.7%以上に分類。",
+   "national_dm_agency": {
+    "name": "Department of Social Welfare, Ministry of Labour and Social Welfare (secretariat of the National Disaster Management Committee) — 未検証",
+    "name_ja": "労働社会福祉省 社会福祉局（国家災害管理委員会事務局）※名称・所管は未検証（事前知識）",
+    "url": "",
+    "warning_channels_ja": "公式サイト・警報経路は今回確認できず。ラオス政府サイト一覧データにも防災機関ドメインは見当たらなかった。気象警報は気象水文局（DMH）とされるが未検証。"
+   },
+   "alert_note_ja": "未検証。緊急番号は3桁（190/191/195, libphonenumber）と4桁（1190/1191/1195, アイルランド外務省渡航情報コピー）の表記が併存。"
+  }
+ ],
+ "_contacts_gaps": [
+  "WebSearch はこのターンの検索上限（200回/ターン、全エージェント共有）に達しており1回も実行できなかった。検索スニペット由来（search_snippet）のデータはゼロ。",
+  "mofa.go.jp / anzen.mofa.go.jp / ezairyu.mofa.go.jp / *.emb-japan.go.jp / disaster.go.th / bnpb.go.id / ndrrmc.gov.ph / nadma.gov.my / scdf.gov.sg / wikipedia / wikidata はすべて接続不可。したがって全ての page_read は GitHub（raw.githubusercontent.com）上の第三者データセット・保存コピーを読んだことを意味し、公式ページ本体は一切読めていない。利用前に公式サイトでの再確認が必要。",
+  "タイ: 在チェンマイ総領事館の住所・電話は未取得。Cell Broadcast の全国運用開始日は第三者レポート（techsauce 等の要約）で「2025年初頭予定」とあるのみで正確な開始日は未確認。RID 1460 は出典資料自体が「未確認」と注記。TMD 1182 は第三者アプリ資料のみ。",
+  "インドネシア: 在スラバヤ・デンパサール・メダン総領事館、在マカッサル領事事務所の住所・電話は未取得。BNPB 117 / BMKG 196 は第三者アプリ記載のみ。InfoBMKG アプリ名・InaRISK は第三者資料とコード検索ヒットによる確認。",
+  "フィリピン: 在セブ・在ダバオ総領事館の電話番号は出典データで伏せ字のため未取得。RA 10639（Free Mobile Disaster Alerts Act）は他法令（RA 11831 第5条）での引用で法名を確認したのみで条文本文は未読。NDRRMC の SMS/セルブロードキャスト警報の運用詳細は未検証。",
+  "ベトナム: 災害ホットラインは見つからず。VNDMA の正式名称・URL（2025年の省庁再編後、phongchongthientai.mard.gov.vn / vndma.gov.vn のどちらが現行か）は未検証。在ホーチミン・在ダナン総領事館の住所・電話は未取得。112 の実運用状況は未確認。",
+  "マレーシア: NADMA ホットライン 03-8870 0150 は第三者ガイドのみ（NADMA 公式インフォグラフィックは未読）。994（消防）は libphonenumber では緊急番号に含まれず短縮番号としてのみ存在。『MyNADMA』というアプリの存在を示す資料は見つからなかった。Cell Broadcast は2026年10月時点で『最終段階』との報道引用のみで運用開始は未確認。在ペナン総領事館・在コタキナバル領事事務所の住所・電話は未取得。",
+  "シンガポール: PWS サイレンの仕様（30秒トーン等）はブログ・教材由来。大使館の郵便番号は未取得。",
+  "ミャンマー: 緊急番号が資料間で不一致（libphonenumber は 199 のみ、npm データセットは警察199/消防191/救急192、Wikipedia 由来データは 999）。DDM の公式 URL（ddm.gov.mm か rrdmyanmar.gov.mm か）は未検証。災害ホットラインなし。住民向け警報経路（SMS・サイレン）は未確認。",
+  "カンボジア: 在カンボジア大使館・在シェムリアップ領事事務所の住所・電話は未取得。NCDM の警報配信経路（EWS1294 等の携帯音声警報）は未検証。災害ホットラインなし。libphonenumber は 666 も緊急番号として列挙するが用途不明のため除外。",
+  "ラオス: 国家防災機関の名称・URL・警報経路は未検証（事前知識のみ、政府サイト一覧データにも該当ドメインなし）。在ラオス大使館の住所・電話は未取得。緊急番号は3桁（190/191/195）と4桁（1190/1191/1195）の表記が資料により異なる。",
+  "外務省サービス: 海外安全アプリの紹介ページ URL、領事メールの説明ページ URL、緊急一斉通報の説明ページ URL は未確認（存在は行政事業レビューのデータで確認、緊急一斉通報は未確認）。対象9か国の海外安全ホームページ国別ページ番号（pcinfectionspothazardinfo_NNN）は特定できず。",
+  "たびレジ・在留届・海外安全ホームページ等の URL は複数の第三者サイトの参照で一致しているが、ページ内容は読めていないため「what_ja」の説明は参照元の記述と事前知識に基づく。"
+ ]
 }

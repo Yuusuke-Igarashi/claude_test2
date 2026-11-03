@@ -45,6 +45,7 @@ App.views.site = {
         <div class="f"><label>シナリオ</label><div class="seg" id="scSeg">${Object.entries(SCEN_SITE).map(([k, v]) => `<button data-scen="${k}" aria-pressed="${k === st.scen}">${ic(v.icon)}${esc(v.short)}</button>`).join('')}</div></div>
         <div class="f"><label>現在地</label><div class="seg" id="meSeg"><button data-me="site" aria-pressed="true">${ic('building')}拠点</button><button data-me="home" aria-pressed="false">${ic('home')}駐在員住宅（代表）</button><button data-me="custom" aria-pressed="false">${ic('pin')}地図をクリック</button></div></div>
       </div>
+      <div class="answer" id="stAnswer"></div>
       <div class="grid side">
         <div style="display:flex;flex-direction:column;gap:12px">
           <div class="card flush"><div class="map-box tall" id="stMapBox"><svg id="stMap" role="img" aria-label="拠点周辺の概略図と避難経路"></svg><div class="hint" id="stHint"></div><div class="legend" id="stLegend"></div><div class="attr" id="stAttr"></div></div></div>
@@ -86,6 +87,12 @@ App.views.site = {
     $('#stRoutes', root).innerHTML = (chosen ? card(chosen, true) : '') + alts.map((a) => card(a, false)).join('') || '<div class="empty">避難先候補なし</div>';
     /* 右側：備えスコア */
     const sc = siteScore(site);
+    const weakest = sc.cats.slice().sort((a, b) => a.score - b.score).slice(0, 2);
+    const top = sc.gaps.filter((g) => g.pri === 1).slice(0, 2);
+    $('#stAnswer', root).innerHTML = `<span class="k">答え</span><ul>
+      <li><b>${esc(scen.short)}のとき、${esc(me.label)}からは：</b>${chosen ? `${esc(chosen.poi.name_ja || chosen.poi.name)} へ徒歩 ${chosen.min} 分（${fmt(chosen.len)} m）。代替は ${alts.map((a) => esc(a.poi.name_ja || a.poi.name)).join('・') || 'なし'}。` : '到達可能な避難先が見つからず、計画の見直しが必要。'}</li>
+      <li><b>備えの現状：</b>スコア ${sc.total}/100。弱いのは ${weakest.map((c) => `${esc(c.label)}（${c.score}）`).join('・')}。</li>
+      <li><b>まず着手すべきこと：</b>${top.length ? top.map((g) => esc(g.label)).join('／') : '優先項目は整備済み'}。警報は ${(c.alert_channels || []).filter((a) => (site.alerts || {})[a.key]).length}/${(c.alert_channels || []).length} チャネルを登録済み。</li></ul>`;
     $('#stSide', root).innerHTML = `
       <div class="card"><div class="card-h"><h2>${esc(site.name_ja)}</h2><span class="r"><span class="tag ${sc.total >= 75 ? 'ok' : sc.total >= 50 ? 'warn' : 'crit'}">${ic('shield')}備えスコア ${sc.total}</span></span><span class="sub">${esc(site.desc_ja || '')}</span></div>
         <div class="score-rows">${sc.cats.map((cat) => `<div class="score-row"><span class="k">${esc(cat.label)}<small>${esc(cat.note)}</small></span><span class="track"><i style="width:${cat.score}%;background:${cat.score >= 75 ? 'var(--ok)' : cat.score >= 50 ? 'var(--warn)' : 'var(--crit)'}"></i></span><span class="v">${cat.score}</span></div>`).join('')}</div>

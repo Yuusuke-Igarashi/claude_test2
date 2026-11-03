@@ -1,30 +1,861 @@
 {
-  "_note": "備えの根拠となる公的ガイダンス。key は拠点チェックリストから参照される。confirmed_by は本セッションでの確認状況。",
-  "items": [
-    { "key": "naikakufu_stock", "audience": "both", "category_ja": "備蓄", "recommendation_ja": "飲料水は 1 人 1 日 3 リットル、食料とあわせて最低 3 日分、できれば 1 週間分を備蓄する", "quantitative": "3L/人/日・3〜7 日", "source_name": "内閣府 防災情報のページ", "source_url": "https://www.bousai.go.jp/kyoiku/keigen/gensai/kiroku/bichiku.html", "confirmed_by": "unverified" },
-    { "key": "naikakufu_bcp", "audience": "company", "category_ja": "BCP", "recommendation_ja": "重要業務の特定、目標復旧時間（RTO）、代替戦略、安否確認、訓練と見直しを含む事業継続計画を策定する", "source_name": "内閣府 事業継続ガイドライン", "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html", "confirmed_by": "unverified" },
-    { "key": "chusho_bcp", "audience": "company", "category_ja": "BCP", "recommendation_ja": "中小企業向けに、緊急時の体制・連絡網・安否確認・取引先との連携を含む BCP の策定と運用を示す指針", "source_name": "中小企業庁 BCP 策定運用指針", "source_url": "https://www.chusho.meti.go.jp/bcp/", "confirmed_by": "unverified" },
-    { "key": "mofa_orr", "audience": "both", "category_ja": "連絡", "recommendation_ja": "3 か月以上の滞在者は在留届を提出し、短期滞在者はたびレジに登録して緊急時の連絡を受け取れるようにする", "source_name": "外務省 海外安全ホームページ", "source_url": "https://www.anzen.mofa.go.jp/", "confirmed_by": "unverified" },
-    { "key": "mofa_ryoji", "audience": "both", "category_ja": "情報", "recommendation_ja": "在外公館の領事メール・緊急一斉通報を受信できる状態にしておく", "source_name": "外務省 海外安全ホームページ", "source_url": "https://www.anzen.mofa.go.jp/", "confirmed_by": "unverified" },
-    { "key": "mofa_tora", "audience": "both", "category_ja": "退避", "recommendation_ja": "緊急時の行動（在宅・国外退避・一時帰国）の判断基準と手順を事前に決めておく", "source_name": "外務省「海外安全 虎の巻」", "source_url": "https://www.anzen.mofa.go.jp/pamph/pamph_01.html", "confirmed_by": "unverified" },
-    { "key": "jetro_crisis", "audience": "company", "category_ja": "通信", "recommendation_ja": "通信途絶に備え、衛星電話など携帯網に依存しない連絡手段を拠点に置く", "source_name": "JETRO 海外安全対策", "source_url": "https://www.jetro.go.jp/", "confirmed_by": "unverified" },
-    { "key": "th_cb", "audience": "both", "category_ja": "警報", "recommendation_ja": "携帯向けの緊急速報（セルブロードキャスト）を受信できる設定にする", "source_name": "タイ DDPM", "source_url": "https://www.disaster.go.th/", "confirmed_by": "unverified" },
-    { "key": "th_ddpm", "audience": "company", "category_ja": "警報", "recommendation_ja": "DDPM・灌漑局・BMA の洪水情報を監視し、避難勧告の区域を確認する", "source_name": "タイ DDPM", "source_url": "https://www.disaster.go.th/", "confirmed_by": "unverified" },
-    { "key": "id_bmkg", "audience": "both", "category_ja": "警報", "recommendation_ja": "BMKG の公式アプリで地震・津波・気象警報を受信する", "source_name": "インドネシア BMKG", "source_url": "https://www.bmkg.go.id/", "confirmed_by": "unverified" },
-    { "key": "ph_ndrrmc", "audience": "both", "category_ja": "警報", "recommendation_ja": "NDRRMC の携帯一斉アラートと PHIVOLCS・PAGASA の速報を受信する", "source_name": "フィリピン NDRRMC", "source_url": "https://ndrrmc.gov.ph/", "confirmed_by": "unverified" },
-    { "key": "ph_dch", "audience": "both", "category_ja": "地震", "recommendation_ja": "揺れたら「Drop, Cover, Hold On」。揺れが収まってから階段で退避し、開けた場所に集合する", "source_name": "PHIVOLCS", "source_url": "https://www.phivolcs.dost.gov.ph/", "confirmed_by": "unverified" },
-    { "key": "fema_water", "audience": "both", "category_ja": "洪水", "recommendation_ja": "流れのある水は 15 cm（6 インチ）で転倒、30 cm（1 フィート）で車が流されうる。冠水した道路に入らない", "quantitative": "15cm／30cm", "source_name": "FEMA / NWS Turn Around Don't Drown", "source_url": "https://www.weather.gov/safety/flood-turn-around-dont-drown", "confirmed_by": "unverified" },
-    { "key": "sphere_water", "audience": "company", "category_ja": "支援基準", "recommendation_ja": "被災者 1 人あたり 1 日 15 リットルの水（飲用・調理・衛生）を最低基準とする", "quantitative": "15L/人/日", "source_name": "Sphere Handbook", "source_url": "https://spherestandards.org/handbook/", "confirmed_by": "unverified" }
-  ],
-  "health_after_disaster": [
-    { "hazard": "flood", "risk_ja": "レプトスピラ症", "advice_ja": "冠水した水に素足や傷のある手足で入らない。発熱・筋肉痛が出たら受診し、冠水に接触したことを伝える", "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods" },
-    { "hazard": "flood", "risk_ja": "デング熱", "advice_ja": "水が引いた後の溜まり水で蚊が増える。長袖・忌避剤、容器の水を捨てる", "source_url": "https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue" },
-    { "hazard": "flood", "risk_ja": "下痢症・水の汚染", "advice_ja": "飲料水は未開封のボトルか 1 分以上の煮沸。氷・生野菜を避ける", "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods" },
-    { "hazard": "flood", "risk_ja": "感電", "advice_ja": "浸水した建物ではブレーカーを落とす。水に浸かった電気機器に触れない", "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods" },
-    { "hazard": "quake", "risk_ja": "余震と建物の再入館", "advice_ja": "外観が無事でも構造の安全が確認されるまで入らない。余震は数日〜数週間続く", "source_url": "https://www.who.int/health-topics/earthquakes" },
-    { "hazard": "quake", "risk_ja": "一酸化炭素中毒", "advice_ja": "発電機・炭火を屋内やベランダで使わない", "source_url": "https://www.who.int/health-topics/earthquakes" },
-    { "hazard": "quake", "risk_ja": "外傷の二次感染・破傷風", "advice_ja": "傷はきれいな水で洗い、10 年以内の破傷風ワクチン接種がなければ受診", "source_url": "https://www.who.int/health-topics/earthquakes" },
-    { "hazard": "quake", "risk_ja": "こころの不調", "advice_ja": "睡眠・食事のリズムを保ち、子どもには安心できる説明を。長引く場合は相談窓口へ", "source_url": "https://www.who.int/health-topics/earthquakes" },
-    { "hazard": "all", "risk_ja": "熱中症", "advice_ja": "屋外避難・停電時は日陰と水分・塩分。乳幼児・高齢者を優先して涼しい場所へ", "source_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health" }
-  ]
+ "_note": "備えの根拠となる公的ガイダンス。key は拠点チェックリストから参照される。confirmed_by は本セッションでの確認状況。",
+ "items": [
+  {
+   "key": "naikakufu_stock",
+   "audience": "both",
+   "category_ja": "備蓄",
+   "recommendation_ja": "飲料水は 1 人 1 日 3 リットル、食料とあわせて最低 3 日分、できれば 1 週間分を備蓄する",
+   "quantitative": "3L/人/日・3〜7 日",
+   "source_name": "内閣府 防災情報のページ",
+   "source_url": "https://www.bousai.go.jp/kyoiku/keigen/gensai/kiroku/bichiku.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "naikakufu_bcp",
+   "audience": "company",
+   "category_ja": "BCP",
+   "recommendation_ja": "重要業務の特定、目標復旧時間（RTO）、代替戦略、安否確認、訓練と見直しを含む事業継続計画を策定する",
+   "source_name": "内閣府 事業継続ガイドライン",
+   "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "chusho_bcp",
+   "audience": "company",
+   "category_ja": "BCP",
+   "recommendation_ja": "中小企業向けに、緊急時の体制・連絡網・安否確認・取引先との連携を含む BCP の策定と運用を示す指針",
+   "source_name": "中小企業庁 BCP 策定運用指針",
+   "source_url": "https://www.chusho.meti.go.jp/bcp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "mofa_orr",
+   "audience": "both",
+   "category_ja": "連絡",
+   "recommendation_ja": "3 か月以上の滞在者は在留届を提出し、短期滞在者はたびレジに登録して緊急時の連絡を受け取れるようにする",
+   "source_name": "外務省 海外安全ホームページ",
+   "source_url": "https://www.anzen.mofa.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "mofa_ryoji",
+   "audience": "both",
+   "category_ja": "情報",
+   "recommendation_ja": "在外公館の領事メール・緊急一斉通報を受信できる状態にしておく",
+   "source_name": "外務省 海外安全ホームページ",
+   "source_url": "https://www.anzen.mofa.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "mofa_tora",
+   "audience": "both",
+   "category_ja": "退避",
+   "recommendation_ja": "緊急時の行動（在宅・国外退避・一時帰国）の判断基準と手順を事前に決めておく",
+   "source_name": "外務省「海外安全 虎の巻」",
+   "source_url": "https://www.anzen.mofa.go.jp/pamph/pamph_01.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "jetro_crisis",
+   "audience": "company",
+   "category_ja": "通信",
+   "recommendation_ja": "通信途絶に備え、衛星電話など携帯網に依存しない連絡手段を拠点に置く",
+   "source_name": "JETRO 海外安全対策",
+   "source_url": "https://www.jetro.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "th_cb",
+   "audience": "both",
+   "category_ja": "警報",
+   "recommendation_ja": "携帯向けの緊急速報（セルブロードキャスト）を受信できる設定にする",
+   "source_name": "タイ DDPM",
+   "source_url": "https://www.disaster.go.th/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "th_ddpm",
+   "audience": "company",
+   "category_ja": "警報",
+   "recommendation_ja": "DDPM・灌漑局・BMA の洪水情報を監視し、避難勧告の区域を確認する",
+   "source_name": "タイ DDPM",
+   "source_url": "https://www.disaster.go.th/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "id_bmkg",
+   "audience": "both",
+   "category_ja": "警報",
+   "recommendation_ja": "BMKG の公式アプリで地震・津波・気象警報を受信する",
+   "source_name": "インドネシア BMKG",
+   "source_url": "https://www.bmkg.go.id/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "ph_ndrrmc",
+   "audience": "both",
+   "category_ja": "警報",
+   "recommendation_ja": "NDRRMC の携帯一斉アラートと PHIVOLCS・PAGASA の速報を受信する",
+   "source_name": "フィリピン NDRRMC",
+   "source_url": "https://ndrrmc.gov.ph/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "ph_dch",
+   "audience": "both",
+   "category_ja": "地震",
+   "recommendation_ja": "揺れたら「Drop, Cover, Hold On」。揺れが収まってから階段で退避し、開けた場所に集合する",
+   "source_name": "PHIVOLCS",
+   "source_url": "https://www.phivolcs.dost.gov.ph/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "fema_water",
+   "audience": "both",
+   "category_ja": "洪水",
+   "recommendation_ja": "流れのある水は 15 cm（6 インチ）で転倒、30 cm（1 フィート）で車が流されうる。冠水した道路に入らない",
+   "quantitative": "15cm／30cm",
+   "source_name": "FEMA / NWS Turn Around Don't Drown",
+   "source_url": "https://www.weather.gov/safety/flood-turn-around-dont-drown",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "sphere_water",
+   "audience": "company",
+   "category_ja": "支援基準",
+   "recommendation_ja": "被災者 1 人あたり 1 日 15 リットルの水（飲用・調理・衛生）を最低基準とする",
+   "quantitative": "15L/人/日",
+   "source_name": "Sphere Handbook",
+   "source_url": "https://spherestandards.org/handbook/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r01",
+   "audience": "both",
+   "category_ja": "備蓄（飲料水）",
+   "recommendation_ja": "飲料水は1人1日3リットルを目安に、最低3日分、大規模災害に備えて1週間分の備蓄が望ましい（内閣府・首相官邸の家庭向け指針）。東南アジアの拠点・住居では水道水が飲用に適さない地域が多いため、ボトル水を「人数×3 L×7日」で在庫管理し、使った分を買い足すローリングストックにする。",
+   "quantitative": "3 L/人/日 × 最低3日（推奨7日）＝1人あたり9〜21 L",
+   "source_name": "首相官邸「災害に対するご家庭での備え～これだけは準備しておこう！～」",
+   "source_url": "https://www.kantei.go.jp/jp/headline/bousai/sonae.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r02",
+   "audience": "both",
+   "category_ja": "備蓄（食料）",
+   "recommendation_ja": "非常食は最低3日分、できれば1週間分を人数分。缶詰・レトルト・米・麺など普段食べる長期保存食品を多めに買い置きし、食べた分を補充するローリングストックで賞味期限切れを防ぐ。加熱用にカセットコンロとボンベを備える。",
+   "quantitative": "最低3日分〜推奨7日分（1人1日3食）；カセットボンベは1人1週間で約6本が目安（要再確認）",
+   "source_name": "農林水産省「災害時に備えた食品ストックガイド」",
+   "source_url": "https://www.maff.go.jp/j/zyukyu/foodstock/guidebook.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r03",
+   "audience": "both",
+   "category_ja": "非常持ち出し品",
+   "recommendation_ja": "非常用持ち出しバッグをすぐ持ち出せる場所に1人1個用意する。内容の目安：飲料水、食料（カップ麺・缶詰・ビスケット・チョコ等）、貴重品（通帳・現金・パスポート/IDの写し・保険証）、救急用品（絆創膏・包帯・消毒液・常備薬）、ヘルメット/防災ずきん、マスク、軍手、懐中電灯、携帯ラジオ、予備電池・モバイルバッテリー、衣類・下着、毛布・タオル、使い捨てカイロ、ウェットティッシュ、洗面用具、携帯トイレ。",
+   "quantitative": "1人1個（家族全員分）",
+   "source_name": "首相官邸「災害に対するご家庭での備え～これだけは準備しておこう！～」",
+   "source_url": "https://www.kantei.go.jp/jp/headline/bousai/sonae.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r04",
+   "audience": "family",
+   "category_ja": "要配慮者の備え（乳幼児・高齢者・持病）",
+   "recommendation_ja": "乳幼児がいる家庭は粉ミルク/液体ミルク・哺乳びん・紙おむつ・おしりふき、高齢者は常備薬・お薬手帳の写し・入れ歯・補聴器・予備の眼鏡、持病のある人は処方薬の予備（英語名の処方箋・診断書の写しも）を持ち出し品に追加する。生理用品・母子健康手帳の写しも含める。",
+   "quantitative": "処方薬は最低7日分の予備（CDC等は7〜10日分を推奨・要再確認）",
+   "source_name": "首相官邸「災害に対するご家庭での備え～これだけは準備しておこう！～」",
+   "source_url": "https://www.kantei.go.jp/jp/headline/bousai/sonae.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r05",
+   "audience": "both",
+   "category_ja": "家具の固定・室内の安全",
+   "recommendation_ja": "家具は「倒れるもの」と考え、L字金具・突っ張り棒・転倒防止マットで固定する。寝室・子ども部屋には背の高い家具を置かない、出入口や避難経路をふさがない配置にする、窓ガラス・食器棚に飛散防止フィルムを貼る。高層コンドは長周期の揺れで家具が移動しやすい（2025年3月ミャンマー地震でのバンコク高層建物の事例）。",
+   "quantitative": "東京消防庁：近年の地震で負傷した人の約30〜50%が家具類の転倒・落下・移動が原因（要再確認）",
+   "source_name": "東京消防庁「家具類の転倒・落下・移動防止対策」",
+   "source_url": "https://www.tfd.metro.tokyo.lg.jp/lfe/bousai_tips/kaguten/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r06",
+   "audience": "both",
+   "category_ja": "安否確認（家族の取り決め）",
+   "recommendation_ja": "家族で「連絡手段の優先順位（LINE→SMS→電話→会社の安否確認システム）」「日本側の中継連絡先（三角連絡：被災地外の親族1人に全員が連絡を入れる）」「集合場所（第1候補・第2候補）」を事前に決め、紙に書いて財布と持ち出し袋に入れる。通信輻輳時は音声通話よりメッセージ（データ通信）が通りやすい。",
+   "quantitative": "集合場所2か所・日本側の中継連絡先1人・連絡手段3経路（本アプリ向けの整理。首相官邸の指針は『安否確認方法をあらかじめ決める』と規定）",
+   "source_name": "首相官邸「災害に対するご家庭での備え～これだけは準備しておこう！～」",
+   "source_url": "https://www.kantei.go.jp/jp/headline/bousai/sonae.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r07",
+   "audience": "both",
+   "category_ja": "安否確認（日本国内の家族向け）",
+   "recommendation_ja": "日本国内の家族が被災した場合の安否確認には災害用伝言ダイヤル「171」（日本国内の固定・携帯電話から）と災害用伝言板「web171」（インターネット経由、海外からも利用可・要再確認）を使う。毎月1日・15日や防災週間の体験利用日に家族で試しておく。",
+   "quantitative": "伝言1件30秒（要再確認）；体験利用日は毎月1日・15日",
+   "source_name": "NTT東日本「災害用伝言ダイヤル（171）」",
+   "source_url": "https://www.ntt-east.co.jp/saigai/voice171/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r08",
+   "audience": "both",
+   "category_ja": "避難場所・避難経路",
+   "recommendation_ja": "自宅・拠点・学校それぞれについて、現地自治体が指定する避難所（evacuation centre）と、拠点が独自に指定する集合場所・高層の避難先を確認し、徒歩の避難経路を2経路以上、昼と夜に実際に歩いて確認する。洪水時は浸水しない上階（垂直避難）を第一候補にし、冠水しやすい道路を通らない経路にする。",
+   "quantitative": "避難経路2経路以上を実地で確認（首相官邸の指針『避難場所・避難経路の確認』を海外向けに展開）",
+   "source_name": "首相官邸「災害に対するご家庭での備え～これだけは準備しておこう！～」",
+   "source_url": "https://www.kantei.go.jp/jp/headline/bousai/sonae.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r09",
+   "audience": "family",
+   "category_ja": "備蓄量の自動計算（東京備蓄ナビ）",
+   "recommendation_ja": "東京都の「東京備蓄ナビ」は家族構成（人数・年齢・性別・ペット等）を入力すると、水・食料・携帯トイレ・カセットボンベ・衛生用品などの必要量を一覧にする。本アプリの個人版の計算ロジックの参考にできる（例：大人1人・1週間で水21 L＝3 L×7日、携帯トイレ35回分＝5回×7日）。",
+   "quantitative": "水3 L/人/日、携帯トイレ5回/人/日、カセットボンベ約6本/人/週（東京備蓄ナビの前提値・要再確認）",
+   "source_name": "東京都「東京備蓄ナビ」",
+   "source_url": "https://www.bichiku.metro.tokyo.lg.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r10",
+   "audience": "both",
+   "category_ja": "地震発生時の行動（消防庁）",
+   "recommendation_ja": "揺れたらまず身の安全（机の下・頭を守る）、揺れが収まってから火の始末・ドアを開けて出口を確保、あわてて屋外に飛び出さない、ブロック塀・狭い路地・崖・川辺に近づかない、避難は徒歩で荷物は最小限、正しい情報（現地当局・在外公館）に従う。",
+   "quantitative": "",
+   "source_name": "総務省消防庁「防災マニュアル－震災対策啓発資料－」",
+   "source_url": "https://www.fdma.go.jp/relocation/bousai_manual/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r11",
+   "audience": "company",
+   "category_ja": "拠点の備蓄（従業員向け）",
+   "recommendation_ja": "従業員が帰宅できない事態（洪水で道路冠水、交通途絶、夜間の発災）を想定し、拠点に従業員数×3日分の飲料水・食料・毛布・携帯トイレを備蓄し、無理に帰宅させず拠点に留める判断基準を決める（東京都帰宅困難者対策条例の考え方）。来客・派遣スタッフ分として1割程度上乗せする（仮定）。",
+   "quantitative": "飲料水9 L/人（3 L×3日）、主食9食/人（3食×3日）、毛布1枚/人（東京都の事業者向け目安）",
+   "source_name": "東京都「帰宅困難者対策ポータル（東京都帰宅困難者対策条例）」",
+   "source_url": "https://www.bousai.metro.tokyo.lg.jp/kitaku_portal/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r12",
+   "audience": "company",
+   "category_ja": "BCP（中小企業庁指針）",
+   "recommendation_ja": "中小企業庁「中小企業BCP策定運用指針」の構成に沿って、①中核事業の特定、②目標復旧時間の設定、③緊急時の体制と指揮命令系統、④従業員の安否確認方法、⑤代替拠点・代替設備・代替調達、⑥情報・データのバックアップ、⑦事業資金、⑧取引先との事前協議、⑨教育・訓練、⑩定期的な見直し、を海外拠点ごとに文書化する。",
+   "quantitative": "",
+   "source_name": "中小企業庁「中小企業BCP策定運用指針」",
+   "source_url": "https://www.chusho.meti.go.jp/bcp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r13",
+   "audience": "company",
+   "category_ja": "BCP（内閣府ガイドライン）",
+   "recommendation_ja": "内閣府「事業継続ガイドライン」に基づき、経営者の関与のもとで、重要業務の選定→目標復旧時間（RTO）・目標復旧レベル（RLO）の設定→ボトルネック資源の特定→事業継続戦略（代替拠点・代替調達・要員・情報システム）→初動対応計画（安否確認・二次災害防止・緊急時体制）→事前対策の実施→教育・訓練→点検・是正・見直し（継続的改善）のサイクルを回す。海外拠点は本社BCPの一部として位置づける。",
+   "quantitative": "",
+   "source_name": "内閣府「事業continuityガイドライン」（令和5年3月改定）",
+   "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r14",
+   "audience": "company",
+   "category_ja": "BCP（ISO 22301）",
+   "recommendation_ja": "ISO 22301:2019（事業継続マネジメントシステム要求事項）は、事業影響度分析（BIA）とリスクアセスメント→事業継続戦略→事業継続計画（対応体制・警報と連絡・復旧手順）→演習・試験プログラム→評価・内部監査・マネジメントレビューを要求する。認証の有無にかかわらず海外拠点BCPの自己点検項目として使える。用語（RTO/RPO/MTPD/MBCO）はISO 22300に定義。",
+   "quantitative": "演習は『計画した間隔で』実施し記録する（頻度は組織が定める）",
+   "source_name": "ISO 22301:2019 Security and resilience — Business continuity management systems — Requirements",
+   "source_url": "https://www.iso.org/standard/75106.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r15",
+   "audience": "company",
+   "category_ja": "目標復旧時間（RTO）",
+   "recommendation_ja": "拠点の各重要業務について「最大許容停止時間（MTPD）」を顧客・契約条件から見積もり、それより短いRTOと復旧時の最低業務レベル（MBCO/RLO）を設定する。海外拠点では本社・他国拠点での代替生産・業務切替に要する時間（通関・輸送を含む）を織り込み、シナリオ（洪水：数週間〜数か月の浸水、地震：建物点検完了まで）ごとにRTOの達成可否を検証する。",
+   "quantitative": "参考：2011年タイ洪水ではアユタヤ等の工業団地が約1〜2か月浸水し、復旧に数か月を要した（規模感の目安・要出典確認）",
+   "source_name": "内閣府「事業継続ガイドライン」（令和5年3月改定）",
+   "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r16",
+   "audience": "company",
+   "category_ja": "代替拠点・代替手段",
+   "recommendation_ja": "重要業務ごとに代替拠点（国内他拠点・第三国・本社・在宅）と切替手順・権限（拠点長不在時の代行順位）を定め、必要な設備・金型・ライセンス・データが代替拠点で使えるかを年1回確認する。製造業は金型・治具の複製やセカンドソースを検討する。",
+   "quantitative": "代行順位は3人目まで指名、年1回の確認（実務上の慣行・公式基準ではない）",
+   "source_name": "内閣府「事業継続ガイドライン」（令和5年3月改定）",
+   "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r17",
+   "audience": "company",
+   "category_ja": "安否確認システム",
+   "recommendation_ja": "全従業員（現地スタッフ・駐在員・帯同家族・出張者を含む）の安否を自動収集する安否確認システムを導入し、SMS・メール・アプリ・LINE等の複数経路で一斉送信、未回答者への電話追跡と拠点ごとの集計責任者を決める。年2回程度の抜き打ち訓練で回答率と所要時間を測り、本アプリのリアルタイム画面の「確認率」の初期値に使う。",
+   "quantitative": "訓練での回答率・所要時間を自社KPIとして設定（公的な数値基準なし）",
+   "source_name": "中小企業庁「中小企業BCP策定運用指針」",
+   "source_url": "https://www.chusho.meti.go.jp/bcp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r18",
+   "audience": "company",
+   "category_ja": "非常用電源",
+   "recommendation_ja": "非常用発電機とUPSを備え、燃料は少なくとも72時間（3日）分を確保し、停電が長引く場合の燃料補給契約を結ぶ。発電機は屋外に設置し窓・吸気口から離す（一酸化炭素中毒防止）。洪水常襲地では発電機・配電盤を想定浸水深より高い階に置く。",
+   "quantitative": "燃料72時間分（内閣府の業務継続の手引きで用いられる目安）；発電機は窓・ドアから約6 m（20フィート）以上離す（Ready.gov/CDC）",
+   "source_name": "内閣府「大規模災害発生時における地方公共団体の業務継続の手引き」",
+   "source_url": "https://www.bousai.go.jp/taisaku/chihogyoumukeizoku/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r19",
+   "audience": "company",
+   "category_ja": "通信手段の多重化",
+   "recommendation_ja": "固定電話・携帯（複数キャリアのSIM）・衛星電話または衛星インターネット・無線機・IP電話など、依存先の異なる通信手段を2系統以上用意し、本社との定時連絡の時刻・手順と通信途絶時の取り決めを文書化する。衛星電話は現地法規（登録・使用許可）を事前に確認する。",
+   "quantitative": "通信手段2系統以上（衛星回線を含む）",
+   "source_name": "外務省「ゴルゴ13の中堅・中小企業向け海外安全対策マニュアル」",
+   "source_url": "https://www.anzen.mofa.go.jp/anzen_info/golgo13xgaimusho.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r20",
+   "audience": "company",
+   "category_ja": "教育・訓練",
+   "recommendation_ja": "新任赴任者と帯同家族には着任時に安全・防災オリエンテーションを行い、拠点では避難訓練・安否確認訓練・BCP机上演習を少なくとも年1回実施して結果をBCPの見直しに反映する。現地の消防法令が定める避難訓練の回数にも従う。",
+   "quantitative": "年1回以上（内閣府ガイドラインは『定期的』と規定。年1回は実務上の最低ライン）",
+   "source_name": "内閣府「事業継続ガイドライン」（令和5年3月改定）",
+   "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r21",
+   "audience": "company",
+   "category_ja": "データ・重要書類のバックアップ",
+   "recommendation_ja": "重要データは拠点外（別の国・クラウドの別リージョン）に自動バックアップし、目標復旧時点（RPO）を定めて復元テストを行う。許認可・契約・登記・保険証券など紙の重要書類は電子化して本社と共有し、原本は浸水しない階の耐火金庫に保管する。",
+   "quantitative": "RPOを業務ごとに設定（例：基幹システム24時間）；復元テスト年1回（例示・公式基準なし）",
+   "source_name": "中小企業庁「中小企業BCP策定運用指針」",
+   "source_url": "https://www.chusho.meti.go.jp/bcp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r22",
+   "audience": "company",
+   "category_ja": "サプライチェーン・取引先",
+   "recommendation_ja": "主要仕入先・物流・ユーティリティ（電力・水・通信）の所在地のハザードを確認し、代替仕入先・代替輸送ルートを事前にリスト化する。取引先と緊急連絡先を交換し、発災後に相互の復旧見込みを共有する手順を決める。",
+   "quantitative": "",
+   "source_name": "内閣府「事業継続ガイドライン」（令和5年3月改定）",
+   "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r23",
+   "audience": "company",
+   "category_ja": "資金・保険",
+   "recommendation_ja": "事業中断時の固定費（人件費・賃料）を賄う手元資金・融資枠を確保し、洪水・地震・事業中断（BI）・従業員の傷害や医療搬送をカバーする保険の免責・補償範囲・現地での請求手続きを確認する。",
+   "quantitative": "",
+   "source_name": "中小企業庁「中小企業BCP策定運用指針」",
+   "source_url": "https://www.chusho.meti.go.jp/bcp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r24",
+   "audience": "both",
+   "category_ja": "在留届",
+   "recommendation_ja": "3か月以上海外に滞在する場合は旅券法に基づき在留届の提出が義務。本人だけでなく帯同家族全員を登録し、住所・電話・メールの変更や帰国時も届け出る。登録すると在外公館から緊急時の安否確認・領事メール・退避情報が届く。オンライン（ORRnet）で提出できる。",
+   "quantitative": "滞在3か月以上で届出義務（旅券法第16条）；家族全員分",
+   "source_name": "外務省「在留届電子届出システム（ORRnet）」",
+   "source_url": "https://www.ezairyu.mofa.go.jp/RRnet/index.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r25",
+   "audience": "both",
+   "category_ja": "たびレジ",
+   "recommendation_ja": "3か月未満の滞在（出張者、一時帰国からの再渡航、観光で来る親族）は「たびレジ」に旅程と連絡先を登録し、滞在先の最新の安全情報・緊急時の連絡を受け取る。出張管理の一環として出張者全員の登録を会社ルール化する。",
+   "quantitative": "滞在3か月未満が対象",
+   "source_name": "外務省「たびレジ（海外旅行登録）」",
+   "source_url": "https://www.ezairyu.mofa.go.jp/tabireg/index.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r26",
+   "audience": "company",
+   "category_ja": "危険情報レベルと退避トリガー",
+   "recommendation_ja": "外務省の危険情報は4段階（レベル1：十分注意、レベル2：不要不急の渡航は止める、レベル3：渡航中止勧告、レベル4：退避勧告）。自然災害では「スポット情報」「広域情報」や在外公館の領事メールで注意喚起される。会社として各レベルに対応する措置を事前に表で決める（例：レベル2で家族の一時帰国を検討、レベル3で家族退避と出張禁止、レベル4で全員退避。この対応づけは各社の判断・仮定）。",
+   "quantitative": "危険情報4段階（レベル1〜4）",
+   "source_name": "外務省 海外安全ホームページ",
+   "source_url": "https://www.anzen.mofa.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r27",
+   "audience": "company",
+   "category_ja": "海外安全対策マニュアル（外務省）",
+   "recommendation_ja": "外務省の「ゴルゴ13の中堅・中小企業向け海外安全対策マニュアル」は、危機管理体制の構築、情報収集、緊急連絡網、安否確認、退避計画、現地従業員の安全、誘拐・テロ対策など13の課題別に対策をまとめている。海外拠点の安全管理規程の雛形として使える。",
+   "quantitative": "",
+   "source_name": "外務省「ゴルゴ13の中堅・中小企業向け海外安全対策マニュアル」",
+   "source_url": "https://www.anzen.mofa.go.jp/anzen_info/golgo13xgaimusho.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r28",
+   "audience": "both",
+   "category_ja": "緊急事態への備えチェック（海外安全虎の巻）",
+   "recommendation_ja": "外務省「海外安全虎の巻」等に沿って、パスポートの残存有効期間と写し（紙＋クラウド）、現地の緊急連絡先一覧（在外公館・警察・救急・病院・会社）、家族との連絡方法と集合場所、非常用品（水・食料・医薬品・懐中電灯・ラジオ・現金）、退避経路・手段（空港までの複数ルート、第三国の退避先）を確認する。",
+   "quantitative": "",
+   "source_name": "外務省「海外安全虎の巻」（海外安全ホームページ パンフレット・資料）",
+   "source_url": "https://www.anzen.mofa.go.jp/pamph/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r29",
+   "audience": "company",
+   "category_ja": "在外公館との連携",
+   "recommendation_ja": "拠点の安全責任者を管轄の在外公館（大使館・総領事館）に把握してもらい、在外公館が開催する「安全対策連絡協議会」や日本人会・商工会議所の緊急連絡網に参加する。在外公館の緊急連絡先を全員の携帯に登録し、領事メールを受信できる状態にする。",
+   "quantitative": "",
+   "source_name": "外務省 海外安全ホームページ",
+   "source_url": "https://www.anzen.mofa.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r30",
+   "audience": "both",
+   "category_ja": "外務省 海外安全アプリ",
+   "recommendation_ja": "外務省「海外安全アプリ」をスマホに入れ、滞在国の危険情報・スポット情報・在外公館の緊急連絡先をプッシュ通知で受け取る。在留届・たびレジと連動させ、家族のスマホにも入れる。",
+   "quantitative": "",
+   "source_name": "外務省 海外安全ホームページ（海外安全アプリ）",
+   "source_url": "https://www.anzen.mofa.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r31",
+   "audience": "company",
+   "category_ja": "退避計画",
+   "recommendation_ja": "退避は「商用便が運航しているうちに早めに判断する」ことが原則。段階（通常→警戒→家族・非必須要員の退避→必須要員の退避→拠点閉鎖）ごとのトリガー、判断権者と代行者、集合場所、空路・陸路の複数ルート、第三国の退避先、退避できない場合の籠城（シェルターイン）用の備蓄を文書化し、年1回見直す。",
+   "quantitative": "",
+   "source_name": "外務省「ゴルゴ13の中堅・中小企業向け海外安全対策マニュアル」",
+   "source_url": "https://www.anzen.mofa.go.jp/anzen_info/golgo13xgaimusho.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r32",
+   "audience": "company",
+   "category_ja": "JICAの安全対策措置を参考にする",
+   "recommendation_ja": "JICAは国・地域別に「安全対策措置」（渡航措置と行動規範：夜間外出制限、移動手段の制限、特定地域への立入禁止など）を公開し、関係者に出発前の安全対策研修を義務づけている。日系企業の海外拠点の行動規範・研修設計の参考になる。",
+   "quantitative": "",
+   "source_name": "JICA「安全対策」",
+   "source_url": "https://www.jica.go.jp/about/safety/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r33",
+   "audience": "both",
+   "category_ja": "医療・病院の事前確認",
+   "recommendation_ja": "外務省「世界の医療事情」で赴任地の医療水準・主要病院・救急体制を確認し、受診する病院（日本語対応の有無）、緊急搬送・医療搬送保険、持病の英語の診断書と薬の一般名リストを準備する。拠点では最寄りの外傷対応病院までの経路を複数確認しておく。",
+   "quantitative": "",
+   "source_name": "外務省「世界の医療事情」",
+   "source_url": "https://www.mofa.go.jp/mofaj/toko/medi/index.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r34",
+   "audience": "family",
+   "category_ja": "学校（日本人学校・インター）との取り決め",
+   "recommendation_ja": "子どもの学校の緊急時対応（校内待機の方針、保護者への引き渡しルール、代理の引き取り者の登録、連絡手段）を確認し、保護者が迎えに行けない場合の代理人を登録する。文部科学省の学校防災マニュアルの手引きは「引き渡しと待機の判断基準」を保護者と事前共有するよう求めている。",
+   "quantitative": "代理の引き取り者2人（仮定）",
+   "source_name": "文部科学省「学校防災マニュアル（地震・津波災害）作成の手引き」",
+   "source_url": "https://www.mext.go.jp/a_menu/kenko/anzen/1323513.htm",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r35",
+   "audience": "company",
+   "category_ja": "Sphere基準（給水）",
+   "recommendation_ja": "避難者・被災従業員への支援計画では、Sphere基準の「基本的な水需要」で必要量を見積もる：飲用2.5〜3 L/人/日、衛生2〜6 L、調理3〜6 L、合計7.5〜15 L/人/日（計画値としては15 L/人/日）。給水所は住居から500 m以内、待ち時間30分以内、蛇口1本あたり250人以内。本アプリの「支援・物資の需給」の需要係数に使う。",
+   "quantitative": "飲用2.5〜3 L/人/日；合計7.5〜15 L/人/日；給水所500 m以内・待ち30分以内・250人/蛇口",
+   "source_name": "Sphere Handbook 2018, WASH「給水基準2.1：アクセスと水量」",
+   "source_url": "https://handbook.spherestandards.org/en/sphere/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r36",
+   "audience": "company",
+   "category_ja": "Sphere基準（居住スペース）",
+   "recommendation_ja": "拠点を一時的な滞在場所・避難場所として使う場合、Sphere基準の最低居住面積（屋根のある空間）1人あたり3.5 m²（寒冷地・都市部は4.5〜5.5 m²）で収容人数を算定する。本アプリの避難所「収容目安」の係数に使う。",
+   "quantitative": "3.5 m²/人（屋根付き居住空間）；寒冷地・都市部4.5〜5.5 m²/人",
+   "source_name": "Sphere Handbook 2018, シェルター・居住基準3「居住空間」",
+   "source_url": "https://handbook.spherestandards.org/en/sphere/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r37",
+   "audience": "company",
+   "category_ja": "Sphere基準（トイレ）",
+   "recommendation_ja": "避難場所・一時滞在場所のトイレは、Sphere基準で最低20人に1基（初動期は50人に1基）、住居から50 m以内、男女別・施錠・照明付き。携帯トイレの備蓄は1人1日5回で計算する（東京備蓄ナビの前提・要再確認）。",
+   "quantitative": "1基/20人（初動期1基/50人）；住居から50 m以内",
+   "source_name": "Sphere Handbook 2018, WASH「排泄物管理基準3.2」",
+   "source_url": "https://handbook.spherestandards.org/en/sphere/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r38",
+   "audience": "company",
+   "category_ja": "Sphere基準（食料）",
+   "recommendation_ja": "被災者への食料支援の計画値はSphere基準の1人1日2,100 kcal（エネルギーの10〜12%をたんぱく質、17%を脂質から）。拠点備蓄の熱量チェックにも使える。",
+   "quantitative": "2,100 kcal/人/日；たんぱく質10〜12%・脂質17%",
+   "source_name": "Sphere Handbook 2018, 食料安全保障と栄養「食料支援基準6.1」",
+   "source_url": "https://handbook.spherestandards.org/en/sphere/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r39",
+   "audience": "company",
+   "category_ja": "Sphere基準（衛生用品）",
+   "recommendation_ja": "避難・滞在者向けの衛生用品は、Sphere基準で石けん（体用）250 g/人/月、洗濯用石けん200 g/人/月、10〜20 Lの水容器（運搬用・保管用）を世帯ごとに、女性には生理用品を配布する。",
+   "quantitative": "石けん250 g/人/月＋洗濯用200 g/人/月；水容器10〜20 L×2/世帯",
+   "source_name": "Sphere Handbook 2018, WASH「衛生促進基準1.2」",
+   "source_url": "https://handbook.spherestandards.org/en/sphere/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r40",
+   "audience": "both",
+   "category_ja": "飲料水の消毒",
+   "recommendation_ja": "断水・浸水で水質が疑わしい場合は煮沸（沸騰させて1分、標高2,000 m超は3分）が最も確実。煮沸できない場合は無香料の家庭用漂白剤（次亜塩素酸ナトリウム約5〜6%）を1 Lあたり2滴（1ガロンに8滴）加えて30分待つ。濁った水は布でろ過してから、濁りが強ければ薬剤を倍量に。WHOは給水時点で遊離残留塩素0.5 mg/L以上（30分接触後）を目安とする。",
+   "quantitative": "煮沸1分（高地3分）；塩素系漂白剤 約2滴/L（8滴/ガロン、6%製品）→30分；遊離残留塩素0.5 mg/L",
+   "source_name": "CDC「Making Water Safe in an Emergency」",
+   "source_url": "https://www.cdc.gov/healthywater/emergency/making-water-safe.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r41",
+   "audience": "both",
+   "category_ja": "大気汚染（WHO指針値）",
+   "recommendation_ja": "WHO大気質ガイドライン2021のPM2.5指針値は24時間平均15 µg/m³、年平均5 µg/m³（暫定目標は24時間平均75→50→37.5→25 µg/m³）。東南アジアの乾季の煙霧（ヘイズ）期には24時間平均が指針値の数倍〜10倍超になることがあり、拠点・家庭でPM2.5実測値に基づく行動基準を決める。",
+   "quantitative": "PM2.5：24時間平均15 µg/m³、年平均5 µg/m³；暫定目標（24h）75/50/37.5/25 µg/m³",
+   "source_name": "WHO global air quality guidelines (2021)",
+   "source_url": "https://www.who.int/publications/i/item/9789240034228",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r42",
+   "audience": "both",
+   "category_ja": "煙霧（ヘイズ）行動基準（シンガポールPSI）",
+   "recommendation_ja": "シンガポールNEAの24時間PSI区分：0〜50 良好、51〜100 中程度、101〜200 不健康、201〜300 非常に不健康、300超 危険。保健省の健康勧告では、PSI 101〜200で健康な人も長時間・激しい屋外活動を減らし、201〜300で避け、300超では屋外活動を最小限にする。高齢者・子ども・妊婦・心肺疾患のある人はひとつ厳しい区分で対応し、屋外で長時間過ごす必要がある場合はN95マスクを着用する。マレーシアAPI、インドネシアISPUも同じ区分値を用いる。",
+   "quantitative": "PSI 101–200：長時間の屋外活動を減らす／201–300：避ける／>300：屋外活動を最小限に＋屋外で必要ならN95",
+   "source_name": "シンガポールNEA haze.gov.sg（MOH Haze Health Advisory）",
+   "source_url": "https://www.haze.gov.sg/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r43",
+   "audience": "both",
+   "category_ja": "大気質指数（米国EPA AQIのPM2.5区分）",
+   "recommendation_ja": "米国EPAのAQI（AirNow・各国の米国大使館の観測値で使われる）のPM2.5（24時間平均）区分：0〜12.0 µg/m³ Good（AQI 0〜50）、12.1〜35.4 Moderate（51〜100）、35.5〜55.4 Unhealthy for Sensitive Groups（101〜150）、55.5〜150.4 Unhealthy（151〜200）、150.5〜250.4 Very Unhealthy（201〜300）、250.5以上 Hazardous（301〜）。EPAは2024年5月に改定しGoodの上限を9.0 µg/m³に引き下げるなど区分値を変更した（改定値は未確認）。AQI 151以上で一般の人も屋外の激しい活動を避け、201以上で屋外活動を避ける。",
+   "quantitative": "PM2.5区分（改定前）：12.0 / 35.4 / 55.4 / 150.4 / 250.4 µg/m³；AQI 101=敏感な人注意、151=全員注意、201=屋外活動回避",
+   "source_name": "U.S. EPA AirNow「AQI Basics」",
+   "source_url": "https://www.airnow.gov/aqi/aqi-basics/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r44",
+   "audience": "both",
+   "category_ja": "タイのPM2.5基準",
+   "recommendation_ja": "タイ政府は2023年6月からPM2.5の24時間平均の環境基準を50から37.5 µg/m³に強化し、公害管理局のAir4Thai（AQI）で地域ごとの値を公表している。バンコク・チェンマイの乾季（1〜4月）は基準超過が常態化するため、拠点はAir4ThaiのAQI 101以上（オレンジ）で屋外作業制限、201以上（赤）で屋外作業中止などの社内基準を設ける（社内基準の例は仮定）。",
+   "quantitative": "PM2.5 24時間基準37.5 µg/m³（2023年6月〜・要再確認）；Air4Thai AQI 101以上で健康影響区分",
+   "source_name": "タイ公害管理局 Air4Thai",
+   "source_url": "http://air4thai.pcd.go.th/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r45",
+   "audience": "both",
+   "category_ja": "暑熱（WBGT基準）",
+   "recommendation_ja": "環境省の熱中症予防情報サイトの日常生活の指針：暑さ指数（WBGT）25〜28℃「警戒」、28〜31℃「厳重警戒」、31℃以上「危険」（外出はなるべく避け涼しい室内へ）。運動指針では31℃以上は運動を原則中止、28〜31℃は激しい運動を中止。日本の「熱中症警戒アラート」はWBGT33℃以上、「特別警戒アラート」は35℃以上で発表。東南アジアの乾季後半〜雨季前（3〜5月）はWBGT28〜31℃が日常的なので、屋外作業は作業・休憩サイクルと水分・塩分補給を規定する。",
+   "quantitative": "WBGT 25/28/31℃（警戒/厳重警戒/危険）；運動は31℃以上で原則中止；警戒アラート33℃・特別警戒35℃",
+   "source_name": "環境省「熱中症予防情報サイト（暑さ指数WBGTについて）」",
+   "source_url": "https://www.wbgt.env.go.jp/wbgt.php",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r46",
+   "audience": "company",
+   "category_ja": "応急手当・救命",
+   "recommendation_ja": "IFRCの国際応急手当・蘇生・教育ガイドライン（2020）に基づき、拠点に救急箱・AEDを配備し、各シフト・各フロアに応急手当講習（CPR・AED・止血）を受けた従業員を配置する。現地法令（労働安全衛生の救急要員・救急箱の規定）に従い、講習は定期的に更新する。",
+   "quantitative": "各フロア・各シフトに応急手当講習修了者1人以上（配置の目安・仮定；各国の法定比率は要確認）",
+   "source_name": "IFRC「International first aid, resuscitation and education guidelines 2020」",
+   "source_url": "https://www.ifrc.org/document/international-first-aid-resuscitation-and-education-guidelines-2020",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r47",
+   "audience": "both",
+   "category_ja": "備蓄（米国FEMA/Ready.govとの比較）",
+   "recommendation_ja": "米国Ready.govは飲料と衛生用に1人1日1ガロン（約3.8 L）を数日分（従来は最低3日分）備えるよう推奨しており、日本の3 L/人/日と近い。本アプリでは日本基準3 L/人/日を既定値、1ガロン/人/日を暑熱地域向けの上限側の目安として扱う。",
+   "quantitative": "1ガロン（約3.8 L）/人/日 × 数日分（従来の案内は最低3日分）",
+   "source_name": "Ready.gov「Water」",
+   "source_url": "https://www.ready.gov/water",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r48",
+   "audience": "both",
+   "category_ja": "非常用持ち出し品（Ready.gov）",
+   "recommendation_ja": "Ready.govの基本キット：水、数日分の非常食、電池式/手回しラジオ、懐中電灯、救急セット、予備電池、ホイッスル（救助要請用）、防じんマスク、ビニールシートとダクトテープ、ウェットティッシュ・ごみ袋、レンチ/ペンチ（ガス・水道の遮断用）、缶切り、地域の地図、携帯電話と充電器・予備バッテリー。追加：処方薬、眼鏡、乳児用ミルク・おむつ、ペットフード、現金、重要書類（防水容器）、寝袋/毛布、着替え、消火器、マッチ、生理用品、食器、筆記具、子どもの本・ゲーム。",
+   "quantitative": "ホイッスル1人1個；水1ガロン/人/日；食料数日分",
+   "source_name": "Ready.gov「Build A Kit」",
+   "source_url": "https://www.ready.gov/kit",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r49",
+   "audience": "both",
+   "category_ja": "洪水時の行動（冠水した道路・水）",
+   "recommendation_ja": "冠水した道路や流れのある水の中を歩かない・泳がない・運転しない（Turn Around, Don't Drown）。流れのある水は深さ15 cm（6インチ）で足をすくわれて転倒し、30 cm（1フィート）で乗用車が浮いて流される（NWSはSUV・トラックでも60 cm＝2フィートで流されるとしている）。冠水した道路はマンホールの開口や路面崩壊が見えないため、水が来る前に移動を終える。",
+   "quantitative": "歩行：流水15 cm（6 in）で転倒／車：30 cm（1 ft）で浮く／SUV・トラック：60 cm（2 ft）",
+   "source_name": "Ready.gov「Floods」／NWS「Turn Around Don't Drown」",
+   "source_url": "https://www.ready.gov/floods",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r50",
+   "audience": "both",
+   "category_ja": "洪水時の行動（垂直避難・電気の遮断）",
+   "recommendation_ja": "浸水の恐れがあれば早めに高い場所・上階へ移動（垂直避難）。建物内に取り残された場合は最上階へ行き、脱出できない閉じた屋根裏には入らない。浸水前に主幹ブレーカーを落としガスの元栓を閉める。濡れた床に立ったまま、または浸水した機器・配線に触れない。浸水した建物の電気は専門家の点検まで復旧させない。",
+   "quantitative": "ブレーカー遮断は浸水前（濡れた状態では触れない）；冠水後の電気機器は点検まで使用禁止",
+   "source_name": "Ready.gov「Floods」",
+   "source_url": "https://www.ready.gov/floods",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r51",
+   "audience": "both",
+   "category_ja": "地震時の行動（Drop, Cover, Hold On）",
+   "recommendation_ja": "揺れを感じたら「Drop（姿勢を低く）・Cover（机の下などで頭と首を守る）・Hold On（揺れが収まるまでつかまる）」。屋内では揺れが収まるまで外に出ない、ベッドでは枕で頭を守る、屋外では建物・電線から離れる、車内では安全な場所に停車し高架や橋を避ける。揺れが収まったら余震に備え、負傷者を確認し、建物の損傷（ひび・傾き・ガス臭）を確認して損傷した建物には戻らない。電話は輻輳するためメッセージで連絡。沿岸部では揺れが収まったらすぐ高台へ。",
+   "quantitative": "揺れが収まるまで動かない；余震は本震後数日〜数週間続く",
+   "source_name": "Ready.gov「Earthquakes」",
+   "source_url": "https://www.ready.gov/earthquakes",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r52",
+   "audience": "both",
+   "category_ja": "津波（沿岸部）",
+   "recommendation_ja": "沿岸部で強い揺れ（立っていられない）や長い揺れ（20秒以上）、海水が急に引く、海からの轟音などの自然の警報を感じたら、公式警報を待たずに直ちに高台または内陸へ移動する。目安は海抜30 m（100フィート）以上、または海岸から1.6 km（1マイル）以上内陸。津波は数分で到達し、第1波が最大とは限らず数時間続くため、当局の解除まで戻らない。徒歩で避難し、車は渋滞するため使わない。",
+   "quantitative": "揺れ20秒以上→直ちに避難；海抜30 m以上 または 内陸1.6 km以上；到達まで数分、数時間続く",
+   "source_name": "NWS「Tsunami Safety」／Ready.gov「Tsunamis」",
+   "source_url": "https://www.weather.gov/safety/tsunami",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r53",
+   "audience": "both",
+   "category_ja": "台風・サイクロン",
+   "recommendation_ja": "接近前に雨戸・シャッターを閉め（なければ窓に板を打ち付け）、屋外の飛散物を片付け、車の燃料を満タンにし、72時間分の水・食料・電池・現金を確保、携帯とモバイルバッテリーを満充電にする。上陸中は屋内の窓から離れた小部屋・廊下（浸水しない階）にとどまり、「台風の目」で一時的に静まっても外に出ない（反対側の暴風が来る）。当局の避難指示があれば早めに従う。通過後は冠水道路・切れた電線に近づかない。",
+   "quantitative": "備蓄72時間分（3日）；台風の目の通過中も屋内待機",
+   "source_name": "Ready.gov「Hurricanes」",
+   "source_url": "https://www.ready.gov/hurricanes",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r54",
+   "audience": "company",
+   "category_ja": "フィリピンの台風警報と出勤停止",
+   "recommendation_ja": "フィリピンPAGASAの熱帯低気圧風信号（TCWS）は5段階（2022年改定）：信号1＝39〜61 km/h（36時間以内）、2＝62〜88 km/h（24時間以内）、3＝89〜117 km/h（18時間以内）、4＝118〜184 km/h（12時間以内）、5＝185 km/h以上（12時間以内）。政府は信号3以上で官公庁・学校を自動休止としており（大統領令66号・2012年、要再確認）、企業も信号ごとの出勤停止・在宅・早退基準を事前に定める。",
+   "quantitative": "TCWS 1〜5（39–61 / 62–88 / 89–117 / 118–184 / ≥185 km/h）；信号3で官公庁・全学校の自動休止（要再確認）",
+   "source_name": "PAGASA「Tropical Cyclone Wind Signals」",
+   "source_url": "https://www.pagasa.dost.gov.ph/learning-tools/tropical-cyclone-wind-signal",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r55",
+   "audience": "both",
+   "category_ja": "火山灰",
+   "recommendation_ja": "火山灰（インドネシア・フィリピンの拠点）の降灰時は屋内にとどまり窓・ドア・換気口を閉め、外出時はN95（FFP2/P2）マスクとゴーグルを着用する（布マスクやサージカルマスクでは細かい灰を十分に防げない）。雨水タンク・井戸・プールは覆い、屋根の雨どいを外す。車の運転は視界不良・路面スリップ・エンジン吸気の損傷があるため最小限にし、エアフィルターを交換する。湿った灰は重く屋根崩落の原因になるため早めに除去する（除去時もマスク・ゴーグル・長袖）。喘息など呼吸器疾患のある人は薬を手元に置く。",
+   "quantitative": "N95/FFP2/P2マスク（サージカル・布は不十分）；灰は湿ると重量が増し屋根に負荷",
+   "source_name": "IVHHN（International Volcanic Health Hazard Network）「The Health Hazards of Volcanic Ash: A Guide for the Public」",
+   "source_url": "https://www.ivhhn.org/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r56",
+   "audience": "both",
+   "category_ja": "停電時の食品安全と発電機",
+   "recommendation_ja": "停電中は冷蔵庫・冷凍庫を開けない。冷蔵庫は扉を閉めたままなら約4時間、冷凍庫は満杯で約48時間（半分なら24時間）は安全温度を保つ。発電機は必ず屋外で、窓・ドア・換気口から6 m（20フィート）以上離して運転し、一酸化炭素警報器を設置する。",
+   "quantitative": "冷蔵庫4時間／冷凍庫48時間（半分24時間）；発電機は窓から6 m（20 ft）以上",
+   "source_name": "Ready.gov「Power Outages」／CDC「Food Safety During a Power Outage」",
+   "source_url": "https://www.ready.gov/power-outages",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "r57",
+   "audience": "company",
+   "category_ja": "警報の受信手段の多重化（防災無線の代替）",
+   "recommendation_ja": "公的警報の受信手段を多重化する：携帯のセルブロードキャスト（緊急速報）受信設定をオンにする（フィリピンはRA 10639「Free Mobile Disaster Alerts Act」により通信事業者が無料で災害警報を配信、タイは2025年にCell Broadcastを導入）、現地防災当局のアプリ・SNS、在外公館の領事メール、気象当局の警報（PAGASA・BMKG・TMD・NEA等）、拠点内の館内放送・無線・サイレン。受信担当者を当番制にする。",
+   "quantitative": "受信経路3系統以上（公的警報＋在外公館＋社内放送）",
+   "source_name": "Republic Act No. 10639（Free Mobile Disaster Alerts Act, フィリピン, 2014）",
+   "source_url": "https://lawphil.net/statutes/repacts/ra2014/ra_10639_2014.html",
+   "confirmed_by": "unverified"
+  }
+ ],
+ "health_after_disaster": [
+  {
+   "hazard": "flood",
+   "risk_ja": "レプトスピラ症（浸水した水からの感染）",
+   "advice_ja": "浸水した水に素足や傷のある皮膚で入らない。防水長靴・手袋を使い、傷は洗って防水絆創膏で覆う。曝露後2〜30日（多くは5〜14日）に発熱・頭痛・筋肉痛・黄疸が出たら受診し、浸水に入ったことを伝える。長時間の曝露が避けられなかった場合は医師と予防内服（ドキシサイクリン）を相談する（フィリピン保健省などで用いられる対応・要再確認）。",
+   "source_url": "https://www.cdc.gov/leptospirosis/"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "デング熱・チクングニア熱（洪水後2〜4週に増加）",
+   "advice_ja": "洪水後は住居周辺のたまり水（容器・タイヤ・植木鉢の受け皿）を週1回捨て、DEETやピカリジンの忌避剤と長袖・長ズボンで日中の刺咬を防ぐ。発熱から3〜7日目に腹痛・持続する嘔吐・出血・ぐったりするなどの警告徴候が出たら直ちに受診。解熱にはパラセタモールを使い、イブプロフェン・アスピリン等のNSAIDsは出血リスクのため避ける。",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "下痢症・コレラ・A型肝炎（汚染された水・食品）",
+   "advice_ja": "煮沸または塩素消毒した水・ボトル水だけを飲み、調理・歯磨きにも使う。食事前・トイレ後の手洗いを徹底し、浸水した食品や停電した冷蔵庫の食品は廃棄する。下痢には経口補水液（ORS）で水分補給し、血便・高熱・尿が出ない・ぐったりする等の脱水徴候は受診する。",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/diarrhoeal-disease"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "創傷感染・破傷風（がれき・汚水による傷）",
+   "advice_ja": "傷は清潔な水と石けんで洗い、乾いた清潔な布で覆う。泥水に浸かった深い傷、刺し傷、赤く腫れて熱を持つ傷は受診する。破傷風の予防接種が10年以内でなければ追加接種を受ける（赴任前に破傷風・A型肝炎・腸チフス等の接種を済ませておく）。",
+   "source_url": "https://www.who.int/health-topics/floods"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "感電・一酸化炭素中毒",
+   "advice_ja": "浸水した建物では主幹ブレーカーを落とすまで電気機器・配線に触れない。濡れた手・濡れた床で電気に触れない。発電機・炭火・ガス機器を屋内や車庫で使わず、発電機は窓から6 m以上離す。頭痛・めまい・吐き気が複数人に同時に出たら一酸化炭素を疑い屋外へ出る。",
+   "source_url": "https://www.ready.gov/floods"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "カビ・皮膚炎（浸水後の清掃）",
+   "advice_ja": "濡れた建材・家具・カーペットは48時間以内に乾燥または撤去する。清掃時はN95マスク・ゴム手袋・ゴーグル・長袖を着用し、換気しながら作業する。喘息・アレルギーのある人、子ども、妊婦はカビの除去作業を避ける。",
+   "source_url": "https://www.cdc.gov/mold/"
+  },
+  {
+   "hazard": "quake",
+   "risk_ja": "外傷・圧挫（クラッシュ）症候群",
+   "advice_ja": "出血は清潔な布で直接圧迫して止血する。長時間（目安1時間以上）がれきに挟まれた人は救出後に急変することがある（クラッシュ症候群）ため、元気に見えても必ず医療機関へ。余震で建物が崩れるため、損傷した建物に物を取りに戻らない。救助は二次災害を避け、複数人で、無理な場合は専門の救助隊を待つ。",
+   "source_url": "https://www.ifrc.org/document/international-first-aid-resuscitation-and-education-guidelines-2020"
+  },
+  {
+   "hazard": "quake",
+   "risk_ja": "粉じん・アスベスト（倒壊建物のがれき）",
+   "advice_ja": "がれきの片付けはN95マスク・手袋・長袖・安全靴で行い、古い建物（断熱材・屋根材）はアスベストを含む可能性があるため、濡らして粉じんを抑え、業者に任せる。目に入った粉じんはこすらず流水で洗う。",
+   "source_url": "https://www.who.int/health-topics/earthquakes"
+  },
+  {
+   "hazard": "quake",
+   "risk_ja": "水・衛生（配管破損・断水）",
+   "advice_ja": "地震後は上下水道の破損で水道水が汚染されることがあるため、煮沸または塩素消毒してから飲む。トイレが使えない場合は携帯トイレを使い、避難場所では20人に1基を目安に仮設トイレを確保し、手洗い場を併設する。",
+   "source_url": "https://handbook.spherestandards.org/en/sphere/"
+  },
+  {
+   "hazard": "all",
+   "risk_ja": "心のケア（急性ストレス反応、子どもの不安）",
+   "advice_ja": "WHOの「心理的応急処置（PFA）」の「見る・聞く・つなぐ」に沿って、安全の確保、基本的ニーズ（水・食事・睡眠・家族との連絡）、落ち着いて話を聞くことを優先する。子どもは退行・夜泣き・甘えなどの反応が出ても普通のことと受け止め、日課を保つ。不眠・フラッシュバック・飲酒増加が数週間続く場合は専門家（会社のEAP・日本語対応カウンセラー）につなぐ。",
+   "source_url": "https://www.who.int/publications/i/item/9789241548205"
+  },
+  {
+   "hazard": "all",
+   "risk_ja": "熱中症（停電・復旧作業・避難所の暑熱）",
+   "advice_ja": "停電でエアコンが止まる被災後は熱中症リスクが急増する。暑さ指数（WBGT）28℃以上は厳重警戒、31℃以上は危険として、屋外の復旧作業は早朝・夕方に限り、こまめな休憩と水分・塩分（経口補水液）を取る。高齢者・乳幼児・持病のある人を優先して涼しい場所へ。めまい・筋肉のけいれん・吐き気があれば作業を中止し、意識がおかしければ救急へ。",
+   "source_url": "https://www.wbgt.env.go.jp/wbgt.php"
+  },
+  {
+   "hazard": "all",
+   "risk_ja": "慢性疾患・処方薬の中断（高血圧・糖尿病・喘息・透析など）",
+   "advice_ja": "処方薬は常に7日分以上の予備を持ち、薬の一般名（英語）と用量を書いたカードを財布に入れる。透析・インスリン・在宅酸素など中断できない治療は、代替の医療機関と搬送手段を事前に決めておく。災害後に薬が切れそうな場合は早めに在外公館や拠点の医療担当、保険会社のアシスタンス窓口に相談する。",
+   "source_url": "https://www.ready.gov/kit"
+  },
+  {
+   "hazard": "haze",
+   "risk_ja": "煙霧（PM2.5）による呼吸器・循環器症状",
+   "advice_ja": "24時間PSI/AQIが「不健康（PSI 101〜200、AQI 151〜200）」以上の日は屋外の長時間・激しい活動を減らし、「非常に不健康（PSI 201〜300）」で避け、「危険（PSI 300超）」では屋外活動を最小限にする。屋外で長時間過ごす必要がある場合はN95マスクを隙間なく装着する。室内は窓を閉め空気清浄機（HEPA）を使い、子ども・高齢者・妊婦・心肺疾患のある人は一段厳しい基準で行動する。",
+   "source_url": "https://www.haze.gov.sg/"
+  },
+  {
+   "hazard": "volcano",
+   "risk_ja": "火山灰による呼吸器・眼への刺激",
+   "advice_ja": "降灰中は屋内にとどまり、外出時はN95/FFP2マスクとゴーグル（コンタクトレンズは外す）。喘息・慢性閉塞性肺疾患の人は発作薬を携帯し症状が出たら受診。灰が入った飲料水は飲まず（覆っていない雨水タンクは使わない）、灰の除去は湿らせて行い、乾いた灰を掃き上げない。",
+   "source_url": "https://www.ivhhn.org/"
+  },
+  {
+   "hazard": "cyclone",
+   "risk_ja": "台風通過後の外傷・感電・食中毒",
+   "advice_ja": "通過後も切れた電線・倒木・冠水道路に近づかない。チェーンソーや屋根上の作業による外傷が多いため、保護具を着け単独作業をしない。停電が4時間を超えた冷蔵庫の生鮮食品、48時間（半分なら24時間）を超えた冷凍食品は廃棄する。浸水後は洪水と同じ感染症対策（水の消毒・蚊対策・レプトスピラ症）を取る。",
+   "source_url": "https://www.ready.gov/hurricanes"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "レプトスピラ症",
+   "advice_ja": "冠水した水に素足や傷のある手足で入らない。発熱・筋肉痛が出たら受診し、冠水に接触したことを伝える",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "デング熱",
+   "advice_ja": "水が引いた後の溜まり水で蚊が増える。長袖・忌避剤、容器の水を捨てる",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "下痢症・水の汚染",
+   "advice_ja": "飲料水は未開封のボトルか 1 分以上の煮沸。氷・生野菜を避ける",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods"
+  },
+  {
+   "hazard": "flood",
+   "risk_ja": "感電",
+   "advice_ja": "浸水した建物ではブレーカーを落とす。水に浸かった電気機器に触れない",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods"
+  },
+  {
+   "hazard": "quake",
+   "risk_ja": "余震と建物の再入館",
+   "advice_ja": "外観が無事でも構造の安全が確認されるまで入らない。余震は数日〜数週間続く",
+   "source_url": "https://www.who.int/health-topics/earthquakes"
+  },
+  {
+   "hazard": "quake",
+   "risk_ja": "一酸化炭素中毒",
+   "advice_ja": "発電機・炭火を屋内やベランダで使わない",
+   "source_url": "https://www.who.int/health-topics/earthquakes"
+  },
+  {
+   "hazard": "quake",
+   "risk_ja": "外傷の二次感染・破傷風",
+   "advice_ja": "傷はきれいな水で洗い、10 年以内の破傷風ワクチン接種がなければ受診",
+   "source_url": "https://www.who.int/health-topics/earthquakes"
+  },
+  {
+   "hazard": "quake",
+   "risk_ja": "こころの不調",
+   "advice_ja": "睡眠・食事のリズムを保ち、子どもには安心できる説明を。長引く場合は相談窓口へ",
+   "source_url": "https://www.who.int/health-topics/earthquakes"
+  },
+  {
+   "hazard": "all",
+   "risk_ja": "熱中症",
+   "advice_ja": "屋外避難・停電時は日陰と水分・塩分。乳幼児・高齢者を優先して涼しい場所へ",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health"
+  }
+ ],
+ "_guidance_gaps": [
+  "検証状況：このサブエージェント実行時点で当ターンのWebSearch予算（200回・全エージェント共有）が既に使い切られており、検索は1回も実行できなかった。また環境のプロキシは bousai.go.jp / kantei.go.jp / fdma.go.jp / maff.go.jp / chusho.meti.go.jp / anzen.mofa.go.jp / ezairyu.mofa.go.jp / jica.go.jp / iso.org / spherestandards.org / who.int / ifrc.org / cdc.gov / ready.gov / fema.gov / weather.gov / wbgt.env.go.jp / haze.gov.sg / pagasa / ivhhn 等をすべて403で遮断（curlで確認）。したがって confirmed_by は 'page_read' も 'search_snippet' も付与できず、全項目が 'unverified_model_knowledge'（モデルの記憶に基づく未検証）である。唯一の例外は米国EPA AQI区分で、raw.githubusercontent.com 上のミラー（hrbonz/python-aqi, aqi/algos/epa.py）から改定前の区分表を実際に取得した（'github_mirror_read'）。レビュー工程で検索予算を回復した上で、少なくとも数値を含む項目（水3 L/人/日・3日/7日、東京都9 L/9食、Sphere 15 L・3.5 m²・1/20・2,100 kcal、FEMA 6 in/1 ft、WBGT 25/28/31、PSI区分、WHO PM2.5 15/5 µg/m³、在留届3か月）の再確認を推奨する。",
+  "URLの確度：首相官邸 sonae.html、ORRnet、たびレジ、ready.gov/{water,kit,floods,earthquakes,hurricanes,power-outages}、WHOファクトシート（dengue / diarrhoeal-disease）、WHO AQG 2021、ISO 22301 (75106)、haze.gov.sg、wbgt.env.go.jp は比較的確度が高い。一方、内閣府 事業継続ガイドライン（sk_04.html）、消防庁 防災マニュアル、東京消防庁 kaguten、東京都 帰宅困難者対策ポータル、外務省 虎の巻（/pamph/）、ゴルゴ13マニュアル、海外安全アプリ案内、JICA安全対策、文科省 学校防災マニュアル、CDC（2024年のサイト再編でURL変更の可能性）、NWS tsunami、PAGASA TCWS、lawphil RA 10639、IVHHN、IFRC 2020ガイドラインのページパスは未確認。",
+  "JETRO：依頼にある「海外進出日系企業の危機管理」に該当する固有の報告書・ページURLを特定できなかった（検索不能）。JETROの2011年タイ洪水関連レポートや『海外進出日系企業実態調査』の該当箇所も未確認のため、JETRO出典の項目は含めていない。",
+  "訓練頻度：内閣府 事業継続ガイドラインおよびISO 22301は訓練・演習を『定期的／計画した間隔で』と規定しており、『年1回』という数値は実務上の慣行として記載した（公式数値ではない）。安否確認の回答率目標・データ復元テスト頻度・代行順位3人・代理引き取り者2人も同様に例示・仮定。",
+  "数値の不確実性（要再確認と明記）：東京備蓄ナビの携帯トイレ5回/人/日・カセットボンベ6本/人/週、東京消防庁の『負傷原因の30〜50%が家具類』、171の伝言30秒、web171の海外利用可否、処方薬7〜10日分（CDC）、タイPM2.5基準37.5 µg/m³（2023年6月）、PAGASA TCWSの風速帯と大統領令66号の自動休止、津波の『揺れ20秒・海抜30 m・内陸1.6 km』、2011年タイ洪水の浸水期間、EPA 2024年AQI改定値（Good上限9.0 µg/m³等）。",
+  "東南アジア各国の現地法定基準（シンガポールの避難訓練回数・救急要員比率、フィリピンRA 9514消防法の訓練回数、タイ・インドネシア・ベトナム・マレーシアの労働安全衛生上の救急箱・救急要員規定、衛星電話の使用許可制度）は未調査・未検証。本出力の『応急手当講習修了者1人以上/フロア』は仮定。",
+  "WHOの洪水・感染症（レプトスピラ症）に関する固有のファクトシートURLを特定できなかったため、レプトスピラ症はCDCトップページ、洪水の創傷・破傷風はWHO health-topics/floods を出典として示した。WHO/WEDC『Technical notes on drinking-water, sanitation and hygiene in emergencies』の個別ノートURLも未確認。",
+  "Sphere Handbook 2018の各基準の章アンカー（handbook.spherestandards.org の #ch… 形式）は未確認のため、ハンドブック全体のURLと基準番号（WASH 2.1 / 3.2 / 1.2、シェルター3、食料6.1）を記載した。Sphere健康基準の施設数（例：一次医療施設1か所/1万人）は確度が低いため除外した。",
+  "アプリ側の整合：src/view-site.js は guidance 項目を key で参照（g.find(x => x.key === key)）しているが、本スキーマには key フィールドがないため、親工程で category_ja または連番から key を付与する必要がある。view-personal.js が参照する内閣府の備蓄ページURL（bousai.go.jp/kyoiku/keigen/gensai/kiroku/bichiku.html）は実在を確認できておらず、本出力では首相官邸 sonae.html と農水省ストックガイドを代替として示した。"
+ ]
 }

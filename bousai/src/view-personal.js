@@ -12,6 +12,7 @@ App.views.personal = {
         </div>
         <div class="vh-r"><span class="tag neutral">入力はこの端末にのみ保存</span></div>
       </div>
+      <div class="answer" id="psAnswer"></div>
       <div class="grid side" style="grid-template-columns:380px minmax(0,1fr)">
         <div class="card" id="psForm"></div>
         <div style="display:flex;flex-direction:column;gap:14px" id="psOut"></div>
@@ -71,6 +72,13 @@ App.views.personal = {
     let cands = [], best = null;
     if (A) { const from = nearestNode(A, me.x, me.y); cands = shelterCandidates(A, area, st.scen, from, speed); best = cands.find((x) => x.reach && (!cons || x.len <= cons.maxWalk)) || cands.find((x) => x.reach); }
     const vertical = st.scen === 'flood' && st.home === 'highrise' && st.floor >= 4;
+    const floodBest = (() => { if (!A) return null; const from = nearestNode(A, me.x, me.y); const cs = shelterCandidates(A, area, 'flood', from, speed); return cs.find((x) => x.reach && (!cons || x.len <= cons.maxWalk)) || cs.find((x) => x.reach); })();
+    const quakeBest = (() => { if (!A) return null; const from = nearestNode(A, me.x, me.y); const cs = shelterCandidates(A, area, 'quake', from, speed); return cs.find((x) => x.reach && (!cons || x.len <= cons.maxWalk)) || cs.find((x) => x.reach); })();
+    const vert = st.home === 'highrise' && st.floor >= 4;
+    $('#psAnswer', root).innerHTML = `<span class="k">答え</span><ul>
+      <li><b>洪水のとき：</b>${vert ? `自宅 ${st.floor} 階に留まる垂直避難が第一候補。長期化なら ${floodBest ? esc(floodBest.poi.name_ja || floodBest.poi.name) + `（徒歩 ${walkMin(floodBest.len, speed)} 分）` : '徒歩圏の高層施設'} へ。` : floodBest ? `${esc(floodBest.poi.name_ja || floodBest.poi.name)} へ早めに移動（徒歩 ${walkMin(floodBest.len, speed)} 分）。` : '徒歩圏の高層施設を確認。'}<b>地震のとき：</b>${quakeBest ? `揺れが収まったら ${esc(quakeBest.poi.name_ja || quakeBest.poi.name)} へ（徒歩 ${walkMin(quakeBest.len, speed)} 分）。` : '近くの広場へ。'}</li>
+      <li><b>備蓄：</b>${plan.n} 人 × ${plan.days} 日で飲料水 ${plan.water} L・食料 ${plan.meals} 食${plan.infants ? '・粉ミルク／おむつ' : ''}${plan.elders ? '・高齢者用品' : ''}${plan.needs ? '・持病の薬 ' + Math.max(7, plan.days) + ' 日分' : ''}（内閣府の目安 3L/人/日）。</li>
+      <li><b>日頃の登録：</b>在留届・たびレジ、家族の集合場所 3 段階と域外連絡先、緊急連絡先カード（下の行動チェック）。</li></ul>`;
     $('#psOut', root).innerHTML = `
       <div class="card"><div class="card-h"><h2>住まいのリスク（${esc(reg.name_ja)}）</h2><span class="r">${srcTag('ThinkHazard', reg.th_url)}</span></div>${risks.length ? `<div style="display:flex;flex-direction:column;gap:8px">${risks.map((r) => `<div class="note ${r.lv >= 4 ? 'warn' : ''}">${ic(HAZ[r.k].icon)}<span><b>${esc(HAZ[r.k].short)}（${lvInfo(['unknown', 'Very low', 'Low', 'Medium', 'High'][r.lv]).ja}）：</b>${esc(r.ja)}</span></div>`).join('')}</div>` : '<div class="empty">この地域の主要ハザードは低水準です</div>'}</div>
       <div class="card flush"><div style="padding:12px 16px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="font-size:15px;margin:0;font-weight:600">避難先と避難路</h2><div class="seg" id="psScen">${scenKeys.map((k) => `<button data-scen="${k}" aria-pressed="${k === st.scen}">${ic(HAZ[k].icon)}${esc(HAZ[k].short)}</button>`).join('')}</div><span class="tag neutral">${esc(cons ? cons.ja : '')}</span></div>
