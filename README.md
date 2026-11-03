@@ -1,3 +1,5 @@
+> **防災コンパス SEA（モック）** — 東南アジアに拠点を持つ企業と駐在員家族向けの防災アプリ試作は [`bousai/`](bousai/) にあります（GitHub Pages では `/bousai/` で配信）。詳細は [bousai/README.md](bousai/README.md)。
+
 # 🍜 ラーメンレーダー (Ramen Radar)
 
 SNS（ソーシャルメディア）から **直近1時間以内に投稿されたラーメンの画像** を集め、

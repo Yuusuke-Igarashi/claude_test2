@@ -1,0 +1,230 @@
+{
+  "_note": "地域（都市圏）ごとのリスク情報。hazards は ThinkHazard の水準（confirmed_by: search_snippet＝検索結果の要約から転記、page_read＝原典取得、unverified＝未検証）。rp は再現期間モデルの仮定パラメータ。",
+  "countries": {
+    "THA": { "hazards": {}, "sources": [] },
+    "IDN": { "hazards": {}, "sources": [] },
+    "PHL": { "hazards": {}, "sources": [] },
+    "VNM": { "hazards": {}, "sources": [] },
+    "MYS": { "hazards": {}, "sources": [] },
+    "SGP": { "hazards": {}, "sources": [] },
+    "MMR": { "hazards": {}, "sources": [] },
+    "KHM": { "hazards": {}, "sources": [] },
+    "LAO": { "hazards": {}, "sources": [] }
+  },
+  "regions": [
+    {
+      "id": "th-bkk", "name_ja": "バンコク首都圏", "name_en": "Bangkok Metropolitan Region", "country": "THA",
+      "adm1_ids": ["THA-416", "THA-417", "THA-413", "THA-422", "THA-423", "THA-418"], "center": [100.55, 13.75],
+      "pop_m": 10.9, "pop_src": "BMR 6 県の概数（仮定）", "jp_residents": null,
+      "desc_ja": "チャオプラヤー川デルタの低平地。海抜 0〜2 m。在留邦人は国内最多でスクンビット周辺に集中。",
+      "th_url": "https://thinkhazard.org/en/report/2853-thailand-bangkok",
+      "hazards": {
+        "river_flood": { "level": "Medium", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "urban_flood": { "level": "Medium", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "coastal_flood": { "level": "High", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "earthquake": { "level": "Low", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "landslide": { "level": "Very low", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "tsunami": { "level": "No data", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "volcano": { "level": "No data", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "cyclone": { "level": "High", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" },
+        "water_scarcity": { "level": "Medium", "src": "https://thinkhazard.org/en/report/2853-thailand-bangkok", "confirmed_by": "search_snippet" }
+      },
+      "hz_note_ja": "ThinkHazard の「サイクロン High」は強風ハザードの区分で、バンコクへの台風直撃は歴史的に稀です。沿岸浸水 High は高潮と地盤沈下を反映しています。極端な暑さ・煙霧は未取得。",
+      "rp": {
+        "flood": {
+          "anchor_ja": "アンカー：2011 年タイ大洪水（被害・損失 465 億 USD＝世界銀行推計、死者 815 人以上）を再現期間 70〜100 年の事象と仮定し、首都圏（BMR）の分担を約 55% と置く。",
+          "k": { "10": 0.15, "50": 0.7, "100": 1.0, "500": 1.3, "1000": 1.45 },
+          "scen": { "10": "北部・東部の低地で局所的な浸水。工業団地は堤防内で操業継続", "50": "1995 年級。北部・西部の住宅地で 1 m 前後の浸水が数週間", "100": "2011 年級。北部・西部・工業団地が 1〜2 か月浸水、中心部は堤防で防御", "500": "2011 年を超える流量。中心部の一部でも浸水、港湾・空港に影響", "1000": "複合（上流豪雨＋高潮）。堤防の広域破堤" },
+          "depth_max": 2.0, "area_max": 40, "pop_max": 0.3, "downtime_max": 60, "loss_max": 25000,
+          "method_ja": "損失＝アンカー損失 × 相対係数 k。影響人口・浸水深・操業停止日数も同じ k で引き延ばす単純モデルで、水理解析ではありません。",
+          "assumptions_ja": ["2011 年の BMR 分担 55% は、被害の多くがアユタヤ・パトゥムタニ・バンコク北部に集中したことからの仮定", "2011 年洪水の再現期間を 70〜100 年と仮定（文献により 50〜100 年以上と幅がある）", "500 年・1000 年の事象は中心部堤防の越水を含むため非線形に増える想定"],
+          "refs": [{ "name": "World Bank 2011 Rapid Assessment", "url": "https://www.worldbank.org/en/country/thailand/publication/thai-flood-2011-rapid-assessment" }]
+        },
+        "urban_flood": {
+          "anchor_ja": "アンカー：雨季のスコールによる数時間〜半日の冠水（スクンビット・ラチャダー等の常襲箇所）。損失規模の公的統計がないため、全項目が仮定。",
+          "k": { "10": 0.5, "50": 0.8, "100": 1.0, "500": 1.2, "1000": 1.3 },
+          "scen": { "10": "毎年規模。ソイの冠水 20〜40 cm、通勤の遅延", "50": "都心の幹線道路が半日冠水、BTS 以外の交通が麻痺", "100": "1 日以上の広域冠水、地下駐車場・1 階店舗の浸水", "500": "数日の冠水と停電の複合", "1000": "排水系統の機能停止" },
+          "depth_max": 0.6, "area_max": 15, "pop_max": 0.05, "downtime_max": 2, "loss_max": 300,
+          "method_ja": "公的な損失統計がないため、操業停止日数と影響範囲から損失を粗く置いたもの。", "assumptions_ja": ["損失は中心部の小売・交通の停止 1 日あたり約 1.5 億 USD と仮定"], "refs": []
+        },
+        "quake": {
+          "anchor_ja": "全国の損失曲線は GEM の国別地震リスクプロファイル（建物損失）。バンコクは国内 AAL 上位 10 地域に含まれず（AAL は北部に集中）、按分比率は 5% と仮定。",
+          "k": { "10": 0.1, "50": 0.4, "100": 0.6, "500": 0.9, "1000": 1.0 }, "share": 0.05,
+          "scen": { "10": "ミャンマー・北部の中規模地震を遠方で感じる程度", "50": "遠方の M7 級で高層階が長周期の揺れ。エレベーター停止", "100": "2025 年 3 月級（ミャンマー M7.7）。高層建物の非構造被害、建設中建物の損傷", "500": "軟弱地盤での増幅が大きい近距離地震（評価に不確実性）", "1000": "想定外の近傍断層活動（評価に不確実性）" },
+          "pop_max": 0.02, "downtime_max": 7,
+          "method_ja": "GEM の全国曲線に地域按分比率を掛けたもの。バンコクは震源から遠いが、軟弱地盤による増幅で高層建物の被害が生じる点は 2025 年に実証済み。", "assumptions_ja": ["按分比率 5% は仮定（GEM の地域別 AAL でバンコクは上位 10 に入らない）", "影響人口は高層建物からの一時避難者を想定"], "refs": []
+        }
+      },
+      "history": [
+        { "date": "2011-07〜12", "name_ja": "タイ大洪水（チャオプラヤー川流域）", "hazard": "flood", "deaths": 815, "damage_usd_m": 46500, "note_ja": "アユタヤ・パトゥムタニの 7 工業団地が浸水。被害・損失 1.43 兆バーツ（約 465 億 USD）は世界銀行の推計", "jp_ja": "約 450 社の日系工場が被災（JETRO 等）。自動車・電機のサプライチェーンが数か月停止", "src": "https://www.worldbank.org/en/country/thailand/publication/thai-flood-2011-rapid-assessment", "src_name": "World Bank", "confirmed_by": "unverified" },
+        { "date": "2025-03-28", "name_ja": "ミャンマー M7.7 地震のバンコクへの影響", "hazard": "quake", "deaths": 103, "damage_usd_m": null, "note_ja": "チャトゥチャック区で建設中の高層ビルが崩壊。死者数は GEM プロファイルが挙げるタイ国内の値", "jp_ja": "高層オフィス・コンドで一時避難。日系企業の多くが安否確認を実施", "src": "https://github.com/gem/risk-profiles", "src_name": "GEM", "confirmed_by": "page_read" }
+      ],
+      "season": { "flood": { "months": [8, 9, 10, 11], "note_ja": "雨季後半、北部の流量が到達" }, "urban_flood": { "months": [5, 6, 7, 8, 9, 10], "note_ja": "雨季のスコール" }, "heat": { "months": [3, 4, 5], "note_ja": "暑季。4 月が最高" }, "haze": { "months": [12, 1, 2, 3], "note_ja": "乾季の野焼き・滞留" } },
+      "sources": []
+    },
+    {
+      "id": "th-ayut", "name_ja": "アユタヤ県（工業団地地帯）", "name_en": "Phra Nakhon Si Ayutthaya", "country": "THA",
+      "adm1_ids": ["THA-412"], "center": [100.57, 14.35],
+      "pop_m": 0.82, "pop_src": "県人口の概数（仮定）",
+      "desc_ja": "バンコクの北約 70 km。ロジャナ・ハイテク・バンパインなど日系工場が集まる工業団地が、2011 年に軒並み浸水した。",
+      "th_url": "https://thinkhazard.org/en/report/2862",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard のアユタヤ県の水準は本セッションで未取得（調査中）。",
+      "rp": {
+        "flood": {
+          "anchor_ja": "アンカー：2011 年にロジャナ工業団地で約 2 m の浸水、操業再開まで数か月。県内の製造業損失を約 120 億 USD と仮定（世界銀行の製造業損失 320 億 USD の一部）。",
+          "k": { "10": 0.2, "50": 0.75, "100": 1.0, "500": 1.2, "1000": 1.3 },
+          "scen": { "10": "団地外の低地で浸水。団地は堤防内で操業継続", "50": "堤防の一部越水。1 階の設備が被害、数週間停止", "100": "2011 年級。団地全域が 2 m 前後浸水、3〜4 か月停止", "500": "2011 年を超える水位。堤防の広域破堤", "1000": "上流ダムの異常放流を伴う複合事象" },
+          "depth_max": 2.5, "area_max": 70, "pop_max": 0.6, "downtime_max": 120, "loss_max": 12000,
+          "method_ja": "損失＝アンカー損失 × k。操業停止日数は 2011 年の実績（約 4 か月）を上限とする。", "assumptions_ja": ["2011 年の再現期間を 70〜100 年と仮定", "団地の周囲堤防は 2011 年後に整備されたため、同規模でも被害は小さくなりうる（モデルでは未考慮）"], "refs": [{ "name": "World Bank 2011 Rapid Assessment", "url": "https://www.worldbank.org/en/country/thailand/publication/thai-flood-2011-rapid-assessment" }]
+        },
+        "quake": { "anchor_ja": "GEM 全国曲線に按分比率 1% を仮定。", "k": { "10": 0.1, "50": 0.4, "100": 0.6, "500": 0.9, "1000": 1.0 }, "share": 0.01, "scen": { "10": "軽微", "50": "遠方地震で軽微", "100": "遠方 M7.7 級で軽微〜非構造被害", "500": "不確実", "1000": "不確実" }, "pop_max": 0.005, "downtime_max": 2, "method_ja": "GEM 全国曲線 × 按分比率。", "assumptions_ja": ["按分 1% は仮定"], "refs": [] }
+      },
+      "history": [
+        { "date": "2011-10", "name_ja": "ロジャナ・ハイテク・バンパイン等 7 工業団地の浸水", "hazard": "flood", "deaths": null, "damage_usd_m": null, "note_ja": "10 月上旬から中旬にかけて相次いで浸水。排水と復旧に数か月", "jp_ja": "日系の自動車・電機部品工場が長期停止。代替生産・金型退避の教訓", "src": "https://www.worldbank.org/en/country/thailand/publication/thai-flood-2011-rapid-assessment", "src_name": "World Bank", "confirmed_by": "unverified" }
+      ],
+      "season": { "flood": { "months": [8, 9, 10, 11], "note_ja": "10 月が最も危険" }, "heat": { "months": [3, 4, 5] } },
+      "sources": []
+    },
+    {
+      "id": "id-jkt", "name_ja": "ジャカルタ首都圏", "name_en": "DKI Jakarta", "country": "IDN",
+      "adm1_ids": ["IDN-1227"], "center": [106.83, -6.2],
+      "pop_m": 10.6, "pop_src": "DKI ジャカルタ州の概数（仮定）。周辺を含む都市圏は 3,000 万超",
+      "desc_ja": "13 本の川が流れ込む沖積低地で、北部は地盤沈下が進む。雨季（12〜3 月）の広域洪水が繰り返され、地震は海溝型・内陸型の双方が脅威。",
+      "th_url": "https://thinkhazard.org/en/report/1167-indonesia-dki-jakarta",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard の DKI ジャカルタの水準は調査中。",
+      "rp": {
+        "flood": { "anchor_ja": "アンカー：2020 年 1 月の洪水（死者 66 人・BNPB）と 2007 年 2 月の洪水を 10〜25 年級と仮定し、損失上限を 2007 年級の数倍と置く。", "k": { "10": 0.45, "50": 0.8, "100": 1.0, "500": 1.2, "1000": 1.3 }, "scen": { "10": "2020 年級。低地の住宅地が 1〜2 m 浸水、数日で引く", "50": "2007 年級。市域の 6 割が浸水、空港アクセス遮断", "100": "長期の広域浸水と北部の高潮が重なる", "500": "海岸堤防の破堤と地盤沈下域の長期湛水", "1000": "複合事象" }, "depth_max": 2.5, "area_max": 45, "pop_max": 0.3, "downtime_max": 14, "loss_max": 2500, "method_ja": "損失＝アンカー損失 × k。", "assumptions_ja": ["2007 年洪失の損失推計には幅があり、ここでは 100 年級の損失を 25 億 USD と仮定"], "refs": [] },
+        "quake": { "anchor_ja": "GEM 全国曲線に DKI ジャカルタの按分 6.6%（GEM の地域別 AAL 4,560 万 USD ÷ 全国 6.93 億 USD）。", "k": { "10": 0.3, "50": 0.6, "100": 0.8, "500": 0.95, "1000": 1.0 }, "share": 0.066, "scen": { "10": "ジャワ南岸の中規模地震で軽微な揺れ", "50": "M7 級の海溝型地震で高層建物の非構造被害", "100": "近傍断層または大規模海溝型地震。老朽建物の倒壊", "500": "首都直下の断層活動", "1000": "最悪ケース" }, "pop_max": 0.3, "downtime_max": 21, "method_ja": "GEM 全国曲線 × 按分比率。", "assumptions_ja": ["按分は AAL ベースで、再現期間ごとの分布は全国と同じと仮定"], "refs": [] }
+      },
+      "history": [
+        { "date": "2020-01", "name_ja": "ジャカルタ首都圏の洪水", "hazard": "flood", "deaths": 66, "damage_usd_m": null, "note_ja": "元日の記録的豪雨。市内の多くの地区が浸水", "jp_ja": "中心部の通勤困難。ブカシ・カラワン工業団地周辺でも浸水", "src": "https://bnpb.go.id/", "src_name": "BNPB", "confirmed_by": "unverified" },
+        { "date": "2018-09-28", "name_ja": "スラウェシ島（パル）地震・津波", "hazard": "quake", "deaths": 4340, "damage_usd_m": null, "note_ja": "M7.5。津波と液状化（GEM プロファイルの値）", "src": "https://github.com/gem/risk-profiles", "src_name": "GEM", "confirmed_by": "page_read" },
+        { "date": "2006-05-27", "name_ja": "ジョグジャカルタ地震", "hazard": "quake", "deaths": 5749, "damage_usd_m": null, "note_ja": "M6.3（GEM プロファイルの値）", "src": "https://github.com/gem/risk-profiles", "src_name": "GEM", "confirmed_by": "page_read" }
+      ],
+      "season": { "flood": { "months": [12, 1, 2, 3], "note_ja": "雨季。1〜2 月がピーク" }, "haze": { "months": [8, 9, 10], "note_ja": "乾季の泥炭火災（年により差）" }, "heat": { "months": [9, 10, 11] } },
+      "sources": []
+    },
+    {
+      "id": "ph-mnl", "name_ja": "マニラ首都圏", "name_en": "Metro Manila (NCR)", "country": "PHL",
+      "adm1_ids": ["PHL-5543", "PHL-5549", "PHL-5553", "PHL-5558", "PHL-5552", "PHL-5550", "PHL-5554", "PHL-5555", "PHL-5542", "PHL-5551", "PHL-5545", "PHL-5556", "PHL-5557", "PHL-5559", "PHL-5546", "PHL-5544", "PHL-5547"], "center": [121.03, 14.6],
+      "pop_m": 13.5, "pop_src": "2020 年国勢調査の概数（仮定）",
+      "desc_ja": "17 市区からなる首都圏。東側を西バレー断層が縦断し、年 20 前後の台風が国内に接近する。",
+      "th_url": "https://thinkhazard.org/en/report/2041-philippines-national-capital-region",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard の NCR の水準は調査中。",
+      "rp": {
+        "quake": { "anchor_ja": "GEM 全国曲線に NCR の按分 19%（GEM の地域別 AAL 5,290 万 USD ÷ 全国 2.76 億 USD）。西バレー断層の M7.2 は MMEIRS（2004 年）が想定し、断層の活動間隔は 400〜600 年とされる。", "k": { "10": 0.2, "50": 0.5, "100": 0.7, "500": 1.0, "1000": 1.05 }, "share": 0.19, "scen": { "10": "M5〜6 級。軽微", "50": "M6.5 級の近傍地震。非構造被害", "100": "M7 級。老朽建物の倒壊、ライフライン途絶", "500": "西バレー断層 M7.2（MMEIRS 想定：死者約 3.4 万人）", "1000": "最悪ケース" }, "pop_max": 0.6, "downtime_max": 30, "method_ja": "GEM 全国曲線 × 按分比率。人的被害は MMEIRS の値を 500 年級の目安として参照。", "assumptions_ja": ["断層活動間隔 400〜600 年から M7.2 を 500 年級に対応付けた仮定"], "refs": [{ "name": "PHIVOLCS", "url": "https://www.phivolcs.dost.gov.ph/" }] },
+        "cyclone": { "anchor_ja": "アンカー：2009 年台風ケッツァーナ（オンドイ）で首都圏の広域が浸水。損失は仮定。", "k": { "10": 0.35, "50": 0.75, "100": 1.0, "500": 1.25, "1000": 1.4 }, "scen": { "10": "毎年規模。シグナル 2〜3 で休校・在宅勤務", "50": "2009 年級。マリキナ川氾濫、首都圏の広域浸水", "100": "強い台風の直撃。長期停電・高潮", "500": "スーパー台風の直撃", "1000": "最悪ケース" }, "depth_max": 3.0, "area_max": 50, "pop_max": 0.4, "downtime_max": 10, "loss_max": 1500, "method_ja": "損失＝アンカー損失 × k。", "assumptions_ja": ["100 年級の損失 15 億 USD は仮定"], "refs": [] }
+      },
+      "history": [
+        { "date": "2009-09-26", "name_ja": "台風ケッツァーナ（オンドイ）", "hazard": "cyclone", "deaths": null, "damage_usd_m": null, "note_ja": "6 時間で 341 mm の記録的降雨。首都圏の広域が浸水", "jp_ja": "マカティ・パシッグの日系オフィスで浸水・通勤不能", "src": "https://ndrrmc.gov.ph/", "src_name": "NDRRMC", "confirmed_by": "unverified" },
+        { "date": "2013-11-08", "name_ja": "台風ハイエン（ヨランダ）", "hazard": "cyclone", "deaths": null, "damage_usd_m": null, "note_ja": "レイテ島タクロバンに高潮。国内最大級の被害", "src": "https://ndrrmc.gov.ph/", "src_name": "NDRRMC", "confirmed_by": "unverified" },
+        { "date": "1990-07-16", "name_ja": "ルソン島地震", "hazard": "quake", "deaths": 2430, "damage_usd_m": null, "note_ja": "M7.8（GEM プロファイルの値）", "src": "https://github.com/gem/risk-profiles", "src_name": "GEM", "confirmed_by": "page_read" },
+        { "date": "2020-01-12", "name_ja": "タール火山噴火", "hazard": "volcano", "deaths": null, "damage_usd_m": null, "note_ja": "首都圏に降灰。NAIA 一時閉鎖", "src": "https://www.phivolcs.dost.gov.ph/", "src_name": "PHIVOLCS", "confirmed_by": "unverified" }
+      ],
+      "season": { "cyclone": { "months": [7, 8, 9, 10, 11], "note_ja": "台風シーズン" }, "urban_flood": { "months": [6, 7, 8, 9, 10], "note_ja": "雨季・ハバガット" }, "heat": { "months": [3, 4, 5] } },
+      "sources": []
+    },
+    {
+      "id": "vn-hcm", "name_ja": "ホーチミン市", "name_en": "Ho Chi Minh City", "country": "VNM",
+      "adm1_ids": ["VNM-501"], "center": [106.7, 10.8],
+      "pop_m": 9.4, "pop_src": "市人口の概数（仮定）",
+      "desc_ja": "サイゴン川・ドンナイ川の低平地。潮位と豪雨の重なりによる冠水が頻発。台風は稀だが接近時の影響は大きい。",
+      "th_url": "https://thinkhazard.org/en/report/2789-viet-nam-ho-chi-minh",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard のホーチミン市の水準は調査中。",
+      "rp": {
+        "urban_flood": { "anchor_ja": "アンカー：大潮と豪雨の重なりで市内の幹線道路が冠水する年数回の事象。損失は仮定。", "k": { "10": 0.5, "50": 0.8, "100": 1.0, "500": 1.2, "1000": 1.3 }, "scen": { "10": "大潮時の道路冠水 30〜50 cm", "50": "豪雨＋大潮で 2 区・7 区・トゥードゥックの広域冠水", "100": "1 日以上の冠水と停電", "500": "高潮を伴う沿岸浸水", "1000": "複合事象" }, "depth_max": 0.8, "area_max": 25, "pop_max": 0.15, "downtime_max": 3, "loss_max": 400, "method_ja": "損失＝仮定損失 × k。", "assumptions_ja": ["100 年級の損失 4 億 USD は仮定"], "refs": [] },
+        "quake": { "anchor_ja": "GEM 全国曲線に按分 3% を仮定（ホーチミン市は上位 10 地域外）。", "k": { "10": 0.1, "50": 0.4, "100": 0.6, "500": 0.9, "1000": 1.0 }, "share": 0.03, "scen": { "10": "軽微", "50": "軽微", "100": "遠方地震で高層階が揺れる", "500": "不確実", "1000": "不確実" }, "pop_max": 0.01, "downtime_max": 2, "method_ja": "GEM 全国曲線 × 按分比率。", "assumptions_ja": ["按分 3% は仮定"], "refs": [] }
+      },
+      "history": [],
+      "season": { "urban_flood": { "months": [9, 10, 11, 12], "note_ja": "雨季後半と大潮" }, "cyclone": { "months": [10, 11, 12], "note_ja": "稀に南部へ接近" }, "heat": { "months": [3, 4, 5] } },
+      "sources": []
+    },
+    {
+      "id": "vn-han", "name_ja": "ハノイ", "name_en": "Ha Noi", "country": "VNM",
+      "adm1_ids": ["VNM-462"], "center": [105.85, 21.03],
+      "pop_m": 8.5, "pop_src": "市人口の概数（仮定）",
+      "desc_ja": "紅河デルタ。2024 年 9 月の台風ヤギでは紅河の水位上昇で市内の低地が浸水した。北部山地の断層による地震リスクは国内では高い方。",
+      "th_url": "https://thinkhazard.org/en/report/2781-viet-nam-ha-noi",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard のハノイの水準は調査中。",
+      "rp": {
+        "flood": { "anchor_ja": "アンカー：2024 年台風ヤギ（ベトナム北部）。損失は仮定。", "k": { "10": 0.3, "50": 0.7, "100": 1.0, "500": 1.25, "1000": 1.4 }, "scen": { "10": "市内低地の冠水", "50": "2024 年級。紅河の水位上昇、郊外の長期浸水", "100": "堤防の危険水位超過", "500": "紅河堤防の破堤", "1000": "複合事象" }, "depth_max": 2.0, "area_max": 30, "pop_max": 0.25, "downtime_max": 10, "loss_max": 1500, "method_ja": "損失＝仮定損失 × k。", "assumptions_ja": ["100 年級の損失 15 億 USD は仮定"], "refs": [] },
+        "quake": { "anchor_ja": "GEM 全国曲線にハノイの按分 21%（GEM 地域別 AAL 240 万 USD ÷ 全国 1,166 万 USD）。", "k": { "10": 0.2, "50": 0.5, "100": 0.7, "500": 0.95, "1000": 1.0 }, "share": 0.21, "scen": { "10": "軽微", "50": "北西部の断層による M6 級で揺れ", "100": "老朽建物の損傷", "500": "不確実", "1000": "不確実" }, "pop_max": 0.1, "downtime_max": 7, "method_ja": "GEM 全国曲線 × 按分比率。", "assumptions_ja": [], "refs": [] }
+      },
+      "history": [],
+      "season": { "flood": { "months": [7, 8, 9, 10], "note_ja": "台風・前線性豪雨" }, "cyclone": { "months": [7, 8, 9, 10] }, "heat": { "months": [5, 6, 7, 8], "note_ja": "40°C 近い熱波" } },
+      "sources": []
+    },
+    {
+      "id": "my-kl", "name_ja": "クアラルンプール・セランゴール", "name_en": "Kuala Lumpur / Selangor", "country": "MYS",
+      "adm1_ids": ["MYS-4831", "MYS-1148", "MYS-4832"], "center": [101.68, 3.15],
+      "pop_m": 8.4, "pop_src": "クランバレーの概数（仮定）",
+      "desc_ja": "クラン川流域。2021 年 12 月の豪雨でセランゴール州が広域浸水。乾季の煙霧（インドネシアの泥炭火災）が周期的に発生。地震・台風はほぼない。",
+      "th_url": "https://thinkhazard.org/en/report/1594-malaysia-selangor",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard のセランゴール州の水準は調査中。",
+      "rp": {
+        "flood": { "anchor_ja": "アンカー：2021 年 12 月の豪雨災害（セランゴール州を中心に大規模浸水）。損失は仮定。", "k": { "10": 0.3, "50": 0.8, "100": 1.0, "500": 1.2, "1000": 1.3 }, "scen": { "10": "クラン川沿いの冠水", "50": "2021 年級。シャアラム・クランの広域浸水", "100": "首都圏の長期浸水", "500": "複合事象", "1000": "最悪ケース" }, "depth_max": 2.5, "area_max": 30, "pop_max": 0.2, "downtime_max": 10, "loss_max": 2000, "method_ja": "損失＝仮定損失 × k。", "assumptions_ja": ["100 年級の損失 20 億 USD は仮定"], "refs": [] },
+        "quake": { "anchor_ja": "GEM 全国曲線にセランゴール＋KL の按分 41%（GEM 地域別 AAL）。絶対額は小さい。", "k": { "10": 0.1, "50": 0.4, "100": 0.6, "500": 0.9, "1000": 1.0 }, "share": 0.41, "scen": { "10": "スマトラの地震を遠方で感じる", "50": "高層階の長周期の揺れ", "100": "非構造被害", "500": "不確実", "1000": "不確実" }, "pop_max": 0.02, "downtime_max": 2, "method_ja": "GEM 全国曲線 × 按分比率。", "assumptions_ja": [], "refs": [] }
+      },
+      "history": [],
+      "season": { "flood": { "months": [11, 12, 1], "note_ja": "北東モンスーン" }, "haze": { "months": [8, 9, 10], "note_ja": "乾季の越境煙霧" }, "heat": { "months": [3, 4, 5] } },
+      "sources": []
+    },
+    {
+      "id": "sg", "name_ja": "シンガポール", "name_en": "Singapore", "country": "SGP",
+      "adm1_ids": ["SGP-4871", "SGP-4872", "SGP-4873", "SGP-4874", "SGP-4875"], "center": [103.82, 1.35],
+      "pop_m": 5.9, "pop_src": "GEM プロファイル（2026 年推計）",
+      "desc_ja": "自然災害リスクは域内で最も低いが、短時間の鉄砲水、越境煙霧、暑熱が生活上のリスク。周辺国で発災した際の退避先・支援拠点になりうる。",
+      "th_url": "https://thinkhazard.org/en/report/222-singapore",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard のシンガポールの水準は調査中。",
+      "rp": {
+        "urban_flood": { "anchor_ja": "アンカー：オーチャード通りなどの短時間の鉄砲水（数時間で解消）。損失は仮定。", "k": { "10": 0.5, "50": 0.8, "100": 1.0, "500": 1.2, "1000": 1.3 }, "scen": { "10": "局所的な鉄砲水", "50": "複数箇所の冠水、MRT 一部運休", "100": "広域の冠水", "500": "高潮との複合", "1000": "最悪ケース" }, "depth_max": 0.5, "area_max": 5, "pop_max": 0.02, "downtime_max": 1, "loss_max": 100, "method_ja": "損失＝仮定損失 × k。", "assumptions_ja": [], "refs": [] },
+        "quake": { "anchor_ja": "GEM 全国曲線（いずれの再現期間でも 100 万 USD 未満）。", "k": { "10": 0, "50": 0, "100": 0, "500": 0, "1000": 0 }, "share": 1.0, "scen": { "10": "スマトラの地震を遠方で感じる", "50": "同上", "100": "高層階で揺れを感じる", "500": "—", "1000": "—" }, "pop_max": 0, "downtime_max": 0, "method_ja": "GEM 全国曲線。", "assumptions_ja": [], "refs": [] }
+      },
+      "history": [],
+      "season": { "urban_flood": { "months": [11, 12, 1] }, "haze": { "months": [8, 9, 10], "note_ja": "2013・2015 年に PSI 300 超" }, "heat": { "months": [4, 5, 6] } },
+      "sources": []
+    },
+    {
+      "id": "mm-ygn", "name_ja": "ヤンゴン", "name_en": "Yangon", "country": "MMR",
+      "adm1_ids": ["MMR-3269"], "center": [96.16, 16.85],
+      "pop_m": 5.4, "pop_src": "市人口の概数（仮定）",
+      "desc_ja": "2008 年のサイクロン・ナルギスでエーヤワディ・デルタとヤンゴンが壊滅的被害。サガイン断層による地震リスクも高く、2025 年 3 月の M7.7 ではマンダレー・ネピドーで甚大な被害。",
+      "th_url": "https://thinkhazard.org/en/report/1740-myanmar-yangon",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard のヤンゴン管区の水準は調査中。",
+      "rp": {
+        "cyclone": { "anchor_ja": "アンカー：2008 年サイクロン・ナルギス（死者・行方不明約 13.8 万人）。損失は仮定。", "k": { "10": 0.2, "50": 0.6, "100": 1.0, "500": 1.2, "1000": 1.3 }, "scen": { "10": "ベンガル湾のサイクロンで強風・豪雨", "50": "デルタに高潮", "100": "ナルギス級の直撃", "500": "最悪ケース", "1000": "最悪ケース" }, "depth_max": 3.0, "area_max": 40, "pop_max": 0.5, "downtime_max": 30, "loss_max": 4000, "method_ja": "損失＝仮定損失 × k。", "assumptions_ja": ["ナルギスの経済損失を約 40 億 USD と仮定（PONJA 等の推計に幅）"], "refs": [] },
+        "quake": { "anchor_ja": "GEM 全国曲線にヤンゴンの按分 24%（GEM 地域別 AAL 1,300 万 USD ÷ 全国 5,450 万 USD）。", "k": { "10": 0.2, "50": 0.5, "100": 0.7, "500": 0.95, "1000": 1.0 }, "share": 0.24, "scen": { "10": "軽微", "50": "サガイン断層南部の M6 級", "100": "1930 年バゴー地震級（M7.3）", "500": "ヤンゴン直下", "1000": "最悪ケース" }, "pop_max": 0.4, "downtime_max": 21, "method_ja": "GEM 全国曲線 × 按分比率。", "assumptions_ja": [], "refs": [] }
+      },
+      "history": [
+        { "date": "2025-03-28", "name_ja": "ミャンマー中部地震（マンダレー・サガイン）", "hazard": "quake", "deaths": 5352, "damage_usd_m": null, "note_ja": "M7.7・サガイン断層。死者数は GEM プロファイルの値", "src": "https://github.com/gem/risk-profiles", "src_name": "GEM", "confirmed_by": "page_read" },
+        { "date": "2008-05-02", "name_ja": "サイクロン・ナルギス", "hazard": "cyclone", "deaths": null, "damage_usd_m": null, "note_ja": "エーヤワディ・デルタに高潮。死者・行方不明は約 13.8 万人とされる", "src": "https://reliefweb.int/", "src_name": "ReliefWeb", "confirmed_by": "unverified" }
+      ],
+      "season": { "cyclone": { "months": [4, 5, 10, 11], "note_ja": "モンスーン前後" }, "flood": { "months": [6, 7, 8, 9] }, "heat": { "months": [3, 4, 5] } },
+      "sources": []
+    },
+    {
+      "id": "kh-pnh", "name_ja": "プノンペン", "name_en": "Phnom Penh", "country": "KHM",
+      "adm1_ids": ["KHM-1789"], "center": [104.92, 11.56],
+      "pop_m": 2.3, "pop_src": "市人口の概数（仮定）",
+      "desc_ja": "メコン川・トンレサップ川の合流点。メコンの増水と都市排水の不足による冠水が主なリスク。地震・台風はほぼない。",
+      "th_url": "https://thinkhazard.org/en/report/1252-cambodia-phnom-penh",
+      "hazards": {},
+      "hz_note_ja": "ThinkHazard のプノンペン都の水準は調査中。",
+      "rp": {
+        "flood": { "anchor_ja": "アンカー：2011 年メコン川洪水（カンボジア全土で死者約 250 人）。損失は仮定。", "k": { "10": 0.3, "50": 0.7, "100": 1.0, "500": 1.2, "1000": 1.3 }, "scen": { "10": "郊外低地の浸水", "50": "2011 年級。郊外と市街の一部が長期浸水", "100": "広域の長期浸水", "500": "複合事象", "1000": "最悪ケース" }, "depth_max": 1.5, "area_max": 30, "pop_max": 0.2, "downtime_max": 14, "loss_max": 500, "method_ja": "損失＝仮定損失 × k。", "assumptions_ja": ["100 年級の損失 5 億 USD は仮定"], "refs": [] },
+        "quake": { "anchor_ja": "GEM 全国曲線（カンボジア全体で損失はほぼゼロ）。", "k": { "10": 0, "50": 0, "100": 0, "500": 0, "1000": 1 }, "share": 1.0, "scen": { "10": "—", "50": "—", "100": "—", "500": "—", "1000": "軽微" }, "pop_max": 0, "downtime_max": 0, "method_ja": "GEM 全国曲線。", "assumptions_ja": [], "refs": [] }
+      },
+      "history": [],
+      "season": { "flood": { "months": [8, 9, 10, 11], "note_ja": "メコンの増水期" }, "heat": { "months": [3, 4, 5] } },
+      "sources": []
+    }
+  ]
+}

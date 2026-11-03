@@ -1,0 +1,30 @@
+{
+  "_note": "備えの根拠となる公的ガイダンス。key は拠点チェックリストから参照される。confirmed_by は本セッションでの確認状況。",
+  "items": [
+    { "key": "naikakufu_stock", "audience": "both", "category_ja": "備蓄", "recommendation_ja": "飲料水は 1 人 1 日 3 リットル、食料とあわせて最低 3 日分、できれば 1 週間分を備蓄する", "quantitative": "3L/人/日・3〜7 日", "source_name": "内閣府 防災情報のページ", "source_url": "https://www.bousai.go.jp/kyoiku/keigen/gensai/kiroku/bichiku.html", "confirmed_by": "unverified" },
+    { "key": "naikakufu_bcp", "audience": "company", "category_ja": "BCP", "recommendation_ja": "重要業務の特定、目標復旧時間（RTO）、代替戦略、安否確認、訓練と見直しを含む事業継続計画を策定する", "source_name": "内閣府 事業継続ガイドライン", "source_url": "https://www.bousai.go.jp/kyoiku/kigyou/keizoku/sk_04.html", "confirmed_by": "unverified" },
+    { "key": "chusho_bcp", "audience": "company", "category_ja": "BCP", "recommendation_ja": "中小企業向けに、緊急時の体制・連絡網・安否確認・取引先との連携を含む BCP の策定と運用を示す指針", "source_name": "中小企業庁 BCP 策定運用指針", "source_url": "https://www.chusho.meti.go.jp/bcp/", "confirmed_by": "unverified" },
+    { "key": "mofa_orr", "audience": "both", "category_ja": "連絡", "recommendation_ja": "3 か月以上の滞在者は在留届を提出し、短期滞在者はたびレジに登録して緊急時の連絡を受け取れるようにする", "source_name": "外務省 海外安全ホームページ", "source_url": "https://www.anzen.mofa.go.jp/", "confirmed_by": "unverified" },
+    { "key": "mofa_ryoji", "audience": "both", "category_ja": "情報", "recommendation_ja": "在外公館の領事メール・緊急一斉通報を受信できる状態にしておく", "source_name": "外務省 海外安全ホームページ", "source_url": "https://www.anzen.mofa.go.jp/", "confirmed_by": "unverified" },
+    { "key": "mofa_tora", "audience": "both", "category_ja": "退避", "recommendation_ja": "緊急時の行動（在宅・国外退避・一時帰国）の判断基準と手順を事前に決めておく", "source_name": "外務省「海外安全 虎の巻」", "source_url": "https://www.anzen.mofa.go.jp/pamph/pamph_01.html", "confirmed_by": "unverified" },
+    { "key": "jetro_crisis", "audience": "company", "category_ja": "通信", "recommendation_ja": "通信途絶に備え、衛星電話など携帯網に依存しない連絡手段を拠点に置く", "source_name": "JETRO 海外安全対策", "source_url": "https://www.jetro.go.jp/", "confirmed_by": "unverified" },
+    { "key": "th_cb", "audience": "both", "category_ja": "警報", "recommendation_ja": "携帯向けの緊急速報（セルブロードキャスト）を受信できる設定にする", "source_name": "タイ DDPM", "source_url": "https://www.disaster.go.th/", "confirmed_by": "unverified" },
+    { "key": "th_ddpm", "audience": "company", "category_ja": "警報", "recommendation_ja": "DDPM・灌漑局・BMA の洪水情報を監視し、避難勧告の区域を確認する", "source_name": "タイ DDPM", "source_url": "https://www.disaster.go.th/", "confirmed_by": "unverified" },
+    { "key": "id_bmkg", "audience": "both", "category_ja": "警報", "recommendation_ja": "BMKG の公式アプリで地震・津波・気象警報を受信する", "source_name": "インドネシア BMKG", "source_url": "https://www.bmkg.go.id/", "confirmed_by": "unverified" },
+    { "key": "ph_ndrrmc", "audience": "both", "category_ja": "警報", "recommendation_ja": "NDRRMC の携帯一斉アラートと PHIVOLCS・PAGASA の速報を受信する", "source_name": "フィリピン NDRRMC", "source_url": "https://ndrrmc.gov.ph/", "confirmed_by": "unverified" },
+    { "key": "ph_dch", "audience": "both", "category_ja": "地震", "recommendation_ja": "揺れたら「Drop, Cover, Hold On」。揺れが収まってから階段で退避し、開けた場所に集合する", "source_name": "PHIVOLCS", "source_url": "https://www.phivolcs.dost.gov.ph/", "confirmed_by": "unverified" },
+    { "key": "fema_water", "audience": "both", "category_ja": "洪水", "recommendation_ja": "流れのある水は 15 cm（6 インチ）で転倒、30 cm（1 フィート）で車が流されうる。冠水した道路に入らない", "quantitative": "15cm／30cm", "source_name": "FEMA / NWS Turn Around Don't Drown", "source_url": "https://www.weather.gov/safety/flood-turn-around-dont-drown", "confirmed_by": "unverified" },
+    { "key": "sphere_water", "audience": "company", "category_ja": "支援基準", "recommendation_ja": "被災者 1 人あたり 1 日 15 リットルの水（飲用・調理・衛生）を最低基準とする", "quantitative": "15L/人/日", "source_name": "Sphere Handbook", "source_url": "https://spherestandards.org/handbook/", "confirmed_by": "unverified" }
+  ],
+  "health_after_disaster": [
+    { "hazard": "flood", "risk_ja": "レプトスピラ症", "advice_ja": "冠水した水に素足や傷のある手足で入らない。発熱・筋肉痛が出たら受診し、冠水に接触したことを伝える", "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods" },
+    { "hazard": "flood", "risk_ja": "デング熱", "advice_ja": "水が引いた後の溜まり水で蚊が増える。長袖・忌避剤、容器の水を捨てる", "source_url": "https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue" },
+    { "hazard": "flood", "risk_ja": "下痢症・水の汚染", "advice_ja": "飲料水は未開封のボトルか 1 分以上の煮沸。氷・生野菜を避ける", "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods" },
+    { "hazard": "flood", "risk_ja": "感電", "advice_ja": "浸水した建物ではブレーカーを落とす。水に浸かった電気機器に触れない", "source_url": "https://www.who.int/news-room/fact-sheets/detail/floods" },
+    { "hazard": "quake", "risk_ja": "余震と建物の再入館", "advice_ja": "外観が無事でも構造の安全が確認されるまで入らない。余震は数日〜数週間続く", "source_url": "https://www.who.int/health-topics/earthquakes" },
+    { "hazard": "quake", "risk_ja": "一酸化炭素中毒", "advice_ja": "発電機・炭火を屋内やベランダで使わない", "source_url": "https://www.who.int/health-topics/earthquakes" },
+    { "hazard": "quake", "risk_ja": "外傷の二次感染・破傷風", "advice_ja": "傷はきれいな水で洗い、10 年以内の破傷風ワクチン接種がなければ受診", "source_url": "https://www.who.int/health-topics/earthquakes" },
+    { "hazard": "quake", "risk_ja": "こころの不調", "advice_ja": "睡眠・食事のリズムを保ち、子どもには安心できる説明を。長引く場合は相談窓口へ", "source_url": "https://www.who.int/health-topics/earthquakes" },
+    { "hazard": "all", "risk_ja": "熱中症", "advice_ja": "屋外避難・停電時は日陰と水分・塩分。乳幼児・高齢者を優先して涼しい場所へ", "source_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health" }
+  ]
+}

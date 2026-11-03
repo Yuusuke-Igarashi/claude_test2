@@ -1,0 +1,146 @@
+{
+  "_note": "拠点周辺の概略図データ。施設の座標は公開情報（Wikipedia・公式サイト）から転記した近似値で、道路・水路は主要なもののみ折れ線で近似。浸水想定域（zones）は過去の浸水事例と地形からの仮定（デモ）。",
+  "areas": [
+    {
+      "area_id": "bkk_sukhumvit", "city_ja": "バンコク", "area_ja": "スクンビット（アソーク〜プロンポン〜トンロー）", "center_lat": 13.7340, "center_lon": 100.5640, "extent_km": 5.6, "rotation_deg": -24, "grid_m": 180,
+      "flood_context_ja": "バンコクは海抜 0〜2 m の低平なデルタ。2011 年の大洪水では北部・西部が長期浸水したが、スクンビットを含む中心部は防潮堤・土のうで守られた。雨季の集中豪雨ではセーンセープ運河周辺やスクンビットのソイで短時間の冠水が頻発する。",
+      "earthquake_context_ja": "タイ国内の地震ハザードは低いが、2025 年 3 月 28 日のミャンマー M7.7 地震ではバンコクの軟弱地盤が長周期の揺れを増幅し、チャトゥチャック区で建設中の高層ビルが崩壊した。高層階では家具の転倒・エレベーター停止に備える。",
+      "zone_src_ja": "2011 年洪水の浸水域（中心部は非浸水）と雨季の冠水常襲箇所からの仮定",
+      "sources": [ { "name": "World Bank: Thai Flood 2011 Rapid Assessment", "url": "https://www.worldbank.org/en/country/thailand/publication/thai-flood-2011-rapid-assessment" }, { "name": "ThinkHazard! Bangkok", "url": "https://thinkhazard.org/en/report/2853-thailand-bangkok" } ],
+      "roads": [
+        { "name": "スクンビット通り (Sukhumvit Rd)", "major": true, "label_offset": "40%", "pts": [[13.7437, 100.5470], [13.7405, 100.5553], [13.7372, 100.5603], [13.7305, 100.5695], [13.7243, 100.5787], [13.7196, 100.5852]] },
+        { "name": "ラーマ4世通り (Rama IV Rd)", "major": true, "label_offset": "45%", "pts": [[13.7295, 100.5360], [13.7250, 100.5480], [13.7225, 100.5580], [13.7180, 100.5700], [13.7150, 100.5820]] },
+        { "name": "アソーク通り／ラチャダーピセーク (Asok Montri Rd)", "major": true, "label_offset": "15%", "pts": [[13.7520, 100.5625], [13.7372, 100.5603], [13.7290, 100.5597], [13.7230, 100.5600]] },
+        { "name": "ペッブリー通り (Phetchaburi Rd)", "major": true, "label_offset": "55%", "pts": [[13.7500, 100.5400], [13.7495, 100.5620], [13.7480, 100.5800], [13.7470, 100.5950]] },
+        { "name": "ウィッタユ通り (Wireless Rd)", "major": false, "label_offset": "40%", "pts": [[13.7437, 100.5478], [13.7340, 100.5472], [13.7275, 100.5470]] },
+        { "name": "スクンビット Soi 23 / 31", "major": false, "label_offset": "30%", "pts": [[13.7380, 100.5620], [13.7440, 100.5660], [13.7470, 100.5690]] },
+        { "name": "トンロー通り (Soi 55)", "major": false, "label_offset": "30%", "pts": [[13.7243, 100.5787], [13.7330, 100.5820], [13.7420, 100.5840]] }
+      ],
+      "rails": [ { "name": "BTS スクンビット線", "pts": [[13.7437, 100.5470], [13.7405, 100.5553], [13.7372, 100.5603], [13.7305, 100.5695], [13.7243, 100.5787], [13.7196, 100.5852]] }, { "name": "MRT ブルーライン", "pts": [[13.7520, 100.5625], [13.7372, 100.5603], [13.7235, 100.5600], [13.7225, 100.5580], [13.7250, 100.5480], [13.7295, 100.5360]] } ],
+      "water": [ { "name": "セーンセープ運河 (Khlong Saen Saep)", "kind": "canal", "width_m": 25, "pts": [[13.7510, 100.5380], [13.7500, 100.5500], [13.7490, 100.5640], [13.7478, 100.5800], [13.7462, 100.5960]] }, { "name": "ベンジャキティ公園の湖", "kind": "lake", "pts": [[13.7310, 100.5570], [13.7310, 100.5615], [13.7265, 100.5615], [13.7265, 100.5570]] } ],
+      "pois": [
+        { "name": "Bumrungrad International Hospital", "name_ja": "バムルンラード病院", "kind": "hospital", "lat": 13.7440, "lon": 100.5530, "why_ja": "日本語通訳・日本人向け窓口のある私立病院（Soi 3）", "source_url": "https://www.bumrungrad.com/", "label_dx": -9, "label_dy": -9 },
+        { "name": "Samitivej Sukhumvit Hospital", "name_ja": "サミティベート病院", "kind": "hospital", "lat": 13.7367, "lon": 100.5781, "why_ja": "日本人医療部のある私立病院（Soi 49）", "source_url": "https://www.samitivejhospitals.com/" },
+        { "name": "Benjakitti Park", "name_ja": "ベンジャキティ公園", "kind": "park_open_space", "lat": 13.7285, "lon": 100.5595, "radius_m": 300, "shelter_for": ["quake", "fire"], "cap": 20000, "why_ja": "広い芝生と湿地公園。地震後の一時集合に適する（低地のため洪水時は不可）", "source_url": "https://en.wikipedia.org/wiki/Benjakitti_Park", "label_dx": 10, "label_dy": 14 },
+        { "name": "Lumphini Park", "name_ja": "ルンピニー公園", "kind": "park_open_space", "lat": 13.7310, "lon": 100.5415, "radius_m": 330, "shelter_for": ["quake", "fire"], "cap": 30000, "why_ja": "市内最大級の公園。大使館に近い", "source_url": "https://en.wikipedia.org/wiki/Lumphini_Park", "label_dx": -58, "label_dy": -14 },
+        { "name": "Queen Sirikit National Convention Center", "name_ja": "クイーンシリキット・センター", "kind": "mall_highrise", "lat": 13.7236, "lon": 100.5600, "floors": 5, "shelter_for": ["flood", "fire"], "cap": 5000, "why_ja": "大規模な屋内空間。洪水時の仮設避難所候補（市との協定が前提）", "source_url": "https://en.wikipedia.org/wiki/Queen_Sirikit_National_Convention_Center", "label_dx": 10, "label_dy": 12 },
+        { "name": "Embassy of Japan", "name_ja": "在タイ日本国大使館", "kind": "embassy", "lat": 13.7337, "lon": 100.5478, "why_ja": "領事窓口。緊急時の邦人保護・情報提供（避難所ではない）", "source_url": "https://www.th.emb-japan.go.jp/", "label_dx": 9, "label_dy": -8 },
+        { "name": "BTS Asok / MRT Sukhumvit", "name_ja": "アソーク駅", "kind": "station", "lat": 13.7372, "lon": 100.5603, "why_ja": "BTS と MRT の乗換駅。高架駅は短時間の冠水退避にも使われる", "source_url": "https://en.wikipedia.org/wiki/Asok_BTS_station", "label_dx": 9, "label_dy": 13 },
+        { "name": "BTS Phrom Phong", "name_ja": "プロンポン駅", "kind": "station", "lat": 13.7305, "lon": 100.5695, "source_url": "https://en.wikipedia.org/wiki/Phrom_Phong_BTS_station", "label_dx": 9, "label_dy": 13 },
+        { "name": "BTS Thong Lo", "name_ja": "トンロー駅", "kind": "station", "lat": 13.7243, "lon": 100.5787, "source_url": "https://en.wikipedia.org/wiki/Thong_Lo_BTS_station", "label_dx": 9, "label_dy": 13 },
+        { "name": "Terminal 21", "name_ja": "ターミナル21", "kind": "mall_highrise", "lat": 13.7378, "lon": 100.5608, "floors": 9, "shelter_for": ["flood", "fire"], "cap": 4000, "why_ja": "アソーク駅直結の商業施設。上層階への垂直避難候補", "source_url": "https://en.wikipedia.org/wiki/Terminal_21_(Bangkok)", "label_dx": 9, "label_dy": -8 },
+        { "name": "EmQuartier", "name_ja": "エムクオーティエ", "kind": "mall_highrise", "lat": 13.7315, "lon": 100.5692, "floors": 9, "shelter_for": ["flood", "fire"], "cap": 5000, "why_ja": "プロンポン駅直結の大型商業施設。垂直避難候補", "source_url": "https://en.wikipedia.org/wiki/EmQuartier", "label_dx": 9, "label_dy": -8 },
+        { "name": "Japanese Association in Thailand", "name_ja": "タイ国日本人会", "kind": "government", "lat": 13.7430, "lon": 100.5690, "why_ja": "邦人コミュニティの拠点。領事出張サービスなどの会場になることがある（位置は概略）", "source_url": "https://www.jat.or.th/", "label_dx": 9, "label_dy": -8 },
+        { "name": "Chulalongkorn Hospital", "name_ja": "チュラロンコン病院", "kind": "hospital", "lat": 13.7325, "lon": 100.5365, "why_ja": "公立の大規模総合病院（ラーマ4世通り）", "source_url": "https://en.wikipedia.org/wiki/King_Chulalongkorn_Memorial_Hospital", "label_dx": -9, "label_dy": 14 }
+      ],
+      "homes": [ { "name_ja": "スクンビット Soi 24（プロンポン）・高層コンド", "lat": 13.7280, "lon": 100.5660 }, { "name_ja": "トンロー Soi 13・高層コンド", "lat": 13.7300, "lon": 100.5810 }, { "name_ja": "アソーク Soi 23・サービスアパート", "lat": 13.7420, "lon": 100.5640 }, { "name_ja": "ラーマ4世通り南側（クロントゥーイ）・低層アパート", "lat": 13.7190, "lon": 100.5650 } ],
+      "zones": {
+        "flood": [ { "depth_m": 0.8, "note_ja": "セーンセープ運河沿いの低地（仮定）", "pts": [[13.7560, 100.5350], [13.7560, 100.6000], [13.7455, 100.6000], [13.7470, 100.5600], [13.7480, 100.5350]] }, { "depth_m": 0.5, "note_ja": "クロントゥーイ港側の低地（仮定）", "pts": [[13.7200, 100.5500], [13.7190, 100.5900], [13.7080, 100.5900], [13.7080, 100.5500]] } ],
+        "urban_flood": [ { "depth_m": 0.4, "note_ja": "スクンビット Soi 21〜31 の冠水常襲箇所（仮定）", "pts": [[13.7400, 100.5620], [13.7450, 100.5700], [13.7400, 100.5720], [13.7360, 100.5640]] }, { "depth_m": 0.4, "note_ja": "Soi 39〜トンロー周辺（仮定）", "pts": [[13.7330, 100.5740], [13.7360, 100.5820], [13.7300, 100.5840], [13.7280, 100.5760]] }, { "depth_m": 0.3, "note_ja": "ペッブリー通り・運河沿い（仮定）", "pts": [[13.7510, 100.5450], [13.7505, 100.5800], [13.7465, 100.5800], [13.7470, 100.5450]] } ],
+        "quake": [ { "depth_m": 1, "note_ja": "高層建物の密集帯（ガラス・外装の落下、長周期地震動）", "pts": [[13.7420, 100.5540], [13.7400, 100.5720], [13.7280, 100.5760], [13.7300, 100.5560]] } ]
+      }
+    },
+    {
+      "area_id": "ayutthaya_rojana", "city_ja": "アユタヤ", "area_ja": "ロジャナ工業団地〜アユタヤ市街", "center_lat": 14.3380, "center_lon": 100.6080, "extent_km": 12, "rotation_deg": 8, "grid_m": 420,
+      "flood_context_ja": "2011 年の洪水では 10 月にロジャナ、ハイテク、バンパイン、サハラッタナナコンなどアユタヤ県の工業団地が相次いで浸水し、数百社の日系工場が数か月操業を停止した。地域全体が低平で、水は北から南へゆっくり移動するため、避難の時間はあるが退避先が遠い。",
+      "earthquake_context_ja": "地震ハザードは低い。ただしアユタヤ遺跡の煉瓦造建造物は小規模な揺れでも損傷しうる。",
+      "zone_src_ja": "2011 年洪水の浸水域（工業団地・市街地の大部分）からの仮定",
+      "sources": [ { "name": "World Bank: Thai Flood 2011 Rapid Assessment", "url": "https://www.worldbank.org/en/country/thailand/publication/thai-flood-2011-rapid-assessment" }, { "name": "ThinkHazard! Phra Nakhon Si Ayutthaya", "url": "https://thinkhazard.org/en/report/2862" } ],
+      "roads": [
+        { "name": "ロジャナ通り (Rojana Rd / Route 3056)", "major": true, "label_offset": "55%", "pts": [[14.3480, 100.5900], [14.3400, 100.6100], [14.3290, 100.6300], [14.3200, 100.6500]] },
+        { "name": "国道1号 パホンヨーティン通り (AH1)", "major": true, "label_offset": "20%", "pts": [[14.4000, 100.6550], [14.3400, 100.6450], [14.2900, 100.6350], [14.2400, 100.6200]] },
+        { "name": "ウートン通り (U-Thong Rd・市街環状)", "major": false, "label_offset": "30%", "pts": [[14.3600, 100.5500], [14.3650, 100.5750], [14.3500, 100.5850], [14.3400, 100.5700], [14.3450, 100.5500]] },
+        { "name": "国道 347 号（バンコク方面）", "major": true, "label_offset": "40%", "pts": [[14.3200, 100.5600], [14.2800, 100.5650], [14.2400, 100.5750]] }
+      ],
+      "rails": [ { "name": "国鉄北本線", "pts": [[14.4000, 100.6300], [14.3500, 100.6150], [14.3000, 100.6100], [14.2400, 100.6050]] } ],
+      "water": [ { "name": "パーサック川 (Pa Sak)", "kind": "canal", "width_m": 120, "pts": [[14.4000, 100.6050], [14.3700, 100.6000], [14.3550, 100.5900], [14.3450, 100.5950], [14.3300, 100.5850], [14.3100, 100.5800]] }, { "name": "チャオプラヤー川", "kind": "canal", "width_m": 220, "pts": [[14.3800, 100.5400], [14.3550, 100.5500], [14.3400, 100.5600], [14.3200, 100.5500], [14.2900, 100.5450]] } ],
+      "pois": [
+        { "name": "Rojana Industrial Park (Ayutthaya)", "name_ja": "ロジャナ工業団地", "kind": "industrial_estate", "lat": 14.3235, "lon": 100.6325, "why_ja": "2011 年に全域が浸水。洪水後に周囲堤防を整備", "source_url": "https://www.rojana.com/", "label_dx": 9, "label_dy": 14 },
+        { "name": "Hi-Tech Industrial Estate", "name_ja": "ハイテク工業団地", "kind": "industrial_estate", "lat": 14.2500, "lon": 100.6050, "why_ja": "バンパイン郡。2011 年に浸水", "source_url": "https://en.wikipedia.org/wiki/2011_Thailand_floods" },
+        { "name": "Ayutthaya Hospital", "name_ja": "アユタヤ病院（県立）", "kind": "hospital", "lat": 14.3520, "lon": 100.5790, "why_ja": "県の基幹病院。2011 年は周辺が浸水", "source_url": "https://en.wikipedia.org/wiki/Phra_Nakhon_Si_Ayutthaya" },
+        { "name": "Ayutthaya City Park (mall)", "name_ja": "アユタヤ・シティパーク（商業施設）", "kind": "mall_highrise", "lat": 14.3330, "lon": 100.5990, "floors": 3, "shelter_for": ["flood", "fire"], "cap": 3000, "why_ja": "数少ない大型の多層建物。短期の垂直避難候補（長期は広域退避）", "source_url": "https://en.wikipedia.org/wiki/Phra_Nakhon_Si_Ayutthaya", "label_dx": 9, "label_dy": -8 },
+        { "name": "Rojana admin building", "name_ja": "ロジャナ管理棟（3 階）", "kind": "mall_highrise", "lat": 14.3260, "lon": 100.6290, "floors": 3, "shelter_for": ["flood", "fire"], "cap": 400, "why_ja": "団地内の自社管理棟。退避前の一時集合・資材退避先", "source_url": "https://www.rojana.com/", "label_dx": -9, "label_dy": -9 },
+        { "name": "Ayutthaya Historical Park", "name_ja": "アユタヤ歴史公園", "kind": "park_open_space", "lat": 14.3560, "lon": 100.5600, "radius_m": 500, "shelter_for": ["quake", "fire"], "cap": 20000, "why_ja": "広い開放空間。地震時の一時集合向き（洪水時は不可）", "source_url": "https://en.wikipedia.org/wiki/Ayutthaya_Historical_Park", "label_dx": -70, "label_dy": -16 },
+        { "name": "Ayutthaya railway station", "name_ja": "アユタヤ駅", "kind": "station", "lat": 14.3480, "lon": 100.5860, "why_ja": "鉄道での広域退避の起点（運行状況に依存）", "source_url": "https://en.wikipedia.org/wiki/Ayutthaya_railway_station" },
+        { "name": "Bang Pa-in Industrial Estate", "name_ja": "バンパイン工業団地", "kind": "industrial_estate", "lat": 14.2420, "lon": 100.5980, "why_ja": "2011 年に浸水", "source_url": "https://en.wikipedia.org/wiki/2011_Thailand_floods", "label_dx": -9, "label_dy": 14 },
+        { "name": "Highland staging (Saraburi direction)", "name_ja": "広域退避の集合地点（国道1号 北東側）", "kind": "other", "lat": 14.3950, "lon": 100.6550, "shelter_for": ["flood"], "cap": 2000, "why_ja": "浸水域の外へ出るための集合地点（仮定）。実際の退避先はサラブリー・バンコク方面のホテル", "source_url": "https://en.wikipedia.org/wiki/2011_Thailand_floods", "label_dx": -9, "label_dy": -9 }
+      ],
+      "homes": [ { "name_ja": "アユタヤ市内 サービスアパート", "lat": 14.3520, "lon": 100.5850 }, { "name_ja": "ロジャナ近接の戸建て（団地東側）", "lat": 14.3300, "lon": 100.6420 } ],
+      "zones": {
+        "flood": [ { "depth_m": 2.0, "note_ja": "工業団地と周辺低地（2011 年は約 2 m）", "pts": [[14.3500, 100.6050], [14.3450, 100.6600], [14.2300, 100.6500], [14.2300, 100.5800], [14.3100, 100.5750]] }, { "depth_m": 1.2, "note_ja": "市街地（2011 年に浸水）", "pts": [[14.3750, 100.5450], [14.3700, 100.6050], [14.3450, 100.6040], [14.3300, 100.5700], [14.3350, 100.5450]] } ],
+        "urban_flood": [ { "depth_m": 0.3, "note_ja": "団地内の排水不良箇所（仮定）", "pts": [[14.3300, 100.6250], [14.3300, 100.6400], [14.3180, 100.6400], [14.3180, 100.6250]] } ],
+        "quake": []
+      }
+    },
+    {
+      "area_id": "jkt_sudirman", "city_ja": "ジャカルタ", "area_ja": "スディルマン〜SCBD〜クニンガン", "center_lat": -6.2180, "center_lon": 106.8180, "extent_km": 7, "rotation_deg": 12, "grid_m": 200,
+      "flood_context_ja": "ジャカルタ北部は海面下に沈下しつつあり、2007 年・2013 年・2020 年 1 月に広域浸水。2020 年 1 月 1 日の豪雨ではクニンガンやブンドゥンガン・ヒリールなど中心部の低地も浸水した。西洪水運河（Banjir Kanal Barat）とチリウン川の水位が目安。",
+      "earthquake_context_ja": "ジャワ島南岸の海溝型地震と内陸の断層（バリバス断層など）が震源となりうる。厚い堆積層で揺れが増幅・長周期化するため、高層階の家具固定と階段避難が重要。",
+      "zone_src_ja": "2020 年 1 月洪水の報道上の浸水地区と地形からの仮定",
+      "sources": [ { "name": "ThinkHazard! DKI Jakarta", "url": "https://thinkhazard.org/en/report/1167-indonesia-dki-jakarta" } ],
+      "roads": [
+        { "name": "スディルマン通り (Jl. Jend. Sudirman)", "major": true, "label_offset": "30%", "pts": [[-6.1930, 106.8230], [-6.2050, 106.8205], [-6.2195, 106.8135], [-6.2300, 106.8050], [-6.2400, 106.8000]] },
+        { "name": "ガトット・スブロト通り (Jl. Gatot Subroto)", "major": true, "label_offset": "55%", "pts": [[-6.2150, 106.7900], [-6.2195, 106.8135], [-6.2260, 106.8300], [-6.2320, 106.8450]] },
+        { "name": "ラスナ・サイド通り (Jl. H.R. Rasuna Said)", "major": true, "label_offset": "25%", "pts": [[-6.2000, 106.8310], [-6.2150, 106.8320], [-6.2300, 106.8330], [-6.2400, 106.8340]] },
+        { "name": "タムリン通り (Jl. M.H. Thamrin)", "major": true, "label_offset": "30%", "pts": [[-6.1760, 106.8230], [-6.1930, 106.8230]] },
+        { "name": "アシア・アフリカ通り (Jl. Asia Afrika)", "major": false, "label_offset": "40%", "pts": [[-6.2195, 106.8135], [-6.2230, 106.8050], [-6.2280, 106.7980]] }
+      ],
+      "rails": [ { "name": "MRT ジャカルタ 南北線", "pts": [[-6.1930, 106.8230], [-6.2010, 106.8225], [-6.2095, 106.8210], [-6.2195, 106.8135], [-6.2275, 106.8030], [-6.2400, 106.8000]] } ],
+      "water": [ { "name": "西洪水運河 (Banjir Kanal Barat)", "kind": "canal", "width_m": 40, "pts": [[-6.2100, 106.8300], [-6.2050, 106.8180], [-6.1990, 106.8110], [-6.1900, 106.8050], [-6.1800, 106.8000]] }, { "name": "クルクット川 (Kali Krukut)", "kind": "canal", "width_m": 12, "pts": [[-6.2450, 106.8130], [-6.2300, 106.8120], [-6.2200, 106.8150], [-6.2100, 106.8170]] } ],
+      "pois": [
+        { "name": "Embassy of Japan (Jakarta)", "name_ja": "在インドネシア日本国大使館", "kind": "embassy", "lat": -6.1920, "lon": 106.8225, "why_ja": "タムリン通り 24 番地。邦人保護・情報提供", "source_url": "https://www.id.emb-japan.go.jp/", "label_dx": 9, "label_dy": -8 },
+        { "name": "RS Medistra", "name_ja": "メディストラ病院", "kind": "hospital", "lat": -6.2330, "lon": 106.8270, "why_ja": "ガトット・スブロト通りの私立病院（日本語対応窓口あり）", "source_url": "https://www.medistra.com/" },
+        { "name": "Siloam Hospitals Semanggi", "name_ja": "シロアム病院スマンギ", "kind": "hospital", "lat": -6.2225, "lon": 106.8120, "why_ja": "スマンギ交差点近くの私立病院", "source_url": "https://www.siloamhospitals.com/", "label_dx": -9, "label_dy": -9 },
+        { "name": "RS MMC", "name_ja": "MMC 病院（クニンガン）", "kind": "hospital", "lat": -6.2300, "lon": 106.8310, "why_ja": "ラスナ・サイド通りの私立病院", "source_url": "https://www.rsmmc.co.id/", "label_dx": 9, "label_dy": 13 },
+        { "name": "Gelora Bung Karno", "name_ja": "ゲロラ・ブン・カルノ（GBK）", "kind": "park_open_space", "lat": -6.2185, "lon": 106.8020, "radius_m": 450, "shelter_for": ["quake", "fire", "flood"], "cap": 50000, "why_ja": "スタジアムを含む広大な複合施設。地震時の集合に最適。やや高台", "source_url": "https://en.wikipedia.org/wiki/Gelora_Bung_Karno_Sports_Complex", "label_dx": -40, "label_dy": -20 },
+        { "name": "Pacific Place", "name_ja": "パシフィック・プレイス（SCBD）", "kind": "mall_highrise", "lat": -6.2245, "lon": 106.8095, "floors": 6, "shelter_for": ["flood", "fire"], "cap": 4000, "why_ja": "SCBD の大型商業施設。垂直避難候補", "source_url": "https://en.wikipedia.org/wiki/Pacific_Place_Jakarta", "label_dx": 9, "label_dy": 13 },
+        { "name": "Grand Indonesia", "name_ja": "グランド・インドネシア", "kind": "mall_highrise", "lat": -6.1950, "lon": 106.8215, "floors": 8, "shelter_for": ["flood", "fire"], "cap": 6000, "why_ja": "ブンダラン HI 近接の大型商業施設", "source_url": "https://en.wikipedia.org/wiki/Grand_Indonesia", "label_dx": 9, "label_dy": 13 },
+        { "name": "MRT Bundaran HI", "name_ja": "MRT ブンダラン HI 駅", "kind": "station", "lat": -6.1930, "lon": 106.8230, "source_url": "https://en.wikipedia.org/wiki/Bundaran_HI_MRT_station", "label_dx": 9, "label_dy": 13 },
+        { "name": "MRT Dukuh Atas", "name_ja": "MRT ドゥクアタス駅", "kind": "station", "lat": -6.2010, "lon": 106.8225, "why_ja": "運河沿いの低地。2020 年に周辺が冠水", "source_url": "https://en.wikipedia.org/wiki/Dukuh_Atas_BNI_MRT_station", "label_dx": 9, "label_dy": 13 },
+        { "name": "MRT Senayan", "name_ja": "MRT スナヤン駅", "kind": "station", "lat": -6.2275, "lon": 106.8030, "source_url": "https://en.wikipedia.org/wiki/Senayan_MRT_station", "label_dx": 9, "label_dy": 13 },
+        { "name": "Taman Menteng", "name_ja": "メンテン公園", "kind": "park_open_space", "lat": -6.1960, "lon": 106.8320, "radius_m": 120, "shelter_for": ["quake", "fire"], "cap": 3000, "why_ja": "住宅地の中の公園。地震時の一時集合", "source_url": "https://en.wikipedia.org/wiki/Menteng", "label_dx": 9, "label_dy": -8 }
+      ],
+      "homes": [ { "name_ja": "クニンガン・サービスアパート（高層）", "lat": -6.2200, "lon": 106.8300 }, { "name_ja": "SCBD／スナヤン・高層コンド", "lat": -6.2260, "lon": 106.8080 }, { "name_ja": "メンテン・戸建て", "lat": -6.1950, "lon": 106.8350 } ],
+      "zones": {
+        "flood": [ { "depth_m": 1.0, "note_ja": "西洪水運河沿い（カレット・ブンドゥンガンヒリール）の低地（仮定）", "pts": [[-6.1950, 106.8050], [-6.2000, 106.8250], [-6.2130, 106.8260], [-6.2080, 106.8120], [-6.2000, 106.8000]] }, { "depth_m": 0.7, "note_ja": "クニンガン南部の低地（2020 年に浸水・仮定）", "pts": [[-6.2250, 106.8250], [-6.2260, 106.8420], [-6.2420, 106.8420], [-6.2400, 106.8230]] } ],
+        "urban_flood": [ { "depth_m": 0.5, "note_ja": "ドゥクアタス〜スディルマン地下道（仮定）", "pts": [[-6.1990, 106.8180], [-6.2000, 106.8260], [-6.2060, 106.8260], [-6.2050, 106.8180]] }, { "depth_m": 0.4, "note_ja": "クニンガン（ラスナ・サイド）（仮定）", "pts": [[-6.2180, 106.8280], [-6.2200, 106.8380], [-6.2330, 106.8380], [-6.2310, 106.8280]] } ],
+        "quake": [ { "depth_m": 1, "note_ja": "高層建物の密集帯（スディルマン〜SCBD）", "pts": [[-6.2000, 106.8170], [-6.2050, 106.8260], [-6.2300, 106.8150], [-6.2280, 106.8040]] } ]
+      }
+    },
+    {
+      "area_id": "mnl_makati_bgc", "city_ja": "マニラ", "area_ja": "マカティ〜ボニファシオ・グローバルシティ（BGC）", "center_lat": 14.5520, "center_lon": 121.0380, "extent_km": 7, "rotation_deg": 30, "grid_m": 200,
+      "flood_context_ja": "2009 年 9 月の台風ケッツァーナ（オンドイ）では首都圏の広域が浸水し、マリキナ川・パシッグ川沿いで被害が大きかった。BGC は比較的標高が高いが、EDSA やマカティ低地の冠水で孤立しやすい。台風は 7〜11 月に集中する。",
+      "earthquake_context_ja": "西バレー断層（マリキナ断層系）は首都圏東部を南北に走り、BGC・タギッグ・パシッグ・マリキナの近傍を通る。M7.2 の地震を想定した MMEIRS（2004 年、JICA・PHIVOLCS・MMDA）は首都圏で約 3 万 4 千人の死者を推計した。",
+      "zone_src_ja": "西バレー断層の位置（PHIVOLCS 公表）と 2009 年洪水の浸水域からの仮定",
+      "sources": [ { "name": "PHIVOLCS: Valley Fault System", "url": "https://www.phivolcs.dost.gov.ph/" }, { "name": "ThinkHazard! Metro Manila", "url": "https://thinkhazard.org/en/report/2041-philippines-national-capital-region" } ],
+      "roads": [
+        { "name": "EDSA", "major": true, "label_offset": "20%", "pts": [[14.5750, 121.0400], [14.5600, 121.0340], [14.5495, 121.0280], [14.5380, 121.0230], [14.5250, 121.0180]] },
+        { "name": "アヤラ通り (Ayala Ave)", "major": true, "label_offset": "35%", "pts": [[14.5495, 121.0280], [14.5560, 121.0190], [14.5600, 121.0130]] },
+        { "name": "マッキンリー通り (McKinley Rd)", "major": false, "label_offset": "40%", "pts": [[14.5480, 121.0290], [14.5470, 121.0400], [14.5460, 121.0480]] },
+        { "name": "32nd St / 5th Ave (BGC)", "major": false, "label_offset": "40%", "pts": [[14.5600, 121.0440], [14.5520, 121.0470], [14.5440, 121.0500]] },
+        { "name": "C-5（カルロス・P・ガルシア通り）", "major": true, "label_offset": "25%", "pts": [[14.5750, 121.0640], [14.5600, 121.0600], [14.5450, 121.0580], [14.5300, 121.0560]] },
+        { "name": "カラヤーン通り (Kalayaan Ave)", "major": false, "label_offset": "45%", "pts": [[14.5600, 121.0250], [14.5560, 121.0420], [14.5540, 121.0560]] }
+      ],
+      "rails": [ { "name": "MRT-3", "pts": [[14.5750, 121.0400], [14.5600, 121.0340], [14.5495, 121.0280], [14.5380, 121.0230], [14.5250, 121.0180]] } ],
+      "water": [ { "name": "パシッグ川 (Pasig River)", "kind": "canal", "width_m": 110, "pts": [[14.5720, 121.0150], [14.5660, 121.0350], [14.5640, 121.0500], [14.5600, 121.0650]] }, { "name": "タギッグ川", "kind": "canal", "width_m": 15, "pts": [[14.5300, 121.0500], [14.5380, 121.0560], [14.5500, 121.0620], [14.5600, 121.0650]] } ],
+      "pois": [
+        { "name": "St. Luke's Medical Center Global City", "name_ja": "セント・ルークス病院（BGC）", "kind": "hospital", "lat": 14.5535, "lon": 121.0485, "why_ja": "BGC の大規模私立病院（外傷・救急）", "source_url": "https://www.stlukes.com.ph/", "label_dx": 9, "label_dy": -8 },
+        { "name": "Makati Medical Center", "name_ja": "マカティ・メディカルセンター", "kind": "hospital", "lat": 14.5580, "lon": 121.0150, "why_ja": "マカティ中心部の総合病院", "source_url": "https://www.makatimed.net.ph/", "label_dx": -9, "label_dy": -9 },
+        { "name": "Ayala Triangle Gardens", "name_ja": "アヤラ・トライアングル・ガーデン", "kind": "park_open_space", "lat": 14.5565, "lon": 121.0240, "radius_m": 110, "shelter_for": ["quake", "fire"], "cap": 5000, "why_ja": "マカティ CBD の公園。地震時の集合場所（周囲は高層ビル）", "source_url": "https://en.wikipedia.org/wiki/Ayala_Triangle_Gardens", "label_dx": -9, "label_dy": -9 },
+        { "name": "Bonifacio High Street", "name_ja": "ボニファシオ・ハイストリート", "kind": "park_open_space", "lat": 14.5505, "lon": 121.0510, "radius_m": 160, "shelter_for": ["quake", "fire"], "cap": 8000, "why_ja": "BGC 中心の細長い公園・遊歩道。地震時の一時集合", "source_url": "https://en.wikipedia.org/wiki/Bonifacio_High_Street", "label_dx": 9, "label_dy": 13 },
+        { "name": "Track 30th", "name_ja": "トラック 30th 公園", "kind": "park_open_space", "lat": 14.5522, "lon": 121.0438, "radius_m": 90, "shelter_for": ["quake", "fire"], "cap": 2000, "why_ja": "BGC 西側の公園", "source_url": "https://en.wikipedia.org/wiki/Bonifacio_Global_City", "label_dx": -9, "label_dy": 13 },
+        { "name": "Manila Japanese School", "name_ja": "マニラ日本人学校", "kind": "school", "lat": 14.5440, "lon": 121.0560, "shelter_for": ["flood", "fire"], "cap": 1500, "why_ja": "BGC 内。家族の集合場所の候補（学校との事前合意が前提）", "source_url": "https://www.mjs.edu.ph/", "label_dx": 9, "label_dy": 13 },
+        { "name": "SM Aura Premier", "name_ja": "SM オーラ", "kind": "mall_highrise", "lat": 14.5470, "lon": 121.0550, "floors": 7, "shelter_for": ["flood", "fire"], "cap": 6000, "why_ja": "BGC の大型商業施設。台風・洪水時の垂直避難候補", "source_url": "https://en.wikipedia.org/wiki/SM_Aura_Premier", "label_dx": 9, "label_dy": 13 },
+        { "name": "MRT-3 Ayala", "name_ja": "MRT アヤラ駅", "kind": "station", "lat": 14.5495, "lon": 121.0280, "source_url": "https://en.wikipedia.org/wiki/Ayala_station", "label_dx": 9, "label_dy": 13 },
+        { "name": "Embassy of Japan (Manila)", "name_ja": "在フィリピン日本国大使館", "kind": "embassy", "lat": 14.5560, "lon": 120.9880, "why_ja": "パサイ市ロハス通り。地図の西端外（約 5 km）", "source_url": "https://www.ph.emb-japan.go.jp/", "label_dx": 9, "label_dy": -8 },
+        { "name": "Glorietta / Greenbelt", "name_ja": "グロリエッタ／グリーンベルト", "kind": "mall_highrise", "lat": 14.5510, "lon": 121.0235, "floors": 5, "shelter_for": ["flood", "fire"], "cap": 8000, "why_ja": "アヤラセンターの商業施設群", "source_url": "https://en.wikipedia.org/wiki/Glorietta", "label_dx": 9, "label_dy": 13 }
+      ],
+      "homes": [ { "name_ja": "BGC・高層コンド", "lat": 14.5485, "lon": 121.0510 }, { "name_ja": "マカティ・レガスピ村・中層", "lat": 14.5535, "lon": 121.0200 }, { "name_ja": "ロックウェル・高層コンド", "lat": 14.5660, "lon": 121.0370 } ],
+      "zones": {
+        "flood": [ { "depth_m": 1.0, "note_ja": "パシッグ川沿いの低地（ロックウェル北側・仮定）", "pts": [[14.5760, 121.0100], [14.5700, 121.0400], [14.5660, 121.0650], [14.5580, 121.0650], [14.5620, 121.0400], [14.5680, 121.0100]] }, { "depth_m": 0.6, "note_ja": "マカティ南西部・EDSA 低地（仮定）", "pts": [[14.5450, 121.0150], [14.5400, 121.0300], [14.5250, 121.0250], [14.5300, 121.0100]] } ],
+        "urban_flood": [ { "depth_m": 0.4, "note_ja": "EDSA・ブエンディア交差点付近（仮定）", "pts": [[14.5570, 121.0300], [14.5560, 121.0380], [14.5500, 121.0370], [14.5510, 121.0290]] } ],
+        "quake": [ { "depth_m": 1, "note_ja": "西バレー断層近傍（タギッグ東側）", "pts": [[14.5800, 121.0620], [14.5800, 121.0750], [14.5200, 121.0750], [14.5200, 121.0600]] }, { "depth_m": 1, "note_ja": "高層建物の密集帯（BGC・マカティ CBD）", "pts": [[14.5580, 121.0180], [14.5600, 121.0300], [14.5520, 121.0320], [14.5500, 121.0200]] } ]
+      }
+    }
+  ]
+}

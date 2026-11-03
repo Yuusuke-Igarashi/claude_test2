@@ -33,8 +33,11 @@ jobs:
       - name: Build static site
         run: |
           node scripts/build-static.mjs
-          mkdir -p _site
+          node bousai/scripts/build.mjs
+          mkdir -p _site/bousai
           cp index.html _site/index.html
+          # 防災モック（東南アジア拠点・家族向け）は /bousai/ で配信
+          cp bousai/index.html _site/bousai/index.html
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

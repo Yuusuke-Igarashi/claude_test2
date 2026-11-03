@@ -1,0 +1,81 @@
+{
+  "_note": "架空の日系製造業（タイ・インドネシア・フィリピンに拠点）を想定したデモ。人数・整備状況はすべて仮定値。",
+  "sites": [
+    {
+      "id": "bkk-hq", "label": "A", "name_ja": "バンコク本社事務所（アソーク）", "short_ja": "バンコク本社", "type_ja": "地域統括・営業事務所", "region": "th-bkk", "country": "THA", "area": "bkk_sukhumvit",
+      "lat": 13.7381, "lon": 100.5612, "staff": 120, "jp_staff": 18, "families": 31,
+      "building_ja": "オフィスビル 32 階建の 21 階（2012 年竣工・RC 造、非常用発電は共用部のみ）",
+      "desc_ja": "スクンビット通りとアソーク通りの交差点近く。2011 年洪水では中心部は堤防で守られ浸水を免れたが、物流途絶と停電リスクが課題。2025 年 3 月のミャンマー地震では長周期の揺れで一時避難した。",
+      "risk_note_ja": "河川洪水は「中」、都市型浸水は雨季のスコールで頻発。地震はタイ全体では低いが、遠方の大地震による高層階の揺れは 2025 年に実証済み。",
+      "home": { "name_ja": "駐在員住宅（スクンビット Soi 24・高層コンド）", "lat": 13.7280, "lon": 100.5660 },
+      "alerts": { "cell_broadcast": true, "ddpm_app": false, "bma_line": true, "embassy_mail": true, "tabireg": false, "orr": true, "consular_mail": true, "mofa_app": false },
+      "prep": {
+        "info": [ { "id": "i1", "label": "携帯の緊急速報（セルブロードキャスト）を全社員の端末で有効化", "s": 1, "pri": 1, "ref": "th_cb" }, { "id": "i2", "label": "DDPM・BMA の公式アプリ／LINE を総務が常時監視", "s": 0.5, "pri": 2, "note": "総務 1 名のみ。当番制にする", "ref": "th_ddpm" }, { "id": "i3", "label": "在外公館の領事メールを拠点共通アドレスで受信", "s": 1, "pri": 2, "ref": "mofa_ryoji" } ],
+        "evac": [ { "id": "e1", "label": "シナリオ別（洪水・地震・火災）の避難先と経路を文書化", "s": 0.5, "pri": 1, "note": "火災のみ。洪水・地震は未作成", "ref": "naikakufu_bcp" }, { "id": "e2", "label": "年 1 回以上の避難訓練（家族参加の回を含む）", "s": 0, "pri": 2, "ref": "chusho_bcp" }, { "id": "e3", "label": "避難判断の基準（例：BMA が特定の区に避難勧告→在宅勤務切替）", "s": 0, "pri": 1, "ref": "naikakufu_bcp" } ],
+        "safety": [ { "id": "s1", "label": "安否確認システムの導入と全社員・帯同家族の登録", "s": 0.5, "pri": 1, "note": "家族の登録率 40%", "ref": "chusho_bcp" }, { "id": "s2", "label": "複数手段（SMS・LINE・衛星）での連絡網", "s": 0.5, "pri": 2 }, { "id": "s3", "label": "在留届・たびレジ登録の全員確認（年 1 回）", "s": 0, "pri": 1, "ref": "mofa_orr" } ],
+        "stock": [ { "id": "k1", "label": "飲料水 3L×人数×3 日分", "s": 1, "pri": 1, "ref": "naikakufu_stock" }, { "id": "k2", "label": "食料 3 日分と簡易トイレ", "s": 0.5, "pri": 2, "note": "食料のみ", "ref": "naikakufu_stock" }, { "id": "k3", "label": "救急セット・常備薬・N95 マスク", "s": 1, "pri": 2 }, { "id": "k4", "label": "駐在員家族向けの備蓄ガイド配布", "s": 0, "pri": 2 } ],
+        "power": [ { "id": "p1", "label": "重要機器用の UPS／可搬発電機と燃料", "s": 0.5, "pri": 2, "note": "UPS のみ" }, { "id": "p2", "label": "衛星電話または衛星通信端末", "s": 0, "pri": 1, "ref": "jetro_crisis" }, { "id": "p3", "label": "モバイル電源・予備回線（別キャリア）", "s": 1, "pri": 3 } ],
+        "bcp": [ { "id": "b1", "label": "重要業務の目標復旧時間（RTO）の設定", "s": 0.5, "pri": 1, "ref": "naikakufu_bcp" }, { "id": "b2", "label": "代替拠点（他拠点・在宅・コワーキング）の指定", "s": 1, "pri": 2 }, { "id": "b3", "label": "データのクラウド退避と復旧手順の訓練", "s": 1, "pri": 2 }, { "id": "b4", "label": "取引先・物流の代替ルート合意", "s": 0, "pri": 2, "ref": "chusho_bcp" } ],
+        "people": [ { "id": "f1", "label": "要配慮者（妊婦・持病・乳幼児・高齢者）の名簿と支援計画", "s": 0.5, "pri": 1 }, { "id": "f2", "label": "家族の緊急連絡先と学校・病院情報の集約", "s": 0.5, "pri": 2 }, { "id": "f3", "label": "一時帰国・退避の判断基準と手配手順", "s": 0, "pri": 1, "ref": "mofa_tora" } ],
+        "facility": [ { "id": "c1", "label": "家具・什器の固定、ガラス飛散防止", "s": 0.5, "pri": 2 }, { "id": "c2", "label": "ビル管理会社と非常時の運用（発電・給水・階段）を確認", "s": 1, "pri": 2 }, { "id": "c3", "label": "危険物・重要書類の保管場所の嵩上げ", "s": 1, "pri": 3 } ]
+      }
+    },
+    {
+      "id": "ayut-plant", "label": "B", "name_ja": "アユタヤ工場（ロジャナ工業団地）", "short_ja": "アユタヤ工場", "type_ja": "製造工場（部品組立）", "region": "th-ayut", "country": "THA", "area": "ayutthaya_rojana",
+      "lat": 14.3235, "lon": 100.6325, "staff": 850, "jp_staff": 9, "families": 6,
+      "building_ja": "平屋の工場棟 2 棟＋3 階建の管理棟（2004 年竣工）。2011 年洪水で約 2 m 浸水、操業再開まで 4 か月",
+      "desc_ja": "2011 年の大洪水で浸水したロジャナ工業団地内。団地は洪水後に周囲堤防を整備したが、堤防を越える規模の洪水や広域の物流途絶が最大のリスク。",
+      "risk_note_ja": "チャオプラヤー川とパーサック川に挟まれた低地。河川洪水は「高」。地震・台風は低い。",
+      "home": { "name_ja": "駐在員住宅（アユタヤ市内 サービスアパート）", "lat": 14.3520, "lon": 100.5850 },
+      "alerts": { "cell_broadcast": true, "ddpm_app": true, "bma_line": false, "embassy_mail": true, "tabireg": true, "orr": true, "consular_mail": true, "mofa_app": true },
+      "prep": {
+        "info": [ { "id": "i1", "label": "携帯の緊急速報を全社員の端末で有効化", "s": 1, "pri": 1, "ref": "th_cb" }, { "id": "i2", "label": "DDPM・灌漑局の河川水位（チャオプラヤー・パーサック）を毎日監視", "s": 1, "pri": 1, "ref": "th_ddpm" }, { "id": "i3", "label": "工業団地管理会社との警報連絡（堤防・排水ポンプ）", "s": 1, "pri": 1 } ],
+        "evac": [ { "id": "e1", "label": "洪水の段階別（注意→警戒→退避）の行動計画", "s": 1, "pri": 1, "ref": "naikakufu_bcp" }, { "id": "e2", "label": "従業員の広域退避先（バンコク市内のホテル・本社）の確保", "s": 0.5, "pri": 1, "note": "日本人のみ。タイ人従業員の計画は未整備" }, { "id": "e3", "label": "年 1 回の避難訓練", "s": 1, "pri": 2 } ],
+        "safety": [ { "id": "s1", "label": "安否確認システムの導入と登録", "s": 1, "pri": 1 }, { "id": "s2", "label": "複数手段での連絡網", "s": 1, "pri": 2 }, { "id": "s3", "label": "在留届・たびレジの全員確認", "s": 1, "pri": 1, "ref": "mofa_orr" } ],
+        "stock": [ { "id": "k1", "label": "飲料水 3L×人数×3 日分", "s": 1, "pri": 1, "ref": "naikakufu_stock" }, { "id": "k2", "label": "食料 3 日分と簡易トイレ", "s": 1, "pri": 2 }, { "id": "k3", "label": "救急セット・常備薬", "s": 1, "pri": 2 }, { "id": "k4", "label": "ボート・救命胴衣・土のう", "s": 0.5, "pri": 1, "note": "土のうのみ" } ],
+        "power": [ { "id": "p1", "label": "非常用発電機と 72 時間分の燃料", "s": 1, "pri": 1 }, { "id": "p2", "label": "衛星電話", "s": 1, "pri": 1 }, { "id": "p3", "label": "受変電設備の嵩上げ（2011 年の浸水高＋1 m）", "s": 0.5, "pri": 1, "note": "嵩上げ 1.5 m。2011 年の浸水高は約 2 m" } ],
+        "bcp": [ { "id": "b1", "label": "RTO の設定と代替生産（他国工場）の合意", "s": 1, "pri": 1 }, { "id": "b2", "label": "金型・重要設備の退避手順", "s": 1, "pri": 1 }, { "id": "b3", "label": "洪水保険（事業中断を含む）の付保", "s": 0.5, "pri": 2, "note": "事業中断は対象外" }, { "id": "b4", "label": "サプライヤーの所在と代替の把握", "s": 0.5, "pri": 2 } ],
+        "people": [ { "id": "f1", "label": "要配慮者の名簿と支援計画", "s": 1, "pri": 1 }, { "id": "f2", "label": "帯同家族の退避先・連絡先", "s": 1, "pri": 2 }, { "id": "f3", "label": "タイ人従業員の家族支援（給与前払い・物資）の方針", "s": 0, "pri": 2 } ],
+        "facility": [ { "id": "c1", "label": "止水板・防水扉の設置", "s": 1, "pri": 1 }, { "id": "c2", "label": "危険物・薬品の高所保管", "s": 1, "pri": 2 }, { "id": "c3", "label": "団地堤防の高さと設計再現期間の把握", "s": 0.5, "pri": 1, "note": "団地側の公表値のみ" } ]
+      }
+    },
+    {
+      "id": "jkt-office", "label": "C", "name_ja": "ジャカルタ事務所（スディルマン）", "short_ja": "ジャカルタ事務所", "type_ja": "販売・サービス事務所", "region": "id-jkt", "country": "IDN", "area": "jkt_sudirman",
+      "lat": 13.0, "lon": 106.81, "staff": 60, "jp_staff": 7, "families": 9,
+      "building_ja": "オフィスタワー 45 階建の 28 階（2016 年竣工）。耐震設計はインドネシア基準",
+      "desc_ja": "スディルマン通りの中心業務地区。2020 年 1 月の大雨では周辺の低地が浸水し、通勤が数日困難になった。地盤沈下と地震（ジャワ島南岸の海溝型・内陸断層）が中長期リスク。",
+      "risk_note_ja": "河川・都市型浸水は「高」。地震はインドネシア全体で高く、ジャカルタの軟弱地盤で揺れが増幅する。",
+      "home": { "name_ja": "駐在員住宅（クニンガン・サービスアパート）", "lat": -6.2200, "lon": 106.8300 },
+      "alerts": { "cell_broadcast": false, "ddpm_app": true, "bma_line": false, "embassy_mail": true, "tabireg": false, "orr": true, "consular_mail": true, "mofa_app": false },
+      "prep": {
+        "info": [ { "id": "i1", "label": "BMKG（気象・地震）公式アプリの導入と通知設定", "s": 1, "pri": 1, "ref": "id_bmkg" }, { "id": "i2", "label": "BPBD DKI Jakarta の洪水情報（早期警報）の監視", "s": 0.5, "pri": 1 }, { "id": "i3", "label": "領事メールの受信", "s": 1, "pri": 2 } ],
+        "evac": [ { "id": "e1", "label": "地震時のビル内避難（非常階段・集合場所）の周知", "s": 1, "pri": 1 }, { "id": "e2", "label": "洪水時の在宅勤務切替基準", "s": 0, "pri": 1 }, { "id": "e3", "label": "避難訓練", "s": 0.5, "pri": 2, "note": "ビル主催の訓練に参加のみ" } ],
+        "safety": [ { "id": "s1", "label": "安否確認システム", "s": 0, "pri": 1 }, { "id": "s2", "label": "WhatsApp グループと電話の連絡網", "s": 1, "pri": 2 }, { "id": "s3", "label": "在留届・たびレジ", "s": 0.5, "pri": 1 } ],
+        "stock": [ { "id": "k1", "label": "飲料水・食料 3 日分", "s": 0.5, "pri": 1 }, { "id": "k2", "label": "救急セット・常備薬", "s": 1, "pri": 2 }, { "id": "k3", "label": "N95 マスク（火山灰・煙霧）", "s": 0, "pri": 3 } ],
+        "power": [ { "id": "p1", "label": "UPS・モバイル電源", "s": 1, "pri": 2 }, { "id": "p2", "label": "衛星電話", "s": 0, "pri": 2 } ],
+        "bcp": [ { "id": "b1", "label": "RTO の設定", "s": 0, "pri": 1 }, { "id": "b2", "label": "在宅勤務での業務継続手順", "s": 1, "pri": 2 }, { "id": "b3", "label": "データのクラウド退避", "s": 1, "pri": 2 } ],
+        "people": [ { "id": "f1", "label": "要配慮者の名簿", "s": 0.5, "pri": 1 }, { "id": "f2", "label": "家族の学校・病院・連絡先", "s": 1, "pri": 2 }, { "id": "f3", "label": "退避の判断基準", "s": 0, "pri": 1 } ],
+        "facility": [ { "id": "c1", "label": "什器の固定", "s": 0, "pri": 2 }, { "id": "c2", "label": "ビル管理の非常時運用の確認", "s": 1, "pri": 2 } ]
+      }
+    },
+    {
+      "id": "mnl-office", "label": "D", "name_ja": "マニラ事務所（ボニファシオ・グローバルシティ）", "short_ja": "マニラ事務所", "type_ja": "販売・技術サポート事務所", "region": "ph-mnl", "country": "PHL", "area": "mnl_makati_bgc",
+      "lat": 14.5508, "lon": 121.0470, "staff": 160, "jp_staff": 12, "families": 17,
+      "building_ja": "オフィスタワー 30 階建の 15 階（2018 年竣工）。耐震設計は NSCP 2015",
+      "desc_ja": "タギッグ市 BGC。マニラ首都圏の東側を南北に走る西バレー断層（マリキナ断層系）から数 km。台風（7〜11 月）と地震が主要リスク。",
+      "risk_note_ja": "地震・台風・都市型浸水がいずれも「高」。BGC は比較的高台で河川洪水の直接リスクは低いが、周辺道路の冠水で孤立しやすい。",
+      "home": { "name_ja": "駐在員住宅（BGC 高層コンド）", "lat": 14.5485, "lon": 121.0510 },
+      "alerts": { "cell_broadcast": true, "ddpm_app": false, "bma_line": false, "embassy_mail": true, "tabireg": true, "orr": true, "consular_mail": true, "mofa_app": true },
+      "prep": {
+        "info": [ { "id": "i1", "label": "NDRRMC の緊急アラート SMS・PHIVOLCS の地震速報", "s": 1, "pri": 1, "ref": "ph_ndrrmc" }, { "id": "i2", "label": "PAGASA の台風情報と市の避難命令の監視", "s": 1, "pri": 1 }, { "id": "i3", "label": "領事メールの受信", "s": 1, "pri": 2 } ],
+        "evac": [ { "id": "e1", "label": "地震時の避難（Drop, Cover, Hold On → 階段で退避 → 広場集合）", "s": 1, "pri": 1, "ref": "ph_dch" }, { "id": "e2", "label": "台風接近時の在宅勤務切替（PAGASA シグナル 3 以上）", "s": 1, "pri": 1 }, { "id": "e3", "label": "避難訓練（年 2 回・市の地震訓練に参加）", "s": 1, "pri": 2 } ],
+        "safety": [ { "id": "s1", "label": "安否確認システム", "s": 1, "pri": 1 }, { "id": "s2", "label": "複数手段の連絡網", "s": 1, "pri": 2 }, { "id": "s3", "label": "在留届・たびレジ", "s": 1, "pri": 1 } ],
+        "stock": [ { "id": "k1", "label": "飲料水・食料 3 日分", "s": 1, "pri": 1 }, { "id": "k2", "label": "救急セット・外傷キット", "s": 1, "pri": 1 }, { "id": "k3", "label": "ヘルメット・懐中電灯・ホイッスルの全員配布", "s": 0.5, "pri": 2 } ],
+        "power": [ { "id": "p1", "label": "UPS・可搬発電機", "s": 0.5, "pri": 2 }, { "id": "p2", "label": "衛星電話", "s": 1, "pri": 1 } ],
+        "bcp": [ { "id": "b1", "label": "RTO の設定", "s": 1, "pri": 1 }, { "id": "b2", "label": "代替拠点（セブ）の指定", "s": 1, "pri": 2 }, { "id": "b3", "label": "データのクラウド退避", "s": 1, "pri": 2 }, { "id": "b4", "label": "地震後の建物安全点検の手配（構造技術者）", "s": 0, "pri": 1 } ],
+        "people": [ { "id": "f1", "label": "要配慮者の名簿", "s": 1, "pri": 1 }, { "id": "f2", "label": "家族の集合場所・学校の引き取り", "s": 0.5, "pri": 2 }, { "id": "f3", "label": "退避の判断基準", "s": 0.5, "pri": 1 } ],
+        "facility": [ { "id": "c1", "label": "什器の固定・ガラス飛散防止", "s": 1, "pri": 2 }, { "id": "c2", "label": "ビル管理の非常時運用の確認", "s": 1, "pri": 2 }, { "id": "c3", "label": "台風時の窓・外部設備の養生手順", "s": 1, "pri": 3 } ]
+      }
+    }
+  ]
+}

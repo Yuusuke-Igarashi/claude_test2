@@ -1,0 +1,21 @@
+{
+  "_note": "本番版が接続しうる公開フィード。本モックは未接続。URL・形式は本セッションで未検証（unverified）のものを含む。",
+  "feeds": [
+    { "name": "GDACS", "provider": "EC JRC / UN OCHA", "url": "https://www.gdacs.org/", "format": "RSS / JSON API", "covers_ja": "地震・津波・台風・洪水・火山の全球アラート", "use_in_app_ja": "支援者向け：被害全体像の初報、影響人口の自動推計", "confirmed_by": "unverified" },
+    { "name": "ReliefWeb API", "provider": "UN OCHA", "url": "https://api.reliefweb.int/", "format": "JSON API", "covers_ja": "状況報告・ニーズ評価・3W", "use_in_app_ja": "支援者向け：支援・物資の需給、現地の状況報告", "confirmed_by": "unverified" },
+    { "name": "USGS Earthquake GeoJSON Feeds", "provider": "USGS", "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php", "format": "GeoJSON", "covers_ja": "全球の地震（マグニチュード・震源・ShakeMap）", "use_in_app_ja": "両画面：地震の発生検知と揺れの分布", "confirmed_by": "unverified" },
+    { "name": "Copernicus Emergency Management Service", "provider": "EU", "url": "https://emergency.copernicus.eu/", "format": "GIS（浸水域・被害マップ）", "covers_ja": "衛星による浸水域・建物被害の速報マップ", "use_in_app_ja": "支援者向け：被害分布図", "confirmed_by": "unverified" },
+    { "name": "GloFAS（Global Flood Awareness System）", "provider": "Copernicus", "url": "https://global-flood.emergency.copernicus.eu/", "format": "Web / API", "covers_ja": "河川洪水の予測", "use_in_app_ja": "両画面：洪水の到達予測", "confirmed_by": "unverified" },
+    { "name": "NASA FIRMS", "provider": "NASA", "url": "https://firms.modaps.eosdis.nasa.gov/", "format": "API / CSV", "covers_ja": "衛星の火災ホットスポット（煙霧の発生源）", "use_in_app_ja": "地域版・現地向け：煙霧の監視", "confirmed_by": "unverified" },
+    { "name": "PDC DisasterAWARE", "provider": "Pacific Disaster Center", "url": "https://www.pdc.org/", "format": "Web / API（要契約）", "covers_ja": "全災害の早期警戒と影響推計", "use_in_app_ja": "支援者向け：統合状況図", "confirmed_by": "unverified" },
+    { "name": "IFRC GO", "provider": "国際赤十字・赤新月社連盟", "url": "https://go.ifrc.org/", "format": "Web / API", "covers_ja": "各国赤十字の対応状況・アピール", "use_in_app_ja": "支援者向け：支援の需給", "confirmed_by": "unverified" },
+    { "name": "HDX（Humanitarian Data Exchange）", "provider": "UN OCHA", "url": "https://data.humdata.org/", "format": "CKAN API / CSV", "covers_ja": "人口・行政界・被災者データ", "use_in_app_ja": "支援者向け：被災者の分布", "confirmed_by": "unverified" },
+    { "name": "Open-Meteo", "provider": "Open-Meteo", "url": "https://open-meteo.com/", "format": "JSON API", "covers_ja": "気温・湿度・降水の予報", "use_in_app_ja": "現地向け：気温・備え", "confirmed_by": "unverified" },
+    { "name": "WAQI / IQAir", "provider": "World Air Quality Index", "url": "https://waqi.info/", "format": "JSON API", "covers_ja": "PM2.5 など大気質", "use_in_app_ja": "現地向け：煙霧・健康", "confirmed_by": "unverified" },
+    { "name": "Thai Meteorological Department", "provider": "タイ気象局", "url": "https://www.tmd.go.th/", "format": "Web / API", "covers_ja": "気象警報・台風", "use_in_app_ja": "両画面：タイの警報", "confirmed_by": "unverified" },
+    { "name": "BMKG", "provider": "インドネシア気象気候地球物理庁", "url": "https://www.bmkg.go.id/", "format": "Open data / XML", "covers_ja": "地震・津波（InaTEWS）・気象", "use_in_app_ja": "両画面：インドネシアの警報", "confirmed_by": "unverified" },
+    { "name": "PHIVOLCS / PAGASA", "provider": "フィリピン", "url": "https://www.phivolcs.dost.gov.ph/", "format": "Web / 速報", "covers_ja": "地震・火山／台風・洪水", "use_in_app_ja": "両画面：フィリピンの警報", "confirmed_by": "unverified" },
+    { "name": "data.gov.sg（NEA）", "provider": "シンガポール政府", "url": "https://data.gov.sg/", "format": "JSON API", "covers_ja": "PSI・降雨・気温", "use_in_app_ja": "現地向け：煙霧・気温", "confirmed_by": "unverified" },
+    { "name": "外務省 領事メール・海外安全情報", "provider": "外務省", "url": "https://www.anzen.mofa.go.jp/", "format": "メール / Web", "covers_ja": "在外公館からの注意喚起・緊急連絡", "use_in_app_ja": "両画面：日本語の公式情報", "confirmed_by": "unverified" }
+  ]
+}
