@@ -16,6 +16,8 @@ const fmtUSD = (m) => {
   return m > 0 ? 'US$1k未満' : '≈0';
 };
 const fmtPct = (v, d = 0) => (v == null || isNaN(v)) ? '—' : `${(v * 100).toFixed(d)}%`;
+/* 大きな数の短縮表記（1.6M / 95k） */
+const fmtC = (n) => (n == null || isNaN(n)) ? '—' : Math.abs(n) >= 1e6 ? (n / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M' : Math.abs(n) >= 1e4 ? Math.round(n / 1e3) + 'k' : fmt(n);
 const fmtHours = (h) => { const H = Math.round(h); const d = Math.floor(H / 24), hh = H % 24; return d > 0 ? `D+${d} ${String(hh).padStart(2, '0')}:00` : `+${hh}h`; };
 const hashStr = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const mulberry32 = (a) => function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };

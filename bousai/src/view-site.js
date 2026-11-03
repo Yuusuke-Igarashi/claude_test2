@@ -46,8 +46,8 @@ App.views.site = {
       </div>
       <div class="ctl">
         <div class="f"><label for="stSel">拠点</label><select id="stSel">${M.sites().map((s) => `<option value="${s.id}">${esc(s.label)}　${esc(s.name_ja)}</option>`).join('')}</select></div>
-        <div class="f"><label>シナリオ</label><div class="seg" id="scSeg">${Object.entries(SCEN_SITE).map(([k, v]) => `<button data-scen="${k}" aria-pressed="${k === st.scen}">${ic(v.icon)}${esc(v.short)}</button>`).join('')}</div></div>
-        <div class="f"><label>現在地</label><div class="seg" id="meSeg"><button data-me="site" aria-pressed="true">${ic('building')}拠点</button><button data-me="home" aria-pressed="false">${ic('home')}駐在員住宅（代表）</button><button data-me="custom" aria-pressed="false">${ic('pin')}地図をクリック</button></div></div>
+        <div class="f"><label>シナリオ</label><div class="seg" id="scSeg" role="group" aria-label="シナリオ">${Object.entries(SCEN_SITE).map(([k, v]) => `<button data-scen="${k}" aria-pressed="${k === st.scen}">${ic(v.icon)}${esc(v.short)}</button>`).join('')}</div></div>
+        <div class="f"><label>現在地</label><div class="seg" id="meSeg" role="group" aria-label="現在地"><button data-me="site" aria-pressed="true">${ic('building')}拠点</button><button data-me="home" aria-pressed="false">${ic('home')}駐在員住宅（代表）</button><button data-me="custom" aria-pressed="false">${ic('pin')}地図をクリック</button></div></div>
       </div>
       <div class="answer" id="stAnswer"></div>
       <div class="grid side">

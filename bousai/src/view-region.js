@@ -14,8 +14,8 @@ App.views.region = {
       </div>
       <div class="ctl">
         <div class="f"><label for="rgSel">地域（都市圏）</label><select id="rgSel">${M.regions().map((r) => `<option value="${r.id}">${esc(r.name_ja)}（${esc(COUNTRY_JA[r.country] || r.country)}）</option>`).join('')}</select></div>
-        <div class="f"><label>地図に表示するハザード</label><div class="seg" id="hzSeg">${['flood', 'urban_flood', 'coastal', 'quake', 'tsunami', 'cyclone', 'landslide', 'volcano', 'heat', 'haze'].map((k) => `<button data-hz="${k}" aria-pressed="${k === st.hz}">${esc(HAZ[k].short)}</button>`).join('')}</div></div>
-        <div class="f"><label>表示範囲</label><div class="seg" id="focusSeg"><button data-focus="sea" aria-pressed="true">東南アジア全域</button><button data-focus="country" aria-pressed="false">選択した国</button></div></div>
+        <div class="f"><label>地図に表示するハザード</label><div class="seg" id="hzSeg" role="group" aria-label="地図に表示するハザード">${['flood', 'urban_flood', 'coastal', 'quake', 'tsunami', 'cyclone', 'landslide', 'volcano', 'heat', 'haze'].map((k) => `<button data-hz="${k}" aria-pressed="${k === st.hz}">${esc(HAZ[k].short)}</button>`).join('')}</div></div>
+        <div class="f"><label>表示範囲</label><div class="seg" id="focusSeg" role="group" aria-label="表示範囲"><button data-focus="sea" aria-pressed="true">東南アジア全域</button><button data-focus="country" aria-pressed="false">選択した国</button></div></div>
       </div>
       <div class="answer" id="rgAnswer"></div>
       <div class="grid map">

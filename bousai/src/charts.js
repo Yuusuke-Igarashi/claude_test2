@@ -23,12 +23,14 @@ function rpChart(box, { series, yFmt = (v) => fmtUSD(v), yLabel = '損失', xLab
   ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(yFmt(t))}</text>`; });
   rps.forEach((rp) => { h += `<text class="ax" x="${X(rp).toFixed(1)}" y="${H - MB + 16}" text-anchor="middle">${rp}</text><line class="axis-l" x1="${X(rp).toFixed(1)}" x2="${X(rp).toFixed(1)}" y1="${MT + ph}" y2="${MT + ph + 4}"/>`; });
   h += `<line class="axis-l" x1="${ML}" x2="${W - MR}" y1="${MT + ph}" y2="${MT + ph}"/><text class="ax-t" x="${ML + pw / 2}" y="${H - 6}" text-anchor="middle">${esc(xLabel)}</text>`;
+  const used = []; /* 端点ラベルの衝突回避 */
+  const placeY = (y) => { let yy = y; for (let k = 0; k < 6; k++) { if (used.every((u) => Math.abs(u - yy) >= 13)) break; yy -= 13; } used.push(yy); return yy; };
   series.forEach((s, si) => {
     const col = s.color || CAT[si % CAT.length]; const pts = s.points.slice().sort((a, b) => a[0] - b[0]);
     const d = pts.map(([rp, v], i) => (i ? 'L' : 'M') + X(rp).toFixed(1) + ' ' + Y(v).toFixed(1)).join('');
     if (!s.dashed) h += `<path class="area" d="${d}L${X(pts[pts.length - 1][0]).toFixed(1)} ${MT + ph}L${X(pts[0][0]).toFixed(1)} ${MT + ph}Z" fill="${col}"/>`;
     h += `<path class="ln" d="${d}" stroke="${col}"${s.dashed ? ' stroke-dasharray="5 4"' : ''}/>`;
-    pts.forEach(([rp, v], i) => { h += `<circle class="pt" cx="${X(rp).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="4.5" fill="${col}" data-s="${si}" data-i="${i}"/>`; if (i === pts.length - 1 || i === 0) h += `<text class="lbl${i === pts.length - 1 ? ' on' : ''}" x="${(X(rp) + (i === pts.length - 1 ? -6 : 8)).toFixed(1)}" y="${(Y(v) - 8).toFixed(1)}" text-anchor="${i === pts.length - 1 ? 'end' : 'start'}">${esc(yFmt(v))}</text>`; });
+    pts.forEach(([rp, v], i) => { h += `<circle class="pt" cx="${X(rp).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="4.5" fill="${col}" data-s="${si}" data-i="${i}"/>`; if (i === pts.length - 1) { const ly = placeY(Y(v) - 8); h += `<text class="lbl on" x="${(X(rp) - 6).toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="end">${esc(yFmt(v))}</text>`; } else if (i === 0 && si === 0) h += `<text class="lbl" x="${(X(rp) + 8).toFixed(1)}" y="${(Y(v) - 8).toFixed(1)}" text-anchor="start">${esc(yFmt(v))}</text>`; });
   });
   h += '</svg>';
   box.innerHTML = h; const tip = chartTip(box); const svg = box.querySelector('svg');

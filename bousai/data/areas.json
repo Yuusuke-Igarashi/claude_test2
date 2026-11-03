@@ -10,8 +10,8 @@
    "extent_km": 5.6,
    "rotation_deg": -24,
    "grid_m": 180,
-   "flood_context_ja": "2011年大洪水の GISTDA 浸水図では、中心部は堤防で守られ、パトゥムワン区 0%、ワッタナー区 0.3%、クロントゥーイ区 0.9%、フアイクワーン区 1.1% しか浸水域に含まれなかった（ThaiFloodRisk.com 整理の CSV、CC BY 4.0、DOI 10.5281/zenodo.23260465、page_read）。一方、雨季の短時間冠水は常襲で、BMA 排水局の記録（2021年10月〜2026年10月）ではスクンビット通りはバンコクで2番目に冠水の多い幹線道路（105 件、中央値 20 cm、最大 50 cm、最多地点はソイ・スクンビット 26）。ワッタナー区 95 件（最大 50 cm、中央値 85 分）、クロントゥーイ区 103 件（最大 40 cm）。ソイ 39 入口（プロンポン）、ソイ 26・36・38・40・42、ソイ 23 のチノータイ付近、トンロー Soi 10 入口が繰り返し 15〜40 cm・1〜7 時間冠水している。区の洪水リスク指数は ワッタナー 25（低）、パトゥムワン 21（低）、クロントゥーイ 52（中）。BTS/MRT 駅の LiDAR 地盤高はアソーク 0.43 m、プロンポン 0.26 m、トンロー 0.49 m、MRT スクンビット 0.75 m と極めて低平。セーンセープ運河のアソーク水位計（HII AIT001）の堤防天端は標高 2.39 m（flood2026 リポジトリ記載の HII/RID 表、page_read）。",
-   "earthquake_context_ja": "タイ中部の地震ハザードは低いが、2025 年 3 月 28 日のミャンマー M7.7 ではバンコクの厚い軟弱堆積層が長周期の揺れを増幅し、チャトゥチャック区で建設中の高層ビルが崩壊した（報道ベース、本セッションでは一次情報未取得）。高層コンド・オフィスが密集するスクンビットでは、エレベーター停止・家具転倒・階段避難・一時集合場所（公園）の事前指定が要点。",
+   "flood_context_ja": "2011年大洪水の GISTDA 浸水図では、中心部は堤防で守られ、パトゥムワン区 0%、ワッタナー区 0.3%、クロントゥーイ区 0.9%、フアイクワーン区 1.1% しか浸水域に含まれなかった。一方、雨季の短時間冠水は常襲で、BMA 排水局の記録（2021年10月〜2026年10月）ではスクンビット通りはバンコクで2番目に冠水の多い幹線道路（105 件、中央値 20 cm、最大 50 cm、最多地点はソイ・スクンビット 26）。ワッタナー区 95 件（最大 50 cm、中央値 85 分）、クロントゥーイ区 103 件（最大 40 cm）。ソイ 39 入口（プロンポン）、ソイ 26・36・38・40・42、ソイ 23 のチノータイ付近、トンロー Soi 10 入口が繰り返し 15〜40 cm・1〜7 時間冠水している。区の洪水リスク指数は ワッタナー 25（低）、パトゥムワン 21（低）、クロントゥーイ 52（中）。BTS/MRT 駅の LiDAR 地盤高はアソーク 0.43 m、プロンポン 0.26 m、トンロー 0.49 m、MRT スクンビット 0.75 m と極めて低平。セーンセープ運河のアソーク水位計（HII AIT001）の堤防天端は標高 2.39 m。",
+   "earthquake_context_ja": "タイ中部の地震ハザードは低いが、2025 年 3 月 28 日のミャンマー M7.7 ではバンコクの厚い軟弱堆積層が長周期の揺れを増幅し、チャトゥチャック区で建設中の高層ビルが崩壊した。高層コンド・オフィスが密集するスクンビットでは、エレベーター停止・家具転倒・階段避難・一時集合場所（公園）の事前指定が要点。",
    "zone_src_ja": "2011 年洪水の GISTDA 浸水図（中心部は非浸水）と BMA 排水局の冠水記録（2021〜2026 年、スクンビット通りは市内 2 位の冠水道路）からの仮定",
    "sources": [
     {
@@ -314,7 +314,7 @@
      "label_dy": -9,
      "coord_src": "unverified",
      "coord_url": "https://www.bumrungrad.com/",
-     "coord_note_ja": "住所 33 Sukhumvit Soi 3 (Soi Nana Nuea) は GitHub 上のタイ病院ディレクトリ（moekyawaung-graduate/thailand-hospitals-directory data.json）で確認。MOPH 病院リストの座標は区役所位置へのフォールバック（13.7263"
+     "coord_note_ja": "住所 33 Sukhumvit Soi 3 (Soi Nana Nuea) は GitHub 上のタイ病院ディレクトリ（moekyawaung-graduate/thailand-hospitals-directory data.json）"
     },
     {
      "name": "Samitivej Sukhumvit Hospital",
@@ -346,7 +346,7 @@
      "label_dy": 14,
      "coord_src": "derived",
      "coord_url": "https://github.com/chalermpolw-code/bangkok-park-pm25-wavelet-2021/blob/main/morphology_2021/park_osm_match_summary.csv",
-     "coord_note_ja": "OSM 上の面積（旧区画）224,618 m² を同 CSV で確認。南西角の MRT クイーンシリキット駅（13.7227,100.5598）は OSM 由来データで確認済みで、湖中心の座標はそこから推定（±200 m）。アソーク・プロンポンから徒歩圏の最大の開放空間。"
+     "coord_note_ja": "OSM 上の面積（旧区画）224,618 m² を同 CSV で確認。南西角の MRT クイーンシリキット駅（13.7227,100.5598）は OSM 由来データで確認済みで、湖中心の座標はそこから推定（±200 m）。アソーク・プロン"
     },
     {
      "name": "Lumphini Park",
@@ -366,7 +366,7 @@
      "label_dy": -14,
      "coord_src": "derived",
      "coord_url": "https://github.com/chalermpolw-code/bangkok-park-pm25-wavelet-2021/blob/main/morphology_2021/park_osm_match_summary.csv",
-     "coord_note_ja": "OSM 上の面積 523,759 m²（約 52 ha）を同 CSV で確認。南西角に MRT シーロム駅（13.7288,100.5378）、南東角に MRT ルンピニー駅（13.7256,100.5460）が OSM 由来データで確認済みで、中心座標はそこから推定（±150 m）。地震時の一時集合場所の第一候補（洪"
+     "coord_note_ja": "OSM 上の面積 523,759 m²（約 52 ha）を同 CSV で確認。南西角に MRT シーロム駅（13.7288,100.5378）、南東角に MRT ルンピニー駅（13.7256,100.5460）が OSM 由来データで確認済"
     },
     {
      "name": "Queen Sirikit National Convention Center",
@@ -400,7 +400,7 @@
      "label_dy": -8,
      "coord_src": "unverified",
      "coord_url": "https://www.th.emb-japan.go.jp/",
-     "coord_note_ja": "住所 177 Witthayu Road, Lumphini, Pathumwan は本ワークフローで取得済みの在外公館データ（embassy_contacts.csv / medassist_embassies.ts）で確認。座標はウィッタユ通り沿い・ルンピニー公園東側の概略値（±200 m）。邦人保護・情報提供の拠"
+     "coord_note_ja": "座標はウィッタユ通り沿い・ルンピニー公園東側の概略値（±200 m）。邦人保護・情報提供の拠"
     },
     {
      "name": "BTS Asok / MRT Sukhumvit",
@@ -414,7 +414,7 @@
      "label_dy": 13,
      "coord_src": "page_read",
      "coord_url": "https://github.com/Nukaze/thai-open-transit/blob/main/data/source/osm-raw.json",
-     "coord_note_ja": "OSM ノード 275514816。MRT スクンビット駅と乗換。ThaiFloodRisk の駅別指数 21（低）、2011〜2024 年に GISTDA 浸水 0 回、LiDAR 地盤高 0.43 m、最寄り水路（セーンセープ運河）297 m。高架駅は短時間の冠水退避にも使える。"
+     "coord_note_ja": "OSM ノード 275514816。MRT スクンビット駅と乗換。ThaiFloodRisk の駅別指数 21（低）、2011〜2024 年に GISTDA 浸水 0 回、LiDAR 地盤高 0.43 m、最寄り水路（セーンセープ運河）29"
     },
     {
      "name": "BTS Phrom Phong",
@@ -427,7 +427,7 @@
      "label_dy": 13,
      "coord_src": "page_read",
      "coord_url": "https://github.com/Nukaze/thai-open-transit/blob/main/data/source/osm-raw.json",
-     "coord_note_ja": "OSM ノード 275514306。日本人居住の中心。ThaiFloodRisk 指数 14（低）だが LiDAR 地盤高 0.26 m と最も低く、駅前のソイ 39 入口は BMA 記録で繰り返し 15〜30 cm 冠水（2021〜2022 年だけで 10 件以上）。"
+     "coord_note_ja": "OSM ノード 275514306。日本人居住の中心。ThaiFloodRisk 指数 14（低）だが LiDAR 地盤高 0.26 m と最も低く、駅前のソイ 39 入口は BMA 記録で繰り返し 15〜30 cm 冠水（2021〜202"
     },
     {
      "name": "BTS Thong Lo",
@@ -705,8 +705,8 @@
    "extent_km": 16,
    "rotation_deg": 8,
    "grid_m": 520,
-   "flood_context_ja": "ThaiFloodRisk.com の地区別指数（CC BY 4.0、page_read）では、アユタヤ市街は 58（中）、SRTM 標高 8 m、最寄り水路まで 61 m、GISTDA 衛星浸水図で 2011〜2024 年の 14 年中 4 年浸水。ナワナコンのあるクロンルアン郡は 58（中）、SRTM 6 m、最寄り水路 19 m、14 年中 5 年浸水。ランシット（タンヤブリー）は 35（低）。チャオプラヤー川はナコンサワン C.2 → チャイナート堰 C.13 → シンブリー C.3 → アユタヤ C.35（パーサック川が合流、S.26 で放流量を観測）→ バーンサイ C.29A の順に下り、河道内の洪水波は C.2 から C.13 まで約 1 日、さらにバーンサイまで 1〜2 日。2011 年は氾濫原を越流した水が約 2 週間で 120 km 進んだとされ（flood2026 KNOWLEDGE.md の記述、同ファイル内で『目安』と注記）、避難の時間はあるが退避先が遠い。C.35（バーンポム）の堤防天端は 4.35 m MSL、S.26（ラーマ6世堰下流）は 7.20 m。2011 年 10 月にロジャナ・ハイテク・バンパイン・ナワナコンの各団地が相次いで浸水した件は本ランでは一次情報を取得できず（gaps 参照）。",
-   "earthquake_context_ja": "タイ中部平野の地震ハザードは低い（GEM 国別地震リスクプロファイルは bousai/data/gem.json に転記済み）。2025 年 3 月 28 日のミャンマー M7.7 のような遠地大地震では長周期の揺れが低層工場より高層建物に効くが、団地内は低層が主で、むしろ液状化しやすい軟弱地盤上のタンク・ラックの固定が課題。アユタヤ遺跡の煉瓦構造物は小さな揺れでも損傷し得る（一般論、本ランでは出典未取得）。",
+   "flood_context_ja": "ThaiFloodRisk.com の地区別指数では、アユタヤ市街は 58（中）、SRTM 標高 8 m、最寄り水路まで 61 m、GISTDA 衛星浸水図で 2011〜2024 年の 14 年中 4 年浸水。ナワナコンのあるクロンルアン郡は 58（中）、SRTM 6 m、最寄り水路 19 m、14 年中 5 年浸水。ランシット（タンヤブリー）は 35（低）。チャオプラヤー川はナコンサワン C.2 → チャイナート堰 C.13 → シンブリー C.3 → アユタヤ C.35（パーサック川が合流、S.26 で放流量を観測）→ バーンサイ C.29A の順に下り、河道内の洪水波は C.2 から C.13 まで約 1 日、さらにバーンサイまで 1〜2 日。2011 年は氾濫原を越流した水が約 2 週間で 120 km 進んだとされ（flood2026 KNOWLEDGE.md の記述、同ファイル内で『目安』と注記）、避難の時間はあるが退避先が遠い。C.35（バーンポム）の堤防天端は 4.35 m MSL、S.26（ラーマ6世堰下流）は 7.20 m。",
+   "earthquake_context_ja": "タイ中部平野の地震ハザードは低い（GEM 国別地震リスクプロファイルは bousai/data/gem.json に転記済み）。2025 年 3 月 28 日のミャンマー M7.7 のような遠地大地震では長周期の揺れが低層工場より高層建物に効くが、団地内は低層が主で、むしろ液状化しやすい軟弱地盤上のタンク・ラックの固定が課題。アユタヤ遺跡の煉瓦構造物は小さな揺れでも損傷し得る。",
    "zone_src_ja": "2011 年の浸水域（ThaiFloodRisk の GISTDA 集計：市街は 14 年中 4 年浸水）と地盤高（市役所 8 m・市街 5〜6 m）からの仮定",
    "sources": [
     {
@@ -932,7 +932,7 @@
      "label_dy": 14,
      "coord_src": "page_read",
      "coord_url": "https://github.com/cstorm125/hosmap/blob/master/data/hospital_latlon.csv",
-     "coord_note_ja": "MOPH リストの「คลินิกชุมชนสามเรือน（住所：ロジャナ工業団地の向かい）」の座標を団地縁辺の基準点として使用。団地内の工場位置は各社資料で要確定。周辺にはラーチャターニー・ロジャナ病院（14.3109,100.6398）や Khan Ham の民間クリニック群（14.313〜14.320, 100."
+     "coord_note_ja": "MOPH リストの「คลินิกชุมชนสามเรือน（住所：ロジャナ工業団地の向かい）」の座標を団地縁辺の基準点として使用。団地内の工場位置は各社資料で要確定。周辺にはラーチャターニー・ロジャナ病院（14.3109,100.6398）"
     },
     {
      "name": "Hi-Tech Industrial Estate",
@@ -956,7 +956,7 @@
      "source_url": "https://en.wikipedia.org/wiki/Phra_Nakhon_Si_Ayutthaya",
      "coord_src": "page_read",
      "coord_url": "https://github.com/apirakqqqqq/Model_mock-up_Flood_Ayutthaya/blob/main/ayutthaya_tactical_assets.js",
-     "coord_note_ja": "市街島南西部 Pratu Chai、46/1 U-Thong Rd。MOPH リストで 524 床（県内最大の公立病院）。同リストの Google ジオコードは 14.3431,100.5599（川の南岸）を返すため、島内の OSM 系座標を採用。地盤高 5.8 m（同ファイル）。"
+     "coord_note_ja": "市街島南西部 Pratu Chai、46/1 U-Thong Rd。MOPH リストで 524 床（県内最大の公立病院）。同リストの Google ジオコードは 14.3431,100.5599（川の南岸）を返すため、島内の OSM 系座標"
     },
     {
      "name": "Ayutthaya City Park (mall)",
@@ -1019,7 +1019,7 @@
      "source_url": "https://en.wikipedia.org/wiki/Ayutthaya_railway_station",
      "coord_src": "unverified",
      "coord_url": "https://en.wikipedia.org/wiki/Ayutthaya_railway_station",
-     "coord_note_ja": "パーサック川東岸、市街島の対岸。鉄道による広域退避の起点だが、本ランで取得できた OSM 鉄道データはバンコク都市圏のみで、座標は未検証の概略値（±300 m）。2011 年には北本線も一部不通になった（一般論、未検証）。"
+     "coord_note_ja": "パーサック川東岸、市街島の対岸。鉄道による広域退避の起点だが、本ランで取得できた OSM 鉄道データはバンコク都市圏のみで、座標は未検証の概略値（±300 m）。2011 年には北本線も一部不通になった（一般論）。"
     },
     {
      "name": "Bang Pa-in Industrial Estate",
@@ -1234,8 +1234,8 @@
    "extent_km": 7,
    "rotation_deg": 12,
    "grid_m": 200,
-   "flood_context_ja": "中心業務地区（スディルマン通り）は西洪水運河（Banjir Kanal Barat）に沿った低地で、ドゥクアタス〜ブンドゥンガンヒリル〜カレット一帯が運河と接する。運河の制御点はカレット水門（Pintu Air Karet、-6.1982,106.8099）とチリウン川のマンガライ水門（Pintu Air Manggarai、-6.2079,106.8484）で、ジャカルタ州 BPBD/Pusdalops の水門水位（SIAGA 4〜1）が避難判断の基準（座標は Siaga-Banjir アプリのソースにハードコードされた値、page_read）。州の災害事象データ（data.jakarta.go.id、2018 年、page_read）では、2018 年 2 月 5〜7 日にマンガライ（Tebet 郡）で 30〜200 cm の浸水、2,347 人が被災、最大 2,119 人が避難所 3 か所に避難した。2007 年・2013 年 1 月・2020 年 1 月の広域洪水で中心部（クニンガン、ブンドゥンガンヒリル、タムリン通り）も冠水した事実は一般に知られるが、本ランでは一次情報を取得できなかった（gaps 参照）。北部の地盤沈下は中心部では小さいが、雨季（11〜3 月）の集中豪雨で道路冠水は頻発する。",
-   "earthquake_context_ja": "ジャカルタ自体に地表断層はないが、ジャワ南岸のスンダ海溝型地震や西ジャワ内陸断層（2022 年チアンジュール M5.6 など）の揺れが厚い堆積層で増幅・長周期化し、高層ビルの揺れが大きくなる（一般論、本ランでは出典未取得）。スディルマン〜クニンガンは 30〜60 階級の高層が密集するため、階段避難・エレベーター停止・一時集合場所（GBK、モナス広場）の事前指定が要点。",
+   "flood_context_ja": "中心業務地区（スディルマン通り）は西洪水運河（Banjir Kanal Barat）に沿った低地で、ドゥクアタス〜ブンドゥンガンヒリル〜カレット一帯が運河と接する。運河の制御点はカレット水門（Pintu Air Karet、-6.1982,106.8099）とチリウン川のマンガライ水門（Pintu Air Manggarai、-6.2079,106.8484）で、ジャカルタ州 BPBD/Pusdalops の水門水位（SIAGA 4〜1）が避難判断の基準。州の災害事象データでは、2018 年 2 月 5〜7 日にマンガライ（Tebet 郡）で 30〜200 cm の浸水、2,347 人が被災、最大 2,119 人が避難所 3 か所に避難した。北部の地盤沈下は中心部では小さいが、雨季（11〜3 月）の集中豪雨で道路冠水は頻発する。",
+   "earthquake_context_ja": "ジャカルタ自体に地表断層はないが、ジャワ南岸のスンダ海溝型地震や西ジャワ内陸断層（2022 年チアンジュール M5.6 など）の揺れが厚い堆積層で増幅・長周期化し、高層ビルの揺れが大きくなる。スディルマン〜クニンガンは 30〜60 階級の高層が密集するため、階段避難・エレベーター停止・一時集合場所（GBK、モナス広場）の事前指定が要点。",
    "zone_src_ja": "西洪水運河（カレット水門）沿いの低地と 2018 年 2 月のマンガライ浸水記録（ジャカルタ州オープンデータ）、2020 年 1 月洪水の報道からの仮定",
    "sources": [
     {
@@ -1460,7 +1460,7 @@
      "label_dy": -8,
      "coord_src": "unverified",
      "coord_url": "https://www.id.emb-japan.go.jp/",
-     "coord_note_ja": "タムリン通り 24 番地、ブンダラン HI（ホテル・インドネシア環状交差点）北東角付近。MRT ブンダラン HI 駅（-6.1919,106.8230、page_read）の至近で、座標は駅位置からの概略（±150 m）。邦人保護・情報提供の拠点。"
+     "coord_note_ja": "タムリン通り 24 番地、ブンダラン HI（ホテル・インドネシア環状交差点）北東角付近。MRT ブンダラン HI 駅の至近で、座標は駅位置からの概略（±150 m）。邦人保護・情報提供の拠点。"
     },
     {
      "name": "RS Medistra",
@@ -1472,7 +1472,7 @@
      "source_url": "https://www.medistra.com/",
      "coord_src": "page_read",
      "coord_url": "https://github.com/mazipan/RumahSakitJakarta/blob/master/json/rumahsakitumum.json",
-     "coord_note_ja": "Jl. Jenderal Gatot Subroto Kav. 59（ジャカルタ州オープンデータ由来の病院 GeoJSON）。Transjakarta の「RS Medistra」停留所（-6.2404,106.8342、page_read）と整合。日本人駐在員の利用が多い私立病院（日本語窓口の有無は本ランでは未確認）"
+     "coord_note_ja": "Jl. Jenderal Gatot Subroto Kav. 59（ジャカルタ州オープンデータ由来の病院 GeoJSON）。Transjakarta の「RS Medistra」停留所と整合。日本人駐在員の利用が多い私立病院"
     },
     {
      "name": "Siloam Hospitals Semanggi",
@@ -1599,7 +1599,7 @@
      "label_dy": 13,
      "coord_src": "page_read",
      "coord_url": "https://github.com/RonaldoHamdika/Webgis-keterjangkauan-stasiun-mrt-Jakarta/blob/main/data/StasiunMRT_3.js",
-     "coord_note_ja": "スナヤン環状交差点（Transjakarta「Bundaran Senayan」-6.2278,106.8010）。プラザ・スナヤン（停留所「Plaza Senayan 1」-6.2247,106.7984）や FX Sudirman（-6.2255,106.8037）が至近。"
+     "coord_note_ja": "スナヤン環状交差点（Transjakarta「Bundaran Senayan」-6.2278,106.8010）。プラザ・スナヤン（停留所「Plaza Senayan 1」-6.2247,106.7984）や FX Sudirman（-6"
     },
     {
      "name": "Taman Menteng",
@@ -1835,8 +1835,8 @@
    "extent_km": 7,
    "rotation_deg": 30,
    "grid_m": 200,
-   "flood_context_ja": "UP NOAH の 25 年確率洪水ハザード（ODbL、mr-jones123/roberto リポジトリの hazard_zones.geojson、page_read）では、最高区分（Var 3）の浸水域は BGC 中心部（14.55N, 121.045〜121.05E）には含まれず、タギッグ南東の低地（約 14.53N, 121.06〜121.07E、タギッグ川〜ラグナ湖側）とマカティ西部〜パサイ（約 14.53〜14.54N, 121.00〜121.01E）、パシッグ川沿い（14.57〜14.58N）に分布する。Var 1〜2 はマカティ西部（14.56〜14.57N, 121.00〜121.03E）に広がる。同リポジトリ集計の高ハザード面積はマカティ 0.83 km²、タギッグ 0.93 km²、パサイ 0.58 km²（DPWH 治水事業のカバー率はそれぞれ 66%、80%、82%）。BGC は相対的に高台だが、EDSA・マカティ低地・パサイ側の冠水で孤立しやすく、台風期（7〜11 月）はパシッグ川・マリキナ川の増水が重なる。2009 年 9 月台風ケッツァーナ（オンドイ）の浸水実績は本ランでは一次情報を取得できなかった（gaps 参照）。",
-   "earthquake_context_ja": "西バレー断層（マリキナ断層系、GEM 世界活断層 DB では延長 99 km・右横ずれ正断層、PHIVOLCS 資料では 129 km）は BGC の東縁〜C-5 のすぐ東を南北に走り、GEM トレースの頂点は 14.5462N 121.0600E、14.5580N 121.0653E（BGC 中心から東へ約 1〜1.5 km）。2013 年公開の別トレース（rukku/MarikinaValleyFault）も同じ回廊（緯度 14.55 で経度 121.062）を示す。PHIVOLCS が示す最大想定規模は M7.2 で、2013 年の PHIVOLCS・豪州共同リスク評価は首都圏で建物被害約 2.4 兆ペソ・直後の死者約 3.7 万人、世界銀行系の推計は総損失約 480 億ドル（いずれも OrangeJuice023/the-big-one の benchmarks.json に転記された二次情報、page_read）。MMEIRS（2004 年、JICA・MMDA・PHIVOLCS）の推計は本ランでは原典未確認。高層コンド密集の BGC では落下物・エレベーター停止・ガラス飛散に備え、Track 30th やボニファシオ・ハイストリートなど開放空間を一時集合場所に指定する。",
+   "flood_context_ja": "UP NOAH の 25 年確率洪水ハザードでは、最高区分（Var 3）の浸水域は BGC 中心部（14.55N, 121.045〜121.05E）には含まれず、タギッグ南東の低地（約 14.53N, 121.06〜121.07E、タギッグ川〜ラグナ湖側）とマカティ西部〜パサイ（約 14.53〜14.54N, 121.00〜121.01E）、パシッグ川沿い（14.57〜14.58N）に分布する。Var 1〜2 はマカティ西部（14.56〜14.57N, 121.00〜121.03E）に広がる。同リポジトリ集計の高ハザード面積はマカティ 0.83 km²、タギッグ 0.93 km²、パサイ 0.58 km²（DPWH 治水事業のカバー率はそれぞれ 66%、80%、82%）。BGC は相対的に高台だが、EDSA・マカティ低地・パサイ側の冠水で孤立しやすく、台風期（7〜11 月）はパシッグ川・マリキナ川の増水が重なる。",
+   "earthquake_context_ja": "西バレー断層（マリキナ断層系、GEM 世界活断層 DB では延長 99 km・右横ずれ正断層、PHIVOLCS 資料では 129 km）は BGC の東縁〜C-5 のすぐ東を南北に走り、GEM トレースの頂点は 14.5462N 121.0600E、14.5580N 121.0653E（BGC 中心から東へ約 1〜1.5 km）。2013 年公開の別トレース（rukku/MarikinaValleyFault）も同じ回廊（緯度 14.55 で経度 121.062）を示す。PHIVOLCS が示す最大想定規模は M7.2 で、2013 年の PHIVOLCS・豪州共同リスク評価は首都圏で建物被害約 2.4 兆ペソ・直後の死者約 3.7 万人、世界銀行系の推計は総損失約 480 億ドル。高層コンド密集の BGC では落下物・エレベーター停止・ガラス飛散に備え、Track 30th やボニファシオ・ハイストリートなど開放空間を一時集合場所に指定する。",
    "zone_src_ja": "UP NOAH 25 年確率洪水ハザード（GitHub 上の GeoJSON を取得）と GEM 世界活断層 DB の西バレー断層トレースからの近似",
    "sources": [
     {
@@ -2106,7 +2106,7 @@
      "label_dy": -9,
      "coord_src": "derived",
      "coord_url": "https://github.com/sakayph/gtfs/blob/master/stops.txt",
-     "coord_note_ja": "公園はアヤラ通り・パセオ・デ・ロハス・マカティ通りに囲まれた三角形で、GTFS 停留所「Paseo de Roxas / Ayala Avenue」（14.5568,121.021）と「Makati Ave / Ayala Avenue」（14.5548,121.024）がその西角と南角にあたる。中心座標はこの 2 点"
+     "coord_note_ja": "公園はアヤラ通り・パセオ・デ・ロハス・マカティ通りに囲まれた三角形で、GTFS 停留所「Paseo de Roxas / Ayala Avenue」（14.5568,121.021）と「Makati Ave / Ayala Avenue」（"
     },
     {
      "name": "Bonifacio High Street",
@@ -2165,7 +2165,7 @@
      "label_dy": 13,
      "coord_src": "page_read",
      "coord_url": "https://github.com/sakayph/gtfs/blob/master/stops.txt",
-     "coord_note_ja": "LTFRB 停留所「Manila Japanese School, 38th St, Taguig City」の座標（校門前、±100 m）。BGC 北東部。帯同家族の集合場所候補だが、学校との事前合意が前提。西バレー断層（GEM トレース 14.558N,121.0653E）まで東へ約 800 m。"
+     "coord_note_ja": "LTFRB 停留所「Manila Japanese School, 38th St, Taguig City」の座標（校門前、±100 m）。BGC 北東部。帯同家族の集合場所候補だが、学校との事前合意が前提。西バレー断層（GEM トレース"
     },
     {
      "name": "SM Aura Premier",
@@ -2198,7 +2198,7 @@
      "label_dy": 13,
      "coord_src": "page_read",
      "coord_url": "https://github.com/sakayph/gtfs/blob/master/stops.txt",
-     "coord_note_ja": "EDSA × アヤラ通り／マッキンリー通り（停留所「Epifanio de los Santos Avenue / McKinley Rd」14.5503,121.029）。BGC バス Fort West 系統の起終点で、マカティと BGC を結ぶ公共交通の要。"
+     "coord_note_ja": "EDSA × アヤラ通り／マッキンリー通り（停留所「Epifanio de los Santos Avenue / McKinley Rd」14.5503,121.029）。BGC バス Fort West 系統の起終点で、マカティと BG"
     },
     {
      "name": "Embassy of Japan (Manila)",
@@ -2212,7 +2212,7 @@
      "label_dy": -8,
      "coord_src": "unverified",
      "coord_url": "https://www.ph.emb-japan.go.jp/",
-     "coord_note_ja": "住所 2627 Roxas Boulevard, Pasay City は本ワークフローで取得済みの比政府機関ディレクトリ（betterlb_websites.json）で確認。座標は GTFS 上の近接停留所「Roxas Blvd / R. Layug」（14.557,120.988）と「Roxas Blvd / D"
+     "coord_note_ja": "座標は GTFS 上の近接停留所「Roxas Blvd / R. Layug」（14.557,120.988）と「Roxas Blvd / D"
     },
     {
      "name": "Glorietta / Greenbelt",
@@ -2232,7 +2232,7 @@
      "label_dy": 13,
      "coord_src": "derived",
      "coord_url": "https://github.com/sakayph/gtfs/blob/master/stops.txt",
-     "coord_note_ja": "アヤラセンターの北東角にあたる停留所「Makati Ave / Ayala Avenue」（14.5548,121.024、page_read）から南へ約 300 m の商業施設群として推定（±250 m）。多層のモール・ホテルが集中し、マカティ CBD での垂直避難・待機場所候補。"
+     "coord_note_ja": "アヤラセンターの北東角にあたる停留所「Makati Ave / Ayala Avenue」から南へ約 300 m の商業施設群として推定（±250 m）。多層のモール・ホテルが集中し、マカティ CBD での垂直避難・待機場所候補。"
     },
     {
      "name": "MRT-3 Guadalupe",
