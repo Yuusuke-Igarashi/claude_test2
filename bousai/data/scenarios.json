@@ -900,7 +900,344 @@
     ]
    },
    "default_t": 120,
-   "short_ja": "BKK 大規模洪水（2011 年型）"
+   "short_ja": "BKK 大規模洪水（2011 年型）",
+   "t0_iso": "2026-10-12T06:00:00+07:00",
+   "city_ja": "バンコク首都圏",
+   "country_ja": "タイ",
+   "hazard_ja": "大規模洪水",
+   "status": "active",
+   "forcing": [
+    {
+     "key": "rain_bkk",
+     "group": "降雨",
+     "name_ja": "24 時間雨量（バンコク都心・BMA 排水局）",
+     "unit": "mm",
+     "kind": "rain",
+     "base": 12,
+     "bursts": [
+      [
+       20,
+       38,
+       55
+      ],
+      [
+       66,
+       30,
+       45
+      ],
+      [
+       110,
+       26,
+       40
+      ],
+      [
+       150,
+       20,
+       30
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 60,
+       "ja": "注意（都市型浸水の目安）"
+      },
+      {
+       "v": 90,
+       "ja": "警戒"
+      }
+     ],
+     "src": "仮定（BMA の冠水記録の規模感を参考）"
+    },
+    {
+     "key": "rain_up",
+     "group": "降雨",
+     "name_ja": "24 時間雨量（上流・ナコンサワン）",
+     "unit": "mm",
+     "kind": "rain",
+     "base": 30,
+     "bursts": [
+      [
+       -40,
+       60,
+       120
+      ],
+      [
+       10,
+       50,
+       110
+      ],
+      [
+       48,
+       36,
+       80
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 90,
+       "ja": "警戒"
+      }
+     ],
+     "src": "仮定"
+    },
+    {
+     "key": "river_c35",
+     "group": "河川水位",
+     "name_ja": "チャオプラヤー川 水位 C.35（アユタヤ・バーンポム）",
+     "unit": "m MSL",
+     "kind": "river",
+     "start": 3.4,
+     "peak": 4.65,
+     "peak_h": 60,
+     "hold_h": 120,
+     "fall_h": 320,
+     "thresholds": [
+      {
+       "v": 3.9,
+       "ja": "警戒水位（仮定）"
+      },
+      {
+       "v": 4.35,
+       "ja": "堤防天端 4.35 m（RID 資料）"
+      }
+     ],
+     "src": "堤防天端は RID 資料（GitHub 上の整理データ）。推移は仮定"
+    },
+    {
+     "key": "river_c29a",
+     "group": "河川水位",
+     "name_ja": "チャオプラヤー川 水位 C.29A（バーンサイ）",
+     "unit": "m MSL",
+     "kind": "river",
+     "start": 2.6,
+     "peak": 3.9,
+     "peak_h": 84,
+     "hold_h": 120,
+     "fall_h": 320,
+     "thresholds": [
+      {
+       "v": 3.5,
+       "ja": "警戒（仮定）"
+      }
+     ],
+     "src": "仮定"
+    },
+    {
+     "key": "tide",
+     "group": "潮位",
+     "name_ja": "バンコク 潮位＋増水（メモリアル橋付近）",
+     "unit": "m",
+     "kind": "tide",
+     "base": 1.6,
+     "amp": 0.6,
+     "period": 12.4,
+     "surge": 0.5,
+     "surge_h": 120,
+     "thresholds": [
+      {
+       "v": 2.5,
+       "ja": "堤防の危険水位（仮定）"
+      }
+     ],
+     "src": "仮定"
+    },
+    {
+     "key": "dam",
+     "group": "ダム放流",
+     "name_ja": "上流ダム放流量（ブミポン＋シリキット）",
+     "unit": "m³/s",
+     "kind": "flow",
+     "start": 1800,
+     "peak": 4200,
+     "peak_h": 30,
+     "hold_h": 150,
+     "fall_h": 200,
+     "thresholds": [
+      {
+       "v": 3500,
+       "ja": "下流で氾濫の恐れ（仮定）"
+      }
+     ],
+     "src": "仮定"
+    }
+   ],
+   "incidents": [
+    {
+     "t": 6,
+     "type": "flood",
+     "district": "ayut",
+     "sev": 2,
+     "where_ja": "アユタヤ県 バーンバーン郡",
+     "ja": "チャオプラヤー川東岸で越水、住宅地が浸水 0.5 m",
+     "src": "DDPM"
+    },
+    {
+     "t": 14,
+     "type": "road",
+     "district": "ayut",
+     "sev": 2,
+     "where_ja": "国道 347 号 バンパイン付近",
+     "ja": "冠水 40 cm で小型車の通行止め",
+     "src": "道路局"
+    },
+    {
+     "t": 22,
+     "type": "evac",
+     "district": "ayut",
+     "sev": 2,
+     "where_ja": "アユタヤ県全域",
+     "ja": "県が避難勧告。寺院・学校に避難所開設",
+     "src": "DDPM"
+    },
+    {
+     "t": 28,
+     "type": "flood",
+     "district": "ayut",
+     "sev": 3,
+     "where_ja": "ロジャナ工業団地",
+     "ja": "団地堤防の一部で越水、工場棟 1 階が浸水開始",
+     "src": "団地管理会社"
+    },
+    {
+     "t": 30,
+     "type": "power",
+     "district": "ayut",
+     "sev": 3,
+     "where_ja": "ウタイ郡",
+     "ja": "変電所の浸水で広域停電（約 6 万世帯）",
+     "src": "PEA"
+    },
+    {
+     "t": 40,
+     "type": "health",
+     "district": "ayut",
+     "sev": 2,
+     "where_ja": "アユタヤ病院",
+     "ja": "1 階浸水のため救急のみ受入、患者を上層階へ",
+     "src": "病院"
+    },
+    {
+     "t": 50,
+     "type": "flood",
+     "district": "pathum",
+     "sev": 2,
+     "where_ja": "ナワナコン工業団地",
+     "ja": "団地周辺道路が冠水、従業員の通勤困難",
+     "src": "団地管理会社"
+    },
+    {
+     "t": 62,
+     "type": "supply",
+     "district": "pathum",
+     "sev": 3,
+     "where_ja": "ナワナコン工業団地",
+     "ja": "電子部品メーカーが操業停止を発表（当社 Tier1）",
+     "src": "取引先"
+    },
+    {
+     "t": 72,
+     "type": "flood",
+     "district": "bkk-north",
+     "sev": 2,
+     "where_ja": "ドンムアン区",
+     "ja": "ドンムアン区で浸水開始（0.3 m）",
+     "src": "BMA 排水局"
+    },
+    {
+     "t": 84,
+     "type": "rail",
+     "district": "bkk-north",
+     "sev": 1,
+     "where_ja": "国鉄北本線",
+     "ja": "ドンムアン〜ランシット間で運休",
+     "src": "タイ国鉄"
+    },
+    {
+     "t": 96,
+     "type": "road",
+     "district": "pathum",
+     "sev": 3,
+     "where_ja": "国道 1 号 アユタヤ〜パトゥムタニ",
+     "ja": "通行止め。北部ルートが遮断",
+     "src": "道路局"
+    },
+    {
+     "t": 100,
+     "type": "flood",
+     "district": "nontha",
+     "sev": 2,
+     "where_ja": "ノンタブリー県 バーンブアトーン",
+     "ja": "住宅地で浸水 1 m 超",
+     "src": "DDPM"
+    },
+    {
+     "t": 110,
+     "type": "health",
+     "district": "ayut",
+     "sev": 2,
+     "where_ja": "アユタヤ避難所群",
+     "ja": "避難所で下痢症の集団発生の疑い（12 名）",
+     "src": "保健局"
+    },
+    {
+     "t": 120,
+     "type": "flood",
+     "district": "bkk-west",
+     "sev": 2,
+     "where_ja": "タウィーワタナー区",
+     "ja": "西部で浸水開始（0.5 m）",
+     "src": "BMA"
+    },
+    {
+     "t": 126,
+     "type": "power",
+     "district": "bkk-north",
+     "sev": 2,
+     "where_ja": "バンケン区",
+     "ja": "変電所の予防停止で約 3 万世帯が停電",
+     "src": "MEA"
+    },
+    {
+     "t": 130,
+     "type": "airport",
+     "district": "bkk-north",
+     "sev": 3,
+     "where_ja": "ドンムアン空港",
+     "ja": "滑走路の浸水で閉鎖",
+     "src": "AOT"
+    },
+    {
+     "t": 140,
+     "type": "supply",
+     "district": "samut",
+     "sev": 1,
+     "where_ja": "バンナー物流センター",
+     "ja": "周辺道路の冠水予報を受け在庫を嵩上げ、搬出のみに縮退",
+     "src": "自社"
+    },
+    {
+     "t": 150,
+     "type": "health",
+     "district": "bkk-central",
+     "sev": 1,
+     "where_ja": "バムルンラード病院",
+     "ja": "北部からの転院受入で救急が混雑",
+     "src": "病院"
+    },
+    {
+     "t": 160,
+     "type": "flood",
+     "district": "bkk-east",
+     "sev": 1,
+     "where_ja": "ミンブリー区",
+     "ja": "東部で道路冠水、排水路の水位上昇",
+     "src": "BMA"
+    }
+   ],
+   "supply_sites": [
+    "bkk-hq",
+    "ayut-plant"
+   ]
   },
   {
    "id": "mnl-quake-wvf",
@@ -1880,7 +2217,528 @@
     ]
    },
    "default_t": 30,
-   "short_ja": "MNL 直下地震（西バレー断層 M7.2）"
+   "short_ja": "MNL 直下地震（西バレー断層 M7.2）",
+   "t0_iso": "2026-11-17T14:20:00+08:00",
+   "city_ja": "マニラ首都圏",
+   "country_ja": "フィリピン",
+   "hazard_ja": "直下地震",
+   "status": "active",
+   "forcing": [
+    {
+     "key": "quake",
+     "group": "地震",
+     "name_ja": "本震・余震（PHIVOLCS 速報・想定）",
+     "unit": "M",
+     "kind": "quake",
+     "events": [
+      [
+       0,
+       7.2,
+       "本震（西バレー断層）"
+      ],
+      [
+       0.3,
+       5.4,
+       ""
+      ],
+      [
+       1.5,
+       5.1,
+       ""
+      ],
+      [
+       6,
+       4.8,
+       ""
+      ],
+      [
+       14,
+       5.6,
+       ""
+      ],
+      [
+       36,
+       6.0,
+       "最大余震"
+      ],
+      [
+       52,
+       4.9,
+       ""
+      ],
+      [
+       80,
+       5.2,
+       ""
+      ],
+      [
+       120,
+       4.6,
+       ""
+      ],
+      [
+       150,
+       5.0,
+       ""
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 5.0,
+       "ja": "M5 以上：建物の再点検"
+      }
+     ],
+     "src": "本震規模は PHIVOLCS の想定。余震は仮定"
+    },
+    {
+     "key": "rain_mnl",
+     "group": "降雨",
+     "name_ja": "24 時間雨量（マニラ・PAGASA）",
+     "unit": "mm",
+     "kind": "rain",
+     "base": 8,
+     "bursts": [
+      [
+       128,
+       40,
+       90
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 50,
+       "ja": "黄色警報相当（仮定）"
+      },
+      {
+       "v": 90,
+       "ja": "橙色警報相当（仮定）"
+      }
+     ],
+     "src": "仮定（週後半に熱帯低気圧接近の想定）"
+    },
+    {
+     "key": "wind",
+     "group": "風",
+     "name_ja": "最大瞬間風速（マニラ）",
+     "unit": "km/h",
+     "kind": "wind",
+     "base": 20,
+     "peak": 75,
+     "peak_h": 140,
+     "width": 30,
+     "thresholds": [
+      {
+       "v": 62,
+       "ja": "TCWS 2 相当（62〜88 km/h）"
+      }
+     ],
+     "src": "仮定"
+    },
+    {
+     "key": "pasig",
+     "group": "河川水位",
+     "name_ja": "パシッグ川 水位（マリキナ・ストーロベレー）",
+     "unit": "m",
+     "kind": "river",
+     "start": 12.0,
+     "peak": 15.0,
+     "peak_h": 150,
+     "hold_h": 20,
+     "fall_h": 60,
+     "thresholds": [
+      {
+       "v": 15.0,
+       "ja": "第 1 警報（仮定）"
+      },
+      {
+       "v": 16.0,
+       "ja": "第 2 警報（仮定）"
+      }
+     ],
+     "src": "仮定"
+    }
+   ],
+   "incidents": [
+    {
+     "t": 0.1,
+     "type": "collapse",
+     "district": "marikina",
+     "sev": 3,
+     "where_ja": "マリキナ市 市街",
+     "ja": "低層住宅・商店の倒壊多数、要救助者あり",
+     "src": "MMDA・市"
+    },
+    {
+     "t": 0.2,
+     "type": "collapse",
+     "district": "pasig",
+     "sev": 3,
+     "where_ja": "パシッグ市",
+     "ja": "中層建物の倒壊 2 件、道路に落下物",
+     "src": "市"
+    },
+    {
+     "t": 0.3,
+     "type": "power",
+     "district": "",
+     "sev": 3,
+     "where_ja": "首都圏全域",
+     "ja": "首都圏の約 8 割で停電",
+     "src": "Meralco"
+    },
+    {
+     "t": 0.4,
+     "type": "collapse",
+     "district": "taguig",
+     "sev": 2,
+     "where_ja": "BGC",
+     "ja": "高層ビルの外装パネル落下、ガラス散乱。構造倒壊の報告なし",
+     "src": "自社・市"
+    },
+    {
+     "t": 0.6,
+     "type": "road",
+     "district": "makati",
+     "sev": 3,
+     "where_ja": "EDSA・C-5",
+     "ja": "渋滞と落下物で通行不能",
+     "src": "MMDA"
+    },
+    {
+     "t": 1,
+     "type": "rail",
+     "district": "",
+     "sev": 3,
+     "where_ja": "MRT-3・LRT",
+     "ja": "全線運休、高架構造物の点検へ",
+     "src": "DOTr"
+    },
+    {
+     "t": 1.5,
+     "type": "airport",
+     "district": "pasay",
+     "sev": 3,
+     "where_ja": "NAIA",
+     "ja": "滑走路点検のため閉鎖",
+     "src": "MIAA"
+    },
+    {
+     "t": 2,
+     "type": "health",
+     "district": "taguig",
+     "sev": 3,
+     "where_ja": "セント・ルークス BGC",
+     "ja": "外傷患者が集中、重症のみ受入",
+     "src": "病院"
+    },
+    {
+     "t": 4,
+     "type": "water",
+     "district": "",
+     "sev": 3,
+     "where_ja": "首都圏東部",
+     "ja": "配水管の破損多数、広域断水",
+     "src": "Manila Water"
+    },
+    {
+     "t": 9,
+     "type": "fire",
+     "district": "manila",
+     "sev": 3,
+     "where_ja": "マニラ市 トンド",
+     "ja": "密集住宅地で火災延焼、消火活動中",
+     "src": "BFP"
+    },
+    {
+     "t": 12,
+     "type": "evac",
+     "district": "qc",
+     "sev": 2,
+     "where_ja": "ケソン市",
+     "ja": "学校・公園に避難センター開設、約 6 万人が屋外避難",
+     "src": "市"
+    },
+    {
+     "t": 18,
+     "type": "airport",
+     "district": "pasay",
+     "sev": 2,
+     "where_ja": "NAIA",
+     "ja": "救援機のみ受入再開",
+     "src": "MIAA"
+    },
+    {
+     "t": 24,
+     "type": "supply",
+     "district": "laguna",
+     "sev": 2,
+     "where_ja": "ラグナ工場",
+     "ja": "設備点検中。生産停止、停電継続",
+     "src": "自社"
+    },
+    {
+     "t": 36,
+     "type": "collapse",
+     "district": "marikina",
+     "sev": 2,
+     "where_ja": "マリキナ市",
+     "ja": "余震 M6.0 で損傷建物の追加倒壊",
+     "src": "市"
+    },
+    {
+     "t": 48,
+     "type": "health",
+     "district": "",
+     "sev": 2,
+     "where_ja": "首都圏の避難所",
+     "ja": "屋外避難者の熱中症・脱水の報告が増加",
+     "src": "保健省"
+    },
+    {
+     "t": 72,
+     "type": "airport",
+     "district": "pasay",
+     "sev": 1,
+     "where_ja": "NAIA",
+     "ja": "民間便 一部再開",
+     "src": "MIAA"
+    },
+    {
+     "t": 96,
+     "type": "road",
+     "district": "makati",
+     "sev": 1,
+     "where_ja": "EDSA",
+     "ja": "一般車両 一部通行可",
+     "src": "MMDA"
+    },
+    {
+     "t": 120,
+     "type": "water",
+     "district": "makati",
+     "sev": 1,
+     "where_ja": "マカティ・BGC",
+     "ja": "給水 一部復旧",
+     "src": "Manila Water"
+    },
+    {
+     "t": 140,
+     "type": "flood",
+     "district": "marikina",
+     "sev": 2,
+     "where_ja": "マリキナ川沿い",
+     "ja": "熱帯低気圧の雨で倒壊家屋の二次崩落・冠水の恐れ",
+     "src": "PAGASA・市"
+    }
+   ],
+   "supply_sites": [
+    "mnl-office"
+   ]
+  },
+  {
+   "id": "jkt-rain-watch",
+   "type": "watch",
+   "country": "IDN",
+   "region": "id-jkt",
+   "city_ja": "ジャカルタ首都圏",
+   "country_ja": "インドネシア",
+   "hazard_ja": "大雨・洪水警報（警戒）",
+   "status": "watch",
+   "name_ja": "ジャカルタ首都圏 大雨・洪水警報（警戒中）",
+   "short_ja": "JKT 大雨・洪水警報",
+   "desc_ja": "BMKG の大雨警報が継続。西洪水運河・チリウン川の水門が Siaga 3〜2。中心部の低地で道路冠水の恐れ。",
+   "t0_iso": "2026-11-03T20:00:00+07:00",
+   "t0_ja": "t=0：BMKG が首都圏に大雨警報",
+   "default_t": 10,
+   "area_id": "jkt_sudirman",
+   "area_site": "jkt-office",
+   "bbox": [
+    106.6,
+    -6.45,
+    107.15,
+    -6.05
+   ],
+   "map_adm1": [
+    "IDN-1227",
+    "IDN-1226",
+    "IDN-1223"
+   ],
+   "districts": [],
+   "sites": [],
+   "shelters": [],
+   "supplies": [],
+   "utilities": [],
+   "logistics": [],
+   "requests": [],
+   "actions": [
+    {
+     "t": 0,
+     "ja": "在宅勤務の判断基準（Siaga 2 で切替）を周知し、通勤経路の冠水情報を共有",
+     "why": "2020 年 1 月は元日未明の豪雨で通勤不能になった"
+    },
+    {
+     "t": 6,
+     "ja": "ブカシ・カラワンの取引先に在庫・操業状況を確認",
+     "why": "ThinkHazard 河川洪水 High の地域"
+    }
+   ],
+   "timeline": [
+    {
+     "t": 0,
+     "who": "BMKG",
+     "ja": "ジャカルタ首都圏に大雨警報（24 時間 100 mm 超の予想）",
+     "cls": "warn"
+    },
+    {
+     "t": 4,
+     "who": "BPBD DKI",
+     "ja": "カレット水門 Siaga 3",
+     "cls": "warn"
+    },
+    {
+     "t": 9,
+     "who": "BPBD DKI",
+     "ja": "マンガライ水門 Siaga 3、低地に注意喚起",
+     "cls": "warn"
+    },
+    {
+     "t": 12,
+     "who": "事務所",
+     "ja": "翌朝の在宅勤務を推奨（通勤経路の冠水予想）",
+     "cls": "ok"
+    }
+   ],
+   "events": [],
+   "hospitals": [],
+   "weather": {
+    "temp": 27,
+    "rh": 92,
+    "desc_ja": "雷雨",
+    "rain_ja": "今夜〜明朝 120 mm の予想",
+    "advice_ja": [
+     "冠水した道路を車で通らない",
+     "停電に備え端末を充電"
+    ]
+   },
+   "forcing": [
+    {
+     "key": "rain_dka",
+     "group": "降雨",
+     "name_ja": "24 時間雨量（ドゥクアタス観測所）",
+     "unit": "mm",
+     "kind": "rain",
+     "base": 40,
+     "bursts": [
+      [
+       2,
+       10,
+       70
+      ],
+      [
+       12,
+       8,
+       60
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 100,
+       "ja": "極端な豪雨（仮定）"
+      },
+      {
+       "v": 150,
+       "ja": "2020 年 1 月級（仮定）"
+      }
+     ],
+     "src": "仮定"
+    },
+    {
+     "key": "karet",
+     "group": "水門水位",
+     "name_ja": "カレット水門（西洪水運河）",
+     "unit": "cm",
+     "kind": "river",
+     "start": 380,
+     "peak": 580,
+     "peak_h": 14,
+     "hold_h": 6,
+     "fall_h": 30,
+     "thresholds": [
+      {
+       "v": 450,
+       "ja": "Siaga 3（仮定・要確認）"
+      },
+      {
+       "v": 550,
+       "ja": "Siaga 2（仮定・要確認）"
+      },
+      {
+       "v": 650,
+       "ja": "Siaga 1（仮定・要確認）"
+      }
+     ],
+     "src": "水門の基準値は要確認"
+    },
+    {
+     "key": "manggarai",
+     "group": "水門水位",
+     "name_ja": "マンガライ水門（チリウン川）",
+     "unit": "cm",
+     "kind": "river",
+     "start": 720,
+     "peak": 880,
+     "peak_h": 16,
+     "hold_h": 6,
+     "fall_h": 30,
+     "thresholds": [
+      {
+       "v": 750,
+       "ja": "Siaga 3（仮定・要確認）"
+      },
+      {
+       "v": 850,
+       "ja": "Siaga 2（仮定・要確認）"
+      },
+      {
+       "v": 950,
+       "ja": "Siaga 1（仮定・要確認）"
+      }
+     ],
+     "src": "水門の基準値は要確認"
+    }
+   ],
+   "incidents": [
+    {
+     "t": 3,
+     "type": "road",
+     "district": "",
+     "sev": 1,
+     "where_ja": "ドゥクアタス地下道",
+     "ja": "スディルマン通り地下道で冠水 20 cm、片側通行",
+     "src": "TMC Polda Metro（SNS）"
+    },
+    {
+     "t": 7,
+     "type": "flood",
+     "district": "",
+     "sev": 1,
+     "where_ja": "ブンドゥンガンヒリル",
+     "ja": "住宅地で浸水 30 cm の報告",
+     "src": "BPBD DKI"
+    },
+    {
+     "t": 11,
+     "type": "power",
+     "district": "",
+     "sev": 1,
+     "where_ja": "カレット",
+     "ja": "低地の一部で予防的な送電停止",
+     "src": "PLN"
+    }
+   ],
+   "supply_sites": [
+    "jkt-office"
+   ]
   }
  ]
 }

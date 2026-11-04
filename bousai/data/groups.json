@@ -1,0 +1,120 @@
+{
+  "_note": "拠点配下のグループ（現地雇用者・家族、取引先・サプライチェーン）と、自治体モードの地域住民・支援者。人数・所在地・在庫日数などは架空の仮定値（デモ）。組織名は実在するものを含むが、能力・資機材の数値は仮定。",
+  "staff": {
+    "bkk-hq": {
+      "summary_ja": "事務所勤務 120 名。日本人 18 名とその家族 31 名はスクンビット周辺の高層コンドに集中。タイ人従業員は北部・東部郊外からの通勤が多い。",
+      "headcount": 120, "japanese": 18, "families": 31, "vulnerable": 9, "commute_ja": "BTS・MRT 60%、自家用車 28%、バス・バイクタクシー 12%（仮定）",
+      "clusters": [
+        { "id": "watthana", "name_ja": "ワッタナー区（スクンビット）", "lat": 13.742, "lon": 100.585, "n": 34, "jp": 16, "fam": 26, "district": "bkk-central", "home_ja": "高層コンド中心", "note_ja": "2011 年は非浸水。都市型浸水の常襲ソイあり" },
+        { "id": "khlongtoei", "name_ja": "クロントゥーイ区", "lat": 13.715, "lon": 100.575, "n": 12, "jp": 2, "fam": 5, "district": "bkk-central", "home_ja": "低層アパート・高層混在", "note_ja": "港側の低地。区の洪水リスク指数 52（中）" },
+        { "id": "bangna", "name_ja": "バンナー区・バンプリー郡", "lat": 13.668, "lon": 100.63, "n": 25, "jp": 0, "fam": 0, "district": "samut", "home_ja": "戸建て・タウンハウス", "note_ja": "東部郊外。2011 年は浸水を免れた" },
+        { "id": "nontha", "name_ja": "ノンタブリー県", "lat": 13.86, "lon": 100.48, "n": 15, "jp": 0, "fam": 0, "district": "nontha", "home_ja": "戸建て", "note_ja": "2011 年に広域浸水" },
+        { "id": "pathum", "name_ja": "パトゥムタニ県（ランシット）", "lat": 14.03, "lon": 100.62, "n": 8, "jp": 0, "fam": 0, "district": "pathum", "home_ja": "戸建て", "note_ja": "2011 年に長期浸水" },
+        { "id": "latkrabang", "name_ja": "ラートクラバン・ミンブリー区", "lat": 13.74, "lon": 100.76, "n": 10, "jp": 0, "fam": 0, "district": "bkk-east", "home_ja": "戸建て", "note_ja": "2011 年に一部浸水" },
+        { "id": "north", "name_ja": "バンコク北部（ドンムアン・サイマイ）", "lat": 13.92, "lon": 100.60, "n": 16, "jp": 0, "fam": 0, "district": "bkk-north", "home_ja": "戸建て", "note_ja": "2011 年に 1 か月以上浸水" }
+      ],
+      "schools_ja": "日本人学校（バンコク日本人学校 2 校区）・インターナショナルスクールの引き渡しルールを家族ごとに確認（仮定）",
+      "support_ja": ["安否確認システムへの家族登録（登録率 40%）", "在宅勤務への切替基準の周知", "家族向け備蓄ガイドと緊急連絡カードの配布", "タイ人従業員向け：前払い・物資支援の方針（未整備）"]
+    },
+    "ayut-plant": {
+      "summary_ja": "工場勤務 850 名。約 200 名が団地内の寮に居住し、残りはウタイ郡・アユタヤ市街・バンパインなど県内の低地から通勤。日本人 9 名と家族 6 名はアユタヤ市街のサービスアパート。",
+      "headcount": 850, "japanese": 9, "families": 6, "vulnerable": 38, "commute_ja": "会社バス 45%、バイク 35%、自家用車 20%（仮定）",
+      "clusters": [
+        { "id": "dorm", "name_ja": "団地内の寮（ロジャナ）", "lat": 14.320, "lon": 100.636, "n": 200, "jp": 0, "fam": 0, "district": "ayut", "home_ja": "寮（3 階建）", "note_ja": "2011 年は団地全域が約 2 m 浸水。寮の 1 階は使用不能になった" },
+        { "id": "uthai", "name_ja": "ウタイ郡", "lat": 14.31, "lon": 100.66, "n": 220, "jp": 0, "fam": 0, "district": "ayut", "home_ja": "戸建て・長屋", "note_ja": "低地。2011 年に浸水" },
+        { "id": "city", "name_ja": "アユタヤ市街", "lat": 14.355, "lon": 100.57, "n": 180, "jp": 9, "fam": 6, "district": "ayut", "home_ja": "サービスアパート・戸建て", "note_ja": "2011 年に浸水。市役所周辺は地盤高 8 m" },
+        { "id": "bangpain", "name_ja": "バンパイン郡", "lat": 14.23, "lon": 100.58, "n": 120, "jp": 0, "fam": 0, "district": "ayut", "home_ja": "戸建て", "note_ja": "2011 年に浸水" },
+        { "id": "wangnoi", "name_ja": "ワンノーイ郡", "lat": 14.22, "lon": 100.72, "n": 70, "jp": 0, "fam": 0, "district": "ayut", "home_ja": "戸建て", "note_ja": "国道 1 号沿い。比較的高い" },
+        { "id": "saraburi", "name_ja": "サラブリー県", "lat": 14.53, "lon": 100.91, "n": 60, "jp": 0, "fam": 0, "district": null, "home_ja": "戸建て", "note_ja": "浸水域外。広域退避先の候補" }
+      ],
+      "schools_ja": "日本人家族の子どもはバンコクの日本人学校へ通学（スクールバス）。洪水時は運休が前提（仮定）",
+      "support_ja": ["寮居住者の退避先（団地外の高台・サラブリー）の確保（未整備）", "会社バスでの広域退避の手順（整備済）", "タイ人従業員の家族支援（前払い・物資）の方針（未整備）", "日本人家族のバンコク退避手配（整備済）"]
+    },
+    "jkt-office": {
+      "summary_ja": "事務所勤務 60 名。日本人 7 名と家族 9 名はクニンガン・スナヤンの高層。インドネシア人従業員はブカシ・タンゲラン・デポックなど郊外からの長距離通勤が多い。",
+      "headcount": 60, "japanese": 7, "families": 9, "vulnerable": 4, "commute_ja": "MRT・バス 40%、バイク 35%、自家用車 25%（仮定）",
+      "clusters": [
+        { "id": "kuningan", "name_ja": "クニンガン・スティアブディ", "lat": -6.22, "lon": 106.83, "n": 15, "jp": 5, "fam": 7, "district": null, "home_ja": "高層サービスアパート", "note_ja": "2020 年 1 月に周辺低地が浸水" },
+        { "id": "kebayoran", "name_ja": "クバヨラン・バル", "lat": -6.245, "lon": 106.80, "n": 12, "jp": 2, "fam": 2, "district": null, "home_ja": "戸建て・中層", "note_ja": "比較的高い地盤" },
+        { "id": "bekasi", "name_ja": "ブカシ", "lat": -6.24, "lon": 107.00, "n": 10, "jp": 0, "fam": 0, "district": null, "home_ja": "戸建て", "note_ja": "ThinkHazard 河川・都市洪水 High" },
+        { "id": "tangerang", "name_ja": "タンゲラン", "lat": -6.18, "lon": 106.63, "n": 8, "jp": 0, "fam": 0, "district": null, "home_ja": "戸建て", "note_ja": "空港方面。通勤 1.5 時間" },
+        { "id": "depok", "name_ja": "デポック", "lat": -6.40, "lon": 106.82, "n": 7, "jp": 0, "fam": 0, "district": null, "home_ja": "戸建て", "note_ja": "チリウン川上流側" },
+        { "id": "central", "name_ja": "中央ジャカルタ（メンテン）", "lat": -6.18, "lon": 106.83, "n": 8, "jp": 0, "fam": 0, "district": null, "home_ja": "戸建て", "note_ja": "" }
+      ],
+      "schools_ja": "ジャカルタ日本人学校（ビンタロ、約 12 km）・JIS（チランダック）。洪水時の通学路遮断が課題（仮定）",
+      "support_ja": ["安否確認システム（未導入）", "洪水時の在宅勤務切替基準（未整備）", "家族の集合場所と学校の引き取りルール（整備済）"]
+    },
+    "mnl-office": {
+      "summary_ja": "事務所勤務 160 名。日本人 12 名と家族 17 名は BGC・マカティの高層コンド。フィリピン人従業員はパシッグ・マリキナ・ケソン市・カビテ・ラグナから通勤。",
+      "headcount": 160, "japanese": 12, "families": 17, "vulnerable": 11, "commute_ja": "ジプニー・バス 45%、自家用車 35%、MRT 20%（仮定）",
+      "clusters": [
+        { "id": "bgc", "name_ja": "タギッグ市（BGC）", "lat": 14.55, "lon": 121.05, "n": 40, "jp": 9, "fam": 13, "district": "taguig", "home_ja": "高層コンド", "note_ja": "断層から 1〜1.5 km。高台で洪水リスクは低い" },
+        { "id": "makati", "name_ja": "マカティ市", "lat": 14.555, "lon": 121.02, "n": 30, "jp": 3, "fam": 4, "district": "makati", "home_ja": "高層・中層", "note_ja": "西部低地は洪水リスク" },
+        { "id": "pasig", "name_ja": "パシッグ市", "lat": 14.575, "lon": 121.08, "n": 20, "jp": 0, "fam": 0, "district": "pasig", "home_ja": "戸建て", "note_ja": "断層直近・パシッグ川" },
+        { "id": "marikina", "name_ja": "マリキナ市", "lat": 14.65, "lon": 121.10, "n": 15, "jp": 0, "fam": 0, "district": "marikina", "home_ja": "戸建て", "note_ja": "2009 年オンドイで広域浸水。断層直近" },
+        { "id": "qc", "name_ja": "ケソン市", "lat": 14.65, "lon": 121.05, "n": 25, "jp": 0, "fam": 0, "district": "qc", "home_ja": "戸建て・中層", "note_ja": "" },
+        { "id": "cavite", "name_ja": "カビテ州（バコール）", "lat": 14.46, "lon": 120.95, "n": 15, "jp": 0, "fam": 0, "district": null, "home_ja": "戸建て", "note_ja": "通勤 2 時間。高潮リスク" },
+        { "id": "laguna", "name_ja": "ラグナ州（サンタローサ）", "lat": 14.31, "lon": 121.11, "n": 15, "jp": 0, "fam": 0, "district": "laguna", "home_ja": "戸建て", "note_ja": "ラグナ湖岸の低地" }
+      ],
+      "schools_ja": "マニラ日本人学校（BGC 内）。地震時は校庭で待機し保護者へ引き渡し（学校の方針は要確認）",
+      "support_ja": ["安否確認システム（整備済・家族登録 70%）", "台風シグナル 3 以上での在宅勤務（整備済）", "地震後の建物安全点検の手配（未整備）", "長距離通勤者の帰宅困難時の宿泊手配（未整備）"]
+    }
+  },
+  "supply": {
+    "bkk-hq": [
+      { "id": "s-bkk-1", "kind": "customer", "name_ja": "自動車 OEM（サムットプラーカーン工場）", "tier": "主要顧客", "lat": 13.60, "lon": 100.70, "region": "th-bkk", "district": "samut", "share": 0.28, "single": false, "inventory_days": null, "alt_ja": "ラヨーン工場への振替可", "note_ja": "2011 年は非浸水だが部品供給途絶で減産" },
+      { "id": "s-bkk-2", "kind": "customer", "name_ja": "家電メーカー（チャチュンサオ）", "tier": "主要顧客", "lat": 13.60, "lon": 101.20, "region": "th-bkk", "district": null, "share": 0.15, "single": false, "inventory_days": null, "alt_ja": "—", "note_ja": "東部。洪水リスク低" },
+      { "id": "s-bkk-3", "kind": "logistics", "name_ja": "バンナー物流センター（自社）", "tier": "物流", "lat": 13.66, "lon": 100.64, "region": "th-bkk", "district": "samut", "share": 0.6, "single": true, "inventory_days": 12, "alt_ja": "レムチャバン倉庫（契約なし）", "note_ja": "単一拠点。冠水 0.4 m で搬出不能" },
+      { "id": "s-bkk-4", "kind": "logistics", "name_ja": "レムチャバン港（輸出入）", "tier": "物流", "lat": 13.08, "lon": 100.88, "region": "th-bkk", "district": null, "share": 0.9, "single": true, "inventory_days": null, "alt_ja": "バンコク港（小型船のみ）", "note_ja": "東部臨海。2011 年は運用継続" },
+      { "id": "s-bkk-5", "kind": "supplier", "name_ja": "IT・通信（データセンター：バンコク都心）", "tier": "サービス", "lat": 13.75, "lon": 100.55, "region": "th-bkk", "district": "bkk-central", "share": 1.0, "single": true, "inventory_days": null, "alt_ja": "クラウド DR（シンガポール）", "note_ja": "停電時は発電機 48 時間" }
+    ],
+    "ayut-plant": [
+      { "id": "s-ayt-1", "kind": "supplier", "name_ja": "電子部品（ナワナコン工業団地）", "tier": "Tier1", "lat": 14.115, "lon": 100.603, "region": "th-bkk", "district": "pathum", "share": 0.35, "single": true, "inventory_days": 10, "alt_ja": "マレーシア（リードタイム 21 日）", "note_ja": "2011 年に浸水し 3 か月停止" },
+      { "id": "s-ayt-2", "kind": "supplier", "name_ja": "金型・プレス（チョンブリー・アマタ）", "tier": "Tier1", "lat": 13.42, "lon": 101.05, "region": "th-bkk", "district": null, "share": 0.2, "single": false, "inventory_days": 18, "alt_ja": "国内 2 社", "note_ja": "東部。洪水リスク低" },
+      { "id": "s-ayt-3", "kind": "supplier", "name_ja": "樹脂原料（ラヨーン）", "tier": "Tier2", "lat": 12.72, "lon": 101.10, "region": "th-bkk", "district": null, "share": 0.5, "single": true, "inventory_days": 14, "alt_ja": "輸入（30 日）", "note_ja": "石化コンビナート。台風・高潮は低" },
+      { "id": "s-ayt-4", "kind": "supplier", "name_ja": "包装資材（アユタヤ地場）", "tier": "Tier2", "lat": 14.34, "lon": 100.60, "region": "th-ayut", "district": "ayut", "share": 0.8, "single": true, "inventory_days": 7, "alt_ja": "バンコクの同業（5 日）", "note_ja": "同じ浸水域内" },
+      { "id": "s-ayt-5", "kind": "customer", "name_ja": "自動車 OEM（ラヨーン・イースタンシーボード）", "tier": "主要顧客", "lat": 12.72, "lon": 101.15, "region": "th-bkk", "district": null, "share": 0.4, "single": false, "inventory_days": null, "alt_ja": "—", "note_ja": "JIT 納入。在庫 3 日" },
+      { "id": "s-ayt-6", "kind": "customer", "name_ja": "家電メーカー（パトゥムタニ）", "tier": "主要顧客", "lat": 14.05, "lon": 100.60, "region": "th-bkk", "district": "pathum", "share": 0.2, "single": false, "inventory_days": null, "alt_ja": "—", "note_ja": "2011 年に浸水" },
+      { "id": "s-ayt-7", "kind": "logistics", "name_ja": "ラートクラバン ICD（コンテナ）", "tier": "物流", "lat": 13.73, "lon": 100.76, "region": "th-bkk", "district": "bkk-east", "share": 0.7, "single": false, "inventory_days": null, "alt_ja": "レムチャバン直送", "note_ja": "2011 年に周辺道路が冠水" },
+      { "id": "s-ayt-8", "kind": "utility", "name_ja": "電力（PEA 変電所・団地内）", "tier": "ユーティリティ", "lat": 14.325, "lon": 100.64, "region": "th-ayut", "district": "ayut", "share": 1.0, "single": true, "inventory_days": null, "alt_ja": "自家発電 72 時間", "note_ja": "2011 年は変電所浸水で長期停電" }
+    ],
+    "jkt-office": [
+      { "id": "s-jkt-1", "kind": "supplier", "name_ja": "組立工場（ブカシ MM2100）", "tier": "Tier1", "lat": -6.30, "lon": 107.08, "region": "id-jkt", "district": null, "share": 0.5, "single": true, "inventory_days": 9, "alt_ja": "タイ工場からの輸入（14 日）", "note_ja": "ThinkHazard 河川・都市洪水 High（ブカシ）" },
+      { "id": "s-jkt-2", "kind": "supplier", "name_ja": "部品（カラワン KIIC）", "tier": "Tier1", "lat": -6.38, "lon": 107.30, "region": "id-jkt", "district": null, "share": 0.3, "single": false, "inventory_days": 12, "alt_ja": "国内 2 社", "note_ja": "チタルム川流域" },
+      { "id": "s-jkt-3", "kind": "customer", "name_ja": "二輪 OEM（チビトゥン）", "tier": "主要顧客", "lat": -6.27, "lon": 107.10, "region": "id-jkt", "district": null, "share": 0.45, "single": false, "inventory_days": null, "alt_ja": "—", "note_ja": "" },
+      { "id": "s-jkt-4", "kind": "customer", "name_ja": "小売チェーン（ジャカルタ・スラバヤ）", "tier": "顧客", "lat": -7.25, "lon": 112.75, "region": "id-jkt", "district": null, "share": 0.2, "single": false, "inventory_days": null, "alt_ja": "—", "note_ja": "" },
+      { "id": "s-jkt-5", "kind": "logistics", "name_ja": "タンジュンプリオク港", "tier": "物流", "lat": -6.10, "lon": 106.88, "region": "id-jkt", "district": null, "share": 0.9, "single": true, "inventory_days": null, "alt_ja": "スラバヤ港（陸送 2 日）", "note_ja": "北部の地盤沈下・高潮域" }
+    ],
+    "mnl-office": [
+      { "id": "s-mnl-1", "kind": "supplier", "name_ja": "ラグナ工場（自社・ビニャン）", "tier": "自社", "lat": 14.31, "lon": 121.09, "region": "ph-mnl", "district": "laguna", "share": 0.6, "single": true, "inventory_days": 8, "alt_ja": "セブ（航空輸送）", "note_ja": "断層から 15 km。ラグナ湖岸の洪水" },
+      { "id": "s-mnl-2", "kind": "supplier", "name_ja": "部品（カビテ経済特区）", "tier": "Tier1", "lat": 14.42, "lon": 120.86, "region": "ph-mnl", "district": null, "share": 0.3, "single": false, "inventory_days": 15, "alt_ja": "国内 2 社", "note_ja": "高潮リスク" },
+      { "id": "s-mnl-3", "kind": "customer", "name_ja": "通信事業者（ケソン市）", "tier": "主要顧客", "lat": 14.65, "lon": 121.05, "region": "ph-mnl", "district": "qc", "share": 0.35, "single": false, "inventory_days": null, "alt_ja": "—", "note_ja": "" },
+      { "id": "s-mnl-4", "kind": "customer", "name_ja": "小売（セブ）", "tier": "顧客", "lat": 10.32, "lon": 123.90, "region": "ph-mnl", "district": null, "share": 0.15, "single": false, "inventory_days": null, "alt_ja": "—", "note_ja": "2025 年 9 月のセブ地震で店舗被害（未検証）" },
+      { "id": "s-mnl-5", "kind": "logistics", "name_ja": "マニラ港・NAIA（輸出入）", "tier": "物流", "lat": 14.60, "lon": 120.95, "region": "ph-mnl", "district": "manila", "share": 0.9, "single": true, "inventory_days": null, "alt_ja": "バタンガス港（陸送 3 時間）", "note_ja": "埋立地・液状化" }
+    ]
+  },
+  "residents": {
+    "th-bkk": { "summary_ja": "首都圏 6 県の住民約 1,090 万人（仮定）。高齢化率は都平均で約 15%（仮定）。在留邦人は国内最多で中心部に集中。", "elderly_share": 0.15, "foreign_share": 0.04, "note_ja": "区別の人口・曝露は発災シナリオの区分に準ずる。避難所は学校・寺院・大学が中心で常設指定制度はない（第三者資料・未検証）。", "channels_ja": "セルブロードキャスト（2025 年〜）、DDPM アプリ、BMA の LINE・SNS、テレビ・ラジオ、寺院・コミュニティの口伝" },
+    "ph-mnl": { "summary_ja": "首都圏 17 市区の住民約 1,350 万人（2020 年国勢調査の概数）。インフォーマル居住区の住民が災害弱者になりやすい。", "elderly_share": 0.06, "foreign_share": 0.01, "note_ja": "バランガイ（最小行政単位）ごとに学校・体育館・バランガイホールが避難センターになる（第三者資料・未検証）。", "channels_ja": "NDRRMC 緊急アラート（携帯一斉送信）、PAGASA 台風シグナル、市・バランガイの SNS、教会・バランガイの呼びかけ" },
+    "default": { "summary_ja": "住民データは未登録。都市圏人口のみ地域画面に表示。", "elderly_share": null, "foreign_share": null, "note_ja": "", "channels_ja": "" }
+  },
+  "ngos": {
+    "th-bkk": [
+      { "name_ja": "タイ赤十字社", "kind": "赤十字", "cap_ja": "救護所・献血・救援物資（仮定：医療チーム 20 班）", "url": "https://www.redcross.or.th/", "coverage": "全国" },
+      { "name_ja": "DDPM（防災減災局）", "kind": "政府", "cap_ja": "救助隊・ボート・ポンプ（仮定：ボート 400 隻）", "url": "https://www.disaster.go.th/", "coverage": "全国" },
+      { "name_ja": "タイ王国軍（陸軍）", "kind": "軍", "cap_ja": "高床トラック・ボート・工兵（仮定）", "url": "", "coverage": "全国" },
+      { "name_ja": "ミラー財団（Mirror Foundation）", "kind": "NGO", "cap_ja": "ボランティア動員・物資仕分け（2011 年洪水で活動）", "url": "https://www.mirror.or.th/", "coverage": "首都圏" },
+      { "name_ja": "タイ国日本人会・バンコク日本人商工会議所", "kind": "邦人団体", "cap_ja": "邦人向け情報・安否・寄付の取りまとめ", "url": "https://www.jat.or.th/", "coverage": "首都圏" },
+      { "name_ja": "JICA タイ事務所", "kind": "政府（日本）", "cap_ja": "国際緊急援助隊の調整、専門家派遣", "url": "https://www.jica.go.jp/overseas/thailand/", "coverage": "全国" }
+    ],
+    "ph-mnl": [
+      { "name_ja": "フィリピン赤十字", "kind": "赤十字", "cap_ja": "救急・救護所・献血（仮定：救急車 60 台）", "url": "https://redcross.org.ph/", "coverage": "全国" },
+      { "name_ja": "NDRRMC／OCD（市民防衛庁）", "kind": "政府", "cap_ja": "統合指揮・捜索救助の調整", "url": "https://ndrrmc.gov.ph/", "coverage": "全国" },
+      { "name_ja": "MMDA（首都圏開発庁）", "kind": "政府", "cap_ja": "救助隊・道路啓開・排水ポンプ（仮定）", "url": "https://mmda.gov.ph/", "coverage": "首都圏" },
+      { "name_ja": "フィリピン軍・消防（BFP）", "kind": "軍・消防", "cap_ja": "捜索救助・消火", "url": "", "coverage": "全国" },
+      { "name_ja": "カリタス・マニラ／ワールドビジョン", "kind": "NGO", "cap_ja": "食料・衛生キットの配布（仮定）", "url": "", "coverage": "首都圏" },
+      { "name_ja": "マニラ日本人会・日本人商工会議所", "kind": "邦人団体", "cap_ja": "邦人向け情報・安否・寄付", "url": "", "coverage": "首都圏" }
+    ],
+    "default": []
+  }
+}

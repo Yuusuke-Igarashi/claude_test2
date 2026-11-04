@@ -59,10 +59,17 @@ const Theme = {
   },
 };
 
+/* 閲覧コンテキスト：組織の種類（企業／自治体）と閲覧者（管理者／従業員） */
+const Ctx = {
+  org: Store.get('org', 'corp'), persona: Store.get('persona', 'admin'),
+  set(k, v) { this[k] = v; Store.set(k, v); document.documentElement.dataset[k] = v; document.dispatchEvent(new CustomEvent('ctxchange')); },
+  isGov() { return this.org === 'gov'; }, isStaff() { return this.persona === 'staff'; },
+};
 /* ルーター（ハッシュ＝画面名） */
-const VIEWS = ['region', 'site', 'personal', 'live-support', 'live-local'];
+const VIEWS = ['risk', 'live', 'me'];
+const HASH_ALIAS = { region: 'risk', site: 'risk', personal: 'me', 'live-support': 'live', 'live-local': 'live' };
 const App = { views: {}, current: null, inited: new Set() };
-function currentView() { const h = (location.hash || '').replace('#', ''); return VIEWS.includes(h) ? h : 'region'; }
+function currentView() { let h = (location.hash || '').replace('#', ''); h = HASH_ALIAS[h] || h; return VIEWS.includes(h) ? h : 'risk'; }
 function showView(name) {
   App.current = name;
   /* 発災画面の再生は画面を離れたら止める */
@@ -79,9 +86,12 @@ function showView(name) {
 }
 function route() {
   const h = (location.hash || '').replace('#', '');
-  if (h && !VIEWS.includes(h)) { if (!App.current) showView('region'); return; } /* 未知のハッシュ（#main など）は無視 */
+  if (h && !VIEWS.includes(h) && !HASH_ALIAS[h]) { if (!App.current) showView('risk'); return; } /* 未知のハッシュ（#main など）は無視 */
   showView(currentView());
 }
+/* 日時表示（シナリオ時刻） */
+const fmtDT = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+const scenarioDate = (sc, t) => { const base = sc.t0_iso ? new Date(sc.t0_iso) : new Date(); return new Date(base.getTime() + t * 3600 * 1000); };
 
 /* 要素生成 */
 function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }

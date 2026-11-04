@@ -24,7 +24,7 @@ for (const f of readdirSync(join(ROOT, 'data'))) {
   data[f.replace('.json', '')] = JSON.parse(read(join('data', f)));
 }
 
-const order = ['core.js', 'geo.js', 'charts.js', 'model.js', 'view-region.js', 'view-site.js', 'view-personal.js', 'view-live.js', 'app.js'];
+const order = ['core.js', 'geo.js', 'charts.js', 'model.js', 'view-region.js', 'view-site.js', 'view-groups.js', 'view-live.js', 'view-personal.js', 'view-risk.js', 'app.js'];
 const js = order.filter((f) => existsSync(join(ROOT, 'src', f))).map((f) => `/* ---- src/${f} ---- */\n${read(join('src', f))}`).join('\n\n');
 
 let html = read('src/index.template.html');
