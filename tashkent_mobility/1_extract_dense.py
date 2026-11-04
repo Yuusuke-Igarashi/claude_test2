@@ -39,7 +39,7 @@ def unzip_all(path, tmpdir):
     return Path(tmpdir)
 
 
-VERSION = "2026-11-02e"
+VERSION = "2026-11-02f"
 
 
 def main():
@@ -61,7 +61,8 @@ def main():
         glob = str(p / "**" / "*.parquet").replace("\\", "/") if p.is_dir() else str(p).replace("\\", "/")
         # 列名の自動判定（先頭ファイルのスキーマ）。引数で指定した列はそちらを優先
         import pyarrow.parquet as pq
-        first = next(p.rglob("*.parquet")) if p.is_dir() else p
+        first = next(p.rglob("*.parquet"), None) if p.is_dir() else p
+        if first is None: sys.exit(f"{p} の下に parquet がありません")
         names = pq.ParquetFile(first).schema_arrow.names
         if "deviceId" in names and "location" in names:
             preset = dict(id="deviceId", time="startTime", lat="location.latitude", lon="location.longitude", acc="horizontalAccuracy", dur="duration"); a.keep_null_acc = True; print("スキーマ: Irys 形式と判定（精度欠損の行は残す）")
@@ -103,7 +104,7 @@ def main():
                    arg_min(lat, ts) AS lat_start, arg_min(lon, ts) AS lon_start, arg_max(lat, ts) AS lat_end, arg_max(lon, ts) AS lon_end
             FROM s GROUP BY maid, seg_no""")
         con.execute(f"CREATE TABLE segk AS SELECT row_number() OVER (ORDER BY maid, t_start) AS seg_id, * FROM seg WHERE n >= {a.min_pts}")
-        ns, nd, npt = con.execute("SELECT count(*), count(DISTINCT maid), sum(n) FROM segk").fetchone()
+        ns, nd, npt = con.execute("SELECT count(*), count(DISTINCT maid), coalesce(sum(n), 0) FROM segk").fetchone()
         print(f"区間（{'途切れで切らない' if a.gap_min <= 0 else f'間隔 ≤{a.gap_min:g} 分'}、{a.min_pts} 点以上）: {ns:,} 区間、{nd:,} 端末、{npt:,} 点（{time.time() - t0:.0f} 秒）")
         if not ns: sys.exit("条件を満たす区間がありません")
         # 4) 書き出し（端末・時刻順）

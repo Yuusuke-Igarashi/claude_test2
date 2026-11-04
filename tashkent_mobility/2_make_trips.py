@@ -165,7 +165,7 @@ def switch_points(t, lat, lon, lo, hi, a):
     return cuts
 
 
-VERSION = "2026-11-04m"
+VERSION = "2026-11-04n"
 
 
 def main():
@@ -311,7 +311,7 @@ def main():
                 trip_id += 1
                 chain = trip_record(pts_t, pts_lat, pts_lon, 0, len(pts_t) - 1, o_kind, d_kind, ob, db, a)
                 chain.update({"trip_id": trip_id, "maid": maid, "source": src_all_trip, "seg_id": seg, "o_stay": o is not None, "d_stay": dst is not None,
-                              "n_parts": len(cuts) + 1, "modes": chain["mode"]})
+                              "n_parts": 1, "modes": chain["mode"]})           # 境目が残れば下で付け直す（取り消しで境目が全部消えたら 1 のまま）
                 def make_parts(cuts_):
                     out_, prev = [], ""
                     edges = [0] + list(cuts_) + [len(pts_t) - 1]

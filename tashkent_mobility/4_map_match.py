@@ -6,6 +6,7 @@ r"""map_match.py（版 2026-11-04a）— トリップの点列を道路網（自
   2. 各点に候補を持つ: 半径 R 以内の弧を最大 K 本（点から弧への距離 = 吸着距離。弧上の位置 s も持つ）
   3. 連続する点の候補どうしを「経路探索の重み（自動車は 長さ ÷ 区分の基準速度 → 大きい道路が選ばれやすい。徒歩は長さ）」の最短経路でつなぎ、
      その実長 P と点どうしの直線距離 D から、P ≤ DETOUR × D + BUFFER かつ P ÷ 経過時間 ≤ V_MAX のものだけを許す
+     （起点・終点は Stay の重心で、位置と時刻が隣の Move 点とずれるため、起点から・終点への区間には V_MAX を掛けない）
   4. 動的計画法（Viterbi）: コスト = Σ (吸着距離 ÷ SIGMA)² ÷ 2 + Σ |P − D| ÷ BETA が最小の候補列を選び、経路をつなぐ。
      つなげない点が出たら、そこで経路を切る（seg 番号を進める）
   5. 点の時刻を経路長で補間して、通った弧ごとの進入・退出時刻を付ける（弧別の実測の通過数・速度に使える）
@@ -32,7 +33,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-VERSION = "2026-11-04b"
+VERSION = "2026-11-04c"
 G = {}   # ワーカー内のグラフ（mode → dict）
 
 
@@ -103,10 +104,15 @@ def path_nodes(pred, s_row, t):
 
 
 def edges_of(g, nodes_seq):
-    """ノード列 → 弧の添字列（並行弧は重みが最小のもの）"""
+    """ノード列 → 弧の添字列（並行弧は重みが最小のもの）。
+    scipy の predecessors は int32 なので、ここで int64 に揃えないと ui * N が桁あふれして（N > 46,341 で起きる）別の弧を黙って引いてしまう"""
     if len(nodes_seq) < 2: return []
-    k = np.asarray(nodes_seq[:-1]) * g["N"] + np.asarray(nodes_seq[1:])
-    pos = np.searchsorted(g["pair_key"], k)
+    u = np.asarray(nodes_seq[:-1], dtype=np.int64); v = np.asarray(nodes_seq[1:], dtype=np.int64)
+    k = u * np.int64(g["N"]) + v
+    pos = np.minimum(np.searchsorted(g["pair_key"], k), len(g["pair_key"]) - 1)
+    if not np.array_equal(g["pair_key"][pos], k):                     # 鍵が一致しない = ノード対に弧が無い（起きたら探索か表の不整合）
+        bad = int(np.flatnonzero(g["pair_key"][pos] != k)[0])
+        raise RuntimeError(f"ノード対 ({int(u[bad])}, {int(v[bad])}) に対応する弧がありません")
     return [int(x) for x in g["pair_edge"][pos]]
 
 
@@ -135,7 +141,9 @@ def match_one(g, t, px, py, a, vmax_ms):
             cost = np.array([(d / a.sigma_m) ** 2 / 2 for _, _, d in C]); back = [(-1, None)] * len(C)
         else:
             D = float(np.hypot(px[i] - px[prev_i], py[i] - py[prev_i])); dt = max(float(t[i] - t[prev_i]), 1.0)
-            Pmax = min(a.detour * D + a.buffer_m, vmax_ms * dt)              # 許す経路長の上限
+            Pmax_d, Pmax_v = a.detour * D + a.buffer_m, vmax_ms * dt
+            endpoint = prev_i == 0 or i == n - 1                              # 起点・終点は Stay の重心（位置は重心、時刻は Stay の端）なので、隣の Move 点との見かけの速度が跳ねる。make_trips と同じく速度の判定から外す
+            Pmax = Pmax_d if endpoint else min(Pmax_d, Pmax_v)                 # 許す経路長の上限
             srcs = sorted(set(g["vi"][e] for e, _, _ in prev_c))            # 前の候補の弧の終点ノードから探索
             spos = {s_: k for k, s_ in enumerate(srcs)}
             dist, pred = dijkstra(g["csr"], directed=True, indices=srcs, return_predecessors=True, limit=Pmax * g["wscale"] + 1)
@@ -158,7 +166,7 @@ def match_one(g, t, px, py, a, vmax_ms):
                     c = cost_prev[pi] + emis + abs(P - D) / a.beta_m
                     if c < cost[ci]: cost[ci] = c; back[ci] = (pi, nodes_seq)
             if not np.isfinite(cost).any():                               # どの候補にもつなげない → 切る（理由: 到達不能（打ち切り範囲内に無い）/ 迂回超過 / 速度超過）
-                if n_far: why["speed" if vmax_ms * dt < a.detour * D + a.buffer_m else "detour"] += 1
+                if n_far: why["speed" if (not endpoint and Pmax_v < Pmax_d) else "detour"] += 1
                 else: why["unreach"] += 1
                 chains.append(cur_chain); cur_chain = []
                 cost = np.array([(d / a.sigma_m) ** 2 / 2 for _, _, d in C]); back = [(-1, None)] * len(C)
