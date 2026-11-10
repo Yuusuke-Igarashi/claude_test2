@@ -2615,7 +2615,7 @@ function showAmedasChart(i){
   $("cpTitle").textContent = `${A.name[i]}（アメダス ${A.id[i]}）`;
   $("cpSub").textContent = pz ? `${A.step[i]} 分ごとの観測。1 時間降水量 = その時刻までの ${CONFIG.AMEDAS.hourMin} 分の合計` : `アメダス ${A.step[i]} 分降水量${Number.isFinite(A.elev[i]) ? `、標高 ${A.elev[i]} m` : ""}`;
   const col = amedasStep(v) < 0 ? "#8a94a3" : amedasColor(v);   // the pill: grey below the first step (a white pill would not read); dark text on a light step
-  $("cpStatus").textContent = amedasStepLabel(v); $("cpStatus").style.background = col; $("cpStatus").style.setProperty("--st", col); $("cpStatus").style.color = inkOn(col);
+  $("cpStatus").textContent = amedasStepLabel(v); $("cpStatus").style.background = col; $("cpStatus").style.setProperty("--st", col); $("cpStatus").style.color = pz ? "" : inkOn(col);   // the presentation's pill is white with navy text (stylesheet)
   const slot = slotAbsTime(t, null), ce = A.curEnd[b + t], he = A.h1End[b + t], stepI = A.step[i];
   const curEnd = !Number.isNaN(ce) && ce !== slot ? `（〜${amedasClock(ce)}）` : "", hEnd = !Number.isNaN(he) && he !== slot ? `（〜${amedasClock(he)}）` : "";   // intervals named when they end before the slot
   $("roL1").textContent = `1 時間降水量 mm${hEnd}`; $("roL2").textContent = `${stepI} 分降水量 mm${curEnd}`;
