@@ -269,7 +269,8 @@ html.present.barhidden #pzBar{display:none}
 #pzBar .timeCtl #slider{margin:0;flex:1;accent-color:var(--navy)}
 #pzBar .timeCtl #playBtn{height:calc(40px * var(--pz-u));font-size:var(--pz-fs-small);border-radius:6px;background:#fff;color:var(--navy)}
 #pzBar .keys{font-size:calc(15px * var(--pz-u));color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
-html.present .maplibregl-ctrl-attrib{font-size:13px}
+html.present .maplibregl-ctrl-attrib{display:none}   /* the presentation shows the credit in words instead (.pzCredit) */
+.maplibregl-ctrl.pzCredit{background:rgba(255,255,255,.92);border:1px solid var(--pz-line);border-radius:6px;padding:4px 10px;font-size:calc(14px * var(--pz-u));color:var(--ink2);white-space:nowrap;box-shadow:none}
 html.present .maplibregl-ctrl-scale{font-size:12px}
 html.present .maplibregl-ctrl-bottom-right .maplibregl-ctrl{margin-right:16px}
 </style>
@@ -489,6 +490,7 @@ const CONFIG = {
   basemap: {
     tiles: ["https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"],
     attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>',
+    credit: "背景地図: 地理院タイル（国土地理院）",   // the presentation's map credit, always shown (replaces the compact ⓘ attribution there)
     maxzoom: 18
   },
   // basemap: { tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors", maxzoom: 19 },
@@ -2584,6 +2586,9 @@ function setPresent(on){
   S.present = on;
   document.documentElement.classList.toggle("present", on);
   if(S.rain){ S.rain.cache.clear(); S.rain.cur = null; renderRainLegend(); }   // the rain colours differ between the views: repaint from the data
+  // the map credit in words at the bottom right (stays when the operator bar is hidden; the normal view keeps MapLibre's ⓘ attribution)
+  if(on && !S.creditCtl){ S.creditCtl = {onAdd(){ const el = document.createElement("div"); el.className = "maplibregl-ctrl pzCredit"; el.textContent = CONFIG.basemap.credit; this._el = el; return el; }, onRemove(){ this._el.remove(); }}; map.addControl(S.creditCtl, "bottom-right"); S.creditCtl._el.parentNode.appendChild(S.creditCtl._el); }   // below the zoom buttons and the scale (MapLibre stacks later controls above)
+  if(!on && S.creditCtl){ map.removeControl(S.creditCtl); S.creditCtl = null; }
   if(on){
     $("pzTimeCtl").append($("playBtn"), $("slider")); $("dsChart").appendChild($("chartPanel"));
     hideTip(); if(S.snsSel){ $("snsCallout").style.display = "none"; $("snsLead").style.display = "none"; S.detail = "sns"; }

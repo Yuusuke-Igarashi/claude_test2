@@ -772,6 +772,8 @@ test("プレゼン表示 (P): header / map 60 % + detail 40 % / subtitle band at
   assert.deepEqual(g.chips, ["lab:表示中", "focus:道路の異常（車の流れ）", "faint:降雨（薄く表示）"]);
   assert.deepEqual(g.vis, { "links-base": "visible", rain: "visible", kaden: "none", sns: "none", "grid-marks": "none" }, "traffic: roads in focus, rain faint, the rest hidden");
   assert.equal(g.rainOp, 0.18, "rain dimmed"); assert.ok(g.chartIn, "the chart panel sits in the detail column"); assert.match(g.other, /道路の異常（車の流れ）.*1,057 本.*対象 4,535 本のうち.*L1.*113/);
+  const credit = await page.evaluate(() => { const c = document.querySelector("#map .pzCredit"), a = document.querySelector(".maplibregl-ctrl-attrib"); return [c && c.textContent, !!c && c.getBoundingClientRect().width > 0, getComputedStyle(a).display]; });
+  assert.deepEqual(credit, ["背景地図: 地理院タイル（国土地理院）", true, "none"], "the map credit in words replaces the compact attribution in the presentation");
   // hover alone does not change the panel in the presentation (the chart shown is always the road outlined on the map)
   const pt0 = await findLink(page, 4, await page.evaluate(() => S.t));
   await hover(page, pt0);
