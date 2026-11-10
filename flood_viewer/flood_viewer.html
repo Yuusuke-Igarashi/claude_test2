@@ -243,7 +243,7 @@ html.present.barhidden .opHint,html.present.barhidden .maplibregl-ctrl-zoom-in,h
 #dsOther .amRow .nm .cat{width:12px;height:12px;margin-right:6px;border:1.5px solid #3b4654;box-shadow:none}
 #dsOther .amRow svg text{fill:var(--muted)} #dsOther .amRow svg .now{stroke:var(--navy);stroke-width:2}
 .chart .bar{fill:var(--am-color,#2171b5)} .chart .bar.future{opacity:var(--am-future,.3)}
-.amLabel{pointer-events:none;white-space:nowrap;font-size:13px;line-height:1.25;font-variant-numeric:tabular-nums}
+.amLabel{pointer-events:none;white-space:nowrap;font-size:var(--am-label-norm,13px);line-height:1.25;font-variant-numeric:tabular-nums}
 .amLabel .amIn{display:inline-block;color:var(--navy);background:rgba(255,255,255,.88);border:1px solid rgba(21,35,59,.18);border-radius:4px;padding:1px 6px}   /* the pill's opacity sits here: MapLibre writes the marker element's own */
 .amLabel b{font-weight:700;margin-right:5px} .amLabel .v{font-weight:400;color:var(--ink)} .amLabel .v.miss{color:var(--muted)}
 html.present .amLabel{font-size:calc(var(--am-label-px,18px) * var(--pz-u))} html.present .amLabel .amIn{padding:2px 8px;border-radius:6px}
@@ -498,7 +498,7 @@ const CONFIG = {
   AMEDAS: {
     hourMin: 60,                                      // the window of the headline value (minutes)
     radius: [[0, 6], [10, 10], [30, 15], [80, 20]],   // point radius on screen by the 1-hour value (mm), linear between the stops
-    color: "#2171b5",                                 // the station's line / bars in the charts (a rain blue, not a baseline / event colour)
+    color: "#3a6fb0",                                 // the station's line / bars in the charts (a blue outside the rain steps and the baseline / event colours)
     futureOpacity: 0.3,                               // bars after the current time in the 10-minute charts (the series "unfolds" with the slider)
     labelPx: 13,                                      // station name + value beside the point (normal view; PRESENT.amedasLabelPx in the presentation)
     stroke: "#3b4654",                                // dark rim of the points (a white rim would make them read as SNS markers)
@@ -895,7 +895,7 @@ const amedasWideCol = (h) => { h = h.trim(); const m = h.match(AMEDAS_WIDE); ret
 function amedasCol(head, key){ const h = head.map(x => x.trim().toLowerCase()); for(const c of AMEDAS_COLS[key]){ const i = h.indexOf(c); if(i >= 0) return i; } return -1; }
 function amedasKind(head){   // "long" | "wide" | "stations" | null
   const has = (k) => amedasCol(head, k) >= 0;
-  if(has("time") && has("id") && has("value")) return "long";
+  if(has("time") && has("id")) return has("value") ? "long" : null;
   if(has("time") && head.some(amedasWideCol)) return "wide";
   if(!has("time") && has("id") && has("lat") && has("lon")) return "stations";
   return null;
@@ -2571,10 +2571,14 @@ function updateAmedas(){
   }
   S.amedasFeats = feats; S.amedasMax = mi >= 0 ? {i: mi, v: mx} : null;
   map.getSource("amedas").setData({type:"FeatureCollection", features: feats});
-  // the name and the 1-hour value beside each point as HTML markers (the map style has no glyph source for text layers; the page's font is used)
-  if(!S.amedasMarkers) S.amedasMarkers = A.id.map((_, i) => { const el = document.createElement("div"); el.className = "amLabel"; return new maplibregl.Marker({element: el, anchor: "left"}).setLngLat([A.lon[i], A.lat[i]]).addTo(map); });
+  // the name and the 1-hour value beside each point as HTML markers (the page's font and the --pz-u scaling of the presentation; a symbol layer would draw its own text)
+  if(S.amedasMarkers && S.amedasMarkers.some(m => m._map !== map)){ S.amedasMarkers.forEach(m => m.remove()); S.amedasMarkers = null; }   // a map rebuilt after a failed load
+  if(!S.amedasMarkers){
+    document.documentElement.style.setProperty("--am-label-px", `${CONFIG.PRESENT.amedasLabelPx}px`); document.documentElement.style.setProperty("--am-label-norm", `${CONFIG.AMEDAS.labelPx}px`);
+    S.amedasMarkers = A.id.map((_, i) => { const el = document.createElement("div"); el.className = "amLabel"; return new maplibregl.Marker({element: el, anchor: "left"}).setLngLat([A.lon[i], A.lat[i]]).addTo(map); });
+  }
   S.amedasMarkers.forEach((m, i) => { const v = A.h1[i * T + t], el = m.getElement();
-    el.innerHTML = `<span class="amIn" style="opacity:${f}"><b>${esc(A.name[i])}</b><span class="v${Number.isNaN(v) ? " miss" : ""}">${amedasFmt(A, i * T + t)}</span></span>`; m.setOffset([feats[i].properties.r + 6, 0]); });
+    el.innerHTML = `<span class="amIn" style="opacity:${f}"><b>${esc(A.name[i])}</b><span class="v${Number.isNaN(v) ? " miss" : ""}">${amedasFmt(A, i * T + t)}</span></span>`; m.setOffset([feats[i].properties.r + 13, 0]); });   // clear of the selection ring (r + 9, 4 px stroke)
   S.amedasLabels = amedasFocus() || S.rainLevel === "full";   // no labels over a dimmed layer (clutter over the roads); back at R = 通常
   placeAmedasLabels();
   if(S.selPoint && S.selPoint.kind === "amedas" && pinKind() === "amedas"){ const i = +S.pinnedId.slice(1); setSelPoint(A.lon[i], A.lat[i], feats[i].properties.r, "amedas"); }
@@ -2587,7 +2591,8 @@ function updateAmedas(){
 function placeAmedasLabels(){
   if(!map || !S.amedas || !S.amedasMarkers) return;
   const on = layerOn("amedas"), w = map.getCanvas().clientWidth, h = map.getCanvas().clientHeight;
-  S.amedasMarkers.forEach((m, i) => { const p = map.project([S.amedas.lon[i], S.amedas.lat[i]]); m.getElement().style.display = on && S.amedasLabels && p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h ? "" : "none"; });
+  const bottom = S.present ? 24 : 0;   // in the presentation a label this close to the bottom edge would reach the subtitle band
+  S.amedasMarkers.forEach((m, i) => { const p = map.project([S.amedas.lon[i], S.amedas.lat[i]]); m.getElement().style.display = on && S.amedasLabels && p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h - bottom ? "" : "none"; });
 }
 // The sidebar legend line (the presentation clones it): unit, the rain steps, the white point below the first step.
 function amedasLegendHtml(){
