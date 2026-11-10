@@ -107,12 +107,12 @@ button:hover{background:#f0efec}
 .legend .turn::before{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);box-shadow:none}
 .legend .grp{color:var(--muted);margin-left:4px}
 #rainDate{font:inherit;font-size:15px;padding:1px 2px}
-#legendRain,#legendKaden,#legendSns,#legendGrid{display:none;flex-wrap:wrap;gap:4px 0;align-items:center;color:var(--ink2);font-size:15px;padding-top:2px;line-height:1.5}
+#legendRain,#legendAmedas,#legendKaden,#legendSns,#legendGrid{display:none;flex-wrap:wrap;gap:4px 0;align-items:center;color:var(--ink2);font-size:15px;padding-top:2px;line-height:1.5}
 .lab.cap{flex-basis:100%;color:var(--muted)}
 .it{display:inline-flex;align-items:center;white-space:nowrap;margin-right:10px}
-#legendRain .sw,#legendKaden .sw,#legendSns .sw,#legendGrid .sw{display:inline-block;width:28px;height:12px;margin-right:2px;vertical-align:middle}
-#legendRain .lab,#legendKaden .lab,#legendSns .lab,#legendGrid .lab{margin-right:6px}
-#legendKaden .dot,#legendSns .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+#legendRain .sw,#legendAmedas .sw,#legendKaden .sw,#legendSns .sw,#legendGrid .sw{display:inline-block;width:28px;height:12px;margin-right:2px;vertical-align:middle}
+#legendRain .lab,#legendAmedas .lab,#legendKaden .lab,#legendSns .lab,#legendGrid .lab{margin-right:6px}
+#legendKaden .dot,#legendSns .dot,#legendAmedas .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:middle;border:1px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 #snsCallout h3{margin:0 18px 4px 0;font-size:16px;line-height:1.3}
 #snsCallout .meta{color:var(--ink2);font-size:14px;margin-bottom:4px}
 #snsCallout .txt{white-space:pre-wrap;line-height:1.45;word-break:break-word}
@@ -232,6 +232,21 @@ html.present.barhidden .opHint,html.present.barhidden .maplibregl-ctrl-zoom-in,h
 #dsOther .posts .t{font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
 #dsOther .posts .x{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--navy)}
 #dsOther .dim{color:var(--muted);font-size:var(--pz-fs-small);margin-top:10px}
+#dsOther .amRows{margin:8px 0 0}
+#dsOther .amRow{display:grid;grid-template-columns:calc(170px * var(--pz-u)) 1fr;gap:0 12px;align-items:center;padding:4px 0;border-top:1px solid var(--pz-line);cursor:pointer}
+#dsOther .amRow:hover .nm{color:var(--series-1)}
+#dsOther .amRow .nm{font-weight:700;color:var(--navy);font-size:var(--pz-fs-text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dsOther .amRow .val{font-size:var(--pz-fs-num);font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1.2}
+#dsOther .amRow .val small{font-size:var(--pz-fs-small);font-weight:400;color:var(--ink2);margin-left:4px}
+#dsOther .amRow .val.miss{font-size:var(--pz-fs-text);font-weight:400;color:var(--muted)}
+#dsOther .amRow svg{display:block;width:100%;height:calc(var(--am-h,92px) * var(--pz-u));font-size:var(--pz-fs-small)}
+#dsOther .amRow .nm .cat{width:12px;height:12px;margin-right:6px;border:1.5px solid #3b4654;box-shadow:none}
+#dsOther .amRow svg text{fill:var(--muted)} #dsOther .amRow svg .now{stroke:var(--navy);stroke-width:2}
+.chart .bar{fill:var(--am-color,#2171b5)} .chart .bar.future{opacity:var(--am-future,.3)}
+.amLabel{pointer-events:none;white-space:nowrap;font-size:13px;line-height:1.25;font-variant-numeric:tabular-nums}
+.amLabel .amIn{display:inline-block;color:var(--navy);background:rgba(255,255,255,.88);border:1px solid rgba(21,35,59,.18);border-radius:4px;padding:1px 6px}   /* the pill's opacity sits here: MapLibre writes the marker element's own */
+.amLabel b{font-weight:700;margin-right:5px} .amLabel .v{font-weight:400;color:var(--ink)} .amLabel .v.miss{color:var(--muted)}
+html.present .amLabel{font-size:calc(var(--am-label-px,18px) * var(--pz-u))} html.present .amLabel .amIn{padding:2px 8px;border-radius:6px}
 html.present #pzLegend{display:block;position:absolute;left:16px;bottom:16px;z-index:5;pointer-events:none;max-width:calc(820px * var(--pz-u));max-height:calc(220px * var(--pz-u));overflow:hidden;background:rgba(255,255,255,.94);border:1px solid var(--pz-line);border-radius:var(--pz-r);padding:10px 16px;font-size:var(--pz-fs-legend);color:var(--ink2);box-sizing:border-box}
 html.present #pzLegend.tl{bottom:auto;top:16px}
 #pzLegend .row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:3px 0}
@@ -292,6 +307,7 @@ html.present .maplibregl-ctrl-bottom-right .maplibregl-ctrl{margin-right:16px}
     <label class="lyr" id="rowGrid"><input type="checkbox" id="chkGrid"><span>徒歩の増減（メッシュ）</span><span class="na-note"></span></label>
     <label class="lyr" id="rowKaden"><input type="checkbox" id="chkKaden" checked><span>家電の接続</span><span class="na-note"></span></label>
     <label class="lyr" id="rowRain"><input type="checkbox" id="chkRain" checked><span>降雨</span><span class="na-note"></span></label>
+    <label class="lyr" id="rowAmedas"><input type="checkbox" id="chkAmedas" checked><span>アメダス雨量（地点）</span><span class="na-note"></span></label>
     <label class="lyr" id="rowSns"><input type="checkbox" id="chkSns" checked><span>SNS 投稿</span><span class="na-note"></span></label>
   </section>
 
@@ -312,6 +328,7 @@ html.present .maplibregl-ctrl-bottom-right .maplibregl-ctrl{margin-right:16px}
     <div class="lgBox" id="lgGrid"><div class="lgHead">徒歩の増減 <b id="gridVal" class="stat"></b></div><div id="legendGrid"></div></div>
     <div class="lgBox" id="lgKaden"><div class="lgHead">家電の接続 <b id="kadenVal" class="stat"></b></div><div id="legendKaden"></div></div>
     <div class="lgBox" id="lgRain"><div class="lgHead">降雨 <b id="rainVal" class="stat"></b></div><div id="legendRain"></div></div>
+    <div class="lgBox" id="lgAmedas"><div class="lgHead">アメダス雨量 <b id="amedasVal" class="stat"></b></div><div id="legendAmedas"></div></div>
     <div class="lgBox" id="lgSns"><div class="lgHead">SNS 投稿 <b id="snsVal" class="stat"></b></div><div id="legendSns"></div></div>
     <div id="lgNone">表示中のレイヤーはありません</div>
   </section>
@@ -431,6 +448,8 @@ html.present .maplibregl-ctrl-bottom-right .maplibregl-ctrl{margin-right:16px}
       <span style="color:var(--muted)">xrain_to_geotiff.py の出力（rain_YYYYMMDD_HHMM.tif。index.json は無くてよい）。車流フォルダの中の rain/ でも可。道路の下に半透明で重ねる</span></p>
       <p style="margin:6px 0 2px"><b>6. SNS 投稿の CSV（任意、複数可）:</b> <input id="snsInput" type="file" multiple accept=".csv,.txt"><br>
       <span style="color:var(--muted)">FASTALERT 形式（投稿ID, 日時, 事象区分, …, 緯度, 経度, 投稿文）か、post_id, post_datetime_jst, latitude, longitude, message, source_category … の形式（UTF-8 / cp932）。緯度経度のある投稿を地点に表示し、クリックで本文と投稿リンク</span></p>
+      <p style="margin:6px 0 2px"><b>7. アメダス雨量の CSV（任意、複数可）:</b> <input id="amedasInput" type="file" multiple accept=".csv,.txt"><br>
+      <span style="color:var(--muted)">気象庁アメダスの 10 分降水量。1 本の縦長 CSV（timestamp_jst, station_id, station_name_ja, latitude, longitude, precipitation_10min_mm …）か、横長 CSV（timestamp_jst, &lt;station_id&gt;_mm …）と地点表（station_id, station_name_ja, latitude, longitude …）の組（UTF-8 / cp932）。地点を地図に描き、直前 1 時間の降水量で色分け。ホバーで時系列、クリックで固定</span></p>
       <p style="margin:10px 0 0"><button id="loadBtn" disabled>読み込む</button> <span id="pickNote" style="color:var(--muted)"></span></p>
     </div>
   </div>
@@ -455,7 +474,9 @@ const CONFIG = {
     event_dwell:    "event_dwell.geojson",
     viewer_dir:     "viewer",                        // per-slot files <role>_<HHMM>.geojson + index.json (loaded lazily)
     rain_dir:       "rain",                          // optional: rain_<YYYYMMDD>_<HHMM>.tif (GeoTIFF) + index.json from xrain_to_geotiff.py
-    grid_dirs:      ["grid", "grid_users"]           // optional: <param>[_<role>]_<HHMM>.tif rasters + index.json (probe_trips.py GRID_M, grid_users.py)
+    grid_dirs:      ["grid", "grid_users"],          // optional: <param>[_<role>]_<HHMM>.tif rasters + index.json (probe_trips.py GRID_M, grid_users.py)
+    // optional AMeDAS 10-minute rainfall (input 7): the long CSV, or the wide CSV + the station table, inside amedas/ (http) or chosen as files
+    amedas_dir:     "amedas", amedas_long: "amedas_10min.csv", amedas_wide: "amedas_10min_wide.csv", amedas_stations: "amedas_stations.csv"
   },
   // Walker-change mesh (徒歩の増減): ratio rasters (event / baseline, NaN where the baseline is 0) are drawn as arrows at the cell
   // centres, red up at >= GRID_UP and blue down at <= GRID_DOWN (no mark in between), so they never read as rain (thresholds in 詳細設定).
@@ -472,6 +493,17 @@ const CONFIG = {
   // Rain colour scale [mm/h] (thresholds like the JMA precipitation-intensity legend); below the first step = transparent
   RAIN_SCALE: [[1, "#a0d2ff"], [5, "#218cff"], [10, "#0041ff"], [20, "#faf500"], [30, "#ff9900"], [50, "#ff2800"], [80, "#b40068"]],
   RAIN_OPACITY: 0.55,
+  // AMeDAS stations (input 7): 10-minute precipitation [mm] per station; the map shows the 1-hour precipitation ending at the slot (the sum of the
+  // previous 60 minutes, which equals the mean intensity in mm/h, so the RAIN_SCALE steps and colours apply). Below the first step: white point.
+  AMEDAS: {
+    hourMin: 60,                                      // the window of the headline value (minutes)
+    radius: [[0, 6], [10, 10], [30, 15], [80, 20]],   // point radius on screen by the 1-hour value (mm), linear between the stops
+    color: "#2171b5",                                 // the station's line / bars in the charts (a rain blue, not a baseline / event colour)
+    futureOpacity: 0.3,                               // bars after the current time in the 10-minute charts (the series "unfolds" with the slider)
+    labelPx: 13,                                      // station name + value beside the point (normal view; PRESENT.amedasLabelPx in the presentation)
+    stroke: "#3b4654",                                // dark rim of the points (a white rim would make them read as SNS markers)
+    classNames: {10: "やや強い雨", 20: "強い雨", 30: "激しい雨", 50: "非常に激しい雨", 80: "猛烈な雨"}   // JMA names of the 1-hour precipitation classes, by their lower bound
+  },
   // Trajectory mode
   TRAJ_MIN_ZOOM: 14,        // trajectories are drawn only at this zoom or closer
   TRAJ_WINDOW_MIN: 60,      // each trajectory covers [time - window, time]
@@ -507,17 +539,17 @@ const CONFIG = {
   // checkbox is on (the scene does not force it); faint = shown dimmed (PRESENT.dim / dimBase, rain by its level, R) and not clickable;
   // context = the road network as a grey backdrop only (links-context); everything else hidden. The headings are the one message of each scene.
   SCENES: [
-    {key: "rain",    label: "降雨", heading: "降雨の分布から、強い雨の範囲と時間帯を確認する",          focus: ["rain"],                        opt: [],       faint: [],               context: ["roads"], rain: "full",
-     hint: "地図をクリックすると、その地点の降雨強度をここに表示します。"},
-    {key: "traffic", label: "交通", heading: "交通量の変化から、冠水が疑われる道路を絞り込む",            focus: ["roads"],                       opt: [],       faint: ["rain"],         context: [],        rain: "dim",
+    {key: "rain",    label: "降雨", heading: "降雨の分布から、強い雨の範囲と時間帯を確認する",          focus: ["rain", "amedas"],              opt: [],       faint: [],               context: ["roads"], rain: "full",
+     hint: "地図をクリックすると、その地点の降雨強度をここに表示します。", hintAmedas: "観測地点をクリックすると、その地点の雨量の推移をここに表示します。"},
+    {key: "traffic", label: "交通", heading: "交通量の変化から、冠水が疑われる道路を絞り込む",            focus: ["roads"],                       opt: [],       faint: ["rain", "amedas"], context: [],      rain: "dim",
      hint: "色のついた道路をクリックすると、その道路の速度と台数を平時と比べてここに表示します。"},
-    {key: "walk",    label: "人流", heading: "徒歩移動者の増減から、人の動きが変わった場所を絞り込む",      focus: ["grid"],                        opt: ["walk"], faint: ["rain", "roads"], context: [],        rain: "dim",
+    {key: "walk",    label: "人流", heading: "徒歩移動者の増減から、人の動きが変わった場所を絞り込む",      focus: ["grid"],                        opt: ["walk"], faint: ["rain", "amedas", "roads"], context: [], rain: "dim",
      hint: "矢印のセルをクリックすると、そのセルの徒歩移動者数の比をここに表示します。"},
-    {key: "kaden",   label: "家電", heading: "家電の接続台数の変化から、台数が減った地域を絞り込む",        focus: ["kaden"],                       opt: [],       faint: ["rain", "roads"], context: [],        rain: "dim",
+    {key: "kaden",   label: "家電", heading: "家電の接続台数の変化から、台数が減った地域を絞り込む",        focus: ["kaden"],                       opt: [],       faint: ["rain", "amedas", "roads"], context: [], rain: "dim",
      hint: "点をクリックすると、その郵便番号の接続台数の推移を平時と比べてここに表示します。"},
-    {key: "sns",     label: "SNS",  heading: "SNS の投稿地点と内容から、現地の手がかりを得る",             focus: ["sns"],                         opt: [],       faint: ["rain", "roads"], context: [],        rain: "dim",
+    {key: "sns",     label: "SNS",  heading: "SNS の投稿地点と内容から、現地の手がかりを得る",             focus: ["sns"],                         opt: [],       faint: ["rain", "amedas", "roads"], context: [], rain: "dim",
      hint: "投稿の地点をクリックすると、本文をここに表示します。"},
-    {key: "all",     label: "統合", heading: "複数のデータを重ね、冠水が疑われる場所を絞り込む",            focus: ["roads", "grid", "kaden", "sns"], opt: ["walk"], faint: ["rain"],         context: [],        rain: "dim",
+    {key: "all",     label: "統合", heading: "複数のデータを重ね、冠水が疑われる場所を絞り込む",            focus: ["roads", "grid", "kaden", "sns"], opt: ["walk"], faint: ["rain", "amedas"], context: [],      rain: "dim",
      hint: "道路・点・投稿をクリックすると、その詳細をここに表示します。"},
   ],
   PRESENT: {
@@ -528,7 +560,8 @@ const CONFIG = {
     rainScale: [[1, "#c6dbef"], [5, "#9ecae1"], [10, "#6baed6"], [20, "#4292c6"], [30, "#2171b5"], [50, "#08519c"], [80, "#08306b"]],
     kadenColors: {2: "#d97706"},                    // KADEN_COLOR replaced in the presentation (legend, pill and chart bands follow): 2/3 以下 darker on white
     lineWidth: {red: 4.0, black: 1.4, gray: 1.0},   // road lines at zoom 14 (x0.6 at 10, x2.2 at 17, as CONFIG.lineWidth)
-    pointScale: {kaden: 1.3, sns: 1.3, kadenAll: 1.0, snsAll: 1.15},   // marker radii in the layer's own scene / in 統合
+    pointScale: {kaden: 1.3, sns: 1.3, amedas: 1.3, kadenAll: 1.0, snsAll: 1.15, amedasAll: 1.0},   // marker radii in the layer's own scene / in 統合
+    amedasLabelPx: 18, amedasFaint: 0.85, amedasFaintScale: 0.7,   // station label size; opacity of the stations as a faint layer at R = 通常 (薄い: dim, 非表示: hidden); their radius factor as a faint layer
     kadenFade: {1: 0.45, 0: 0.30},                  // opacity of 平時並み / 判定なし appliance points (ring and fill)
     gridMarkPx: [12, 30], gridIconAll: 0.8, gridOpacityAll: 0.85,     // walker-change arrows: size range, and the factor in 統合
     basemapOpacity: 0.45,
@@ -546,6 +579,7 @@ const CONFIG = {
 const S = {
   times: [],            // ["12:00", ...]
   kaden: null, showKaden: true, kadenFeats: null, kadenChartIdx: null,   // appliance points (input 4)
+  amedas: null, showAmedas: true, amedasFeats: null, amedasChartIdx: null,   // AMeDAS stations (input 7): {n, id, name, lat, lon, obsT, obs, h1, ...}
   sns: null,            // {posts: [...], groups: Map("lat,lon" -> {lon, lat, posts}), noCoord, files, formats} from input 6
   showSns: true, snsWin: "60", snsSel: null, snsFeats: null, snsNow: null,   // snsWin: "60" | "180" | "day" | "all"; snsSel: {key, idx} of the open callout
   ids: [],              // link ids (string) in CSV row order
@@ -672,13 +706,15 @@ async function loadViaFetch(){
   for(const dir of f.grid_dirs){ const txt = await fetchText(dir + "/index.json", true); if(txt) gridFound.push([JSON.parse(txt), (name) => `${dir}/${name}`]); }
   const grid = gridFromIndexes(gridFound);
   if(grid) fileRow("grid*/", `グリッド ${grid.sources.size} ラスタ（表示時に読み込み）`);
+  const amedas = [];   // input 7 over http: the long CSV, or the wide CSV + the station table, inside amedas/
+  for(const key of ["amedas_long", "amedas_wide", "amedas_stations"]){ const name = `${f.amedas_dir}/${f[key]}`; const txt = await fetchText(name, true); if(txt) amedas.push({name, txt: txt.replace(/^\uFEFF/, "")}); }
   const idx = await fetchText(f.viewer_dir + "/index.json", true);
   if(idx){
     const index = JSON.parse(idx), sources = new Map();
     S.period = index.period || S.period;   // the probe folder's period wins over viewer.json
     for(const role of index.roles || []) for(const tm of (index.slots || {})[role] || []) sources.set(`${role}_${tm}`, `${f.viewer_dir}/${role}_${tm.replace(":", "")}.geojson`);
     fileRow(f.viewer_dir + "/", `時刻別 ${sources.size} ファイル（表示時に読み込み）`);
-    return {network, bs, es, bc, ec, err, lazySources: sources, rain, grid, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
+    return {network, bs, es, bc, ec, err, lazySources: sources, rain, grid, amedas, loadInfo: `http 経由: ${f.viewer_dir}/index.json から時刻別 ${sources.size} ファイルを登録`};
   }
   const [bt, et, bd, ed] = await Promise.all([
     fetchText(f.baseline_traj, true), fetchText(f.event_traj, true),
@@ -686,7 +722,7 @@ async function loadViaFetch(){
   ]);
   const loadInfo = `http 経由: ${location.href.replace(/[^/]*$/, "")}${f.viewer_dir}/index.json が取得できません（HTML と同じ階層に viewer フォルダを置いてください）`
     + ([bt, et, bd, ed].some(Boolean) ? "。1 日 1 ファイル形式の軌跡を使用" : "。1 日 1 ファイル形式の軌跡もありません");
-  return {network, bs, es, bc, ec, err, bt, et, bd, ed, rain, grid, loadInfo};
+  return {network, bs, es, bc, ec, err, bt, et, bd, ed, rain, grid, amedas, loadInfo};
 }
 
 // Rain slot registry: key "YYYYMMDD_HH:MM" -> source (url or File). From rain/index.json ({files:[{file,date,time}]})
@@ -847,11 +883,126 @@ const KADEN_LABEL = {0:"平時の台数が少ない / データなし", 1:"平�
 const KADEN_COLOR = {0:"#9aa3ad", 1:"#4b5563", 2:"#f59e0b", 3:"#dc2626", 4:"#2563eb"};
 const KADEN_SHORT = {0:"判定なし", 1:"平時並み", 2:"2/3 以下", 3:"1/3 以下", 4:"3 倍以上"};   // legend labels (the chart panel keeps KADEN_LABEL)
 
-function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], snsList = []){
+// ---- AMeDAS stations (input 7): JMA 10-minute precipitation [mm] per station, timestamps = end of the interval (JST) ----
+// Either one long CSV (a row per station and interval, with the name and coordinates), or a wide CSV (a column "<station_id>_mm" per
+// station) together with a station table (station_id, latitude, longitude, names). The kind of each file comes from its header.
+const AMEDAS_COLS = {time: ["timestamp_jst", "timestamp", "datetime", "time", "日時", "年月日時分", "年月日時"], id: ["station_id", "id", "観測所番号", "地点番号"],
+                     value: ["precipitation_10min_mm", "precipitation_mm", "precip_mm", "rain_mm", "value", "降水量", "降水量(mm)"],
+                     name: ["station_name_ja", "station_name", "name", "地点", "観測所名", "地点名"], nameEn: ["station_name_en", "name_en"],
+                     lat: ["latitude", "lat", "緯度"], lon: ["longitude", "lon", "lng", "経度"], elev: ["elevation_m", "elevation", "標高"]};
+const AMEDAS_WIDE = /^(.+)_mm$/i;
+const amedasWideCol = (h) => { h = h.trim(); const m = h.match(AMEDAS_WIDE); return m && !AMEDAS_COLS.value.includes(h.toLowerCase()) ? m[1].trim() : null; };   // "<station_id>_mm", not a value column
+function amedasCol(head, key){ const h = head.map(x => x.trim().toLowerCase()); for(const c of AMEDAS_COLS[key]){ const i = h.indexOf(c); if(i >= 0) return i; } return -1; }
+function amedasKind(head){   // "long" | "wide" | "stations" | null
+  const has = (k) => amedasCol(head, k) >= 0;
+  if(has("time") && has("id") && has("value")) return "long";
+  if(has("time") && head.some(amedasWideCol)) return "wide";
+  if(!has("time") && has("id") && has("lat") && has("lon")) return "stations";
+  return null;
+}
+// A time stamp as JST wall-clock ms (local Date, like the slider's slotAbsTime and the SNS posts): "2026-08-13T02:10:00+09:00",
+// "2026/8/13 2:10" (unpadded, as the JMA site's CSV) and "24:00" (= 00:00 of the next day) are read; an offset other than +09:00
+// (Z, +00:00, ...) is converted to JST and counted. Returns [ms, converted].
+function amedasTime(str){
+  const m = String(str || "").trim().match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?\s*(Z|[+-]\d{2}:?\d{2})?$/i);
+  if(!m) return [NaN, false];
+  let [, Y, Mo, D, h, mi, sec, off] = m, day = 0; if(+h === 24){ h = 0; day = 1; }
+  let ms = new Date(+Y, +Mo - 1, +D + day, +h, +mi, +(sec || 0)).getTime(), conv = false;
+  if(off){ const o = off.toUpperCase() === "Z" ? 0 : (off[0] === "-" ? -1 : 1) * (parseInt(off.slice(1, 3), 10) * 60 + parseInt(off.slice(-2), 10)); if(o !== 540){ ms += (540 - o) * 60000; conv = true; } }
+  return [ms, conv];
+}
+// A precipitation cell: "--" (JMA: no precipitation) = 0; a trailing ")" / "]" (準正常値 / 資料不足値) is dropped; "×", "///", "#", "欠測", blank = missing.
+function amedasValue(str){
+  const w = String(str === undefined || str === null ? "" : str).trim();
+  if(w === "" || /^(×|x|\/\/+|#+|欠測|-)$/i.test(w)) return NaN;
+  if(w === "--") return 0;
+  const x = parseFloat(w.replace(/[\)\]）］]$/, ""));
+  return Number.isFinite(x) ? x : NaN;
+}
+const readAmedasFiles = (list) => list && list.length ? Promise.all([...list].map(readSnsFile)) : Promise.resolve(null);   // UTF-8 / cp932, like the SNS CSVs
+// Parse the AMeDAS files once the time axis is known. Per station: its observations (interval ends), its own step (median gap: 10-minute or
+// hourly data), and per viewer slot the 1-hour precipitation ending at the slot = the sum of the observations in (slot - hour, slot] when at
+// least 80 % of the step's count are present (JMA's rule for 準正常値; 5 of 6 for 10-minute data, flagged in h1q), the end time of the last
+// observation used (h1End), and the latest observation ending within one step before the slot (cur, curEnd).
+function parseAmedas(files){
+  const T = S.T, st = new Map(), series = new Map(), kinds = [], skipped = [];
+  let badTime = 0, dup = 0, conflict = 0, conv = 0;
+  const put = (id, ms, v) => { let m = series.get(id); if(!m){ m = new Map(); series.set(id, m); }
+    if(m.has(ms)){ dup++; const prev = m.get(ms); if(Number.isNaN(v)) return; if(!Number.isNaN(prev)){ if(prev !== v) conflict++; return; } }   // a duplicate: the first number wins
+    m.set(ms, v); };
+  const station = (id, f) => {   // first non-empty value wins (the long CSV repeats the station on every row)
+    const s = st.get(id) || {id, name: "", nameEn: "", lat: NaN, lon: NaN, elev: NaN};
+    for(const k in f){ const v = f[k]; if(v === undefined || v === "" || (typeof v === "number" && Number.isNaN(v))) continue; if(s[k] === "" || (typeof s[k] === "number" && Number.isNaN(s[k]))) s[k] = v; }
+    st.set(id, s);
+  };
+  const rank = {long: 0, wide: 1, stations: 2};   // the long CSV's names and coordinates first, the station table fills the blanks
+  const parsed = files.map(({name, txt}) => { const rows = parseCsvRows(txt).filter(r => r.length > 1); const kind = rows.length ? amedasKind(rows[0]) : null; if(!kind) skipped.push(name); else kinds.push(`${name}: ${kind}`); return {name, rows, kind}; })
+                      .filter(p => p.kind).sort((x, y) => rank[x.kind] - rank[y.kind]);
+  const long = parsed.some(p => p.kind === "long");
+  const time = (str) => { const [ms, c] = amedasTime(str); if(c) conv++; return ms; };
+  for(const {rows, kind} of parsed){
+    const head = rows[0], c = (k) => amedasCol(head, k), get = (r, i) => i >= 0 && r[i] !== undefined ? String(r[i]).trim() : "";
+    const iId = c("id"), iName = c("name"), iEn = c("nameEn"), iLat = c("lat"), iLon = c("lon"), iEl = c("elev"), iT = c("time"), iV = c("value");
+    if(kind === "stations" || kind === "long") for(const r of rows.slice(1)){
+      const id = get(r, iId); if(!id) continue;
+      station(id, {name: get(r, iName), nameEn: get(r, iEn), lat: parseFloat(get(r, iLat)), lon: parseFloat(get(r, iLon)), elev: parseFloat(get(r, iEl))});
+      if(kind === "long"){ const ms = time(get(r, iT)); if(Number.isNaN(ms)){ badTime++; continue; } put(id, ms, amedasValue(get(r, iV))); }
+    }
+    if(kind === "wide" && !long){   // a long file carries the series already: the wide one is then ignored
+      const cols = head.map((h, j) => { const id = amedasWideCol(h); return id ? [id, j] : null; }).filter(Boolean);
+      for(const r of rows.slice(1)){ const ms = time(get(r, iT)); if(Number.isNaN(ms)){ badTime++; continue; } for(const [id, j] of cols){ station(id, {}); put(id, ms, amedasValue(get(r, j))); } }
+    }
+  }
+  const ids = [], noCoord = [];
+  for(const id of series.keys()){ const s = st.get(id); if(s && Number.isFinite(s.lat) && Number.isFinite(s.lon)) ids.push(id); else noCoord.push(id); }
+  if(!ids.length) return {n: 0, noCoord, skipped, kinds, badTime, files: files.map(f => f.name)};
+  const obsT = Float64Array.from(new Set(ids.flatMap(id => [...series.get(id).keys()]))).sort(), nObs = obsT.length, n = ids.length;
+  const pos = new Map(Array.from(obsT, (ms, i) => [ms, i])), obs = new Float32Array(n * nObs).fill(NaN);   // (a typed array's map would coerce the pairs)
+  const median = (arr) => { arr = arr.slice().sort((x, y) => x - y); return arr.length ? arr[Math.floor(arr.length / 2)] : NaN; };
+  const step = new Int32Array(n);   // each station's own interval (minutes) from the median gap of its time stamps; 10 when it has a single one
+  ids.forEach((id, i) => { const ts = [...series.get(id).keys()].sort((x, y) => x - y); for(const ms of ts) obs[i * nObs + pos.get(ms)] = series.get(id).get(ms);
+                           const gaps = ts.slice(1).map((ms, k) => ms - ts[k]); step[i] = gaps.length ? Math.max(1, Math.round(median(gaps) / 60000)) : 10; });
+  const stepMin = Math.min(...Array.from(step));   // the finest cadence (the row charts' title)
+  const hour = CONFIG.AMEDAS.hourMin, fmtMs = (ms) => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
+  // the date of slot 0 when neither the period nor the network file name gives one: the first day on which slot 0's clock time falls inside the data
+  let fallback = null;
+  for(let k = 0; k < nObs && !fallback; k++){ const d = new Date(obsT[k]), ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    const ms0 = new Date(`${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}T${S.times[0]}:00`).getTime(); if(ms0 >= obsT[0] - hour * 60000 && ms0 <= obsT[nObs-1]) fallback = ymd; }
+  const slotMs = S.times.map((_, t) => slotAbsTime(t, fallback));
+  const h1 = new Float32Array(n * T).fill(NaN), h1q = new Uint8Array(n * T), h1End = new Float64Array(n * T).fill(NaN), cur = new Float32Array(n * T).fill(NaN), curEnd = new Float64Array(n * T).fill(NaN);
+  const upper = (ms) => { let lo = 0, hi = nObs; while(lo < hi){ const mid = (lo + hi) >> 1; if(obsT[mid] <= ms) lo = mid + 1; else hi = mid; } return lo; };   // first index with obsT > ms
+  for(let t = 0; t < T; t++){
+    const ms = slotMs[t], hi = upper(ms);
+    let lo = hi; while(lo > 0 && obsT[lo-1] > ms - hour * 60000) lo--;   // observations ending in (ms - hour, ms]
+    for(let i = 0; i < n; i++){
+      const need = Math.max(1, Math.round(hour / step[i])), b = i * nObs;
+      let sum = 0, present = 0, last = NaN;
+      for(let k = lo; k < hi; k++){ const v = obs[b + k]; if(Number.isNaN(v)) continue; sum += v; present++; last = obsT[k]; }
+      if(present >= Math.max(1, Math.ceil(0.8 * need))){ h1[i * T + t] = sum; h1q[i * T + t] = present < need ? 1 : 0; h1End[i * T + t] = last; }
+      for(let k = hi - 1; k >= 0 && obsT[k] > ms - step[i] * 60000; k--){ const v = obs[b + k]; if(!Number.isNaN(v)){ cur[i * T + t] = v; curEnd[i * T + t] = obsT[k]; break; } }
+    }
+  }
+  let inRange = 0, axisMax = 0;   // observations on the axis (one hour before slot 0 counts), and the largest value among them (the shared y max of the row charts)
+  for(let k = 0; k < nObs; k++){ const ms = obsT[k]; if(ms < slotMs[0] - hour * 60000 || ms > slotMs[T-1]) continue; inRange++; for(let i = 0; i < n; i++){ const v = obs[i * nObs + k]; if(v > axisMax) axisMax = v; } }
+  return {n, id: ids, name: ids.map(id => st.get(id).name || id), nameEn: ids.map(id => st.get(id).nameEn), lat: Float64Array.from(ids, id => st.get(id).lat), lon: Float64Array.from(ids, id => st.get(id).lon),
+          elev: ids.map(id => st.get(id).elev), obsT, nObs, step, stepMin, obs, h1, h1q, h1End, cur, curEnd, noCoord, skipped, kinds, badTime, dup, conflict, conv, inRange, axisMax,
+          range: [fmtMs(obsT[0]), fmtMs(obsT[nObs-1])], axis: [fmtMs(slotMs[0]), fmtMs(slotMs[T-1])], files: files.map(f => f.name), format: long ? "long" : "wide"};
+}
+// The loader's summary line of the AMeDAS input, and the reasons when nothing can be shown.
+function amedasSummary(A){
+  if(!A) return "読める CSV がありません（列名を確認: timestamp_jst, station_id, precipitation_10min_mm か <station_id>_mm と地点表）";
+  if(!A.n) return `地点が描けません（座標のない地点 ${A.noCoord.length}${A.skipped.length ? "、読めないファイル " + A.skipped.join(", ") : ""}）`;
+  const steps = [...new Set(Array.from(A.step))].sort((x, y) => x - y).join(" / ");
+  return `${A.n} 地点、${steps} 分値 ${A.nObs} 時刻（${A.range[0]}〜${A.range[1]}）、時間軸の中 ${A.inRange} 時刻${A.inRange ? "" : ` ※時間軸 ${A.axis[0]}〜${A.axis[1]} に合う観測がありません`}`
+    + (A.noCoord.length ? `、座標のない地点 ${A.noCoord.length} は非表示` : "") + (A.skipped.length ? `、読めないファイル ${A.skipped.join(", ")}` : "") + (A.badTime ? `、日時の読めない行 ${A.badTime}` : "")
+    + (A.conv ? `、UTC など JST 以外の表記 ${A.conv} 行を JST に換算` : "") + (A.dup ? `、重複 ${A.dup} 行${A.conflict ? `（値の食い違い ${A.conflict}）` : ""}` : "");
+}
+
+function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], snsList = [], amedasList = []){
   const want = CONFIG.files;
   const kadenTxt = readKadenFiles(kadenList);
   const snsTxt = snsList.length ? Promise.all([...snsList].map(readSnsFile)).then(parseSns) : Promise.resolve(null);
-  const byName = {}, sources = new Map(), other = [], rainFiles = new Map();
+  const byName = {}, sources = new Map(), other = [], rainFiles = new Map(), amedasFolder = [];
   let total = 0, rainIndexFile = null, viewerIndexFile = null, tomtomFile = null;
   const gridIndexFiles = [];
   const gridFiles = new Map();
@@ -880,6 +1031,7 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
       continue;
     }
     if(fl.name === "viewer.json"){ tomtomFile = tomtomFile || fl; continue; }   // tomtom_run.ipynb: period + thresholds
+    if(!amedasList.length && /\.(csv|txt)$/i.test(fl.name) && /(^|\/)amedas\/[^\/]+$/.test(fl.webkitRelativePath || "")){ amedasFolder.push(fl); continue; }
     byName[fl.name] = fl;
     if(!Object.values(want).includes(fl.name) && other.length < 8) other.push(fl.webkitRelativePath || fl.name);
   }
@@ -909,8 +1061,9 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
   const viewerIndex = viewerIndexFile ? readSource(viewerIndexFile).then(JSON.parse).catch(() => null) : Promise.resolve(null);
   const tomtomJson = tomtomFile ? readSource(tomtomFile).then(parseViewerJson).catch(() => null) : Promise.resolve(null);
   const gridIndex = Promise.all(gridIndexFiles.map(fl => readSource(fl).then(JSON.parse).catch(() => null)));
-  return tomtomJson.then(tomtom => Promise.all([read("network", false, tomtom && tomtom.files && tomtom.files.network), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt, snsTxt, Promise.resolve(tomtom)]))
-    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, rainIdx, viewerIdx, gridIdx, kaden, sns, tomtom]) => {
+  const amedasTxt = readAmedasFiles(amedasList.length ? amedasList : amedasFolder);
+  return tomtomJson.then(tomtom => Promise.all([read("network", false, tomtom && tomtom.files && tomtom.files.network), read("baseline_speed"), read("event_speed"), read("baseline_count"), read("event_count"), read("error", true), ...optional, rainIndex, viewerIndex, gridIndex, kadenTxt, snsTxt, Promise.resolve(tomtom), amedasTxt]))
+    .then(([network, bs, es, bc, ec, err, bt, et, bd, ed, rainIdx, viewerIdx, gridIdx, kaden, sns, tomtom, amedas]) => {
       if(tomtomFile) fileRow("viewer.json", tomtom ? `${tomtom.period ? "期間 " + tomtom.period.event.start + " から " + tomtom.period.event.hours + " 時間（" + tomtom.period.event.slot_min + " 分窓）" : "期間なし"} / ${tomtom.nbParams ? "閾値を既定値に" : "閾値なし"}` : "読めません");
       if(snsList.length) fileRow("SNS", sns ? `${sns.posts.length.toLocaleString()} 件（座標なし ${sns.noCoord.toLocaleString()} 件は非表示、${sns.dates.join(", ")}、形式 ${sns.formats.join("/")}）` : "読める投稿がありません（列名を確認）");
       if(kadenList.length) fileRow("家電", kaden ? `kaden_event_ts.csv / kaden_baseline_ts.csv（${kaden.name}）` : "不足: *_event_ts.csv と *_baseline_ts.csv の組が見つかりません");
@@ -918,7 +1071,7 @@ function loadViaFiles(fileList, rainList = [], gridList = [], kadenList = [], sn
       S.nbParams = (tomtom && tomtom.nbParams) || null;
       const rain = rainRegistry(rainFiles, rainIdx);   // the file names alone define the slots
       const grid = gridRegistry(gridFiles, gridIdx);   // gridIdx: one index per grid folder
-      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, grid, kaden, sns, loadInfo};
+      return {network, bs, es, bc, ec, err, bt, et, bd, ed, lazySources: sources.size ? sources : null, rain, grid, kaden, sns, amedas, loadInfo};
     });
 }
 
@@ -1190,6 +1343,9 @@ async function boot(loaderFn){
   S.rain = raw.rain || null;
   S.kaden = raw.kaden ? parseKaden(raw.kaden) : null;
   S.sns = raw.sns || null;
+  S.amedas = raw.amedas && raw.amedas.length ? parseAmedas(raw.amedas) : null;
+  if(raw.amedas && raw.amedas.length){ fileRow("アメダス", amedasSummary(S.amedas)); if(!S.amedas.n) S.amedas = null; }
+  if(S.amedas){ setProgress(`アメダス: ${S.amedas.n} 地点（${S.amedas.name.join("、")}）、${S.amedas.stepMin} 分値 ${S.amedas.nObs} 時刻`); await tick(); }
   if(S.sns){ setProgress(`SNS: ${S.sns.posts.length.toLocaleString()} 件、${S.sns.groups.size.toLocaleString()} 地点（${S.sns.dates.join(", ")}）`); await tick(); }
   S.grid = raw.grid || null;
   if(S.grid){ S.gridParam = S.grid.params.length ? S.grid.params[0][0] : null; setProgress(`グリッド: ${S.grid.sources.size} ラスタ（${S.grid.params.map(p => p[1]).join(", ")}）`); await tick(); }
@@ -1387,10 +1543,10 @@ function initMap(gj){
     });
     map.on("mouseleave", "links-hit", () => { if(!layerActive("roads")) return; map.getCanvas().style.cursor = ""; if(S.pinnedId === null) hideChart(); setHover(null); });
     // presentation: a marker (SNS, appliance point) under the cursor wins over the road under it (the map's click handler takes it)
-    const markerAt = (pt) => S.present && map.queryRenderedFeatures(pt, {layers: [layerActive("sns") && map.getLayer("sns") && "sns", layerActive("kaden") && map.getLayer("kaden") && "kaden"].filter(Boolean)}).length > 0;
+    const markerAt = (pt) => S.present && map.queryRenderedFeatures(pt, {layers: ["sns", "kaden", "amedas"].filter((l) => layerActive(l) && map.getLayer(l))}).length > 0;
     map.on("click", "links-hit", (e) => { if(layerActive("roads") && !onWalk(e.point) && !markerAt(e.point)) onClick(e); });
     // something clickable (a road, an appliance point, an SNS marker) under the cursor: the pointer cursor stays
-    const clickableAt = (pt) => { const ls = [layerActive("roads") && "links-hit", layerActive("kaden") && "kaden", layerActive("sns") && "sns"].filter((l) => l && map.getLayer(l));
+    const clickableAt = (pt) => { const ls = [layerActive("roads") && "links-hit", layerActive("kaden") && "kaden", layerActive("amedas") && "amedas", layerActive("sns") && "sns"].filter((l) => l && map.getLayer(l));
                                   return ls.length > 0 && map.queryRenderedFeatures(pt, {layers: ls}).length > 0; };
     let moveTimer = null, lastMove = null;
     // Tooltip: the walking-trajectory feature under the cursor, else the walker-change cell's value (when those layers are shown).
@@ -1416,11 +1572,14 @@ function initMap(gj){
         if(S.pinnedId === key) clearPin();
         else { clearPin(); S.pinnedId = key; $("chartPanel").classList.add("pinned"); setSelPoint(S.kaden.lon[i], S.kaden.lat[i], kadenRadius(S.kadenFeats[i].properties.base), "kaden"); }
         placePanel(e.point); showKadenChart(i); return true; };
+      const amedasHit = () => { if(!layerActive("amedas") || !map.getLayer("amedas")) return false;
+        const hit = map.queryRenderedFeatures(e.point, {layers: ["amedas"]}); if(!hit.length) return false;
+        selectAmedas(hit[0].properties.i, e.point); return true; };
       const snsHit = () => { if(!S.sns || !map.getLayer("sns")) return false;
         const hit = layerActive("sns") ? map.queryRenderedFeatures(e.point, {layers: ["sns"]}) : [];
         if(hit.length){ openSnsCallout(hit[0].properties.key, 0); return true; }
         if(S.snsSel) closeSnsCallout(); return false; };
-      if(S.present ? (snsHit() || kadenHit()) : (kadenHit() || snsHit())) return;
+      if(S.present ? (snsHit() || kadenHit() || amedasHit()) : (kadenHit() || amedasHit() || snsHit())) return;
       if(walkOn()){   // a click marks the trajectory feature under the cursor; a second click or an empty click clears it
         const ft = trajHit(e.point);
         const same = ft && S.trajSel && S.trajSel.source === ft.layer.id && S.trajSel.id === ft.id;
@@ -1434,6 +1593,19 @@ function initMap(gj){
     });
     map.on("moveend", () => { updateTraj(); drawGridMarks(); });
     map.on("move", () => { if(S.badge) updateBadge(); });
+    if(S.amedas){   // AMeDAS stations: a point per station, filled with the rain step of its 1-hour precipitation (white below the first step)
+      map.addSource("amedas", {type:"geojson", data: EMPTY_FC});
+      map.addLayer({ id:"amedas", type:"circle", source:"amedas",
+                     paint:{ "circle-radius": ["get", "r"], "circle-color": ["get", "color"], "circle-opacity": 0.92,
+                             "circle-stroke-color": CONFIG.AMEDAS.stroke, "circle-stroke-width": 2 } });
+      map.on("mousemove", "amedas", (e) => {
+        if(!e.features.length || !layerActive("amedas")) return;
+        map.getCanvas().style.cursor = "pointer";
+        if(S.pinnedId === null && !(S.present && !CONFIG.PRESENT.hoverChart)){ placePanel(e.point); showAmedasChart(e.features[0].properties.i); }   // presentation: click only
+      });
+      map.on("mouseleave", "amedas", () => { map.getCanvas().style.cursor = ""; if(S.pinnedId === null && S.amedasChartIdx !== null) hideChart(); });
+      map.on("move", placeAmedasLabels);
+    }
     if(S.kaden){
       map.addSource("kaden", {type:"geojson", data: EMPTY_FC});
       map.addLayer({ id:"kaden", type:"circle", source:"kaden",
@@ -1471,6 +1643,7 @@ function initMap(gj){
     setupPresent();
     updateRain();
     updateKaden();
+    updateAmedas();
     updateSns();
     updateGrid();
     applyEmphasis();
@@ -1503,16 +1676,17 @@ const MODE_LABEL = {walk:"徒歩", vehicle:"車両", other:"その他"};
 //   grid = the walker-change mesh (ratio layers as arrows at the cell centres, count layers as a colour fill, tooltip);
 //   kaden / rain / sns = appliance points, rain raster, SNS posts. A layer without data keeps its row, disabled, with the reason as tooltip.
 // Legends and live values follow the shown layers (凡例 block); parameters are in the 詳細設定 block only.
-const LAYER_FLAG = {roads: "showRoads", walk: "showWalk", grid: "showGrid", kaden: "showKaden", rain: "showRain", sns: "showSns"};
+const LAYER_FLAG = {roads: "showRoads", walk: "showWalk", grid: "showGrid", kaden: "showKaden", rain: "showRain", amedas: "showAmedas", sns: "showSns"};
 const walkOn = () => layerOn("walk");
 const gridOn = () => layerOn("grid");
 // Effective visibility of a layer: its checkbox (表示) and its data; in the presentation also the scene (focus or faint) and the rain level (R).
-const LAYER_DATA = {roads: () => true, walk: () => hasTraj(), grid: () => !!S.grid, kaden: () => !!S.kaden, rain: () => !!S.rain, sns: () => !!S.sns};
+const LAYER_DATA = {roads: () => true, walk: () => hasTraj(), grid: () => !!S.grid, kaden: () => !!S.kaden, rain: () => !!S.rain, amedas: () => !!S.amedas, sns: () => !!S.sns};
 function layerOn(key){
   if(!LAYER_DATA[key]() || !S[LAYER_FLAG[key]]) return false;
   if(!S.present) return true;
   const sc = sceneDef(), inScene = sc.focus.includes(key) || sc.opt.includes(key) || sc.faint.includes(key);
   if(key === "rain") return inScene && S.rainLevel !== "off";
+  if(key === "amedas") return inScene && (sc.focus.includes(key) || S.rainLevel !== "off");   // a faint layer elsewhere: hidden with the rain (R)
   return inScene;   // roads of a "context" scene are not on: the grey network (links-context) stands in for them
 }
 // A layer the cursor can pick (hover, click): shown, and in the presentation a focus / opt layer of the scene (faint layers are context only).
@@ -1528,6 +1702,16 @@ function layerDim(key){
 const rainOpacity = () => S.present ? (S.rainLevel === "full" ? CONFIG.PRESENT.rainOpacity.full : CONFIG.PRESENT.rainOpacity.dim) : CONFIG.RAIN_OPACITY;
 // Rain colour steps: the presentation's blue steps when set, else RAIN_SCALE (paintRain and every legend use this one function).
 const rainScale = () => (S.present && CONFIG.PRESENT.rainScale) || CONFIG.RAIN_SCALE;
+// AMeDAS stations: opacity factor (1 in the normal view and the rain scene; as a faint layer PRESENT.amedasFaint at R = 通常, PRESENT.dim at 薄い),
+// the step colour of a 1-hour value (white below the first step, grey when missing), its step label, and the point radius on screen.
+const amedasDim = () => !S.present || sceneDef().focus.includes("amedas") ? 1 : S.rainLevel === "full" ? CONFIG.PRESENT.amedasFaint : CONFIG.PRESENT.dim;
+function amedasStep(v){ const sc = rainScale(); let on = -1; if(Number.isFinite(v)) for(let k = sc.length - 1; k >= 0; k--) if(v >= sc[k][0]){ on = k; break; } return on; }
+const amedasColor = (v) => Number.isNaN(v) ? "#d9dde3" : amedasStep(v) < 0 ? "#ffffff" : rainScale()[amedasStep(v)][1];
+function amedasStepLabel(v){ const sc = rainScale(), k = amedasStep(v), cls = k >= 0 && CONFIG.AMEDAS.classNames[sc[k][0]]; return Number.isNaN(v) ? missingLabel() : k < 0 ? `${sc[0][0]} mm 未満` : (sc[k+1] ? `${sc[k][0]}–${sc[k+1][0]} mm` : `${sc[k][0]} mm 以上`) + (cls ? `（${cls}）` : ""); }
+const amedasFocus = () => !S.present || sceneDef().focus.includes("amedas");
+const amedasFmt = (A, b) => Number.isNaN(A.h1[b]) ? missingLabel() : fmt(A.h1[b]) + (A.h1q[b] ? ")" : "");   // the 1-hour value of station slot b, ")" = 準正常値 (one observation missing)
+const amedasRadius = (v) => interp(CONFIG.AMEDAS.radius, Number.isNaN(v) ? 0 : Math.max(0, v)) * pointScale("amedas") * (amedasFocus() ? 1 : CONFIG.PRESENT.amedasFaintScale);
+const inkOn = (hex) => { const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || ""); if(!m) return "#fff"; const [r, g, b] = [1, 2, 3].map(i => parseInt(m[i], 16)); return 0.299 * r + 0.587 * g + 0.114 * b > 160 ? "#1a1a19" : "#fff"; };
 // Appliance class colour: the presentation's replacements when set (legend, status pill, chart bands and the map use this one function).
 const kadenColor = (k) => (S.present && CONFIG.PRESENT.kadenColors && CONFIG.PRESENT.kadenColors[k]) || KADEN_COLOR[k];
 // Wording of the presentation: the comparison day is 対象日 (normal view: イベント時 / 有事 / 発災日), a missing value 欠測 (normal view: –).
@@ -1542,6 +1726,7 @@ function setupLayers(){
     ["grid", !!S.grid, "徒歩変化のメッシュ（walk_mesh.ipynb / grid_users.py / probe_trips.py の GeoTIFF と index.json）が読み込まれていません"],
     ["kaden", !!S.kaden, "家電データ（入力 4: *_event_ts.csv と *_baseline_ts.csv）が読み込まれていません"],
     ["rain", !!S.rain, "降雨（入力 5、または車流フォルダの rain/）が読み込まれていません"],
+    ["amedas", !!S.amedas, "アメダス雨量の CSV（入力 7、または車流フォルダの amedas/）が読み込まれていません"],
     ["sns", !!S.sns, "SNS 投稿の CSV（入力 6）が読み込まれていません"],
   ];
   for(const [key, ok, why] of rows){
@@ -1556,14 +1741,15 @@ function setupLayers(){
 // Show or hide one layer (key of LAYER_FLAG), as the checkbox does.
 function setLayer(key, on){
   S[LAYER_FLAG[key]] = on;
-  const dropChart = (kaden) => {   // the chart panel of a feature of the layer just hidden goes with it
-    if(S.pinnedId !== null && (typeof S.pinnedId === "string") === kaden) clearPin();   // kaden pins are "k<i>", links their feature id
-    if($("chartPanel").style.display === "block" && (S.kadenChartIdx !== null) === kaden) hideChart();
+  const dropChart = (kind) => {   // the chart panel of a feature of the layer just hidden goes with it
+    if(pinKind() === kind) clearPin();
+    if($("chartPanel").style.display === "block" && chartKind() === kind) hideChart();
   };
-  if(key === "roads"){ if(!on){ dropChart(false); setHover(null); map.getCanvas().style.cursor = ""; } }
+  if(key === "roads"){ if(!on){ dropChart("roads"); setHover(null); map.getCanvas().style.cursor = ""; } }
   else if(key === "walk"){ if(!on){ setTrajSel(null); hideTip(); } updateTraj(); }
   else if(key === "grid"){ if(!on){ hideTip(); setSelCell(null); } updateGrid(); }
-  else if(key === "kaden"){ if(!on) dropChart(true); updateKaden(); }
+  else if(key === "kaden"){ if(!on) dropChart("kaden"); updateKaden(); }
+  else if(key === "amedas"){ if(!on) dropChart("amedas"); updateAmedas(); }
   else if(key === "rain") updateRain();
   else if(key === "sns") updateSns();
   syncLayers();
@@ -1576,7 +1762,7 @@ function syncLayers(){
   map.setLayoutProperty("links-context", "visibility", (walk && !roads) || (context && !roads) ? "visible" : "none");   // the network as light context: trajectories without the anomaly colours, or a "context" scene
   $("statTraffic").style.display = roads ? "" : "none";
   $("nearestBtn").disabled = !walk; $("nearestBtn").title = walk ? "現在の時刻のデータのうち、地図中心に最も近いものへ移動" : "徒歩の軌跡を表示すると使えます";
-  const shown = {lgRoads: roads, lgWalk: walk, lgGrid: gridOn(), lgKaden: layerOn("kaden"), lgRain: layerOn("rain"), lgSns: layerOn("sns")};
+  const shown = {lgRoads: roads, lgWalk: walk, lgGrid: gridOn(), lgKaden: layerOn("kaden"), lgRain: layerOn("rain"), lgAmedas: layerOn("amedas"), lgSns: layerOn("sns")};
   for(const [id, on] of Object.entries(shown)) $(id).style.display = on ? "block" : "none";
   $("lgNone").style.display = Object.values(shown).some(Boolean) ? "none" : "block";
 }
@@ -2194,12 +2380,15 @@ function onClick(e){
   else { clearPin(); S.pinnedId = ft.id; $("chartPanel").classList.add("pinned"); setSelLink(ft.id); }
   showChart(ft);
 }
-function hideChart(){ $("chartPanel").style.display = "none"; S.kadenChartIdx = null; renderDetail(); }
-// Drop the pin (link or appliance point) and its highlight on the map.
+function hideChart(){ $("chartPanel").style.display = "none"; S.kadenChartIdx = null; S.amedasChartIdx = null; renderDetail(); }
+// Kind of the pinned object: a link (numeric feature id), an appliance point ("k<i>") or an AMeDAS station ("a<i>"); of the chart panel's subject.
+const pinKind = () => S.pinnedId === null ? null : typeof S.pinnedId === "number" ? "roads" : S.pinnedId[0] === "a" ? "amedas" : "kaden";
+const chartKind = () => lastFeature ? "roads" : S.kadenChartIdx !== null ? "kaden" : S.amedasChartIdx !== null ? "amedas" : null;
+// Drop the pin (link, appliance point or station) and its highlight on the map.
 function clearPin(){
   S.pinnedId = null; $("chartPanel").classList.remove("pinned");
   setSelLink(null);
-  if(S.selPoint && S.selPoint.kind === "kaden") setSelPoint(null);
+  if(S.selPoint && (S.selPoint.kind === "kaden" || S.selPoint.kind === "amedas")) setSelPoint(null);
 }
 function setSelLink(fid){
   if(!map || !map.getSource("links")) return;
@@ -2258,6 +2447,7 @@ function applyTime(t, force=false){
   updateTraj();
   updateRain();
   updateKaden();
+  updateAmedas();
   updateSns();
   updateGrid();
   if(S.present){ renderHeader(); renderDetail(); }
@@ -2341,14 +2531,14 @@ function updateKaden(){
 function showKadenChart(i){
   const K = S.kaden; if(!K) return;
   const T = S.T, t = S.t, b = i*T;
-  lastFeature = null; S.kadenChartIdx = i;
+  lastFeature = null; S.kadenChartIdx = i; S.amedasChartIdx = null;
   $("chartPanel").style.display = "block";
   $("cpKind").textContent = S.present ? (S.pinnedId === "k" + i ? "選択中の地点（家電の接続台数、郵便番号）" : "カーソル位置の地点（家電の接続台数、郵便番号）") : "";
   $("cpKind").classList.toggle("sel", S.present && S.pinnedId === "k" + i);
   $("cpTitle").textContent = `〒${K.zip[i]} ${K.city[i]} ${K.place[i]}`.trim();
   $("cpSub").textContent = S.present ? `接続台数（15 分ごと）${baselineNote()}` : "家電の接続台数（郵便番号）";
   const k = kadenCls(K.base[b+t], K.ev[b+t]);
-  $("cpStatus").textContent = KADEN_LABEL[k]; $("cpStatus").style.background = kadenColor(k); $("cpStatus").style.setProperty("--st", kadenColor(k));
+  $("cpStatus").textContent = KADEN_LABEL[k]; $("cpStatus").style.background = kadenColor(k); $("cpStatus").style.setProperty("--st", kadenColor(k)); $("cpStatus").style.color = "";
   $("roL1").textContent = S.present ? "比（対象日 ÷ 平時）" : "比 (発災日/平時)"; $("roL2").textContent = "台数 /15分";
   const ratio = K.base[b+t] >= CONFIG.KADEN.minBase ? K.ev[b+t] / K.base[b+t] : NaN;
   $("roBS").textContent = "–"; $("roES").textContent = fmt(ratio, 2);
@@ -2368,6 +2558,158 @@ function showKadenChart(i){
   chartNote([K.base.subarray(b, b+T), K.ev.subarray(b, b+T)], `帯 = 判定の時間帯（1/3 以下・2/3 以下・3 倍以上。色は凡例と同じ）。平時 ${KD.minBase} 台未満の窓は比を出さない（判定なし）`);
   renderDetail();
 }
+// ---- AMeDAS stations: the points of the current slot, their labels, the legend line, the selection and the chart panel ----
+function updateAmedas(){
+  if(!map || !S.amedas || !map.getSource("amedas")) return;
+  const A = S.amedas, on = layerOn("amedas"), T = S.T, t = S.t, n = A.n, feats = new Array(n), f = amedasDim();
+  map.setLayoutProperty("amedas", "visibility", on ? "visible" : "none");
+  let mx = -1, mi = -1;
+  for(let i = 0; i < n; i++){
+    const v = A.h1[i * T + t];
+    if(!Number.isNaN(v) && v > mx){ mx = v; mi = i; }
+    feats[i] = {type:"Feature", properties:{i, v: Number.isNaN(v) ? -1 : v, color: amedasColor(v), r: amedasRadius(v)}, geometry:{type:"Point", coordinates:[A.lon[i], A.lat[i]]}};
+  }
+  S.amedasFeats = feats; S.amedasMax = mi >= 0 ? {i: mi, v: mx} : null;
+  map.getSource("amedas").setData({type:"FeatureCollection", features: feats});
+  // the name and the 1-hour value beside each point as HTML markers (the map style has no glyph source for text layers; the page's font is used)
+  if(!S.amedasMarkers) S.amedasMarkers = A.id.map((_, i) => { const el = document.createElement("div"); el.className = "amLabel"; return new maplibregl.Marker({element: el, anchor: "left"}).setLngLat([A.lon[i], A.lat[i]]).addTo(map); });
+  S.amedasMarkers.forEach((m, i) => { const v = A.h1[i * T + t], el = m.getElement();
+    el.innerHTML = `<span class="amIn" style="opacity:${f}"><b>${esc(A.name[i])}</b><span class="v${Number.isNaN(v) ? " miss" : ""}">${amedasFmt(A, i * T + t)}</span></span>`; m.setOffset([feats[i].properties.r + 6, 0]); });
+  S.amedasLabels = amedasFocus() || S.rainLevel === "full";   // no labels over a dimmed layer (clutter over the roads); back at R = 通常
+  placeAmedasLabels();
+  if(S.selPoint && S.selPoint.kind === "amedas" && pinKind() === "amedas"){ const i = +S.pinnedId.slice(1); setSelPoint(A.lon[i], A.lat[i], feats[i].properties.r, "amedas"); }
+  $("amedasVal").textContent = on ? (S.amedasMax ? `${n} 地点（最大 ${amedasFmt(A, S.amedasMax.i * T + t)} mm ${A.name[S.amedasMax.i]}）` : `${n} 地点（この時刻の値なし）`) : "";
+  const lg = $("legendAmedas");
+  if(on){ lg.innerHTML = amedasLegendHtml(); lg.style.display = "flex"; } else lg.style.display = "none";
+  if(S.amedasChartIdx !== null && $("chartPanel").style.display !== "none") showAmedasChart(S.amedasChartIdx);
+}
+// Labels only for the stations inside the map (a marker outside the canvas would sit over the panel or the subtitle band), and only with the layer on.
+function placeAmedasLabels(){
+  if(!map || !S.amedas || !S.amedasMarkers) return;
+  const on = layerOn("amedas"), w = map.getCanvas().clientWidth, h = map.getCanvas().clientHeight;
+  S.amedasMarkers.forEach((m, i) => { const p = map.project([S.amedas.lon[i], S.amedas.lat[i]]); m.getElement().style.display = on && S.amedasLabels && p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h ? "" : "none"; });
+}
+// The sidebar legend line (the presentation clones it): unit, the rain steps, the white point below the first step.
+function amedasLegendHtml(){
+  const sc = rainScale();
+  return `<span class="lab">1 時間降水量 mm</span>` + sc.map(([v, c], i) => `<span class="it"><span class="dot" style="background:${c}"></span>${v}${sc[i+1] ? "–" + sc[i+1][0] : "+"}</span>`).join("")
+    + `<span class="it"><span class="dot" style="background:#fff"></span>${sc[0][0]} 未満</span><span class="it"><span class="dot" style="background:#d9dde3"></span>${missingLabel()}</span>`;
+}
+// Select a station (map click or a row of the scene panel): pin + ring + ① badge and the chart panel; the same station again unpins
+// (in the presentation that returns to the scene's overview, the normal view keeps the chart as on hover).
+function selectAmedas(i, point){
+  const A = S.amedas, key = "a" + i;
+  if(S.rainSel){ S.rainSel = null; if(S.detail === "rain") S.detail = null; }   // the rain probe of the scene gives way to the station
+  if(S.pinnedId === key){ clearPin(); if(S.present){ hideChart(); return; } }
+  else { clearPin(); S.pinnedId = key; $("chartPanel").classList.add("pinned"); setSelPoint(A.lon[i], A.lat[i], S.amedasFeats[i].properties.r, "amedas"); }
+  if(point) placePanel(point);
+  showAmedasChart(i);
+}
+function showAmedasChart(i){
+  const A = S.amedas; if(!A) return;
+  const T = S.T, t = S.t, b = i * T, v = A.h1[b + t], c = A.cur[b + t], pz = S.present;
+  lastFeature = null; S.kadenChartIdx = null; S.amedasChartIdx = i;
+  $("chartPanel").style.display = "block";
+  $("cpKind").textContent = pz ? (S.pinnedId === "a" + i ? "選択中の観測地点（アメダス雨量）" : "カーソル位置の観測地点（アメダス雨量）") : "";
+  $("cpKind").classList.toggle("sel", pz && S.pinnedId === "a" + i);
+  $("cpTitle").textContent = `${A.name[i]}（アメダス ${A.id[i]}）`;
+  $("cpSub").textContent = pz ? `${A.step[i]} 分ごとの観測。1 時間降水量 = その時刻までの ${CONFIG.AMEDAS.hourMin} 分の合計` : `アメダス ${A.step[i]} 分降水量${Number.isFinite(A.elev[i]) ? `、標高 ${A.elev[i]} m` : ""}`;
+  const col = amedasStep(v) < 0 ? "#8a94a3" : amedasColor(v);   // the pill: grey below the first step (a white pill would not read); dark text on a light step
+  $("cpStatus").textContent = amedasStepLabel(v); $("cpStatus").style.background = col; $("cpStatus").style.setProperty("--st", col); $("cpStatus").style.color = inkOn(col);
+  const slot = slotAbsTime(t, null), ce = A.curEnd[b + t], he = A.h1End[b + t], stepI = A.step[i];
+  const curEnd = !Number.isNaN(ce) && ce !== slot ? `（〜${amedasClock(ce)}）` : "", hEnd = !Number.isNaN(he) && he !== slot ? `（〜${amedasClock(he)}）` : "";   // intervals named when they end before the slot
+  $("roL1").textContent = `1 時間降水量 mm${hEnd}`; $("roL2").textContent = `${stepI} 分降水量 mm${curEnd}`;
+  $("roBS").textContent = "–"; $("roES").textContent = amedasFmt(A, b + t); $("roBC").textContent = "–"; $("roEC").textContent = fmt(c);
+  const h1 = A.h1.subarray(b, b + T), none = new Float32Array(T).fill(NaN), sc = rainScale();
+  const refs = sc.filter(([lo]) => CONFIG.AMEDAS.classNames[lo] && lo >= 30).map(([lo]) => ({v: lo, text: `${CONFIG.AMEDAS.classNames[lo]} ${lo}`}));   // the stronger JMA classes as dashed lines (when inside the range)
+  drawChart($("chartSpeed"), h1, none, null, pz ? "1 時間降水量（mm）" : "1 時間降水量 mm", ["1 時間", null], {single: `1 時間${hEnd}`, colorA: CONFIG.AMEDAS.color, values: [v], minMax: 10, refs});
+  drawAmedasBars($("chartCount"), i, pz ? `${stepI} 分降水量（mm）` : `${stepI} 分降水量 mm`, {value: c, valueLabel: `${stepI} 分${curEnd}`});
+  const q = A.h1q[b + t] ? `。${amedasFmt(A, b + t)} の「)」= 欠測 1 つを含む準正常値` : "";
+  chartNote([h1], `1 時間降水量 = その時刻までの ${CONFIG.AMEDAS.hourMin} 分の ${stepI} 分降水量の合計（${Math.round(CONFIG.AMEDAS.hourMin / stepI)} つのうち 2 つ以上欠ければ欠測）${q}。棒 = ${stepI} 分降水量、薄い棒 = 現在の時刻より後`);
+  renderDetail();
+}
+// The 10-minute precipitation of one station as bars on the slider's time axis (slot 0 .. slot T-1, continuous time, so the bars need not
+// align with the slots): bars up to the current time in the station colour, later ones faint, the current time as a navy line. opts.compact:
+// the small chart of a row in the scene panel (no title or indicator; a shared y max in opts.ymax); opts.value: the indicator (latest observation).
+function drawAmedasBars(svg, i, title, opts){
+  opts = opts || {};
+  const A = S.amedas, T = S.T, pz = S.present, compact = !!opts.compact;
+  const W = svg.clientWidth || 416, H = svg.clientHeight || 150;
+  const fs = parseFloat(getComputedStyle(svg).fontSize) || 12, d = fs - 12;
+  const M = compact ? {l: fs * 2.6, r: 8, t: 6, b: fs * 1.5} : pz ? {l:64, r:96, t:60, b:34} : {l:40 + 5*d, r:10, t:20 + 2*d, b:22 + 2*d};
+  const pw = W - M.l - M.r, ph = H - M.t - M.b;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.setProperty("--am-color", CONFIG.AMEDAS.color); svg.style.setProperty("--am-future", CONFIG.AMEDAS.futureOpacity);
+  const ns = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, txt) => { const e = document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(txt !== undefined) e.textContent = txt; return e; };
+  const width = (t) => { try { return t.getComputedTextLength(); } catch(e) { return 0; } };
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const t0 = slotAbsTime(0, null), t1 = slotAbsTime(T - 1, null), span = Math.max(1, t1 - t0), step = A.step[i] * 60000, b = i * A.nObs;
+  const x = (ms) => M.l + (ms - t0) / span * pw;
+  let mx = 0; for(let k = 0; k < A.nObs; k++){ const ms = A.obsT[k]; if(ms <= t0 || ms - step >= t1) continue; const v = A.obs[b + k]; if(v > mx) mx = v; }
+  const ymax = niceMaxFine(Math.max((opts.ymax || mx) * 1.05, 2));
+  const y = (v) => M.t + ph - v / ymax * ph;
+  if(!compact){
+    if(pz){
+      svg.appendChild(el("text", {x: 0, y: 26, class:"ttl"}, title));
+      const miss = opts.value === undefined || Number.isNaN(opts.value);
+      const vt = el("text", {x: W, y: 26, "text-anchor":"end", class: "indv " + (miss ? "miss" : "sn")}, miss ? missingLabel() : fmt(opts.value)); svg.appendChild(vt);
+      svg.appendChild(el("text", {x: W - width(vt) - 6, y: 26, "text-anchor":"end", class:"ind"}, opts.valueLabel || `${A.stepMin} 分`));
+    } else svg.appendChild(el("text", {x:M.l, y:13 + d, class:"ttl"}, title));
+  }
+  const divs = [4, 5, 3].find(dv => Math.abs(ymax / dv * 10 - Math.round(ymax / dv * 10)) < 1e-9) || 4;   // tick steps with at most one decimal (15 -> 5, 10, 15)
+  for(let g = 0; g <= divs; g++){   // grid and y ticks (compact: 0 and the max only)
+    if(compact && g % divs) continue;
+    const v = ymax * g / divs, yy = y(v);
+    svg.appendChild(el("line", {x1:M.l, x2:M.l+pw, y1:yy, y2:yy, class: g === 0 ? "axis" : "grid"}));
+    svg.appendChild(el("text", {x:M.l-6, y:yy + 4 + d/2, "text-anchor":"end"}, (+v.toFixed(1)).toString()));
+  }
+  let st = 8; while(st < T && st * pw / Math.max(1, T - 1) < fs * 3.7) st *= 2;   // x ticks at the slot times, every 2 h at 15 min, sparser when they would collide
+  for(let k = 0; k < T; k += st) svg.appendChild(el("text", {x: x(slotAbsTime(k, null)), y: H - (compact ? 3 : 6), "text-anchor":"middle"}, S.times[k]));
+  const now = slotAbsTime(S.t, null);
+  const bar = (x0, x1, v, future) => { if(x1 > x0) svg.appendChild(el("rect", {x: x0.toFixed(1), y: y(v).toFixed(1), width: (x1 - x0).toFixed(1), height: (M.t + ph - y(v)).toFixed(1), class: "bar" + (future ? " future" : "")})); };
+  for(let k = 0; k < A.nObs; k++){   // one bar per observation over its interval (end - step, end]; none for 0 or a missing value; the bar under the now-line is split there
+    const ms = A.obsT[k], v = A.obs[b + k];
+    if(!(v > 0) || ms <= t0 || ms - step >= t1) continue;
+    const x0 = Math.max(M.l, x(ms - step)) + 0.5, x1 = Math.min(M.l + pw, x(ms)) - 0.5;
+    if(ms - step < now && now < ms){ const xn = x(now); bar(x0, xn, v, false); bar(xn, x1, v, true); }
+    else bar(x0, x1, v, ms > now);
+  }
+  const xt = x(now);
+  svg.appendChild(el("line", {x1:xt, x2:xt, y1:M.t, y2:M.t+ph, class:"now"}));
+  if(pz && !compact){   // the time of the marker, in a navy tag on top of the plot (as drawChart)
+    const tw = fs * 3.2, th = fs * 1.4, tx = Math.max(M.l, Math.min(xt - tw / 2, W - M.r - tw));
+    svg.appendChild(el("rect", {x: tx, y: M.t - th - 2, width: tw, height: th, rx: 4, class: "tlabbg"}));
+    svg.appendChild(el("text", {x: tx + tw / 2, y: M.t - 2 - th * 0.3, "text-anchor": "middle", class: "tlab"}, S.times[S.t]));
+  }
+  if(compact) return;
+  // crosshair readout on hover: the observation whose interval holds the cursor time
+  const cross = el("line", {x1:0, x2:0, y1:M.t, y2:M.t+ph, class:"cross", visibility:"hidden"});
+  const tipbg = el("rect", {x:0, y:0, width:0, height:18 + d, rx:4, class:"tipbg", visibility:"hidden"});
+  const tip1 = el("text", {x:0, y:0, class:"tip", visibility:"hidden"});
+  svg.append(cross, tipbg, tip1);
+  const fmtClock = amedasClock;
+  svg.onmousemove = (ev) => {
+    const rect = svg.getBoundingClientRect(), px = (ev.clientX - rect.left) * W / rect.width;
+    const ms = t0 + Math.max(0, Math.min(1, (px - M.l) / pw)) * span;
+    let k = -1; for(let j = 0; j < A.nObs; j++) if(A.obsT[j] - step < ms && ms <= A.obsT[j]){ k = j; break; }
+    if(k < 0){ [cross, tipbg, tip1].forEach(e => e.setAttribute("visibility", "hidden")); return; }
+    const xx = x(A.obsT[k]);
+    cross.setAttribute("x1", xx); cross.setAttribute("x2", xx); cross.setAttribute("visibility", "visible");
+    tip1.textContent = `${fmtClock(A.obsT[k] - step)}–${fmtClock(A.obsT[k])}  ${fmt(A.obs[b + k])} mm`;
+    const tw = tip1.getComputedTextLength() + 12, tx = xx + 8 + tw > W ? xx - 8 - tw : xx + 8;
+    tipbg.setAttribute("x", tx); tipbg.setAttribute("y", M.t + 2); tipbg.setAttribute("width", tw); tipbg.setAttribute("visibility", "visible");
+    tip1.setAttribute("x", tx + 6); tip1.setAttribute("y", M.t + 14 + d); tip1.setAttribute("visibility", "visible");
+  };
+  svg.onmouseleave = () => { [cross, tipbg, tip1].forEach(e => e.setAttribute("visibility", "hidden")); };
+}
+// A rounded-up axis maximum with finer steps than niceMax (1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10 x 10^k), for the bar charts.
+function niceMaxFine(v){
+  if(!(v > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
+  return ([1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(n => m <= n) || 10) * p;
+}
+const amedasClock = (ms) => { const d = new Date(ms); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
 // "／ 平時 = 08-14 18:00〜08-15 06:00" for the panel's sub line (presentation) when the baseline period is known.
 function baselineNote(){
   const pd = S.period; return pd && pd.baseline && pd.baseline.start ? ` ／ 平時 = ${periodSpan(pd.baseline).replace(/^\d{4}-/, "")}` : "";
@@ -2388,7 +2730,7 @@ function eventSpeedSeries(b){
 }
 
 function showChart(ft){
-  lastFeature = ft; S.kadenChartIdx = null;
+  lastFeature = ft; S.kadenChartIdx = null; S.amedasChartIdx = null;
   $("roL1").textContent = "速度 km/h"; $("roL2").textContent = `台数 /${slotMin()}分`;
   const p = ft.properties;
   const r = p._row;
@@ -2400,7 +2742,7 @@ function showChart(ft){
   const pair = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? (S.present ? `対向 Link ${p.pair_id}` : `対向: ${p.pair_id}`) : "対向なし";
   $("cpSub").textContent = S.present ? `${pair}${baselineNote()}` : pair;
   if(r < 0){
-    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[0]);
+    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[0]); $("cpStatus").style.color = "";
     ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
     drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, `台数 /${slotMin()}分`);
     chartNote([], ""); renderDetail();
@@ -2410,7 +2752,7 @@ function showChart(ft){
   const k = S.cls[b+t];
   let label = STATUS_LABEL[k];
   if(k === 1 && S.e1[b+t]) label = `対象（単独異常 L${S.e1[b+t]}、裏取りなし）`;
-  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[k]);
+  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[k]); $("cpStatus").style.color = "";
   const es = eventSpeedSeries(b);
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(es[t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
@@ -2546,8 +2888,9 @@ function drawChart(svg, a, b, errMask, title, labels, opts){
 // プレゼン表示 (presentation, P): header band, map (left) + detail panel (right), subtitle band; scenes 1-6
 // ============================================================
 function sceneDef(){ return CONFIG.SCENES.find(s => s.key === S.scene) || CONFIG.SCENES[0]; }
-const LAYER_NAME = {rain: "降雨", roads: "道路の異常（車の流れ）", walk: "徒歩の軌跡", grid: "徒歩の増減", kaden: "家電の接続", sns: "SNS 投稿"};
-const LAYER_SHORT = {rain: "降雨", roads: "道路の異常", walk: "徒歩の軌跡", grid: "徒歩の増減", kaden: "家電の接続", sns: "SNS 投稿"};
+const LAYER_NAME = {rain: "降雨", amedas: "アメダス雨量", roads: "道路の異常（車の流れ）", walk: "徒歩の軌跡", grid: "徒歩の増減", kaden: "家電の接続", sns: "SNS 投稿"};
+const LAYER_SHORT = {rain: "降雨", amedas: "アメダス雨量", roads: "道路の異常", walk: "徒歩の軌跡", grid: "徒歩の増減", kaden: "家電の接続", sns: "SNS 投稿"};
+const rainLike = (k) => k === "rain" || k === "amedas";   // the layers the rain level (R) applies to
 function setupPresent(){
   S.scene = CONFIG.PRESENT.scene;
   document.documentElement.style.setProperty("--pz-sub", `calc(${CONFIG.PRESENT.subtitleBand}px * var(--pz-u))`);
@@ -2603,8 +2946,9 @@ function setPresent(on){
     syncAll(); updateBadge();
     if(S.snsSel) openSnsCallout(S.snsSel.key, S.snsSel.idx);
   }
-  map.resize();
+  map.resize(); placeAmedasLabels();   // the canvas changed size: the station labels outside it go
   if(lastFeature && $("chartPanel").style.display === "block") showChart(lastFeature); else if(S.kadenChartIdx !== null && $("chartPanel").style.display === "block") showKadenChart(S.kadenChartIdx);
+  else if(S.amedasChartIdx !== null && $("chartPanel").style.display === "block") showAmedasChart(S.amedasChartIdx);
 }
 function setBarHidden(hidden){ S.barHidden = hidden; document.documentElement.classList.toggle("barhidden", hidden); }
 // A scene: its focus layers are switched on (their 表示 checkbox too), the faint ones dimmed, the rest hidden; the rain level resets to the scene's default.
@@ -2616,8 +2960,8 @@ function setScene(key){
   S.rainLevel = sc.rain || (sc.focus.includes("rain") ? "full" : "dim");
   // the selections of the other scenes go, so the panel shows this scene's data
   const focus = (k) => sc.focus.includes(k) || sc.opt.includes(k);
-  if(S.pinnedId !== null && !focus(typeof S.pinnedId === "string" ? "kaden" : "roads")) clearPin();
-  if($("chartPanel").style.display === "block" && (S.pinnedId === null || !focus(typeof S.pinnedId === "string" ? "kaden" : "roads"))) hideChart();
+  if(S.pinnedId !== null && !focus(pinKind())) clearPin();
+  if($("chartPanel").style.display === "block" && (S.pinnedId === null || !focus(pinKind()))) hideChart();
   if(S.snsSel && !focus("sns")) closeSnsCallout();
   if(S.gridSel && !focus("grid")) setSelCell(null);
   if(S.rainSel && !focus("rain")){ S.rainSel = null; if(S.selPoint && S.selPoint.kind === "rain") setSelPoint(null); if(S.detail === "rain") S.detail = null; }
@@ -2625,17 +2969,16 @@ function setScene(key){
   for(const b of $("pzScenes").querySelectorAll("button")) b.classList.toggle("on", b.dataset.key === key);
   syncAll();
 }
-function cycleRain(){   // R: full -> dim -> off -> full (every scene)
-  if(!S.rain) return;
+function cycleRain(){   // R: full -> dim -> off -> full (every scene; the stations follow as a faint layer)
+  if(!S.rain && !S.amedas) return;
   S.rainLevel = S.rainLevel === "full" ? "dim" : S.rainLevel === "dim" ? "off" : "full";
   syncAll();
 }
 // Everything that depends on the layer state: map layers, emphasis, header, legend, detail panel.
 function syncAll(){
   if(!map || !map.getLayer("links-base")) return;
-  syncLayers(); updateTraj(); updateRain(); updateKaden(); updateSns(); updateGrid(); applyEmphasis();
-  if(S.pinnedId !== null && typeof S.pinnedId !== "string" && !layerOn("roads")){ clearPin(); hideChart(); }
-  if(S.pinnedId !== null && typeof S.pinnedId === "string" && !layerOn("kaden")){ clearPin(); hideChart(); }
+  syncLayers(); updateTraj(); updateRain(); updateKaden(); updateAmedas(); updateSns(); updateGrid(); applyEmphasis();
+  if(S.pinnedId !== null && !layerOn(pinKind())){ clearPin(); hideChart(); }
   if(S.snsSel && !layerOn("sns")) closeSnsCallout();
   if(S.gridSel && !gridOn()) setSelCell(null);
   if(S.rainSel && !layerOn("rain")){ S.rainSel = null; if(S.selPoint && S.selPoint.kind === "rain") setSelPoint(null); if(S.detail === "rain") S.detail = null; }
@@ -2670,6 +3013,12 @@ function applyEmphasis(){
     map.setPaintProperty("kaden", "circle-stroke-width", pz ? (S.scene === "all" ? 3 : 3.5) : 1);
     map.setPaintProperty("kaden", "circle-stroke-opacity", pz ? op : k);
   }
+  if(map.getLayer("amedas")){   // stations: the radius and colour come with the data (updateAmedas); here the opacity of a faint layer
+    const k = amedasDim();
+    map.setPaintProperty("amedas", "circle-opacity", 0.92 * k);
+    map.setPaintProperty("amedas", "circle-stroke-opacity", k);
+    map.setPaintProperty("amedas", "circle-stroke-width", pz ? 2.5 : 2);
+  }
   if(map.getLayer("sns")){
     const k = layerDim("sns"), f = pointScale("sns");
     map.setPaintProperty("sns", "circle-radius", ["interpolate", ["linear"], ["sqrt", ["get", "n"]], 1, 5.5 * f, 3, 9 * f, 8, 15 * f]);
@@ -2691,9 +3040,9 @@ function renderHeader(){
   const name = (k) => k === "sns" ? `SNS 投稿（${esc(snsWindow()[2])}）` : k === "grid" ? "徒歩の増減（メッシュ）" : esc(LAYER_NAME[k]);
   for(const k of [...sc.focus, ...sc.opt]) if(layerOn(k)) chips.push(`<span class="focus">${name(k)}</span>`);
   for(const k of sc.faint){
-    if(k === "rain" && S.rain && S.showRain && S.rainLevel === "off"){ chips.push(`<span class="faint">降雨（非表示）</span>`); continue; }
+    if(rainLike(k) && LAYER_DATA[k]() && S[LAYER_FLAG[k]] && S.rainLevel === "off"){ chips.push(`<span class="faint">${name(k)}（非表示）</span>`); continue; }
     if(!layerOn(k)) continue;
-    chips.push(`<span class="faint">${k === "roads" ? "道路の異常" : name(k)}（${k === "rain" && S.rainLevel === "full" ? "通常" : "薄く表示"}）</span>`);
+    chips.push(`<span class="faint">${k === "roads" ? "道路の異常" : name(k)}（${rainLike(k) && S.rainLevel === "full" ? "通常" : "薄く表示"}）</span>`);
   }
   if(sc.context.includes("roads")) chips.push(`<span class="faint">道路網（位置の目安）</span>`);
   $("pzChips").innerHTML = chips.join("");
@@ -2707,7 +3056,7 @@ function renderHeader(){
 // Legend of the layers of the scene (focus first), from the sidebar's legend markup, over the bottom-left of the map.
 function renderLegend(){
   const sc = sceneDef(), rows = [];
-  const src = {roads: ["legendTraffic", "legend"], walk: ["legendTraj", "legend"], grid: ["legendGrid", "lg"], kaden: ["legendKaden", "lg"], rain: ["legendRain", "lg"], sns: ["legendSns", "lg"]};
+  const src = {roads: ["legendTraffic", "legend"], walk: ["legendTraj", "legend"], grid: ["legendGrid", "lg"], kaden: ["legendKaden", "lg"], rain: ["legendRain", "lg"], amedas: ["legendAmedas", "lg"], sns: ["legendSns", "lg"]};
   const all = sc.key === "all";
   const row = (k, sub) => {
     if(!layerOn(k)) return;
@@ -2717,20 +3066,25 @@ function renderLegend(){
     if(k === "walk"){ html = html.replace(/<span class="pt"[\s\S]*$/, ""); }   // the two roles only (the dwell / mode / turn marks are detail)
     if(k === "kaden"){ html = html.replace(/<span class="lab">平時比<\/span>/, ""); name = all ? "家電の接続" : "家電の接続（対象日 ÷ 平時）"; note = all ? "" : "大きさ = 平時の台数"; }
     if(k === "sns") note = all ? "" : "大きさ = 同じ地点の件数";
+    if(k === "amedas"){   // the steps are those of the rain: with the rain row in the legend too, only the white point remains; a faint row: the name only
+      name = sub ? "アメダス雨量" : "アメダス雨量（1 時間降水量）"; note = sub || all ? "" : "大きさ = 1 時間降水量";
+      if(layerOn("rain")){ html = `<span class="it"><span class="dot" style="background:#fff"></span>${rainScale()[0][0]} mm 未満</span><span class="it"><span class="dot" style="background:#d9dde3"></span>${missingLabel()}</span>`;
+                           if(!sub) note = "点 = 直前 60 分の合計（段階は降雨と同じ。面の 15 分強度より遅れて変わる）" + (all ? "" : "。大きさ = 1 時間降水量"); }
+    }
     if(all && k === "sns"){   // 統合: the top 3 categories (the sidebar legend lists up to 8, by count)
       const items = html.split('<span class="it">').slice(1).map(x => '<span class="it">' + x.replace(/<span class="lab">[\s\S]*$/, ""));
       html = items.slice(0, 3).join("") + (items.length > 3 ? `<span class="lab">他 ${items.length - 3} 区分</span>` : "");
     }
-    const op = sub ? (k === "rain" ? rainOpacity() : CONFIG.PRESENT.dim) : 1;
-    rows.push(`<div class="row ${sub ? "sub" : ""} ${k}" style="--sw-op:${op}"><span class="nm">${esc(name)}${sub ? `（${k === "rain" && S.rainLevel === "full" ? "通常" : "薄く表示"}）` : ""}</span><div class="${cls}">${label(html)}</div>${note ? `<span class="note">${note}</span>` : ""}</div>`);
+    const op = sub ? (k === "rain" ? rainOpacity() : k === "amedas" ? amedasDim() : CONFIG.PRESENT.dim) : 1;
+    rows.push(`<div class="row ${sub ? "sub" : ""} ${k}" style="--sw-op:${op}"><span class="nm">${esc(name)}${sub ? `（${rainLike(k) && S.rainLevel === "full" ? "通常" : "薄く表示"}）` : ""}</span><div class="${cls}">${label(html)}</div>${note ? `<span class="note">${note}</span>` : ""}</div>`);
   };
   for(const k of [...sc.focus, ...sc.opt]) row(k, false);
   for(const k of sc.faint) row(k, true);
   if(sc.context.includes("roads")) rows.push(`<div class="row sub roads" style="--sw-op:0.6"><span class="nm">道路網（位置の目安）</span><div class="legend"><span style="--c:var(--road-gray)">道路</span></div></div>`);
   $("pzLegend").innerHTML = rows.join("");
   $("pzLegend").style.display = rows.length ? "block" : "none";
-  $("pzRain").textContent = `R 降雨: ${!S.rain ? "データなし" : {full: "通常", dim: "薄い", off: "非表示"}[S.rainLevel]}`;
-  $("pzRain").disabled = !S.rain;
+  $("pzRain").textContent = `R 降雨: ${!S.rain && !S.amedas ? "データなし" : {full: "通常", dim: "薄い", off: "非表示"}[S.rainLevel]}`;
+  $("pzRain").disabled = !S.rain && !S.amedas;
 }
 // The detail panel besides the chart panel: the SNS post, the mesh cell, the rain probe, the clicked trajectory feature, or the scene's hint / summary.
 function renderDetail(){
@@ -2745,6 +3099,8 @@ function renderDetail(){
   else if(S.detail === "traj" && S.trajSel && walkOn()) html = trajDetailHtml();
   else html = emptyDetailHtml();
   other.innerHTML = html;
+  for(const svg of other.querySelectorAll("svg.am")) drawAmedasBars(svg, +svg.dataset.i, "", {compact: true, ymax: S.amedas.axisMax});   // the station rows of the rain scene
+  for(const r of other.querySelectorAll(".amRow")) r.onclick = () => selectAmedas(+r.dataset.i);
   for(const b of other.querySelectorAll("button[data-d]")) b.onclick = () => { const g = S.snsNow.get(S.snsSel.key); openSnsCallout(S.snsSel.key, (S.snsSel.idx + +b.dataset.d + g.posts.length) % g.posts.length); };
   for(const r of other.querySelectorAll(".posts .p")) r.onclick = () => openSnsCallout(r.dataset.key, +r.dataset.idx);
 }
@@ -2814,6 +3170,8 @@ function emptyDetailHtml(){
   if(f("kaden") && S.kadenCnt) sum.push([`${n(S.kadenCnt[2] + S.kadenCnt[3])}<small>地点</small>`, `<span class="ring" style="--c:${kadenColor(3)}"></span><b>家電の接続台数の減少</b>（${n(S.kaden.n)} 地点のうち）`]);
   if(f("grid") && S.grid.cur && S.grid.cur.key === gridKey() && S.grid.cur.marks) sum.push([`<span class="arr up">↑</span>${n(S.grid.cur.marks.up)} <span class="arr down">↓</span>${n(S.grid.cur.marks.down)}<small>セル</small>`, `<b>徒歩の増減</b>（直近 ${(gridLayer() || [0, 0, 0, 0, 60])[4]} 分）`]);
   if(f("sns") && S.snsCount) sum.push([`${n(S.snsCount.posts)}<small>件</small>`, `<span class="cat" style="background:${CONFIG.SNS_COLORS["浸水・冠水"]}"></span><b>SNS 投稿</b>（${n(S.snsCount.spots)} 地点、${esc(S.snsCount.label)}）`]);
+  if(sc.key === "all" && layerOn("amedas") && S.amedasMax){ const A = S.amedas, m = S.amedasMax, e = A.h1End[m.i * S.T + t], end = !Number.isNaN(e) && e !== slotAbsTime(t, null) ? amedasClock(e) : S.times[t];   // the rain context of 統合, one line
+    sum.push([`${amedasFmt(A, m.i * S.T + t)}<small>mm</small>`, `<span class="cat" style="background:${amedasColor(m.v)};border-color:${CONFIG.AMEDAS.stroke}"></span><b>アメダス 1 時間降水量</b>（最大 ${esc(A.name[m.i])}、${esc(end)} まで）`]); }
   const sumHtml = sum.length ? `<div class="sum">${sum.map(([a, b]) => `<span class="n">${a}</span><span class="l">${b}</span>`).join("")}</div>` : "";
   if(sc.key === "traffic" && f("roads"))
     return dhead(kick, false, "道路の異常（車の流れ）") + `<div class="big">${n(S.countsError[t])} 本<small>対象 ${n(S.countsTarget[t])} 本のうち</small></div>`
@@ -2835,12 +3193,28 @@ function emptyDetailHtml(){
     const list = posts.slice(0, 5).map(({g, p, i}) => `<span class="p" data-key="${esc(g.key)}" data-idx="${i}"><span class="cat" style="background:${CONFIG.SNS_COLORS[p.cat] || CONFIG.SNS_DEFAULT_COLOR}"></span><span class="t">${esc(String(p.time).slice(11, 16) || p.time)}</span><span class="x">${esc(String(p.text).slice(0, 30))}</span></span>`).join("");
     return dhead(kick, false, `SNS 投稿（${esc(S.snsCount.label)}）`) + `<div class="big">${n(S.snsCount.posts)} 件・${n(S.snsCount.spots)} 地点</div>` + (list ? `<div class="posts">${list}</div>` : "") + opHint(esc(sc.hint));
   }
-  if(sc.key === "rain" && layerOn("rain")){
-    const mx = rainMaxInView();
-    return dhead(kick, false, "降雨強度（XRAIN、15 分ごと）") + (S.rain.cur ? `<div class="big">${mx !== null ? mx.toFixed(1) : "–"} ${rainUnit()}<small>表示範囲の最大</small></div>` + rainStepsHtml(mx) : `<div class="big" style="font-size:var(--pz-fs-title)">（この時刻の降雨なし）</div>`)
-      + opHint(esc(sc.hint));
+  if(sc.key === "rain" && (layerOn("rain") || layerOn("amedas"))){
+    const mx = layerOn("rain") ? rainMaxInView() : null, rainBig = layerOn("rain") ? (S.rain.cur ? `<div class="big">${mx !== null ? mx.toFixed(1) : "–"} ${rainUnit()}<small>表示範囲の最大</small></div>` : `<div class="big" style="font-size:var(--pz-fs-title)">（この時刻の降雨なし）</div>`) : "";
+    if(layerOn("amedas"))   // the stations' time series, one row each; the raster's maximum as one line below them
+      return amedasRowsHtml(kick) + (layerOn("rain") ? `<div class="meta">降雨（XRAIN）の表示範囲の最大 ${S.rain.cur ? (mx !== null ? mx.toFixed(1) : "–") + " " + rainUnit() : "（この時刻の降雨なし）"}</div>` : "") + opHint(esc(sc.hintAmedas || sc.hint));
+    return dhead(kick, false, "降雨強度（XRAIN、15 分ごと）") + rainBig + (S.rain.cur ? rainStepsHtml(mx) : "") + opHint(esc(sc.hint));
   }
   return dhead(kick, false, sc.key === "all" ? "この時刻の重なり" : esc(sc.label)) + sumHtml + opHint(esc(sc.hint));
+}
+// The rain scene without a selection: the strongest station of this time, then a row per station (file order, so the rows stay put while
+// playing): name, 1-hour precipitation, and its 10-minute bars over the whole axis (drawn by renderDetail; a click selects the station).
+function amedasRowsHtml(kick){
+  const A = S.amedas, T = S.T, t = S.t, mx = S.amedasMax, slot = slotAbsTime(t, null);
+  const when = (i) => { const e = A.h1End[i * T + t]; return `${!Number.isNaN(e) && e !== slot ? amedasClock(e) : esc(S.times[t])} までの 1 時間`; };   // the end of the last observation used
+  const big = !A.inRange ? `<div class="big">–<small>期間に合う観測がありません（観測 ${esc(A.range[0])}〜${esc(A.range[1])}）</small></div>`
+    : !mx ? `<div class="big">${missingLabel()}<small>この時刻は全地点が欠測</small></div>`
+    : amedasStep(mx.v) < 0 ? `<div class="big">雨なし<small>全地点 ${rainScale()[0][0]} mm 未満（${when(mx.i)}）</small></div>`
+    : `<div class="big">${amedasFmt(A, mx.i * T + t)} mm<small>最大: ${esc(A.name[mx.i])}（${when(mx.i)}）</small></div>`;
+  const order = A.id.map((_, i) => i).sort((a, b) => A.lat[b] - A.lat[a] || a - b);   // north to south, so the rows follow the map
+  const rowH = A.n <= 5 ? 92 : Math.max(40, Math.floor(470 / A.n));                   // more stations: shorter rows, so every one stays in the picture
+  const rows = order.map((i) => { const v = A.h1[i * T + t], miss = Number.isNaN(v);
+    return `<div class="amRow" data-i="${i}" style="--am-h:${rowH}px"><div><div class="nm"><span class="cat" style="background:${amedasColor(v)};border-color:${CONFIG.AMEDAS.stroke}"></span>${esc(A.name[i])}</div><div class="val${miss ? " miss" : ""}">${miss ? missingLabel() : amedasFmt(A, i * T + t) + "<small>mm</small>"}</div></div><svg class="chart am" data-i="${i}"></svg></div>`; }).join("");
+  return dhead(kick, false, `アメダス雨量（1 時間降水量、${A.n} 地点）`) + big + (A.inRange ? `<div class="amRows">${rows}</div>` : "");
 }
 // A click on the map in the presentation with nothing clickable under it: a mesh cell (walker change) or a rain probe point for the detail panel.
 function presentClick(e){
@@ -2889,7 +3263,7 @@ function fitStage(){
   info.textContent = `16:9 の枠 ${w} × ${h} px` + (dpr === 1 ? "" : `（画面の画素 ${Math.round(w * dpr)} × ${Math.round(h * dpr)}）`);
   info.style.display = "block";
   info.style.display = innerHeight - h >= info.offsetHeight + 12 || innerWidth - w >= info.offsetWidth + 24 ? "block" : "none";
-  if(map){ map.resize(); placeSnsCallout(); }
+  if(map){ map.resize(); placeSnsCallout(); placeAmedasLabels(); }
 }
 
 // ============================================================
@@ -2911,15 +3285,16 @@ function fitStage(){
                      `3: ${$("gridInput").files.length ? `メッシュ ${[...$("gridInput").files].filter(f => GRID_NAME.test(f.name)).length} 枚` : "なし"}`,
                      `4: ${$("kadenInput").files.length ? `家電 時系列 ${[...$("kadenInput").files].filter(f => KADEN_TS.test(f.name)).length} 本` : "なし"}`,
                      `5: ${$("rainInput").files.length ? `降雨 ${[...$("rainInput").files].filter(f => RAIN_NAME.test(f.name)).length} 枚` : "なし"}`,
-                     `6: ${$("snsInput").files.length ? `SNS ${$("snsInput").files.length} ファイル` : "なし"}`];
+                     `6: ${$("snsInput").files.length ? `SNS ${$("snsInput").files.length} ファイル` : "なし"}`,
+                     `7: ${$("amedasInput").files.length ? `アメダス ${$("amedasInput").files.length} ファイル` : "なし"}`];
       $("pickNote").textContent = parts.join(" / "); $("loadBtn").disabled = !main;
     };
-    for(const id of ["fileInput","dirInput","probeInput","rainInput","gridInput","kadenInput","snsInput"]) $(id).addEventListener("change", note);
+    for(const id of ["fileInput","dirInput","probeInput","rainInput","gridInput","kadenInput","snsInput","amedasInput"]) $(id).addEventListener("change", note);
     $("loadBtn").addEventListener("click", async () => {
       const main = $("dirInput").files.length ? $("dirInput").files : $("fileInput").files;
       if(!main.length) return;
       $("filePick").style.display = "none";
-      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("gridInput").files, $("kadenInput").files, $("snsInput").files)); }
+      try{ await boot(() => loadViaFiles([...main, ...$("probeInput").files], $("rainInput").files, $("gridInput").files, $("kadenInput").files, $("snsInput").files, $("amedasInput").files)); }
       catch(e2){ setProgress("読み込みエラー: " + e2.message); $("filePick").style.display = "block"; console.error(e2); }
     });
   }

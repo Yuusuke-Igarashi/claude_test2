@@ -412,7 +412,7 @@ test("standalone file:// with the folder picker uses the per-slot files", async 
   await page.goto("file://" + join(DIST, HTML));
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#dirInput", DATA);
-  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: \d+ ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.lazy ? S.lazy.sources.size : 0), SLOT_FILES, "slot files found in the folder");
@@ -433,7 +433,7 @@ test("two separate inputs: data files and the rain folder", async () => {
   assert.ok(await page.evaluate(() => document.getElementById("loadBtn").disabled), "load button disabled until input 1 is chosen");
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));   // input 1 without rain / lowland
   await page.setInputFiles("#rainInput", join(DATA, "rain"));
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: 降雨 48 枚 \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: なし \/ 3: なし \/ 4: なし \/ 5: 降雨 48 枚 \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   assert.equal(await page.evaluate(() => S.rain ? S.rain.sources.size : 0), 48, "rain registered from input 2");
@@ -560,7 +560,7 @@ test("two folders: traffic (tomtom_out) and probe (probe_out: viewer/ + grid/)",
   await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));          // 1: traffic files only
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));                        // 2: the probe folder's viewer/
-  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・メッシュ 0 枚 \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /^1: 5 ファイル \/ 2: 時刻別 96 本・メッシュ 0 枚 \/ 3: なし \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const st = await page.evaluate(() => ({ lazy: S.lazy ? S.lazy.sources.size : 0, rain: S.rain, grid: S.grid, trajOff: document.getElementById("chkWalk").disabled, gridOff: document.getElementById("chkGrid").disabled }));
@@ -575,7 +575,7 @@ test("walker-change layer reads a mesh folder (input 3) on its own", async () =>
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));              // period only, no grid*/ inside
   await page.setInputFiles("#gridInput", join(DATA, "grid_users"));
-  assert.match(await page.textContent("#pickNote"), /3: メッシュ 144 枚 \/ 4: なし \/ 5: なし \/ 6: なし$/);
+  assert.match(await page.textContent("#pickNote"), /3: メッシュ 144 枚 \/ 4: なし \/ 5: なし \/ 6: なし \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const reg = await page.evaluate(() => ({ params: S.grid.params.map((p) => p[0]), n: S.grid.sources.size, on: S.showGrid, gridOff: document.getElementById("chkGrid").disabled, trajOff: document.getElementById("chkWalk").disabled }));
@@ -630,20 +630,20 @@ test("sidebar: one checkbox per layer in 表示, every parameter in 詳細設定
     kaden: [document.getElementById("chkKaden").disabled, document.getElementById("rowKaden").title],
   }));
   assert.equal(s.mapLeft, s.side, "the map starts right of the sidebar");
-  assert.deepEqual(s.rows, ["道路の異常（車の流れ）", "徒歩の軌跡", "徒歩の増減（メッシュ）", "家電の接続", "降雨", "SNS 投稿"]);
-  assert.equal(s.boxes, 6); assert.equal(s.other, 0, "no parameter in the layer block");
+  assert.deepEqual(s.rows, ["道路の異常（車の流れ）", "徒歩の軌跡", "徒歩の増減（メッシュ）", "家電の接続", "降雨", "アメダス雨量（地点）", "SNS 投稿"]);
+  assert.equal(s.boxes, 7); assert.equal(s.other, 0, "no parameter in the layer block");
   assert.deepEqual(s.params, [], "every parameter sits in the detail block"); assert.equal(s.legendInputs, 0, "no control in the legend block");
   assert.equal(s.closed, 6, "detail groups start closed");
   assert.equal(s.kaden[0], true, "no appliance data over http in the sample"); assert.match(s.kaden[1], /家電データ.*読み込まれていません/);
   // layers combine freely: roads + trajectories + walker change + rain at once, each with its legend
   await page.click("#chkWalk"); await page.click("#chkGrid"); await page.waitForTimeout(600);
-  const on = await page.evaluate(() => ({ layers: ["links-base", "grid-marks", "rain"].map((l) => map.getLayoutProperty(l, "visibility")), walk: walkOn(),
-    legends: ["lgRoads", "lgWalk", "lgGrid", "lgRain", "lgNone"].map((id) => getComputedStyle(document.getElementById(id)).display) }));
-  assert.deepEqual(on.layers, ["visible", "visible", "visible"]); assert.ok(on.walk); assert.deepEqual(on.legends, ["block", "block", "block", "block", "none"]);
+  const on = await page.evaluate(() => ({ layers: ["links-base", "grid-marks", "rain", "amedas"].map((l) => map.getLayoutProperty(l, "visibility")), walk: walkOn(),
+    legends: ["lgRoads", "lgWalk", "lgGrid", "lgRain", "lgAmedas", "lgNone"].map((id) => getComputedStyle(document.getElementById(id)).display) }));
+  assert.deepEqual(on.layers, ["visible", "visible", "visible", "visible"]); assert.ok(on.walk); assert.deepEqual(on.legends, ["block", "block", "block", "block", "block", "none"]);
   await page.screenshot({ path: join(SHOTS, "sidebar.png") });
-  for (const id of ["#chkRoads", "#chkWalk", "#chkGrid", "#chkRain"]) await page.click(id);
-  const off = await page.evaluate(() => ({ layers: ["links-base", "links-hit", "links-context", "grid-marks", "rain"].map((l) => map.getLayoutProperty(l, "visibility")), none: getComputedStyle(document.getElementById("lgNone")).display }));
-  assert.deepEqual(off.layers, ["none", "none", "none", "none", "none"]); assert.equal(off.none, "block", "the legend block says nothing is shown");
+  for (const id of ["#chkRoads", "#chkWalk", "#chkGrid", "#chkRain", "#chkAmedas"]) await page.click(id);
+  const off = await page.evaluate(() => ({ layers: ["links-base", "links-hit", "links-context", "grid-marks", "rain", "amedas"].map((l) => map.getLayoutProperty(l, "visibility")), none: getComputedStyle(document.getElementById("lgNone")).display, labels: [...document.querySelectorAll(".amLabel")].map((e) => e.style.display) }));
+  assert.deepEqual(off.layers, ["none", "none", "none", "none", "none", "none"]); assert.equal(off.none, "block", "the legend block says nothing is shown"); assert.deepEqual(off.labels, Array(5).fill("none"), "the station labels go with the layer");
   // a pinned link chart goes away with the roads
   await page.click("#chkRoads");
   await page.evaluate((t) => applyTime(t), T_18);
@@ -919,7 +919,7 @@ test("SNS posts (input 6, FASTALERT layout): CSV parsing, time window, stacked p
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));        // period -> slot dates
   await page.setInputFiles("#snsInput", join(DATA, "sns", "FA_sample_20240821.csv"));
-  assert.match(await page.textContent("#pickNote"), /5: なし \/ 6: SNS 1 ファイル$/);
+  assert.match(await page.textContent("#pickNote"), /5: なし \/ 6: SNS 1 ファイル \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => ({ n: S.sns.posts.length, noCoord: S.sns.noCoord, groups: S.sns.groups.size, dates: S.sns.dates, formats: S.sns.formats, opt: !document.getElementById("chkSns").disabled,
@@ -968,7 +968,7 @@ test("SNS posts (input 6, posts layout): ISO times with +09:00, source_category 
   await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
   await page.setInputFiles("#probeInput", join(DATA, "viewer"));
   await page.setInputFiles("#snsInput", [join(DATA, "sns", "chiba_sample_posts.csv"), join(DATA, "sns", "FA_sample_20240821.csv")]);
-  assert.match(await page.textContent("#pickNote"), /6: SNS 2 ファイル$/);
+  assert.match(await page.textContent("#pickNote"), /6: SNS 2 ファイル \/ 7: なし$/);
   await page.click("#loadBtn");
   await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
   const info = await page.evaluate(() => { const p = S.sns.posts.filter((q) => q.file === "chiba_sample_posts.csv");
@@ -993,5 +993,210 @@ test("SNS posts (input 6, posts layout): ISO times with +09:00, source_category 
   assert.match(c.html, /href="https:\/\/x\.com\/user6\/status\/\d+" target="_blank"[^>]*>投稿を開く</); assert.match(c.html, /写真・動画を開く/);
   await page.click("#snsCallout button[data-d='1']"); await page.waitForTimeout(100);
   assert.match(await page.textContent("#snsCallout"), /00:05:00.*"膝まで水" です|00:05:00.*車が動けない/);
+  await page.close();
+});
+
+// AMeDAS 10-minute rainfall (input 7). The expected 1-hour totals come straight from the wide CSV (the sum of the six 10-minute values ending in the hour).
+let amedasLongH1 = null;
+function amedasHourFromCsv(stationId, endIso) {   // sum of the 10-minute values with end times in (end - 60 min, end]
+  const rows = readFileSync(join(DATA, "amedas", "amedas_10min_wide.csv"), "utf8").trim().split("\n").map((l) => l.split(","));
+  const col = rows[0].indexOf(`${stationId}_mm`), end = new Date(endIso + "+09:00").getTime();
+  return rows.slice(1).filter((r) => { const t = new Date(r[0]).getTime(); return t > end - 3600000 && t <= end; }).reduce((a, r) => a + parseFloat(r[col]), 0);
+}
+test("AMeDAS stations (input 7, long CSV): stations, 1-hour totals per slot, points with labels, legend, chart panel, toggle", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));
+  await page.setInputFiles("#amedasInput", join(DATA, "amedas", "amedas_10min.csv"));
+  assert.match(await page.textContent("#pickNote"), /7: アメダス 1 ファイル$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const info = await page.evaluate(() => ({ n: S.amedas.n, ids: S.amedas.id, names: S.amedas.name, format: S.amedas.format, step: S.amedas.stepMin, steps: Array.from(S.amedas.step), nObs: S.amedas.nObs, inRange: S.amedas.inRange, range: S.amedas.range,
+    elev: S.amedas.elev[0], vis: map.getLayoutProperty("amedas", "visibility"), feats: S.amedasFeats.length, labels: document.querySelectorAll(".amLabel").length, opt: !document.getElementById("chkAmedas").disabled,
+    row: [...document.querySelectorAll("#fileList li")].map((li) => li.textContent).find((t) => /^アメダス/.test(t)), legend: document.getElementById("legendAmedas").textContent, dots: document.querySelectorAll("#legendAmedas .dot").length }));
+  assert.equal(info.n, 5); assert.deepEqual(info.ids, ["99001", "99002", "99003", "99004", "99005"]); assert.deepEqual(info.names, ["中央", "北西", "北東", "南西", "南東"]);
+  assert.equal(info.format, "long"); assert.equal(info.step, 10); assert.equal(info.nObs, 79); assert.equal(info.inRange, 77, "17:00 .. 06:00 minus the two before 17:00 of slot 0's hour");
+  assert.deepEqual(info.range, ["2024-08-21 17:00", "2024-08-22 06:00"]); assert.ok(Number.isNaN(info.elev), "no elevation column in the long CSV"); assert.deepEqual(info.steps, [10, 10, 10, 10, 10]); assert.equal(info.vis, "visible"); assert.equal(info.feats, 5); assert.equal(info.labels, 5); assert.ok(info.opt);
+  assert.match(info.row, /^アメダス: 5 地点、10 分値 79 時刻（2024-08-21 17:00〜2024-08-22 06:00）、時間軸の中 77 時刻$/);
+  assert.equal(info.legend, "1 時間降水量 mm1–55–1010–2020–3030–5050–8080+1 未満–"); assert.equal(info.dots, 9, "the steps as circles, plus the white point and the grey missing one");
+  // the 1-hour total ending at the slot: at 00:00 (six values 23:10 .. 00:00), at 23:15 (22:20 .. 23:10, the last complete interval 23:10 is the readout)
+  const at = (hhmm, id) => page.evaluate(([hhmm, id]) => { applyTime(S.times.indexOf(hhmm)); const i = S.amedas.id.indexOf(id), A = S.amedas, b = i * S.T + S.t;
+    return { h1: A.h1[b], q: A.h1q[b], cur: A.cur[b], curEnd: Number.isNaN(A.curEnd[b]) ? null : new Date(A.curEnd[b]).toTimeString().slice(0, 5), h1End: Number.isNaN(A.h1End[b]) ? null : new Date(A.h1End[b]).toTimeString().slice(0, 5), label: document.querySelectorAll(".amLabel")[i].textContent, color: S.amedasFeats[i].properties.color, r: S.amedasFeats[i].properties.r, val: document.getElementById("amedasVal").textContent }; }, [hhmm, id]);
+  let v = await at("00:00", "99001");
+  assert.ok(Math.abs(v.h1 - amedasHourFromCsv("99001", "2024-08-22T00:00:00")) < 1e-4, `1-hour total ${v.h1}`); assert.equal(v.q, 0); assert.equal(v.curEnd, "00:00"); assert.equal(v.h1End, "00:00"); assert.equal(v.label, "中央" + v.h1.toFixed(1));
+  assert.ok(await page.evaluate((c) => CONFIG.RAIN_SCALE.some(([, x]) => x === c), v.color), "the normal view's rain colour"); assert.ok(v.r >= 10, "a large point for a strong hour");
+  assert.match(v.val, /^5 地点（最大 \d+\.\d mm 中央）$/);
+  v = await at("23:15", "99002");
+  assert.ok(Math.abs(v.h1 - amedasHourFromCsv("99002", "2024-08-21T23:10:00")) < 1e-4, "23:15: the six intervals ending 22:20 .. 23:10"); assert.equal(v.curEnd, "23:10"); assert.equal(v.h1End, "23:10");
+  v = await at("18:00", "99003");
+  assert.ok(Number.isFinite(v.h1), "slot 0 has a complete hour (the data start an hour earlier)"); assert.equal(v.color, "#ffffff", "no rain yet: a white point"); assert.equal(v.label, "北東0.0");
+  amedasLongH1 = await page.evaluate(() => Array.from(S.amedas.h1, (x) => (Number.isNaN(x) ? null : x)));
+  assert.equal(amedasLongH1.filter((x) => x === null).length, 0, "no missing hour on the sample axis");
+  // chart panel: the 1-hour line and the 10-minute bars, the JMA class in the pill, the latest complete interval named when it ends before the slot
+  await page.evaluate(() => applyTime(S.times.indexOf("23:45")));
+  const chart = await page.evaluate(() => { const i = S.amedas.id.indexOf("99001"); showAmedasChart(i);
+    return { shown: document.getElementById("chartPanel").style.display, title: document.getElementById("cpTitle").textContent, status: document.getElementById("cpStatus").textContent, ink: document.getElementById("cpStatus").style.color,
+      l1: document.getElementById("roL1").textContent, l2: document.getElementById("roL2").textContent, es: document.getElementById("roES").textContent, ec: document.getElementById("roEC").textContent,
+      line: document.querySelectorAll("#chartSpeed path.l1").length, bars: document.querySelectorAll("#chartCount rect.bar").length, future: document.querySelectorAll("#chartCount rect.bar.future").length,
+      ticks: [...document.querySelectorAll("#chartCount text")].map((e) => e.textContent).filter((t) => /^\d\d:\d\d$/.test(t)), idx: S.amedasChartIdx, kind: chartKind(), h1: S.amedas.h1[i * S.T + S.t], cur: S.amedas.cur[i * S.T + S.t] }; });
+  assert.equal(chart.shown, "block"); assert.equal(chart.title, "中央（アメダス 99001）"); assert.match(chart.status, /^\d+(–\d+)? mm( 以上)?（(やや強い雨|強い雨|激しい雨|非常に激しい雨|猛烈な雨)）$/);
+  assert.equal(chart.l1, "1 時間降水量 mm（〜23:40）", "the window is named by its last observation"); assert.equal(chart.l2, "10 分降水量 mm（〜23:40）"); assert.equal(chart.es, chart.h1.toFixed(1)); assert.equal(chart.ec, chart.cur.toFixed(1));
+  assert.equal(chart.line, 1); assert.ok(chart.bars > 20 && chart.future > 0 && chart.future < chart.bars, `bars ${chart.bars} / future ${chart.future}`); assert.deepEqual(chart.ticks, ["18:00", "20:00", "22:00", "00:00", "02:00", "04:00"]);
+  assert.equal(chart.idx, 0); assert.equal(chart.kind, "amedas");
+  await page.evaluate(() => { showChart({ id: 0, properties: { id: "x", _row: -1 } }); });   // a link chart takes the panel over
+  assert.equal(await page.evaluate(() => [S.amedasChartIdx, chartKind()].join()), ",roads");
+  // click selection: pin, ring, the same station again unpins (the normal view keeps the chart as on hover)
+  const sel = await page.evaluate(() => { selectAmedas(2, { x: 100, y: 100 }); return { pinned: S.pinnedId, kind: S.selPoint && S.selPoint.kind, pk: pinKind(), title: document.getElementById("cpTitle").textContent }; });
+  assert.deepEqual(sel, { pinned: "a2", kind: "amedas", pk: "amedas", title: "北東（アメダス 99003）" });
+  assert.deepEqual(await page.evaluate(() => { selectAmedas(2); return [S.pinnedId, S.selPoint, document.getElementById("chartPanel").style.display]; }), [null, null, "block"]);
+  await page.click("#chkAmedas"); await page.waitForTimeout(200);
+  assert.deepEqual(await page.evaluate(() => [map.getLayoutProperty("amedas", "visibility"), document.querySelector(".amLabel").style.display, document.getElementById("amedasVal").textContent, getComputedStyle(document.getElementById("lgAmedas")).display, document.getElementById("chartPanel").style.display]),
+    ["none", "none", "", "none", "none"], "layer, labels, legend and the station's chart go together");
+  await page.click("#chkAmedas"); await page.waitForTimeout(200);
+  assert.equal(await page.evaluate(() => map.getLayoutProperty("amedas", "visibility")), "visible");
+  await page.screenshot({ path: join(SHOTS, "amedas.png") });
+  await page.close();
+});
+
+test("AMeDAS stations (input 7, wide CSV + station table): the same stations and 1-hour totals as the long CSV; a lone wide CSV has no coordinates", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#amedasInput", [join(DATA, "amedas", "amedas_10min_wide.csv"), join(DATA, "amedas", "amedas_stations.csv")]);
+  assert.match(await page.textContent("#pickNote"), /7: アメダス 2 ファイル$/);
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const w = await page.evaluate(() => ({ format: S.amedas.format, ids: S.amedas.id, names: S.amedas.name, lat: Array.from(S.amedas.lat), kinds: S.amedas.kinds, h1: Array.from(S.amedas.h1, (x) => (Number.isNaN(x) ? null : x)) }));
+  assert.equal(w.format, "wide"); assert.deepEqual(w.ids, ["99001", "99002", "99003", "99004", "99005"]); assert.deepEqual(w.names, ["中央", "北西", "北東", "南西", "南東"]); assert.equal(w.lat[0], 35.6865);
+  assert.equal(await page.evaluate(() => S.amedas.elev[0]), 12, "elevation from the station table");
+  assert.deepEqual(w.kinds, ["amedas_10min_wide.csv: wide", "amedas_stations.csv: stations"]);
+  assert.ok(amedasLongH1, "the long-CSV test ran first"); assert.deepEqual(w.h1, amedasLongH1, "identical 1-hour totals from both layouts");
+  await page.close();
+  // the wide CSV alone: the stations have no coordinates, so nothing is drawn and the loader says why
+  const page2 = await newPage();
+  await page2.goto("file://" + join(DIST, HTML));
+  await page2.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page2.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page2.setInputFiles("#amedasInput", join(DATA, "amedas", "amedas_10min_wide.csv"));
+  await page2.click("#loadBtn");
+  await page2.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const lone = await page2.evaluate(() => ({ amedas: S.amedas, disabled: document.getElementById("chkAmedas").disabled, row: [...document.querySelectorAll("#fileList li")].map((li) => li.textContent).find((t) => /^アメダス/.test(t)) }));
+  assert.equal(lone.amedas, null); assert.equal(lone.disabled, true); assert.match(lone.row, /地点が描けません（座標のない地点 5）/);
+  await page2.close();
+});
+
+test("プレゼン表示: アメダスの場面 — the rain scene's station rows (north to south, bars, shared axis), row click selects, R dims / hides the stations elsewhere, 統合 line", async () => {
+  const page = await newPage();
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.setInputFiles("#probeInput", join(DATA, "viewer"));
+  await page.setInputFiles("#rainInput", join(DATA, "rain"));
+  await page.setInputFiles("#amedasInput", join(DATA, "amedas", "amedas_10min.csv"));
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  await page.evaluate(() => applyTime(S.times.indexOf("23:30")));
+  await page.evaluate(() => map.jumpTo({ center: [139.75, 35.68], zoom: 12.6 })); await page.waitForTimeout(600);
+  const state = () => page.evaluate(() => {
+    const band = document.getElementById("pzSub").getBoundingClientRect(), over = [];
+    for (const e of document.querySelectorAll("#stage *")) { if (e.closest("#pzSub, #pzBar")) continue; const b = e.getBoundingClientRect(); if (!b.width || !b.height) continue;
+      if (b.bottom > band.top + 1 && b.top < band.bottom && getComputedStyle(e).visibility !== "hidden") over.push(e.id || e.className || e.tagName); }
+    return { scene: S.scene, chips: document.getElementById("pzChips").textContent, legend: [...document.querySelectorAll("#pzLegend .row")].map((r) => r.className.replace(/\s+/g, " ").trim() + ":" + r.textContent.replace(/\s+/g, " ").trim()),
+      rows: [...document.querySelectorAll("#dsOther .amRow .nm")].map((e) => e.textContent), vals: [...document.querySelectorAll("#dsOther .amRow .val")].map((e) => e.textContent),
+      bars: [...document.querySelectorAll("#dsOther svg.am")].map((s) => s.querySelectorAll("rect.bar").length), nowLines: document.querySelectorAll("#dsOther svg.am line.now").length,
+      ymax: [...document.querySelectorAll("#dsOther svg.am")].map((s) => [...s.querySelectorAll("text")].map((t) => t.textContent).filter((t) => /^\d+(\.\d+)?$/.test(t)).map(Number).reduce((a, b) => Math.max(a, b), 0)),
+      big: document.querySelector("#dsOther .big") && document.querySelector("#dsOther .big").textContent, other: document.getElementById("dsOther").textContent, otherShown: document.getElementById("dsOther").style.display, overBand: [...new Set(over)],
+      vis: map.getLayoutProperty("amedas", "visibility"), op: map.getPaintProperty("amedas", "circle-opacity"), stroke: map.getPaintProperty("amedas", "circle-stroke-color"),
+      labels: [...document.querySelectorAll(".amLabel")].map((e) => [e.style.display, e.querySelector(".amIn").style.opacity]), r: S.amedasFeats.map((f) => f.properties.r), rainBtn: document.getElementById("pzRain").textContent,
+      pinned: S.pinnedId, kind: S.selPoint && S.selPoint.kind, badge: !!document.querySelector(".pzBadge"), cp: document.getElementById("cpKind").textContent, title: document.getElementById("cpTitle").textContent,
+      colors: S.amedasFeats.map((f) => f.properties.color) };
+  });
+  await page.keyboard.press("p"); await page.waitForTimeout(700);
+  await page.keyboard.press("1"); await page.waitForTimeout(700);
+  let g = await state();
+  assert.equal(g.scene, "rain"); assert.equal(g.chips, "表示中降雨アメダス雨量道路網（位置の目安）");
+  assert.deepEqual(g.rows, ["北西", "北東", "中央", "南東", "南西"], "rows from north to south"); assert.equal(g.vals.length, 5); assert.ok(g.vals.every((v) => /^\d+\.\dmm$/.test(v)), g.vals.join());
+  assert.ok(g.bars.every((n) => n > 20), "10-minute bars in every row " + g.bars); assert.equal(g.nowLines, 5); assert.equal(new Set(g.ymax).size, 1, "one shared y max " + g.ymax);
+  assert.match(g.big, /^\d+\.\d mm最大: 中央（23:30 までの 1 時間）$/); assert.match(g.other, /降雨（XRAIN）の表示範囲の最大 \d+\.\d mm\/h/); assert.match(g.other, /観測地点をクリックすると/);
+  assert.deepEqual(g.overBand, [], "nothing over the subtitle band (labels of stations outside the map are hidden)");
+  assert.equal(g.vis, "visible"); assert.equal(g.op, 0.92); assert.equal(g.stroke, "#3b4654"); assert.ok(g.labels.every(([d, o]) => d === "" && o === "1"), JSON.stringify(g.labels)); assert.equal(g.rainBtn, "R 降雨: 通常");
+  assert.ok(await page.evaluate(() => S.amedasFeats.every((f) => CONFIG.PRESENT.rainScale.some(([, c]) => c === f.properties.color) || f.properties.color === "#ffffff")), "the presentation's blue steps " + g.colors);
+  assert.ok(g.legend.some((l) => /^row amedas:アメダス雨量（1 時間降水量）1 mm 未満欠測点 = 直前 60 分の合計（段階は降雨と同じ。面の 15 分強度より遅れて変わる）。大きさ = 1 時間降水量$/.test(l)), g.legend.join(" | "));
+  await page.screenshot({ path: join(SHOTS, "present_amedas.png") });
+  // a row selects its station: pin, ring, ① badge, the chart panel; Delete returns to the rows
+  await page.click("#dsOther .amRow:nth-child(3)"); await page.waitForTimeout(400);
+  g = await state();
+  assert.equal(g.pinned, "a0"); assert.equal(g.kind, "amedas"); assert.ok(g.badge); assert.equal(g.cp, "選択中の観測地点（アメダス雨量）"); assert.equal(g.title, "中央（アメダス 99001）"); assert.equal(g.otherShown, "none", "the chart panel replaces the rows");
+  assert.deepEqual(await page.evaluate(() => [...document.querySelectorAll("#chartSpeed .reflab")].map((e) => e.textContent)), ["激しい雨 30", "非常に激しい雨 50", "猛烈な雨 80"], "the JMA classes as reference lines");
+  assert.equal(await page.evaluate(() => document.querySelectorAll("#chartCount .tlab").length), 1, "the time tag on the bar chart");
+  await page.screenshot({ path: join(SHOTS, "present_amedas_station.png") });
+  await page.keyboard.press("Delete"); await page.waitForTimeout(300);
+  g = await state(); assert.equal(g.pinned, null); assert.equal(g.rows.length, 5); assert.equal(g.otherShown, "block");
+  // scene 2: the stations as a faint layer (smaller, dimmed, no labels); R: hidden, then 通常 with labels
+  await page.keyboard.press("2"); await page.waitForTimeout(600);
+  g = await state();
+  assert.equal(g.chips, "表示中道路の異常（車の流れ）降雨（薄く表示）アメダス雨量（薄く表示）"); assert.ok(Math.abs(g.op - 0.92 * 0.35) < 1e-6, "dimmed " + g.op);
+  assert.ok(g.labels.every(([d]) => d === "none"), "no labels over a dimmed layer"); assert.ok(g.r.every((r) => r <= 20 * 1.3 * 0.7), "smaller points " + g.r);
+  assert.ok(g.legend.some((l) => /^row sub amedas:アメダス雨量（薄く表示）1 mm 未満欠測$/.test(l)), g.legend.join(" | "));
+  await page.keyboard.press("r"); await page.waitForTimeout(300);
+  g = await state(); assert.equal(g.vis, "none"); assert.ok(g.labels.every(([d]) => d === "none")); assert.equal(g.chips, "表示中道路の異常（車の流れ）降雨（非表示）アメダス雨量（非表示）");
+  await page.keyboard.press("r"); await page.waitForTimeout(300);
+  g = await state(); assert.equal(g.vis, "visible"); assert.ok(Math.abs(g.op - 0.92 * 0.85) < 1e-6); assert.ok(g.labels.every(([d, o]) => d === "" && o === "0.85"), "labels back at 通常"); assert.equal(g.chips, "表示中道路の異常（車の流れ）降雨（通常）アメダス雨量（通常）");
+  // 統合: one summary line with the strongest station
+  await page.keyboard.press("6"); await page.waitForTimeout(600);
+  g = await state(); assert.match(g.other, /\d+\.\dmmアメダス 1 時間降水量（最大 中央、23:30 まで）/);
+  // the normal view again: the JMA colours, labels shown
+  await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+  g = await state(); assert.ok(await page.evaluate(() => S.amedasFeats.every((f) => CONFIG.RAIN_SCALE.some(([, c]) => c === f.properties.color) || f.properties.color === "#ffffff")), g.colors.join()); assert.ok(g.labels.every(([d, o]) => d === "" && o === "1"));
+  await page.close();
+});
+
+test("AMeDAS parser: JMA markers (-- ) ] ×), UTC offsets, unpadded dates, duplicates, hourly stations, a station without coordinates, 準正常値", async () => {
+  const page = await newPage();
+  await page.goto("file://" + join(DIST, HTML));
+  await page.waitForSelector("#filePick", { state: "visible", timeout: 30000 });
+  await page.setInputFiles("#fileInput", REQUIRED.map((f) => join(DATA, f)));
+  await page.click("#loadBtn");
+  await page.waitForSelector("#loader", { state: "hidden", timeout: 120000 });
+  const r = await page.evaluate(() => {
+    const rows = ["timestamp_jst,station_id,station_name_ja,latitude,longitude,precipitation_10min_mm"];
+    const stamp = (h, m) => `2024-08-${h >= 24 ? "22" : "21"}T${String(h % 24).padStart(2, "0")}:${String(m).padStart(2, "0")}:00+09:00`;
+    for (let h = 17; h < 30; h++) for (let m = 0; m < 60; m += 10) {   // 17:00 .. 05:50 (+ 06:00 below) for station A: 1.0 each, with JMA markers around 23:00
+      let v = "1.0"; const t = h * 60 + m;
+      if (t === 23 * 60) v = "--"; else if (t === 23 * 60 + 10) v = "2.5)"; else if (t === 23 * 60 + 20) v = "3.0]"; else if (t === 23 * 60 + 30) v = "×"; else if (t === 23 * 60 + 40) v = "";
+      rows.push(`${stamp(h, m)},A,甲,35.68,139.75,${v}`);
+    }
+    rows.push("2024-08-22T06:00:00+09:00,A,甲,35.68,139.75,1.0");
+    rows.push("2024-08-21T18:00:00+09:00,A,甲,35.68,139.75,9.0");          // duplicate of 18:00: the first number (1.0) stays, a conflict is counted
+    rows.push("2024-08-21T18:10:00+09:00,A,甲,35.68,139.75,");              // duplicate with a blank: ignored
+    rows.push("2024-08-21T07:55:00Z,A,甲,35.68,139.75,4.0");                // UTC 07:55 = JST 16:55: converted (before the axis; counted in the range)
+    rows.push("2024/8/21 2:10,A,甲,35.68,139.75,0.5");                      // unpadded, no offset = JST
+    for (let h = 18; h <= 30; h++) rows.push(`${stamp(h, 0)},B,乙,35.70,139.76,${h === 24 ? "6.0" : "12.0"}`);   // hourly station: 18:00 .. 06:00
+    rows.push("2024-08-21T18:00:00+09:00,C,丙,,,1.0");                      // no coordinates
+    const A = parseAmedas([{ name: "x.csv", txt: rows.join("\n") }]);
+    const slot = (hhmm) => S.times.indexOf(hhmm), at = (i, hhmm) => { const b = i * S.T + slot(hhmm); return [A.h1[b], A.h1q[b], A.cur[b], Number.isNaN(A.h1End[b]) ? null : new Date(A.h1End[b]).toTimeString().slice(0, 5)]; };
+    return { n: A.n, ids: A.id, noCoord: A.noCoord, step: Array.from(A.step), stepMin: A.stepMin, conv: A.conv, dup: A.dup, conflict: A.conflict, badTime: A.badTime, kinds: A.kinds, summary: amedasSummary(A),
+      a1800: at(0, "18:00"), a1830: at(0, "18:30"), a2300: at(0, "23:00"), a2315: at(0, "23:15"), a2330: at(0, "23:30"), a2345: at(0, "23:45"), a0000: at(0, "00:00"), a0030: at(0, "00:30"), a0045: at(0, "00:45"),
+      b1800: at(1, "18:00"), b1815: at(1, "18:15"), b0000: at(1, "00:00"), b0045: at(1, "00:45"), label: amedasFmt(A, 0 * S.T + slot("23:15")) };
+  });
+  assert.equal(r.n, 2); assert.deepEqual(r.ids, ["A", "B"]); assert.deepEqual(r.noCoord, ["C"]); assert.deepEqual(r.step, [10, 60]); assert.equal(r.stepMin, 10);
+  assert.equal(r.conv, 1); assert.equal(r.dup, 2); assert.equal(r.conflict, 1); assert.equal(r.badTime, 0);
+  assert.match(r.summary, /^2 地点、10 \/ 60 分値 \d+ 時刻（2024-08-21 02:10〜2024-08-22 06:00）、時間軸の中 \d+ 時刻、座標のない地点 1 は非表示、UTC など JST 以外の表記 1 行を JST に換算、重複 2 行（値の食い違い 1）$/);
+  assert.deepEqual(r.a1800, [6, 0, 1, "18:00"], "six 10-minute values of 1.0 (the 18:00 duplicate kept its first value)");
+  assert.deepEqual(r.a1830, [6, 0, 1, "18:30"]);
+  assert.deepEqual(r.a2300, [5, 0, 0, "23:00"], "-- counts as 0 mm, not missing");
+  assert.deepEqual(r.a2315, [6.5, 0, 2.5, "23:10"], "'2.5)' is 2.5");
+  assert.deepEqual(r.a2330, [7.5, 1, NaN, "23:20"], "'3.0]' is 3.0; 5 of 6 present (× at 23:30) = 準正常値; no observation ends in (23:20, 23:30]");
+  assert.ok(Number.isNaN(r.a2345[0]) && r.a2345[1] === 0 && r.a2345[3] === null, "23:45: 22:50 .. 23:40 has only 4 of 6 (× and a blank) -> missing");
+  assert.ok(Number.isNaN(r.a0000[0]), "00:00: 23:10 .. 00:00 has 4 of 6 -> missing");
+  assert.deepEqual(r.a0030, [5, 1, 1, "00:30"], "00:30: 23:40 missing, 5 of 6 -> 準正常値"); assert.deepEqual(r.a0045, [6, 0, 1, "00:40"]);
+  assert.equal(r.label, "6.5"); assert.equal(await page.evaluate(() => { const A = parseAmedas([{ name: "y.csv", txt: "timestamp_jst,station_id,latitude,longitude,precipitation_10min_mm\n" + ["23:40", "23:50", "00:00", "00:10", "00:30"].map((t) => `2024-08-${t < "12" ? "22" : "21"}T${t}:00+09:00,Z,35.68,139.75,1.0`).join("\n") }]); return amedasFmt(A, S.times.indexOf("00:30")); }), "5.0)", "5 of 6 present: the 準正常 mark");
+  // hourly station B: one observation per hour is the whole window (need = 1); cur holds through the hour
+  assert.deepEqual(r.b1800, [12, 0, 12, "18:00"]); assert.deepEqual(r.b1815, [12, 0, 12, "18:00"], "18:15: the 18:00 hour (17:00-18:00) is the latest complete one");
+  assert.deepEqual(r.b0000, [6, 0, 6, "00:00"]); assert.deepEqual(r.b0045, [6, 0, 6, "00:00"]);
   await page.close();
 });

@@ -5,7 +5,7 @@
   "description": "Standalone map viewers for the flood candidate analysis: flood_viewer (traffic, trajectories, walker mesh, appliances, rain, SNS) and flood_viewer_simple (traffic + rain only)",
   "type": "module",
   "scripts": {
-    "data": "python3 sample/make_synthetic.py && python3 sample/make_trajectories.py && python3 sample/make_rain.py && python3 sample/make_kaden.py && python3 sample/make_sns_posts.py",
+    "data": "python3 sample/make_synthetic.py && python3 sample/make_trajectories.py && python3 sample/make_rain.py && python3 sample/make_kaden.py && python3 sample/make_sns_posts.py && python3 sample/make_amedas.py",
     "build": "node build_simple.mjs && node build_standalone.mjs",
     "test": "node --test tests/*.test.js",
     "all": "npm run data && npm run build && npm test"

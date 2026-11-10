@@ -16,6 +16,7 @@
 | `error.csv` | 任意 | notebook の判定結果。画面の再計算との照合表示にだけ使う |
 | `error_geojson/error_L{1,2,3}_YYYYMMDD_HHMM.geojson` | 任意 | 中身は読まない。viewer.json が無いとき、名前から期間の開始を決める（フォルダ選択時のみ） |
 | `rain/rain_YYYYMMDD_HHMM.tif` と `rain/index.json` | 任意 | 降雨の GeoTIFF。別フォルダにして入力 2 で選んでもよい |
+| `amedas/amedas_10min.csv`、または `amedas/amedas_10min_wide.csv` + `amedas/amedas_stations.csv` | 任意（本体版のみ） | アメダスの 10 分降水量（8b 章）。本体版の入力 7 でファイルを選んでもよい |
 
 - フォルダ選択では、サブフォルダを含む全ファイルを**ファイル名だけ**で振り分けます。同じ名前のファイルを 2 か所に置かないでください（どちらが使われるかは決まりません。viewer.json だけは最初に見つかったもの）。
 - 上の表以外のファイル（`*.gpkg`、`error_level1.csv`、`error_links.csv` など）は無視されます。
@@ -166,6 +167,19 @@ id,12:00,12:30,13:00,...,11:30
 ```
 
   使うのは `files[].file` と `unit` だけです。`unit` が `mm (` で始まると、凡例が「降雨量 mm（15 分）」になります。
+
+## 8b. `amedas/`（任意、本体版 `flood_viewer_standalone.html` のみ）
+
+気象庁アメダスの 10 分降水量を地点の点として描きます（XRAIN の代わり、または併用）。シンプル版は読みません。
+
+- 2 つの形のどちらか（種類はヘッダで判別。列名の大小文字は区別しません）:
+  - 縦長 1 本 `amedas_10min.csv`: 1 行 = 地点 × 10 分区間。必須列は時刻（`timestamp_jst` / `timestamp` / `datetime` / `time`）、地点番号（`station_id` / `id`）、値（`precipitation_10min_mm` / `precipitation_mm` / `precip_mm` / `rain_mm` / `value`）。地点名（`station_name_ja` / `station_name` / `name`）、`latitude` / `lat`、`longitude` / `lon`、`elevation_m` は任意（座標が無い地点は描けません。地点表で補えます）。他の列（`interval_start_jst`, `precipitation_raw`, `quality_flag`, `source_url` など）は無視します。
+  - 横長 `amedas_10min_wide.csv`（時刻列 + `<station_id>_mm` の列）と地点表 `amedas_stations.csv`（`station_id`, `station_name_ja`, `station_name_en`, `latitude`, `longitude`, `elevation_m`, …）の組。縦長と横長の両方があるときは縦長の値を使い、地点表は名前と座標の補いに使います。
+- 時刻は 10 分区間の**終了**時刻（気象庁の表と同じ）。`2026-08-13T02:10:00+09:00` のような ISO 形式でも `2026/08/13 02:10` でも読み、JST の壁時計として扱います（オフセットは読みません）。間隔は時刻の差の中央値から取るので、10 分値でも 1 時間値でも構いません。
+- 値は mm。空欄や数値でないものは欠測です（気象庁の `--`（降水なし）は変換時に 0 にしてください。欠測の `×` や `///` は空欄に）。
+- ビューアが各窓に付ける値は「その窓の時刻までの 1 時間降水量」= 直前 60 分に終わる区間の値の合計（10 分値なら 6 つ。1 つでも欠けると欠測）です。時間軸の最初の窓の 1 時間分が揃うよう、期間の開始より **1 時間前**から入れてください。読み出し行の「10 分降水量」は窓の時刻までに終わった最後の区間の値で、窓が :15 / :45 のときは `（〜HH:MM）` と区間の終了時刻を添えます。
+- 日付は時間軸（viewer.json の period、無ければネットワークファイル名の日付）に合わせます。合う観測が無い地点は欠測の点になり、1 つも無ければ読み込み時に「期間に合う観測がありません」と出します。
+- http 経由では上の 3 つの名前（`CONFIG.files.amedas_*`）だけを取りに行きます。フォルダ選択では `amedas/` の中の `.csv` / `.txt` をすべて読み、入力 7 でファイルを選んだときはそちらを優先します。UTF-8（BOM 可）か cp932。
 
 ## 9. ビューアの判定式（error.csv を合わせるため）
 

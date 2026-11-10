@@ -976,7 +976,7 @@ function eventSpeedSeries(b){
   return out;
 }
 function showChart(ft){
-  lastFeature = ft; S.kadenChartIdx = null;
+  lastFeature = ft; S.kadenChartIdx = null; S.amedasChartIdx = null;
   $("roL1").textContent = "速度 km/h"; $("roL2").textContent = `台数 /${slotMin()}分`;
   const p = ft.properties;
   const r = p._row;
@@ -988,7 +988,7 @@ function showChart(ft){
   const pair = (p.pair_id !== null && p.pair_id !== undefined && p.pair_id !== "") ? (S.present ? `対向 Link ${p.pair_id}` : `対向: ${p.pair_id}`) : "対向なし";
   $("cpSub").textContent = S.present ? `${pair}${baselineNote()}` : pair;
   if(r < 0){
-    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[0]);
+    $("cpStatus").textContent = "データなし"; $("cpStatus").style.background = STATUS_COLOR[0]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[0]); $("cpStatus").style.color = "";
     ["roBS","roES","roBC","roEC"].forEach(k => $(k).textContent = "–");
     drawChart($("chartSpeed"), null, null, null, "速度 km/h"); drawChart($("chartCount"), null, null, null, `台数 /${slotMin()}分`);
     chartNote([], ""); renderDetail();
@@ -998,7 +998,7 @@ function showChart(ft){
   const k = S.cls[b+t];
   let label = STATUS_LABEL[k];
   if(k === 1 && S.e1[b+t]) label = `対象（単独異常 L${S.e1[b+t]}、裏取りなし）`;
-  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[k]);
+  $("cpStatus").textContent = label; $("cpStatus").style.background = STATUS_COLOR[k]; $("cpStatus").style.setProperty("--st", STATUS_COLOR[k]); $("cpStatus").style.color = "";
   const es = eventSpeedSeries(b);
   $("roBS").textContent = fmt(S.bs[b+t]); $("roES").textContent = fmt(es[t]);
   $("roBC").textContent = fmt(S.bc[b+t]); $("roEC").textContent = fmt(S.ec[b+t]);
