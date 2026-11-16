@@ -175,6 +175,7 @@ App.views.me = {
     }
     box.innerHTML = `<div class="sec-h"><span class="no">05</span><h2>Live reporting: status in ${esc(d ? d.name_ja.split(' (')[0] : site.short_ja)}</h2><span class="r"><span class="tag ${watch ? 'warn' : 'crit'}">${watch ? 'Warning in effect' : 'Incident in progress'}</span><button class="btn sm primary" id="meSafe">${ic('check')}Report I am safe (demo)</button></span><p>Utilities, weather, contacts and medical status for the district your address (representative point) belongs to. The clock is shared with the live reporting screen.</p></div>
       ${liveHead(sc, t, { compact: true, idp: 'me' })}
+      <div class="jump" style="justify-content:flex-start"><a class="btn sm" href="#recovery" data-gorecovery="personal">${ic('refresh')}Recovery timeline for your district (weeks and months after)</a></div>
       <div class="note ${act.cls}">${ic(act.icon)}<span><b>Action for you:</b> ${act.ja}</span></div>
       <div class="status-grid">${parts.util}</div>
       <div class="grid c2">${parts.weather}${parts.contacts}</div>

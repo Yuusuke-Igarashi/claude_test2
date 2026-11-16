@@ -109,7 +109,7 @@ App.views.live = {
           <h1>Follow an unfolding disaster <em>hour by hour</em></h1>
           <p class="q"><b>Question:</b> Which disaster is unfolding in which country and city right now? How are the hazard drivers (rainfall, river levels, temperature, shaking) evolving, how far has the impact spread, and what state are our sites and partners in?</p>
         </div>
-        <div class="vh-r"><span class="tag crit">${ic('alert')}Scenario playback (demo data)</span><span class="tag neutral">Use the slider to jump to any point in time</span></div>
+        <div class="vh-r"><span class="tag crit">${ic('alert')}Scenario playback (demo data)</span><span class="tag neutral">Use the slider to jump to any point in time</span><a class="btn sm" href="#recovery">${ic('refresh')}Recovery monitoring (weeks and months after)</a></div>
       </div>
       <div id="evCards"></div>
       <div id="headSlot"></div>

@@ -23,6 +23,7 @@
   /* From other views: jump to a tree node in view 1 (data-node) or to a specific event in view 2 (data-golive); toggle the map legend */
   document.addEventListener('click', (e) => {
     const n = e.target.closest('[data-node]'); if (n && !n.closest('#v-risk')) { e.preventDefault(); const node = JSON.parse(n.dataset.node); App.views.risk.st.node = node; Store.set('riskNode', node); if (node.region) Store.set('region', node.region); if (node.site) Store.set('site', node.site); if (App.current === 'risk') App.views.risk.update($('#v-risk')); else location.hash = 'risk'; window.scrollTo({ top: 0 }); return; }
+    const gr = e.target.closest('[data-gorecovery]'); if (gr) { e.preventDefault(); App.views.recovery.st.persp = gr.dataset.gorecovery; Store.set('rcPersp', gr.dataset.gorecovery); if (App.current === 'recovery') App.views.recovery.update($('#v-recovery')); else location.hash = 'recovery'; return; }
     const g = e.target.closest('[data-golive]'); if (g) { e.preventDefault(); Live.st.scen = g.dataset.golive; Store.set('liveScen', Live.st.scen); if (App.current === 'live') App.views.live.update($('#v-live')); else location.hash = 'live'; return; }
     const t = e.target.closest('.map-box .legend .t'); if (t) t.parentElement.classList.toggle('open');
   });

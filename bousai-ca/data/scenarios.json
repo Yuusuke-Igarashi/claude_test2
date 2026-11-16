@@ -1676,7 +1676,649 @@
      "url": "https://www.who.int/europe/news-room/questions-and-answers/item/public-health-advice-in-the-aftermath-of-an-earthquake",
      "confirmed_by": "search_snippet"
     }
-   ]
+   ],
+   "recovery": {
+    "horizon_d": 730,
+    "default_d": 30,
+    "phases": [
+     {
+      "key": "emergency",
+      "ja": "Emergency response",
+      "from_d": 0,
+      "to_d": 14,
+      "desc": "Search and rescue, shelter and heating, damage tagging of buildings"
+     },
+     {
+      "key": "early",
+      "ja": "Early recovery",
+      "from_d": 14,
+      "to_d": 90,
+      "desc": "Utilities and transport back, schools reopen, compensation and temporary housing"
+     },
+     {
+      "key": "recon",
+      "ja": "Reconstruction",
+      "from_d": 90,
+      "to_d": 730,
+      "desc": "Demolition and rebuilding, seismic retrofit, return to normal economic activity"
+     }
+    ],
+    "note_ja": "Curves are logistic/decay models anchored on analog events (1988 Spitak, 2023 Türkiye-Syria, 2011 Christchurch, the 2024-01-23 Almaty response). No published recovery timeline exists for a Verny-type Almaty earthquake; treat days as orders of magnitude.",
+    "services": [
+     {
+      "key": "power",
+      "ja": "Electricity",
+      "icon": "bolt",
+      "base_d": 3,
+      "spread": 2.5
+     },
+     {
+      "key": "water",
+      "ja": "Water supply",
+      "icon": "drop",
+      "base_d": 7,
+      "spread": 3.0,
+      "note": "boil-water notice until tested"
+     },
+     {
+      "key": "gas",
+      "ja": "Gas",
+      "icon": "fire",
+      "base_d": 21,
+      "spread": 2.5,
+      "note": "network pressure-tested street by street"
+     },
+     {
+      "key": "heating",
+      "ja": "District heating",
+      "icon": "home",
+      "base_d": 14,
+      "spread": 3.0,
+      "note": "late-autumn frost: heating is the critical service"
+     },
+     {
+      "key": "telecom",
+      "ja": "Mobile & internet",
+      "icon": "radio",
+      "base_d": 2,
+      "spread": 1.5
+     },
+     {
+      "key": "transport",
+      "ja": "Metro & buses",
+      "icon": "train",
+      "base_d": 10,
+      "spread": 3.0,
+      "note": "metro reopens after tunnel inspection"
+     },
+     {
+      "key": "schools",
+      "ja": "Schools & nurseries",
+      "icon": "users",
+      "base_d": 30,
+      "spread": 2.5,
+      "note": "buildings used as shelters first"
+     },
+     {
+      "key": "clinics",
+      "ja": "Routine clinics",
+      "icon": "heart",
+      "base_d": 14,
+      "spread": 1.5
+     },
+     {
+      "key": "shops",
+      "ja": "Shops, markets, banks",
+      "icon": "box",
+      "base_d": 7,
+      "spread": 2.0
+     },
+     {
+      "key": "waste",
+      "ja": "Waste collection",
+      "icon": "truck",
+      "base_d": 5,
+      "spread": 1.5
+     },
+     {
+      "key": "offices",
+      "ja": "Akimat offices (documents, compensation)",
+      "icon": "doc",
+      "base_d": 3,
+      "spread": 1.2
+     }
+    ],
+    "company": {
+     "cap_half_d": 30,
+     "cap_k_d": 8,
+     "node_base_d": 20
+    },
+    "indicators": {
+     "region": [
+      {
+       "key": "shelter",
+       "ja": "People in shelters",
+       "kind": "decay",
+       "unit": "people",
+       "peak": 176000,
+       "floor": 2500,
+       "delay_d": 3,
+       "tau_d": 25,
+       "good": "low",
+       "target": 5000,
+       "note": "Evacuees in heated shelters, reception points and host families (model)"
+      },
+      {
+       "key": "svc",
+       "ja": "Public services restored (pop-weighted)",
+       "kind": "services",
+       "unit": "%",
+       "note": "Average of 11 services across districts"
+      },
+      {
+       "key": "assessed",
+       "ja": "Buildings assessed (tagged)",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 20,
+       "k_d": 7,
+       "note": "Rapid damage certification, red/yellow/green"
+      },
+      {
+       "key": "schools",
+       "ja": "Schools open",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 35,
+       "k_d": 10,
+       "note": "Share of schools back in education"
+      },
+      {
+       "key": "biz",
+       "ja": "Businesses reopened",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 45,
+       "k_d": 15,
+       "note": "Share of registered businesses operating"
+      },
+      {
+       "key": "housing",
+       "ja": "Housing repaired or rebuilt",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 320,
+       "k_d": 90,
+       "note": "Share of damaged dwellings repaired/rebuilt (long tail)"
+      }
+     ],
+     "company": [
+      {
+       "key": "cap",
+       "ja": "Site capacity (all sites)",
+       "kind": "site",
+       "unit": "%",
+       "note": "Capacity-weighted across sites"
+      },
+      {
+       "key": "staff",
+       "ja": "Staff at work",
+       "kind": "staff",
+       "unit": "%",
+       "note": "Share of staff working (on site or remote)"
+      },
+      {
+       "key": "supply",
+       "ja": "Supply chain availability",
+       "kind": "supply",
+       "unit": "%",
+       "note": "Share-weighted availability of registered nodes"
+      },
+      {
+       "key": "loss",
+       "ja": "Cumulative business loss",
+       "kind": "points",
+       "unit": "USD M",
+       "points": [
+        [
+         0,
+         0
+        ],
+        [
+         7,
+         1.2
+        ],
+        [
+         30,
+         3.5
+        ],
+        [
+         90,
+         5.5
+        ],
+        [
+         365,
+         7.0
+        ],
+        [
+         730,
+         7.5
+        ]
+       ],
+       "good": "low",
+       "target": 8,
+       "note": "Lost margin plus repair costs net of insurance (assumption, USD million)"
+      },
+      {
+       "key": "bcp",
+       "ja": "BCP milestones completed",
+       "kind": "points",
+       "unit": "%",
+       "points": [
+        [
+         0,
+         0.1
+        ],
+        [
+         3,
+         0.3
+        ],
+        [
+         14,
+         0.55
+        ],
+        [
+         30,
+         0.7
+        ],
+        [
+         90,
+         0.85
+        ],
+        [
+         365,
+         1.0
+        ]
+       ],
+       "note": "Share of the BCP milestone list"
+      }
+     ],
+     "personal": [
+      {
+       "key": "svc",
+       "ja": "Services restored in my district",
+       "kind": "services",
+       "unit": "%",
+       "note": "Average of 11 services (district selected below)"
+      },
+      {
+       "key": "normal",
+       "ja": "Daily life back to normal",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 40,
+       "k_d": 14,
+       "note": "Composite: home, work, school, shops, transport (model)"
+      },
+      {
+       "key": "comp",
+       "ja": "Compensation paid to households",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 75,
+       "k_d": 20,
+       "note": "Share of eligible households paid"
+      },
+      {
+       "key": "psych",
+       "ja": "Psychosocial support uptake",
+       "kind": "decay",
+       "unit": "people",
+       "peak": 12000,
+       "floor": 300,
+       "delay_d": 10,
+       "tau_d": 60,
+       "good": "low",
+       "target": 2000,
+       "note": "Monthly contacts with support services (model)"
+      }
+     ]
+    },
+    "milestones": {
+     "region": [
+      {
+       "d": 0,
+       "who": "Akimat / MES",
+       "ja": "State of emergency declared; 112 overloaded; assembly points and heated tents opened at school reception points",
+       "detail": "On 2024-01-23 assembly points opened within 1-1.5 h (DChS); no siren or SMS alert that night",
+       "cls": "crit",
+       "src": "DChS audit, search snippet"
+      },
+      {
+       "d": 1,
+       "who": "MES",
+       "ja": "Search and rescue concentrated on collapsed Soviet-era blocks (Auezov, Almaly, Turksib); hospitals triage",
+       "cls": "crit"
+      },
+      {
+       "d": 3,
+       "who": "MES",
+       "ja": "72-hour rescue window ends; priority shifts to shelter, heating and water at night frost",
+       "cls": "warn"
+      },
+      {
+       "d": 5,
+       "who": "AlES / Almaty Su",
+       "ja": "Power back for ~70% of consumers; water by tanker in the north; metro closed for tunnel inspection",
+       "cls": "warn"
+      },
+      {
+       "d": 7,
+       "who": "Akimat",
+       "ja": "Rapid damage certification starts (red / yellow / green tags) for 100,000+ buildings",
+       "detail": "Analog: Türkiye 2023 used rapid tagging within the first week",
+       "src": "assumption"
+      },
+      {
+       "d": 14,
+       "who": "Akimat",
+       "ja": "Emergency phase ends; schools used as shelters begin returning to education; gas restored in low-damage districts",
+       "cls": "ok"
+      },
+      {
+       "d": 30,
+       "who": "Metro / Heat networks",
+       "ja": "Metro Line 1 reopens; district heating restored in most of the centre",
+       "cls": "ok"
+      },
+      {
+       "d": 45,
+       "who": "Akimat",
+       "ja": "Damage assessment complete; share of uninhabitable buildings published; demolition list",
+       "cls": "warn"
+      },
+      {
+       "d": 60,
+       "who": "Government",
+       "ja": "Temporary housing (modular units) handed over; compensation payments start (state budget reserve, IFRC appeal)",
+       "cls": "ok",
+       "src": "assumption"
+      },
+      {
+       "d": 90,
+       "who": "Government",
+       "ja": "Reconstruction programme approved; demolition of condemned blocks; seismic retrofit funding for 1960-80s buildings",
+       "cls": "ok"
+      },
+      {
+       "d": 180,
+       "who": "Akimat",
+       "ja": "Schools and clinics fully back in their own buildings; debris 80% cleared",
+       "cls": "ok"
+      },
+      {
+       "d": 365,
+       "who": "Government",
+       "ja": "First rebuilt apartment blocks handed over; building-code update under way",
+       "cls": "ok"
+      },
+      {
+       "d": 730,
+       "who": "Government",
+       "ja": "Reconstruction largely complete; residual housing programme and retrofit continue",
+       "cls": "ok"
+      }
+     ],
+     "company": [
+      {
+       "d": 0,
+       "who": "Crisis team",
+       "ja": "All staff accounted for; office evacuated to Esentai Park; remote work ordered",
+       "cls": "crit"
+      },
+      {
+       "d": 1,
+       "who": "Facilities",
+       "ja": "Structural engineer inspects Esentai Tower; warehouse racking collapse confirmed; insurer notified",
+       "cls": "warn"
+      },
+      {
+       "d": 3,
+       "who": "Management",
+       "ja": "Decision point: keep Esentai (green tag) or move to the alternate site; Khorgos consignments re-routed via Dostyk",
+       "cls": "warn"
+      },
+      {
+       "d": 7,
+       "who": "Facilities",
+       "ja": "Non-structural repairs (ceilings, glass film, server racks) start; inventory count at the warehouse"
+      },
+      {
+       "d": 14,
+       "who": "Management",
+       "ja": "Office reoccupied floor by floor; about 60% of staff at work; key supplier in the industrial zone at 30%",
+       "cls": "ok"
+      },
+      {
+       "d": 30,
+       "who": "Supply chain",
+       "ja": "Supply chain availability about 70%; A2/A3 corridors fully open; warehouse rebuilt in modular form",
+       "cls": "ok"
+      },
+      {
+       "d": 60,
+       "who": "Finance",
+       "ja": "Insurance interim payment received; family support programme (housing, schooling) reviewed",
+       "cls": "ok"
+      },
+      {
+       "d": 90,
+       "who": "Management",
+       "ja": "Full capacity; BCP review and seismic retrofit plan for the warehouse approved",
+       "cls": "ok"
+      },
+      {
+       "d": 180,
+       "who": "Procurement",
+       "ja": "Second-source supplier in Tashkent qualified; stock policy raised to 3 weeks",
+       "cls": "ok"
+      },
+      {
+       "d": 365,
+       "who": "Crisis team",
+       "ja": "Annual drill rewritten with lessons learned; recovery closed",
+       "cls": "ok"
+      }
+     ],
+     "personal": [
+      {
+       "d": 0,
+       "who": "You",
+       "ja": "Stay out of damaged buildings; meet the family at the agreed point; register at the assembly point",
+       "cls": "crit"
+      },
+      {
+       "d": 1,
+       "who": "You",
+       "ja": "Night in a heated shelter if your building is not cleared; check for gas smell before any re-entry",
+       "cls": "crit"
+      },
+      {
+       "d": 3,
+       "who": "Akimat",
+       "ja": "Power back in parts of Bostandyk; water tankers announced by district",
+       "cls": "warn"
+      },
+      {
+       "d": 7,
+       "who": "Akimat",
+       "ja": "Your building is tagged: green = return, yellow = limited use, red = no entry; compensation application opens at the district akimat (documents: ID, ownership, photos)",
+       "cls": "warn"
+      },
+      {
+       "d": 14,
+       "who": "Schools",
+       "ja": "Schools reopen in shifts; metro still closed (buses, car-sharing)",
+       "cls": "ok"
+      },
+      {
+       "d": 30,
+       "who": "Utilities",
+       "ja": "Metro reopens; gas and heating back in most of the centre; routine clinics open",
+       "cls": "ok"
+      },
+      {
+       "d": 60,
+       "who": "Government",
+       "ja": "Compensation payments; repairs of non-structural damage; modular housing for red-tagged buildings",
+       "cls": "ok"
+      },
+      {
+       "d": 90,
+       "who": "You",
+       "ja": "Life mostly normal; psychosocial support still available; review the family plan",
+       "cls": "ok"
+      },
+      {
+       "d": 365,
+       "who": "Akimat",
+       "ja": "Retrofit of older buildings; check your building on the published list",
+       "cls": "ok"
+      }
+     ]
+    },
+    "checklists": {
+     "region": {
+      "emergency": [
+       {
+        "ja": "Open reception points with heating and water in every district",
+        "why": "night frost in late autumn"
+       },
+       {
+        "ja": "Publish the building-tagging schedule and the compensation document list"
+       },
+       {
+        "ja": "Daily situation report: casualties, shelters, utilities by district"
+       }
+      ],
+      "early": [
+       {
+        "ja": "Return schools from shelter use to education (shifts)"
+       },
+       {
+        "ja": "Modular housing sites allocated; demolition list published"
+       },
+       {
+        "ja": "Debris removal contracts and disposal sites"
+       }
+      ],
+      "recon": [
+       {
+        "ja": "Reconstruction programme with retrofit priority for 1960-80s blocks"
+       },
+       {
+        "ja": "Update building code and land-use plan for the mudflow and fault zones"
+       },
+       {
+        "ja": "After-action review published"
+       }
+      ]
+     },
+     "company": {
+      "emergency": [
+       {
+        "ja": "Account for staff and families; log injuries; activate remote work"
+       },
+       {
+        "ja": "Engineer inspection of the office and warehouse before any re-entry"
+       },
+       {
+        "ja": "Notify insurer, customers and key suppliers; re-route logistics"
+       }
+      ],
+      "early": [
+       {
+        "ja": "Decide on temporary relocation vs. repair (cost and timeline)"
+       },
+       {
+        "ja": "Restart critical processes in priority order (RTO list)"
+       },
+       {
+        "ja": "Family support: housing, schooling, medical, cash advances"
+       }
+      ],
+      "recon": [
+       {
+        "ja": "Close insurance claim; capitalize repairs; retrofit plan"
+       },
+       {
+        "ja": "Diversify single-source suppliers; raise safety stock"
+       },
+       {
+        "ja": "Rewrite the BCP and drill with lessons learned"
+       }
+      ]
+     },
+     "personal": {
+      "emergency": [
+       {
+        "ja": "Do not re-enter a damaged building; sleep in a shelter if in doubt"
+       },
+       {
+        "ja": "Keep documents, cash and medicines with you; charge phones at reception points"
+       },
+       {
+        "ja": "Report your status to the company safety-check system daily"
+       }
+      ],
+      "early": [
+       {
+        "ja": "Apply for compensation with photos and ownership documents"
+       },
+       {
+        "ja": "Boil water until the utility lifts the notice; use gas only after the network check"
+       },
+       {
+        "ja": "Register children for school shifts; agree pickup rules"
+       }
+      ],
+      "recon": [
+       {
+        "ja": "Repair non-structural damage; secure furniture again"
+       },
+       {
+        "ja": "Check whether your building is on the retrofit or demolition list"
+       },
+       {
+        "ja": "Use psychosocial support if sleep or anxiety problems persist"
+       }
+      ]
+     }
+    },
+    "refs": [
+     {
+      "name": "Almaty 2024-01-23 earthquake response (DChS/MES statements, search snippets)",
+      "url": "https://en.wikipedia.org/wiki/2024_Uqturpan_earthquake",
+      "confirmed_by": "third_party"
+     },
+     {
+      "name": "Amey et al. 2021, Mw 6.5 Almaty scenario losses",
+      "url": "",
+      "confirmed_by": "search_snippet"
+     },
+     {
+      "name": "Recovery pacing analogs: 1988 Spitak, 2011 Christchurch, 2023 Türkiye-Syria (assumption)",
+      "url": "",
+      "confirmed_by": "unverified"
+     }
+    ],
+    "assumptions_ja": [
+     "Restoration days are model values, not utility commitments.",
+     "Shelter population decays with a 25-day time constant after day 3.",
+     "Housing repair follows a logistic curve centred on day 320 (two winters).",
+     "Company losses in USD million are illustrative."
+    ]
+   }
   },
   {
    "id": "wkz-flood-2024type",
@@ -3153,7 +3795,610 @@
    ],
    "supply_sites": [
     "aty-branch"
-   ]
+   ],
+   "recovery": {
+    "horizon_d": 365,
+    "default_d": 45,
+    "phases": [
+     {
+      "key": "emergency",
+      "ja": "Emergency response",
+      "from_d": 0,
+      "to_d": 30,
+      "desc": "Evacuation, dikes and pumping while the Zhaiyk wave passes downstream"
+     },
+     {
+      "key": "early",
+      "ja": "Early recovery",
+      "from_d": 30,
+      "to_d": 120,
+      "desc": "Drying and disinfection, damage assessment, compensation, schools back"
+     },
+     {
+      "key": "recon",
+      "ja": "Reconstruction",
+      "from_d": 120,
+      "to_d": 365,
+      "desc": "Houses rebuilt or compensated, dikes rebuilt before the next spring"
+     }
+    ],
+    "note_ja": "Anchored on the 2024 Kazakhstan floods: Kulsary evacuation (33,641 people), 2,674 houses in Kulsary, compensation and the state build-or-compensate programme completed in the following months (IFRC, ACAPS, government statements via search snippets). Exact dates are model values.",
+    "services": [
+     {
+      "key": "power",
+      "ja": "Electricity",
+      "icon": "bolt",
+      "base_d": 5,
+      "spread": 2.5,
+      "note": "substations dried and tested"
+     },
+     {
+      "key": "water",
+      "ja": "Water supply",
+      "icon": "drop",
+      "base_d": 14,
+      "spread": 3.0,
+      "note": "wells and intakes disinfected"
+     },
+     {
+      "key": "gas",
+      "ja": "Gas",
+      "icon": "fire",
+      "base_d": 10,
+      "spread": 2.0
+     },
+     {
+      "key": "telecom",
+      "ja": "Mobile & internet",
+      "icon": "radio",
+      "base_d": 2,
+      "spread": 1.0
+     },
+     {
+      "key": "transport",
+      "ja": "Roads & rail",
+      "icon": "car",
+      "base_d": 20,
+      "spread": 3.0,
+      "note": "Dossor-Kulsary road, A-27 and the railway"
+     },
+     {
+      "key": "schools",
+      "ja": "Schools & nurseries",
+      "icon": "users",
+      "base_d": 25,
+      "spread": 2.0,
+      "note": "used as shelters first"
+     },
+     {
+      "key": "clinics",
+      "ja": "Routine clinics",
+      "icon": "heart",
+      "base_d": 10,
+      "spread": 1.5
+     },
+     {
+      "key": "shops",
+      "ja": "Shops, markets, banks",
+      "icon": "box",
+      "base_d": 10,
+      "spread": 2.0
+     },
+     {
+      "key": "waste",
+      "ja": "Waste and debris collection",
+      "icon": "truck",
+      "base_d": 14,
+      "spread": 2.0
+     },
+     {
+      "key": "offices",
+      "ja": "Akimat offices (compensation)",
+      "icon": "doc",
+      "base_d": 5,
+      "spread": 1.0
+     }
+    ],
+    "company": {
+     "cap_half_d": 25,
+     "cap_k_d": 7,
+     "node_base_d": 15
+    },
+    "indicators": {
+     "region": [
+      {
+       "key": "disp",
+       "ja": "People displaced",
+       "kind": "decay",
+       "unit": "people",
+       "peak": 33600,
+       "floor": 800,
+       "delay_d": 20,
+       "tau_d": 55,
+       "good": "low",
+       "target": 2000,
+       "note": "Evacuees in schools, camps and host families (2024 Kulsary peak)"
+      },
+      {
+       "key": "svc",
+       "ja": "Public services restored (pop-weighted)",
+       "kind": "services",
+       "unit": "%"
+      },
+      {
+       "key": "dried",
+       "ja": "Houses dried and inspected",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 60,
+       "k_d": 18,
+       "note": "Share of flooded houses dried, disinfected and inspected"
+      },
+      {
+       "key": "comp",
+       "ja": "Households compensated",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 90,
+       "k_d": 25,
+       "note": "Share of eligible households paid (2024: payments from May to September)"
+      },
+      {
+       "key": "schools",
+       "ja": "Schools open",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 40,
+       "k_d": 12
+      },
+      {
+       "key": "rebuilt",
+       "ja": "Houses rebuilt or repaired",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 170,
+       "k_d": 45,
+       "note": "State programme: rebuild or compensate (2024: first houses by September)"
+      }
+     ],
+     "company": [
+      {
+       "key": "cap",
+       "ja": "Site capacity (all sites)",
+       "kind": "site",
+       "unit": "%"
+      },
+      {
+       "key": "staff",
+       "ja": "Staff at work",
+       "kind": "staff",
+       "unit": "%"
+      },
+      {
+       "key": "supply",
+       "ja": "Supply chain availability",
+       "kind": "supply",
+       "unit": "%"
+      },
+      {
+       "key": "loss",
+       "ja": "Cumulative business loss",
+       "kind": "points",
+       "unit": "USD M",
+       "points": [
+        [
+         0,
+         0
+        ],
+        [
+         10,
+         0.4
+        ],
+        [
+         30,
+         1.1
+        ],
+        [
+         90,
+         1.8
+        ],
+        [
+         180,
+         2.2
+        ],
+        [
+         365,
+         2.4
+        ]
+       ],
+       "good": "low",
+       "target": 3,
+       "note": "Kulsary base inventory loss, convoy delays, repairs (assumption)"
+      },
+      {
+       "key": "bcp",
+       "ja": "BCP milestones completed",
+       "kind": "points",
+       "unit": "%",
+       "points": [
+        [
+         0,
+         0.1
+        ],
+        [
+         5,
+         0.3
+        ],
+        [
+         30,
+         0.5
+        ],
+        [
+         90,
+         0.75
+        ],
+        [
+         180,
+         0.9
+        ],
+        [
+         365,
+         1.0
+        ]
+       ]
+      }
+     ],
+     "personal": [
+      {
+       "key": "svc",
+       "ja": "Services restored in my district",
+       "kind": "services",
+       "unit": "%"
+      },
+      {
+       "key": "normal",
+       "ja": "Daily life back to normal",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 70,
+       "k_d": 25
+      },
+      {
+       "key": "comp",
+       "ja": "Compensation paid to households",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 90,
+       "k_d": 25
+      },
+      {
+       "key": "health",
+       "ja": "Water-borne illness cases",
+       "kind": "decay",
+       "unit": "cases",
+       "peak": 400,
+       "floor": 5,
+       "delay_d": 15,
+       "tau_d": 40,
+       "good": "low",
+       "target": 30,
+       "note": "Gastro-intestinal cases per month in the district (model)"
+      }
+     ]
+    },
+    "milestones": {
+     "region": [
+      {
+       "d": 0,
+       "who": "Akimat / MES",
+       "ja": "Kulsary flooded; mass evacuation to schools and TCO camps (2024: 33,641 people)",
+       "cls": "crit",
+       "src": "IFRC/ACAPS, page_read"
+      },
+      {
+       "d": 5,
+       "who": "MES",
+       "ja": "Dossor-Kulsary road closed; Zhylyoi district cut off except by rail and air",
+       "cls": "crit"
+      },
+      {
+       "d": 12,
+       "who": "Kazhydromet",
+       "ja": "Zhaiyk peak passes Uralsk (2024: 864 cm on 22 April)",
+       "cls": "warn"
+      },
+      {
+       "d": 20,
+       "who": "Akimat",
+       "ja": "Water receding in Kulsary; pumping and disinfection start; return only to cleared streets",
+       "cls": "warn"
+      },
+      {
+       "d": 30,
+       "who": "Akimat",
+       "ja": "Emergency phase ends in Kulsary; damage assessment (2024: 2,674 houses in Kulsary); Atyrau city still on alert",
+       "cls": "warn"
+      },
+      {
+       "d": 45,
+       "who": "Government",
+       "ja": "Compensation applications via eGov; condemned houses listed for demolition",
+       "cls": "ok"
+      },
+      {
+       "d": 60,
+       "who": "Kazhydromet",
+       "ja": "Zhaiyk peak passes Atyrau; dikes hold in the city",
+       "cls": "ok"
+      },
+      {
+       "d": 90,
+       "who": "Government",
+       "ja": "Rebuild-or-compensate programme under way; schools back in Kulsary",
+       "cls": "ok"
+      },
+      {
+       "d": 150,
+       "who": "Government",
+       "ja": "First new houses handed over (2024: by September); compensation largely paid",
+       "cls": "ok"
+      },
+      {
+       "d": 240,
+       "who": "Akimat",
+       "ja": "Dikes rebuilt and raised before the next snowmelt; Kulsary ring dike design",
+       "cls": "ok"
+      },
+      {
+       "d": 365,
+       "who": "Government",
+       "ja": "Flood protection plan: reservoir rules with Russia, early-warning gauges, insurance scheme",
+       "cls": "ok"
+      }
+     ],
+     "company": [
+      {
+       "d": 0,
+       "who": "Crisis team",
+       "ja": "Kulsary base staff relocated to Atyrau; Tengiz convoys suspended",
+       "cls": "crit"
+      },
+      {
+       "d": 3,
+       "who": "Finance",
+       "ja": "Kulsary base inventory written off; insurer notified",
+       "cls": "warn"
+      },
+      {
+       "d": 10,
+       "who": "Operations",
+       "ja": "Temporary yard rented in Atyrau; critical parts flown in",
+       "cls": "warn"
+      },
+      {
+       "d": 25,
+       "who": "Logistics",
+       "ja": "Tengiz access restored via Beyneu; convoys resume with escort",
+       "cls": "ok"
+      },
+      {
+       "d": 45,
+       "who": "Facilities",
+       "ja": "Kulsary base dried; electrical inspection; decision on raising the platform",
+       "cls": "warn"
+      },
+      {
+       "d": 60,
+       "who": "Finance",
+       "ja": "Insurance interim payment; customer penalties negotiated",
+       "cls": "ok"
+      },
+      {
+       "d": 90,
+       "who": "Operations",
+       "ja": "Kulsary base reopened on a raised platform; stock rebuilt to 3 weeks",
+       "cls": "ok"
+      },
+      {
+       "d": 180,
+       "who": "Management",
+       "ja": "Decision: keep Kulsary or consolidate in Atyrau; BCP triggers set on Kazhydromet gauges",
+       "cls": "ok"
+      },
+      {
+       "d": 365,
+       "who": "Crisis team",
+       "ja": "Flood BCP exercised before the spring season",
+       "cls": "ok"
+      }
+     ],
+     "personal": [
+      {
+       "d": 0,
+       "who": "You",
+       "ja": "Evacuate when told; take documents, cash, medicines; register at the shelter",
+       "cls": "crit"
+      },
+      {
+       "d": 3,
+       "who": "You",
+       "ja": "Report to the company safety-check system; keep receipts for evacuation costs"
+      },
+      {
+       "d": 20,
+       "who": "Akimat",
+       "ja": "Water receding: do not return until your street is cleared; electricity stays off until inspected",
+       "cls": "warn"
+      },
+      {
+       "d": 30,
+       "who": "Akimat",
+       "ja": "House inspection; apply for compensation (ID, ownership documents, photos)",
+       "cls": "warn"
+      },
+      {
+       "d": 45,
+       "who": "You",
+       "ja": "Drying and disinfection; discard soaked food and medicines; boil water",
+       "cls": "warn"
+      },
+      {
+       "d": 60,
+       "who": "Government",
+       "ja": "Compensation payment; temporary housing if the house is condemned",
+       "cls": "ok"
+      },
+      {
+       "d": 90,
+       "who": "Schools",
+       "ja": "Schools back in their buildings; clinics on normal hours",
+       "cls": "ok"
+      },
+      {
+       "d": 150,
+       "who": "Government",
+       "ja": "New house handed over if rebuilt under the programme",
+       "cls": "ok"
+      },
+      {
+       "d": 365,
+       "who": "You",
+       "ja": "Check the dike works and your insurance before the next spring",
+       "cls": "ok"
+      }
+     ]
+    },
+    "checklists": {
+     "region": {
+      "emergency": [
+       {
+        "ja": "Evacuation points with water, heating and medical posts in every affected district"
+       },
+       {
+        "ja": "Dike patrols and pumping schedules; daily gauge bulletin"
+       },
+       {
+        "ja": "Register evacuees for compensation from day one"
+       }
+      ],
+      "early": [
+       {
+        "ja": "House-by-house inspection and disinfection teams"
+       },
+       {
+        "ja": "Pay compensation and allocate temporary housing"
+       },
+       {
+        "ja": "Return schools to education; restore water intakes"
+       }
+      ],
+      "recon": [
+       {
+        "ja": "Rebuild-or-compensate programme completed before winter"
+       },
+       {
+        "ja": "Dikes rebuilt and raised; reservoir operating rules agreed"
+       },
+       {
+        "ja": "Flood zoning and insurance for the floodplain"
+       }
+      ]
+     },
+     "company": {
+      "emergency": [
+       {
+        "ja": "Relocate staff; secure the base; move vehicles to high ground"
+       },
+       {
+        "ja": "Notify insurer and customers; agree convoy alternatives with Tengiz operators"
+       },
+       {
+        "ja": "Daily family check-ins for staff in Kulsary"
+       }
+      ],
+      "early": [
+       {
+        "ja": "Dry and inspect the base; decide on raising or relocation"
+       },
+       {
+        "ja": "Rebuild critical stock; qualify a second logistics route (Beyneu, air freight)"
+       },
+       {
+        "ja": "Support families with housing and compensation paperwork"
+       }
+      ],
+      "recon": [
+       {
+        "ja": "Raise the platform or consolidate in Atyrau"
+       },
+       {
+        "ja": "Set BCP triggers on Kazhydromet gauge levels"
+       },
+       {
+        "ja": "Exercise the flood BCP before the spring season"
+       }
+      ]
+     },
+     "personal": {
+      "emergency": [
+       {
+        "ja": "Leave early with documents, cash and medicines; never drive through water"
+       },
+       {
+        "ja": "Register at the shelter and with the company"
+       },
+       {
+        "ja": "Keep receipts for compensation"
+       }
+      ],
+      "early": [
+       {
+        "ja": "Return only to cleared streets; have the wiring checked before switching on"
+       },
+       {
+        "ja": "Discard soaked food and medicines; boil water; disinfect surfaces"
+       },
+       {
+        "ja": "Apply for compensation with photos and documents"
+       }
+      ],
+      "recon": [
+       {
+        "ja": "Repair or accept the rebuilt house; raise valuables and the electrical panel"
+       },
+       {
+        "ja": "Review insurance; keep an evacuation bag ready for the next spring"
+       },
+       {
+        "ja": "Watch children for illness after flood exposure"
+       }
+      ]
+     }
+    },
+    "refs": [
+     {
+      "name": "IFRC DREF and ACAPS briefings, Kazakhstan floods 2024",
+      "url": "https://reliefweb.int/disaster/fl-2024-000039-kaz",
+      "confirmed_by": "page_read"
+     },
+     {
+      "name": "Kazakhstan 2024 floods (Wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/2024_Kazakhstan_floods",
+      "confirmed_by": "third_party"
+     },
+     {
+      "name": "Compensation and rebuild timeline 2024 (government statements, search snippets)",
+      "url": "",
+      "confirmed_by": "search_snippet"
+     }
+    ],
+    "assumptions_ja": [
+     "Service restoration starts after half of the district recession time.",
+     "Displacement decays with a 55-day time constant after day 20.",
+     "House rebuilding centred on day 170 (2024: first houses by September).",
+     "Company losses are illustrative."
+    ]
+   }
   },
   {
    "id": "tas-heat-watch",
@@ -3445,7 +4690,384 @@
      "url": "https://api.open-meteo.com/",
      "confirmed_by": "search_snippet"
     }
-   ]
+   ],
+   "recovery": {
+    "horizon_d": 30,
+    "default_d": 10,
+    "phases": [
+     {
+      "key": "warning",
+      "ja": "Heat warning in force",
+      "from_d": 0,
+      "to_d": 8,
+      "desc": "Shifted hours, hydration, outage preparedness"
+     },
+     {
+      "key": "return",
+      "ja": "Return to normal",
+      "from_d": 8,
+      "to_d": 30,
+      "desc": "Normal hours, grid repairs, review of cooling and generator capacity"
+     }
+    ],
+    "note_ja": "Heat waves leave little physical damage; recovery is about health follow-up, grid and water repairs and updating the summer protocol. Curves are illustrative.",
+    "services": [
+     {
+      "key": "power",
+      "ja": "Electricity (outage-free)",
+      "icon": "bolt",
+      "base_d": 2,
+      "spread": 1.5,
+      "note": "cable and transformer repairs after peak load"
+     },
+     {
+      "key": "water",
+      "ja": "Water pressure (upper floors)",
+      "icon": "drop",
+      "base_d": 2,
+      "spread": 1.5
+     },
+     {
+      "key": "clinics",
+      "ja": "Clinic waiting times",
+      "icon": "heart",
+      "base_d": 4,
+      "spread": 1.0
+     },
+     {
+      "key": "transport",
+      "ja": "Metro ventilation / buses",
+      "icon": "train",
+      "base_d": 1,
+      "spread": 1.0
+     },
+     {
+      "key": "work",
+      "ja": "Normal working hours",
+      "icon": "clock",
+      "base_d": 9,
+      "spread": 0.5
+     },
+     {
+      "key": "offices",
+      "ja": "Government offices",
+      "icon": "doc",
+      "base_d": 1,
+      "spread": 0.5
+     }
+    ],
+    "company": {
+     "cap_half_d": 2,
+     "cap_k_d": 1,
+     "node_base_d": 3
+    },
+    "indicators": {
+     "region": [
+      {
+       "key": "adm",
+       "ja": "Heat-related admissions per day",
+       "kind": "decay",
+       "unit": "cases",
+       "peak": 120,
+       "floor": 5,
+       "delay_d": 7,
+       "tau_d": 5,
+       "good": "low",
+       "target": 15,
+       "note": "City hospitals (model; July 2026: 37 heatstroke, 21 ... per ministry statements)"
+      },
+      {
+       "key": "svc",
+       "ja": "Services back to normal",
+       "kind": "services",
+       "unit": "%"
+      },
+      {
+       "key": "outage",
+       "ja": "Customers without power",
+       "kind": "decay",
+       "unit": "people",
+       "peak": 7000,
+       "floor": 0,
+       "delay_d": 6,
+       "tau_d": 2,
+       "good": "low",
+       "target": 500,
+       "note": "2026-07-18 fault cut about 7,000 customers"
+      },
+      {
+       "key": "work",
+       "ja": "Normal working hours",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 9,
+       "k_d": 1.5
+      }
+     ],
+     "company": [
+      {
+       "key": "cap",
+       "ja": "Site capacity",
+       "kind": "site",
+       "unit": "%"
+      },
+      {
+       "key": "staff",
+       "ja": "Staff at work (normal hours)",
+       "kind": "staff",
+       "unit": "%"
+      },
+      {
+       "key": "supply",
+       "ja": "Supply chain availability",
+       "kind": "supply",
+       "unit": "%"
+      },
+      {
+       "key": "loss",
+       "ja": "Cumulative cost (overtime, cooling, lost hours)",
+       "kind": "points",
+       "unit": "USD M",
+       "points": [
+        [
+         0,
+         0
+        ],
+        [
+         8,
+         0.08
+        ],
+        [
+         30,
+         0.1
+        ]
+       ],
+       "good": "low",
+       "target": 0.2
+      }
+     ],
+     "personal": [
+      {
+       "key": "svc",
+       "ja": "Services back to normal in my district",
+       "kind": "services",
+       "unit": "%"
+      },
+      {
+       "key": "normal",
+       "ja": "Daily routine back to normal",
+       "kind": "logistic",
+       "unit": "%",
+       "half_d": 9,
+       "k_d": 1.5
+      },
+      {
+       "key": "health",
+       "ja": "Heat-illness follow-ups",
+       "kind": "decay",
+       "unit": "cases",
+       "peak": 40,
+       "floor": 0,
+       "delay_d": 7,
+       "tau_d": 4,
+       "good": "low",
+       "target": 5
+      }
+     ]
+    },
+    "milestones": {
+     "region": [
+      {
+       "d": 0,
+       "who": "Uzhydromet",
+       "ja": "Orange heat warning issued",
+       "cls": "warn"
+      },
+      {
+       "d": 2,
+       "who": "Labour inspectorate",
+       "ja": "Outdoor work suspended 11:00-16:00",
+       "cls": "warn"
+      },
+      {
+       "d": 5,
+       "who": "Ministry of Energy",
+       "ja": "District outages after record load; repair crews on 24-h shifts",
+       "cls": "crit"
+      },
+      {
+       "d": 6,
+       "who": "Uzhydromet",
+       "ja": "Peak 44.3 C; warning extended",
+       "cls": "crit"
+      },
+      {
+       "d": 8,
+       "who": "Uzhydromet",
+       "ja": "Warning lifted as a cooler air mass arrives with dust",
+       "cls": "ok"
+      },
+      {
+       "d": 10,
+       "who": "City",
+       "ja": "Normal working hours; street watering ends; grid repairs continue",
+       "cls": "ok"
+      },
+      {
+       "d": 14,
+       "who": "Ministry of Health",
+       "ja": "Review of heat-related admissions and cooling centres",
+       "cls": "ok"
+      },
+      {
+       "d": 30,
+       "who": "City",
+       "ja": "Summer heat protocol updated (cooling centres, outage priority list)",
+       "cls": "ok"
+      }
+     ],
+     "company": [
+      {
+       "d": 0,
+       "who": "Crisis team",
+       "ja": "Heat protocol: 07:00-14:00 hours, remote work, daily check calls",
+       "cls": "warn"
+      },
+      {
+       "d": 2,
+       "who": "Facilities",
+       "ja": "Generator fuel and server-room cooling checked; cool room designated"
+      },
+      {
+       "d": 5,
+       "who": "Facilities",
+       "ja": "Office on generator during district outage; staff sent home early",
+       "cls": "crit"
+      },
+      {
+       "d": 8,
+       "who": "Crisis team",
+       "ja": "Warning lifted; normal hours from day 10",
+       "cls": "ok"
+      },
+      {
+       "d": 14,
+       "who": "Management",
+       "ja": "Review: cooling capacity, generator sizing, supplier delays in Chirchik",
+       "cls": "ok"
+      },
+      {
+       "d": 30,
+       "who": "Management",
+       "ja": "Summer BCP annex updated; contracts with outage clauses",
+       "cls": "ok"
+      }
+     ],
+     "personal": [
+      {
+       "d": 0,
+       "who": "You",
+       "ja": "Hydrate, avoid 11:00-17:00 outdoors, check on older relatives daily",
+       "cls": "warn"
+      },
+      {
+       "d": 5,
+       "who": "You",
+       "ja": "Outage: keep the fridge closed, use the cool room, charge devices",
+       "cls": "crit"
+      },
+      {
+       "d": 8,
+       "who": "You",
+       "ja": "Warning lifted; keep medicines cool until the fridge is back",
+       "cls": "ok"
+      },
+      {
+       "d": 10,
+       "who": "You",
+       "ja": "Back to normal hours; see a doctor if dizziness or fatigue persists",
+       "cls": "ok"
+      },
+      {
+       "d": 30,
+       "who": "You",
+       "ja": "Prepare for the next wave: fans, water stock, power bank",
+       "cls": "ok"
+      }
+     ]
+    },
+    "checklists": {
+     "region": {
+      "warning": [
+       {
+        "ja": "Open cooling centres and publish outage priorities"
+       },
+       {
+        "ja": "Daily bulletin on admissions and outages"
+       }
+      ],
+      "return": [
+       {
+        "ja": "Repair cables and transformers; audit grid margins"
+       },
+       {
+        "ja": "Update the summer protocol with cooling centres and labour rules"
+       }
+      ]
+     },
+     "company": {
+      "warning": [
+       {
+        "ja": "Shifted hours and remote work; cool room with backup power"
+       },
+       {
+        "ja": "Daily check calls to staff at risk"
+       }
+      ],
+      "return": [
+       {
+        "ja": "Review cooling and generator capacity; update the BCP annex"
+       },
+       {
+        "ja": "Record overtime and costs for the annual review"
+       }
+      ]
+     },
+     "personal": {
+      "warning": [
+       {
+        "ja": "Drink regularly; avoid the midday sun; never leave children or pets in cars"
+       },
+       {
+        "ja": "Keep medicines below 25 C; prepare for outages"
+       }
+      ],
+      "return": [
+       {
+        "ja": "See a doctor if symptoms persist"
+       },
+       {
+        "ja": "Restock water and buy a fan or power bank before the next wave"
+       }
+      ]
+     }
+    },
+    "refs": [
+     {
+      "name": "Uzhydromet, Ministry of Energy and Ministry of Health statements July 2025-2026 (search snippets)",
+      "url": "",
+      "confirmed_by": "search_snippet"
+     },
+     {
+      "name": "WHO heat-health action plans",
+      "url": "https://www.who.int/",
+      "confirmed_by": "unverified"
+     }
+    ],
+    "assumptions_ja": [
+     "Illustrative curves; no damage model."
+    ]
+   }
   }
  ]
 }

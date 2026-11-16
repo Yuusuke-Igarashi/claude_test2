@@ -71,7 +71,7 @@ function rangeTicks(lo, hi, n = 4) {
  * Time series (time since the event vs. value). Solid line with fill before now, dotted line after now (projection).
  * yMin: 0 starts the axis at zero, null fits the axis to the value range (e.g. river level). thresholds: [{v, ja}] are drawn as horizontal dashed lines.
  */
-function lineChart(box, { series, now, yFmt = (v) => fmt(v), xFmt = (t) => fmtHours(t), height = 200, xMax = 168, yLabel = '', yMin = 0, thresholds = [] }) {
+function lineChart(box, { series, now, yFmt = (v) => fmt(v), xFmt = (t) => fmtHours(t), height = 200, xMax = 168, yLabel = '', yMin = 0, thresholds = [], xTicks = null }) {
   const W = 560, H = height, ML = 54, MR = 12, MT = 14, MB = 34; const pw = W - ML - MR, ph = H - MT - MB;
   const vals = series.flatMap((s) => s.values.map((p) => p[1])).concat(thresholds.map((th) => th.v));
   const maxV = Math.max(1e-9, ...vals); let ticks;
@@ -80,7 +80,8 @@ function lineChart(box, { series, now, yFmt = (v) => fmt(v), xFmt = (t) => fmtHo
   const X = (t) => ML + (t / xMax) * pw, Y = (v) => MT + ph - ((v - lo) / Math.max(1e-9, maxT - lo)) * ph;
   let h = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yLabel)}">`;
   ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(yFmt(t))}</text>`; });
-  for (let d = 0; d <= xMax / 24; d++) h += `<text class="ax" x="${X(d * 24).toFixed(1)}" y="${H - MB + 16}" text-anchor="${d * 24 >= xMax ? 'end' : d === 0 ? 'start' : 'middle'}">D+${d}</text>`;
+  if (xTicks) xTicks.forEach(([tx, lab]) => { h += `<text class="ax" x="${X(tx).toFixed(1)}" y="${H - MB + 16}" text-anchor="${tx >= xMax ? 'end' : tx === 0 ? 'start' : 'middle'}">${esc(lab)}</text>`; });
+  else for (let d = 0; d <= xMax / 24; d++) h += `<text class="ax" x="${X(d * 24).toFixed(1)}" y="${H - MB + 16}" text-anchor="${d * 24 >= xMax ? 'end' : d === 0 ? 'start' : 'middle'}">D+${d}</text>`;
   thresholds.forEach((th) => { if (th.v < lo || th.v > maxT) return; const y = Y(th.v); h += `<line class="th-l" x1="${ML}" x2="${W - MR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/><text class="th-t" x="${W - MR}" y="${(y - 3).toFixed(1)}" text-anchor="end">${esc(th.ja)}</text>`; });
   series.forEach((s, si) => { const col = s.color || CAT[si % CAT.length]; const past = s.values.filter((p) => p[0] <= now), fut = s.values.filter((p) => p[0] >= now); const d = (arr) => arr.map(([t, v], i) => (i ? 'L' : 'M') + X(t).toFixed(1) + ' ' + Y(v).toFixed(1)).join(''); if (past.length > 1) { h += `<path class="area" d="${d(past)}L${X(past[past.length - 1][0]).toFixed(1)} ${MT + ph}L${X(past[0][0]).toFixed(1)} ${MT + ph}Z" fill="${col}"/><path class="ln" d="${d(past)}" stroke="${col}"/>`; } if (fut.length > 1) h += `<path class="ln" d="${d(fut)}" stroke="${col}" stroke-dasharray="3 4" opacity=".55"/>`; const cur = s.values.reduce((b, p) => Math.abs(p[0] - now) < Math.abs(b[0] - now) ? p : b, s.values[0]); const flip = X(cur[0]) > W - 70; h += `<circle class="pt" cx="${X(cur[0]).toFixed(1)}" cy="${Y(cur[1]).toFixed(1)}" r="4.5" fill="${col}"/><text class="lbl on" x="${(X(cur[0]) + (flip ? -7 : 7)).toFixed(1)}" y="${(Y(cur[1]) + (Y(cur[1]) < MT + 16 ? 16 : -6)).toFixed(1)}" text-anchor="${flip ? 'end' : 'start'}">${yFmt(cur[1])}</text>`; });
   h += `<line class="hover-l" x1="${X(now).toFixed(1)}" x2="${X(now).toFixed(1)}" y1="${MT}" y2="${MT + ph}"/><text class="ax" x="${X(now).toFixed(1)}" y="${MT - 3}" text-anchor="middle">${esc(xFmt(now))}</text>`;
