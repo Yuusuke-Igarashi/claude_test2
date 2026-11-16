@@ -1,4 +1,4 @@
-/* 図表（SVG・ホバー付き）。色はトークンから、文字はテキスト色から。 */
+/* Charts (SVG, with hover tooltips). Colors come from the theme tokens, text uses the text color. */
 const CAT = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)'];
 
 function chartTip(box) { let t = box.querySelector('.tip'); if (!t) { t = el('<div class="tip" hidden></div>'); box.appendChild(t); } return t; }
@@ -12,18 +12,18 @@ function niceTicks(max, n = 4) {
 }
 
 /**
- * 再現期間曲線：x = 再現期間（対数）, y = 損失（線形）
- * series: [{name, color, points:[[rp, value]], dashed}]  yFmt: 値表示
+ * Return period curve: x = return period (log scale), y = loss (linear)
+ * series: [{name, color, points:[[rp, value]], dashed}]  yFmt: value formatter
  */
-function rpChart(box, { series, yFmt = (v) => fmtUSD(v), yLabel = '損失', xLabel = '再現期間（年）', rps = [10, 50, 100, 500, 1000] }) {
+function rpChart(box, { series, yFmt = (v) => fmtUSD(v), yLabel = 'Loss', xLabel = 'Return period (years)', rps = [10, 50, 100, 500, 1000] }) {
   const W = 560, H = 280, ML = 70, MR = 16, MT = 18, MB = 42; const pw = W - ML - MR, ph = H - MT - MB;
   const lx = Math.log10(rps[0]) - 0.1, hx = Math.log10(rps[rps.length - 1]) + 0.1; const X = (rp) => ML + (Math.log10(rp) - lx) / (hx - lx) * pw;
   const maxV = Math.max(1e-9, ...series.flatMap((s) => s.points.map((p) => p[1]))); const ticks = niceTicks(maxV); const maxT = ticks[ticks.length - 1]; const Y = (v) => MT + ph - (v / maxT) * ph;
-  let h = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yLabel)}の再現期間曲線">`;
+  let h = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yLabel)} return period curve">`;
   ticks.forEach((t) => { h += `<line class="grid-l" x1="${ML}" x2="${W - MR}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="ax" x="${ML - 8}" y="${(Y(t) + 3.5).toFixed(1)}" text-anchor="end">${esc(yFmt(t))}</text>`; });
   rps.forEach((rp) => { h += `<text class="ax" x="${X(rp).toFixed(1)}" y="${H - MB + 16}" text-anchor="middle">${rp}</text><line class="axis-l" x1="${X(rp).toFixed(1)}" x2="${X(rp).toFixed(1)}" y1="${MT + ph}" y2="${MT + ph + 4}"/>`; });
   h += `<line class="axis-l" x1="${ML}" x2="${W - MR}" y1="${MT + ph}" y2="${MT + ph}"/><text class="ax-t" x="${ML + pw / 2}" y="${H - 6}" text-anchor="middle">${esc(xLabel)}</text>`;
-  const used = []; /* 端点ラベルの衝突回避 */
+  const used = []; /* avoid overlapping end-point labels */
   const placeY = (y) => { let yy = y; for (let k = 0; k < 6; k++) { if (used.every((u) => Math.abs(u - yy) >= 13)) break; yy -= 13; } used.push(yy); return yy; };
   series.forEach((s, si) => {
     const col = s.color || CAT[si % CAT.length]; const pts = s.points.slice().sort((a, b) => a[0] - b[0]);
@@ -34,12 +34,12 @@ function rpChart(box, { series, yFmt = (v) => fmtUSD(v), yLabel = '損失', xLab
   });
   h += '</svg>';
   box.innerHTML = h; const tip = chartTip(box); const svg = box.querySelector('svg');
-  svg.onmousemove = (e) => { const c = e.target.closest('circle.pt'); if (!c) { tip.hidden = true; return; } const s = series[+c.dataset.s]; const pts = s.points.slice().sort((a, b) => a[0] - b[0]); const [rp, v] = pts[+c.dataset.i]; tip.innerHTML = `<b>再現期間 ${rp} 年（年超過確率 ${(100 / rp).toFixed(rp >= 100 ? 1 : 0)}%）</b><div class="r"><i style="background:${s.color || CAT[+c.dataset.s % CAT.length]}"></i>${esc(s.name)}：${esc(yFmt(v))}</div>`; tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
+  svg.onmousemove = (e) => { const c = e.target.closest('circle.pt'); if (!c) { tip.hidden = true; return; } const s = series[+c.dataset.s]; const pts = s.points.slice().sort((a, b) => a[0] - b[0]); const [rp, v] = pts[+c.dataset.i]; tip.innerHTML = `<b>${rp}-year return period (annual exceedance probability ${(100 / rp).toFixed(rp >= 100 ? 1 : 0)}%)</b><div class="r"><i style="background:${s.color || CAT[+c.dataset.s % CAT.length]}"></i>${esc(s.name)}: ${esc(yFmt(v))}</div>`; tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
   svg.onmouseleave = () => { tip.hidden = true; };
 }
 
 /**
- * 縦棒（カテゴリ×1系列、または積み上げ）。cats:[label], series:[{name,color,values}]
+ * Vertical bar chart (categories x one series, or stacked). cats:[label], series:[{name,color,values}]
  */
 function barChart(box, { cats, series, yFmt = (v) => fmt(v), yLabel = '', height = 240, stacked = false, labels = true, hl = -1 }) {
   const W = 560, H = height, ML = 56, MR = 12, MT = 16, MB = 40; const pw = W - ML - MR, ph = H - MT - MB; const n = cats.length;
@@ -56,20 +56,20 @@ function barChart(box, { cats, series, yFmt = (v) => fmt(v), yLabel = '', height
   });
   h += `<line class="axis-l" x1="${ML}" x2="${W - MR}" y1="${MT + ph}" y2="${MT + ph}"/></svg>`;
   box.innerHTML = h; const tip = chartTip(box); const svg = box.querySelector('svg');
-  svg.onmousemove = (e) => { const r = e.target.closest('rect.bar-r'); if (!r) { tip.hidden = true; return; } const i = +r.dataset.i; tip.innerHTML = `<b>${esc(cats[i])}</b>` + series.map((s, si) => `<div class="r"><i style="background:${s.color || CAT[si % CAT.length]}"></i>${esc(s.name)}：${yFmt(s.values[i] || 0)}</div>`).join(''); tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
+  svg.onmousemove = (e) => { const r = e.target.closest('rect.bar-r'); if (!r) { tip.hidden = true; return; } const i = +r.dataset.i; tip.innerHTML = `<b>${esc(cats[i])}</b>` + series.map((s, si) => `<div class="r"><i style="background:${s.color || CAT[si % CAT.length]}"></i>${esc(s.name)}: ${yFmt(s.values[i] || 0)}</div>`).join(''); tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
   svg.onmouseleave = () => { tip.hidden = true; };
 }
 
 /**
- * 時系列（発災からの時間）。series:[{name,color,values:[[t,v]]}], now: 現在時刻 t, xFmt
+ * Time series (time since the event). series:[{name,color,values:[[t,v]]}], now: current time t, xFmt
  */
 function rangeTicks(lo, hi, n = 4) {
   const span = Math.max(1e-9, hi - lo); const raw = span / n; const p = Math.pow(10, Math.floor(Math.log10(raw))); const m = raw / p; const step = (m >= 5 ? 10 : m >= 2 ? 5 : m >= 1 ? 2 : 1) * p;
   const t = []; for (let v = Math.floor(lo / step) * step; v <= hi + step * 0.999; v += step) t.push(+v.toFixed(10)); return t.length > 1 ? t : [lo, hi];
 }
 /**
- * 時系列（発災からの時間 × 値）。now より前は実線＋塗り、後は点線（見込み）。
- * yMin: 0 で原点から、null で値域に合わせる（水位など）。thresholds: [{v, ja}] を横の破線で示す。
+ * Time series (time since the event vs. value). Solid line with fill before now, dotted line after now (projection).
+ * yMin: 0 starts the axis at zero, null fits the axis to the value range (e.g. river level). thresholds: [{v, ja}] are drawn as horizontal dashed lines.
  */
 function lineChart(box, { series, now, yFmt = (v) => fmt(v), xFmt = (t) => fmtHours(t), height = 200, xMax = 168, yLabel = '', yMin = 0, thresholds = [] }) {
   const W = 560, H = height, ML = 54, MR = 12, MT = 14, MB = 34; const pw = W - ML - MR, ph = H - MT - MB;
@@ -86,11 +86,11 @@ function lineChart(box, { series, now, yFmt = (v) => fmt(v), xFmt = (t) => fmtHo
   h += `<line class="hover-l" x1="${X(now).toFixed(1)}" x2="${X(now).toFixed(1)}" y1="${MT}" y2="${MT + ph}"/><text class="ax" x="${X(now).toFixed(1)}" y="${MT - 3}" text-anchor="middle">${esc(xFmt(now))}</text>`;
   h += `<line class="axis-l" x1="${ML}" x2="${W - MR}" y1="${MT + ph}" y2="${MT + ph}"/></svg>`;
   box.innerHTML = h; const tip = chartTip(box); const svg = box.querySelector('svg');
-  svg.onmousemove = (e) => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const q = pt.matrixTransform(svg.getScreenCTM().inverse()); const t = clamp((q.x - ML) / pw * xMax, 0, xMax); tip.innerHTML = `<b>${esc(xFmt(t))}</b>` + series.map((s, si) => { const cur = s.values.reduce((b, p) => Math.abs(p[0] - t) < Math.abs(b[0] - t) ? p : b, s.values[0]); return `<div class="r"><i style="background:${s.color || CAT[si % CAT.length]}"></i>${esc(s.name)}：${yFmt(cur[1])}</div>`; }).join(''); tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
+  svg.onmousemove = (e) => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const q = pt.matrixTransform(svg.getScreenCTM().inverse()); const t = clamp((q.x - ML) / pw * xMax, 0, xMax); tip.innerHTML = `<b>${esc(xFmt(t))}</b>` + series.map((s, si) => { const cur = s.values.reduce((b, p) => Math.abs(p[0] - t) < Math.abs(b[0] - t) ? p : b, s.values[0]); return `<div class="r"><i style="background:${s.color || CAT[si % CAT.length]}"></i>${esc(s.name)}: ${yFmt(cur[1])}</div>`; }).join(''); tip.hidden = false; placeTip(box, tip, e.clientX, e.clientY); };
   svg.onmouseleave = () => { tip.hidden = true; };
 }
 
-/* 地震の本震・余震（縦線＝マグニチュード）。events: [[t, M, label]] */
+/* Earthquake mainshock and aftershocks (stem height = magnitude). events: [[t, M, label]] */
 function stemChart(box, { events, now, xMax = 168, height = 180, yLabel = '', thresholds = [], yMin = 3, yMax = 8, xFmt = (t) => fmtHours(t) }) {
   const W = 560, H = height, ML = 54, MR = 12, MT = 16, MB = 34; const pw = W - ML - MR, ph = H - MT - MB;
   const X = (t) => ML + (t / xMax) * pw, Y = (v) => MT + ph - ((v - yMin) / (yMax - yMin)) * ph;
@@ -104,7 +104,7 @@ function stemChart(box, { events, now, xMax = 168, height = 180, yLabel = '', th
   box.innerHTML = h;
 }
 
-/* 横棒リスト（HTML） rows:[{label, value, max, color, text}] */
+/* Horizontal bar list (HTML). rows:[{label, value, max, color, text}] */
 function miniBars(rows) {
   const max = Math.max(1e-9, ...rows.map((r) => r.max ?? r.value));
   return `<div class="mini-bars">${rows.map((r) => `<div class="row"><span>${esc(r.label)}</span><span class="track"><i style="width:${clamp(r.value / (r.max ?? max) * 100, 0, 100).toFixed(1)}%;background:${r.color || 'var(--accent)'}"></i></span><span class="v">${esc(r.text ?? fmt(r.value))}</span></div>`).join('')}</div>`;
