@@ -2317,7 +2317,29 @@
      "Shelter population decays with a 25-day time constant after day 3.",
      "Housing repair follows a logistic curve centred on day 320 (two winters).",
      "Company losses in USD million are illustrative."
-    ]
+    ],
+    "simulator": {
+     "note_ja": "Cost bases (assumptions, USD): public cost = affected people × 250 emergency cost + 45,000 damaged dwellings × 30,000 repair + 900 M infrastructure; company direct damage 3.0 M, 45 k lost margin per day of lost capacity, 20 k per day of supply disruption; household repair 18,000 (house) / 7,000 (apartment) × exposure, 20 per person-day in a shelter, 70 lost wage per day. Lever effects are multipliers stated in the code (e.g., retrofit halves direct damage and cuts site recovery time by 40%).",
+     "region": {
+      "per_capita_usd": 250,
+      "dwellings": 45000,
+      "repair_usd": 30000,
+      "infra_m": 900,
+      "temp_housing_usd": 2500
+     },
+     "company": {
+      "direct_damage_m": 3.0,
+      "daily_loss_m": 0.045,
+      "supply_daily_m": 0.02,
+      "family_support_m": 0.08
+     },
+     "personal": {
+      "repair_house_usd": 18000,
+      "repair_apt_usd": 7000,
+      "shelter_day_usd": 20,
+      "daily_wage_usd": 70
+     }
+    }
    }
   },
   {
@@ -4397,7 +4419,29 @@
      "Displacement decays with a 55-day time constant after day 20.",
      "House rebuilding centred on day 170 (2024: first houses by September).",
      "Company losses are illustrative."
-    ]
+    ],
+    "simulator": {
+     "note_ja": "Cost bases (assumptions, USD): public cost = affected people × 120 + 12,000 flooded houses × 28,000 (2024 programme: rebuild or compensate) + 250 M infrastructure and dikes; company direct damage 1.2 M (Kulsary base stock), 15 k per day of lost capacity, 12 k per day of supply disruption; household repair 20,000 (house) / 3,000 (apartment) × exposure, 15 per person-day in a shelter, 60 lost wage per day.",
+     "region": {
+      "per_capita_usd": 120,
+      "dwellings": 12000,
+      "repair_usd": 28000,
+      "infra_m": 250,
+      "temp_housing_usd": 2000
+     },
+     "company": {
+      "direct_damage_m": 1.2,
+      "daily_loss_m": 0.015,
+      "supply_daily_m": 0.012,
+      "family_support_m": 0.04
+     },
+     "personal": {
+      "repair_house_usd": 20000,
+      "repair_apt_usd": 3000,
+      "shelter_day_usd": 15,
+      "daily_wage_usd": 60
+     }
+    }
    }
   },
   {
@@ -5066,7 +5110,29 @@
     ],
     "assumptions_ja": [
      "Illustrative curves; no damage model."
-    ]
+    ],
+    "simulator": {
+     "note_ja": "Cost bases (assumptions, USD): a heat wave causes little physical damage; public cost = affected people × 2 (health and cooling measures) + 5 M grid repairs; company 20 k direct (cooling, generator fuel), 10 k per day of lost capacity; household: no repairs, 60 lost wage per day without remote work.",
+     "region": {
+      "per_capita_usd": 2,
+      "dwellings": 0,
+      "repair_usd": 0,
+      "infra_m": 5,
+      "temp_housing_usd": 0
+     },
+     "company": {
+      "direct_damage_m": 0.02,
+      "daily_loss_m": 0.01,
+      "supply_daily_m": 0.003,
+      "family_support_m": 0.01
+     },
+     "personal": {
+      "repair_house_usd": 0,
+      "repair_apt_usd": 0,
+      "shelter_day_usd": 0,
+      "daily_wage_usd": 60
+     }
+    }
    }
   }
  ]
