@@ -333,6 +333,101 @@
     "The profile gives no uncertainty ranges; GEM's 1949 and 1907 fatality counts differ from Wikipedia/NGDC-based figures."
    ]
   },
+  "TKM": {
+   "name_ja": "Turkmenistan",
+   "iso3": "TKM",
+   "pop_m": 7.7,
+   "gdp_b": 68.7,
+   "hdi": 0.764,
+   "social_extra": {
+    "pop_growth_pct": 1.48,
+    "gdp_per_capita_usd": 9161,
+    "gini": 40.8
+   },
+   "replacement_b": {
+    "res": 38.8,
+    "com": 6.9,
+    "ind": 0.7,
+    "total": 46.5
+   },
+   "aal_k": {
+    "res": 3407,
+    "com": 594,
+    "ind": 45,
+    "total": 4045
+   },
+   "aalr_permille": 0.087,
+   "aalr_permille_by_lob": {
+    "res": 0.088,
+    "com": 0.086,
+    "ind": 0.062
+   },
+   "loss_curve_m": {
+    "10": 2.1,
+    "50": 36.2,
+    "100": 73.6,
+    "500": 241.2,
+    "1000": 387.5
+   },
+   "read_note": "Values transcribed from the GEM profile PNG (5847x4134 px) using a 1200 px overview plus three crops (social and risk indicator tables; major-earthquake list; loss-by-region bars with loss curves). All five loss-curve values are printed on the chart to 0.1 M USD ($2.1M, $36.2M, $73.6M, $241.2M, $387.5M). Loss-by-region values are the bar labels ($1.1M, $1.1M, $846.4k, $809.5k, $79.8k, $30.4k) converted to M USD; the two $1.1M labels are rounded, so the Balkan and Ahal shares are +/-0.05 M USD. Region names follow GEM/GeoBoundaries ('Asgabat' = Ashgabat city as its own unit; Ahal excludes the capital). Building classes by count: adobe/earth 41%, other 21%, unreinforced masonry 17%, wood 9%, confined masonry 7%, remainder steel/concrete; by value: concrete 55%, confined masonry 12%, wood 8%, unreinforced masonry 8%, other 8%, adobe/earth 5%, remainder steel.",
+   "major_eq": [
+    [
+     1946,
+     "M6.9",
+     "Turkmenistan (Kazandzhik area; USGS ISC-GEM Mw 7.0, 40 km NE of Balkanabat, 1946-11-04)",
+     400
+    ],
+    [
+     1948,
+     "M7.2",
+     "Ashkhabad (Ashgabat; USGS ISC-GEM Mw 7.15, 14 km N of Ashgabat, 1948-10-05 UTC)",
+     110000
+    ],
+    [
+     2000,
+     "M7.0",
+     "Nebitdag-Turkmenbashi (Balkanabat; USGS Mw 7.0, 2000-12-06)",
+     11
+    ]
+   ],
+   "loss_by_region_m": [
+    [
+     "Balkan",
+     1.1
+    ],
+    [
+     "Ahal",
+     1.1
+    ],
+    [
+     "Asgabat",
+     0.8464
+    ],
+    [
+     "Lebap",
+     0.8095
+    ],
+    [
+     "Mary",
+     0.0798
+    ],
+    [
+     "Dasoguz",
+     0.0304
+    ]
+   ],
+   "loss_by_region_check": "Sum of bar labels = 3.97 M USD vs. table total AAL 4.045 M USD (difference is the rounding of the two $1.1M labels; Balkan + Ahal together = about 2.28 M USD).",
+   "src": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png",
+   "src_readme": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/README.md",
+   "version": "GEM Country Seismic Risk Profiles (risk-profiles repository, master branch; README states social indicators for 2026 population / 2024 GDP / 2023 HDI, costs in 2025 USD; boundaries GeoBoundaries)",
+   "license": "CC BY-NC-SA 4.0",
+   "confirmed_by": "page_read",
+   "gaps": [
+    "The Balkan and Ahal bars are both labelled $1.1M, so their individual AAL is known only to +/-0.05 M USD.",
+    "Loss by line of business per return period is not labelled (stacked bars only; residential dominates at every return period, commercial about 15% at 1,000 years); not transcribed.",
+    "The 1948 death toll of 110,000 is GEM's figure (NOAA/EM-DAT based); Wikipedia gives 10,000-110,000 and some sources up to 176,000 - disputed."
+   ]
+  },
   "UZB": {
    "name_ja": "Uzbekistan",
    "iso3": "UZB",

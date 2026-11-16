@@ -99,9 +99,9 @@
    "japanese_missions": [
     {
      "name_ja": "Embassy of Japan in Kazakhstan (Astana); Consular Office of Japan in Almaty (branch office of the Embassy)",
-     "address": "Embassy: 6th floor, 62 Kosmonavtov Street, Chubary micro-district, Astana 010000. Almaty office: 41 Kazybek bi Street, 3rd floor, Almaty 050010",
-     "phone": "Embassy +7-7172-97-78-43 (consular section +7-7172-97-78-72 per an embassy notice); Almaty office +7-727-298-06-00",
-     "url": "https://www.kz.emb-japan.go.jp/ (MOFA country page: https://www.mofa.go.jp/mofaj/area/kazakhstan/index.html)",
+     "address": "Embassy: 6th floor, 62 Kosmonavtov Street, Chubary micro-district, Astana 010000. Almaty office: 41 Kazybek bi Street, 3rd floor, Almaty 050010 Phones: Embassy +7-7172-97-78-43 (consular section +7-7172-97-78-72 per an embassy notice); Almaty office +7-727-298-06-00",
+     "phone": "+7-7172-97-78-43",
+     "url": "https://www.kz.emb-japan.go.jp/",
      "confirmed_by": "search_snippet"
     }
    ],
@@ -175,13 +175,14 @@
    "other_missions_note_ja": "No Japanese honorary consulates elsewhere in Kazakhstan are known (unverified). The Almaty office serves the south (Almaty, Jetisu, Jambyl, Turkistan, Shymkent); Astana covers the rest. Atyrau and Aktau (oil hubs) have no Japanese mission; the nearest is Astana (about 1,800 km) - plan for consular help by phone/e-mail.",
    "wri": 2.18,
    "wri_rank": 155,
-   "wri_src": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
+   "wri_src": "WorldRiskIndex 2025 (IFHV / Bündnis Entwicklung Hilft)",
    "wri_url": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
    "wri_confirmed": "page_read (score) / derived (rank)",
    "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
    "inform": 2.7,
    "inform_rank": 135,
-   "inform_src": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=482&Iso3=KAZ&IndicatorId=INFORM",
+   "inform_src": "INFORM Risk Index 2025 (EC JRC)",
+   "inform_url": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=482&Iso3=KAZ&IndicatorId=INFORM",
    "aal_flood_m": null,
    "aal_src": "",
    "aal_url": "",
@@ -255,9 +256,9 @@
    "japanese_missions": [
     {
      "name_ja": "Embassy of Japan in the Kyrgyz Republic (Bishkek)",
-     "address": "35/1 Tashkent Street, Bishkek 720014, Kyrgyz Republic",
-     "phone": "+996-312-37-55-15, +996-312-37-55-16",
-     "url": "https://www.kg.emb-japan.go.jp/ (MOFA list page: https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/kilgith.html)",
+     "address": "35/1 Tashkent Street, Bishkek 720014, Kyrgyz Republic Phones: +996-312-37-55-15, +996-312-37-55-16",
+     "phone": "+996-312-37-55-15",
+     "url": "https://www.kg.emb-japan.go.jp/",
      "confirmed_by": "search_snippet"
     }
    ],
@@ -331,13 +332,14 @@
    "other_missions_note_ja": "No Japanese honorary consulate outside Bishkek is known (unverified). The JICA Kyrgyz Republic Office and the Kyrgyz-Japan Center for Human Development (KRJC) in Bishkek are not consular missions. The third-party embassy contact file (scratchpad/dl/embassy_contacts.csv) has no Kyrgyzstan rows; other missions in Bishkek should be taken from their own sites (not reachable here).",
    "wri": 2.96,
    "wri_rank": 131,
-   "wri_src": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
+   "wri_src": "WorldRiskIndex 2025 (IFHV / Bündnis Entwicklung Hilft)",
    "wri_url": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
    "wri_confirmed": "page_read (score) / derived (rank)",
    "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
    "inform": 3.6,
    "inform_rank": 89,
-   "inform_src": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=493&IndicatorId=INFORM",
+   "inform_src": "INFORM Risk Index 2025 (EC JRC)",
+   "inform_url": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=493&IndicatorId=INFORM",
    "aal_flood_m": null,
    "aal_src": "",
    "aal_url": "",
@@ -411,9 +413,9 @@
    "japanese_missions": [
     {
      "name_ja": "Embassy of Japan in Tajikistan (Dushanbe)",
-     "address": "80A Khabibullo Nazarov Street (Kuchai Kh. Nazarov 80A), Dushanbe 734000, Tajikistan",
-     "phone": "+992 (44) 600-54-77 to 600-54-80 (MOFA listing); older directories give +992 (37) 227-54-36 / 227-54-46 / 221-39-70",
-     "url": "https://www.tj.emb-japan.go.jp/ (MOFA listing: https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/taji.html)",
+     "address": "80A Khabibullo Nazarov Street (Kuchai Kh. Nazarov 80A), Dushanbe 734000, Tajikistan Phones: +992 (44) 600-54-77 to 600-54-80 (MOFA listing); older directories give +992 (37) 227-54-36 / 227-54-46 / 221-39-70",
+     "phone": "+992 (44) 600-54-77",
+     "url": "https://www.tj.emb-japan.go.jp/",
      "confirmed_by": "search_snippet"
     }
    ],
@@ -480,46 +482,171 @@
    "other_missions_note_ja": "No Japanese consulates outside Dushanbe are known (unverified). For sites in Sughd (Khujand), the Dushanbe embassy is about 300 km away across the Anzob tunnel/Shahriston pass, a road that closes in winter storms; the Embassy of Japan in Uzbekistan (Tashkent, about 150 km from Khujand) is physically closer but requires a border crossing. JICA has an office in Dushanbe (unverified).",
    "wri": 2.85,
    "wri_rank": 135,
-   "wri_src": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv)",
+   "wri_src": "WorldRiskIndex 2025 (IFHV / Bündnis Entwicklung Hilft)",
    "wri_url": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv)",
    "wri_confirmed": "page_read (score) / derived (rank)",
    "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
    "inform": 4.0,
    "inform_rank": 79,
-   "inform_src": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?Iso3=TJK&IndicatorId=INFORM",
+   "inform_src": "INFORM Risk Index 2025 (EC JRC)",
+   "inform_url": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?Iso3=TJK&IndicatorId=INFORM",
    "aal_flood_m": null,
    "aal_src": "",
    "aal_url": "",
    "aal_note": "Not retrieved"
   },
   {
-   "country": "TKM",
+   "country": "Turkmenistan",
    "iso3": "TKM",
    "jp_residents": null,
    "jp_companies": null,
-   "emergency_numbers": [],
-   "disaster_hotlines": [],
-   "japanese_missions": [],
+   "emergency_numbers": [
+    {
+     "service_ja": "Fire and rescue (civil defence dispatch)",
+     "number": "01",
+     "note_ja": "libphonenumber emergency pattern for TM is 0[1-3] (two digits); from mobiles dial 001 (search snippet: Wikipedia 'Telephone numbers in Turkmenistan', Smartraveller)",
+     "source_url": "https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory TM) ; https://en.wikipedia.org/wiki/Telephone_numbers_in_Turkmenistan ; https://www.smartraveller.gov.au/destinations/asia/turkmenistan",
+     "confirmed_by": "page_read (libphonenumber local file) / search_snippet (mobile form)"
+    },
+    {
+     "service_ja": "Police",
+     "number": "02",
+     "note_ja": "002 from mobiles",
+     "source_url": "https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory TM) ; https://en.wikipedia.org/wiki/Telephone_numbers_in_Turkmenistan",
+     "confirmed_by": "page_read / search_snippet"
+    },
+    {
+     "service_ja": "Ambulance",
+     "number": "03",
+     "note_ja": "003 from mobiles",
+     "source_url": "https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory TM) ; https://en.wikipedia.org/wiki/Telephone_numbers_in_Turkmenistan",
+     "confirmed_by": "page_read / search_snippet"
+    },
+    {
+     "service_ja": "Gas emergency (natural gas safety)",
+     "number": "04",
+     "note_ja": "In libphonenumber it is a short code (0[1-49]) but not in the <emergency> class; 004 from mobiles",
+     "source_url": "https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory TM) ; https://en.wikipedia.org/wiki/Telephone_numbers_in_Turkmenistan",
+     "confirmed_by": "page_read / search_snippet"
+    },
+    {
+     "service_ja": "Telephone directory / information",
+     "number": "09",
+     "note_ja": "Short code only",
+     "source_url": "https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory TM)",
+     "confirmed_by": "page_read"
+    },
+    {
+     "service_ja": "Single emergency number (112/911 proposed; 123 piloted in Arkadag city in 2023)",
+     "number": "112",
+     "note_ja": "NOT confirmed as operating nationally: the President proposed testing a single number (112 or 911) and a 123 single-call system was to be piloted in Arkadag (May 2023). Keep 01/02/03 as the working numbers.",
+     "source_url": "https://afghanistan.tmembassy.gov.tm/en/news/76571 ; https://daryo.uz/en/2023/05/22/turkmenistan-to-unify-emergency-calls",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "Main Directorate of Civil Defence and Rescue Operations, Ministry of Defence (rescue dispatch via the fire/rescue number)",
+     "number": "01",
+     "note_ja": "No separate public disaster hotline was found; rescue call-outs go through 01 (001 from mobiles). From memory the directorate also has a duty line in Ashgabat, not verified.",
+     "source_url": "https://www.unicef.org/turkmenistan/press-releases/turkmenistan-strengthens-emergency-preparedness-through-joint-training-protection",
+     "confirmed_by": "search_snippet (agency) / unverified (dispatch routing)"
+    },
+    {
+     "agency": "Turkmenhydromet (Türkmengidromet) forecast and storm-warning service",
+     "number": null,
+     "note_ja": "Warnings are sent to government services on an approved list and published through state media/turkmenportal; no public telephone hotline found",
+     "source_url": "https://wecoop.eu/wp-content/uploads/2021/11/4-1.4-Turkmenhydromet-Agalhanowa-ENG.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "Embassy of Japan in Turkmenistan (consular section)",
+     "number": "+993-12-477081 / 477082",
+     "note_ja": "Use for Japanese nationals' safety confirmation; see japanese_mission",
+     "source_url": "https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/tolk.html",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "Embassy of Japan in Turkmenistan (Ashgabat)",
+     "address": "Trading Centre 'Paytagt', Street 1945 (Kosi), Building 60, Ashgabat 744017 Phones: +993-12-477081, +993-12-477082 (fax 477083); e-mail jp-embassy@ah.mofa.go.jp",
+     "phone": "+993-12-477081",
+     "url": "https://www.tm.emb-japan.go.jp/",
+     "confirmed_by": "search_snippet"
+    }
+   ],
    "national_dm_agency": {
-    "name": "",
-    "name_ja": "",
-    "url": "",
-    "warning_channels_ja": ""
+    "name": "Main Directorate of Civil Defence and Rescue Operations of the Ministry of Defence of Turkmenistan (lead operational agency; headed by a Deputy Minister of Defence) and the State Commission of Turkmenistan for Emergency Situations (interagency commission); an Interagency Working Group for Disaster Risk Reduction launched with UNDRR; policy framework: State Programme on civil defence 2019-2030",
+    "name_ja": "Main Directorate of Civil Defence and Rescue Operations of the Ministry of Defence of Turkmenistan (lead operational agency; headed by a Deputy Minister of Defence) and the State Commission of Turkmenistan for Emergency Situations (interagency commission); an Interagency Working Group for Disaster Risk Reduction launched with UNDRR; policy framework: State Programme on civil defence 2019-2030",
+    "url": "https://www.undrr.org/news/turkmenistan-launches-its-interagency-working-group-disaster-risk-reduction",
+    "warning_channels_ja": "Turkmenhydromet 3-day bulletins for the five regions and Ashgabat plus storm warnings passed to services on an approved list; state TV/radio and government web portals (turkmenistan.gov.tm, turkmenportal.com) for public notices; civil-defence drills in schools; SMS safety reminders have been sent via mobile operators; sirens, voice alarms and mobile apps are planned under the Amu Darya early-warning project (2025). Disasters are often not reported by state media, so independent outlets (RFE/RL Azatlyk, turkmen.news, Chronicles of Turkmenistan) are frequently the first public source."
    },
-   "alert_channels": [],
-   "alert_note_ja": "",
-   "alert_src": "",
-   "alert_src_name": "",
-   "other_missions_note_ja": "",
-   "wri": null,
-   "wri_rank": null,
-   "wri_src": "",
-   "wri_url": "",
-   "wri_confirmed": "unverified",
+   "alert_channels": [
+    {
+     "key": "hydromet_bulletin",
+     "name_ja": "Turkmenhydromet daily 3-day forecast bulletin and storm warnings",
+     "note_ja": "Bulletin covers the five regions and Ashgabat; storm warnings go to services on an approved list and reach the public via state media and turkmenportal.com weather items",
+     "source_url": "https://wecoop.eu/wp-content/uploads/2021/11/4-1.4-Turkmenhydromet-Agalhanowa-ENG.pdf ; https://turkmenportal.com/en/news/100146-heavy-rains-and-temperatures-up-to-30c-are-expected-in-turkmenistan-from-april-6-to-12",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "state_media",
+     "name_ja": "State TV/radio (Altyn Asyr and other state channels) and government portals",
+     "note_ja": "Official announcements; disasters are under-reported or not reported (2020 Lebap storm, 2024 floods were absent from state media)",
+     "source_url": "https://timesca.com/turkmenistan-bans-people-from-talking-about-the-weather/ ; https://en.turkmen.news/2020/05/04/spotlight/storm-battered-turkmenabat-left-to-its-fate/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "sms_operators",
+     "name_ja": "SMS via mobile operators (TM Cell / Altyn Asyr)",
+     "note_ja": "Civil-defence fire-safety SMS reminders have been sent nationally; no evidence of a systematic hazard-alert SMS service",
+     "source_url": "https://yerzemin.com/display/turkmenistan-is-received-sms-on-observance-of-fire-safety-rules/98060",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "sirens_apps_planned",
+     "name_ja": "Sirens, voice alarms and mobile apps (Amu Darya early-warning project, 2025)",
+     "note_ja": "Planned/under development with Kazakh hydrologists and GIZ/CESDRR support; coverage and go-live date unknown",
+     "source_url": "https://tngizt.gov.tm/en/news/tuerkmenistanyn-we-gazagystanyn-gidrologlary-amyderya-irki-duydurys-ulgamyny-berkitmek-meselesini-ara-alyp-maslahatlasdylar ; https://cesdrr.org/uploads/dev/2026/Overview_Document_on_the_Status_of_Early_Warning_Systems.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "independent_media",
+     "name_ja": "Independent/exile media and social channels (RFE/RL Azatlyk, turkmen.news, Chronicles of Turkmenistan, Progres.online)",
+     "note_ja": "Often the only timely source on casualties and damage; access from inside Turkmenistan requires VPN (internet filtering) - from memory, unverified",
+     "source_url": "https://www.rferl.org/a/turkmen-province-in-chaos-after-deadly-windstorms/30585718.html ; https://en.turkmen.news/",
+     "confirmed_by": "search_snippet (reporting role) / unverified (access)"
+    },
+    {
+     "key": "intl_feeds",
+     "name_ja": "International feeds: USGS earthquake notifications, GDACS, Sentinel Asia activations (e.g., FL-2024-000072-TKM), NASA dust-storm imagery",
+     "note_ja": "Useful because domestic reporting is sparse; Sentinel Asia activation for the May 2024 Ashgabat/Ahal floods was requested by CAIAG",
+     "source_url": "https://sentinel-asia.org/EO/2024/article20240516TM.html ; https://earthquake.usgs.gov/fdsnws/event/1/ ; https://www.gdacs.org/",
+     "confirmed_by": "search_snippet (Sentinel Asia) / page_read (USGS)"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "Embassy of Japan consular e-mails (Zairyu-todoke / Tabi-Regi registrants)",
+     "note_ja": "Standard MOFA channel; embassy site www.tm.emb-japan.go.jp is blocked from this session",
+     "source_url": "https://www.tm.emb-japan.go.jp/",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "alert_note_ja": "Turkmenhydromet 3-day bulletins for the five regions and Ashgabat plus storm warnings passed to services on an approved list; state TV/radio and government web portals (turkmenistan.gov.tm, turkmenportal.com) for public notices; civil-defence drills in schools; SMS safety reminders have been sent via mobile operators; sirens, voice alarms and mobile apps are planned under the Amu Darya early-warning project (2025). Disasters are often not reported by state media, so independent outlets (RFE/RL Azatlyk, turkmen.news, Chronicles of Turkmenistan) are frequently the first public source.",
+   "alert_src": "https://www.unicef.org/turkmenistan/press-releases/turkmenistan-strengthens-emergency-preparedness-through-joint-training-protection ; https://akipress.com/news:585294:Turkmen_officials_discuss_management_of_natural_disasters_on_study_visit_to_United_States ; https://www.undrr.org/news/turkmenistan-launches-its-interagency-working-group-disaster-risk-reduction ; https://wecoop.eu/wp-content/uploads/2021/11/4-1.4-Turkmenhydromet-Agalhanowa-ENG.pdf",
+   "alert_src_name": "Main Directorate of Civil Defence and Rescue Operations of the Ministry of Defence of Turkmenistan (lead operational agency; headed by a Deputy Minister of Defence) and the State Commission of Turkmenistan for Emergency Situations (interagency commission); an Interagency Working Group for Disaster Risk Reduction launched with UNDRR; policy framework: State Programme on civil defence 2019-2030",
+   "other_missions_note_ja": "No Japanese consulate or honorary consulate outside Ashgabat is known (unverified). Turkmenbashi (about 560 km by road/rail west of the capital), Balkanabat and Turkmenabat rely on the Ashgabat embassy; plan for consular help by phone/e-mail. A JICA office operates in Ashgabat (from memory, unverified). Entry visas and internal travel permits (Balkan border zones) can delay relocation - from memory, unverified.",
+   "wri": 1.29,
+   "wri_rank": 174,
+   "wri_src": "WorldRiskIndex 2025 (IFHV / Bündnis Entwicklung Hilft)",
+   "wri_url": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum; downloaded in this session)",
+   "wri_confirmed": "page_read (score) / derived (rank)",
    "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
-   "inform": null,
-   "inform_rank": null,
-   "inform_src": "",
+   "inform": 3.1,
+   "inform_rank": 113,
+   "inform_src": "INFORM Risk Index 2025 (EC JRC)",
+   "inform_url": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx, downloaded in this session); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=482&Iso3=TKM&IndicatorId=INFORM",
    "aal_flood_m": null,
    "aal_src": "",
    "aal_url": "",
@@ -614,8 +741,8 @@
    "japanese_missions": [
     {
      "name_ja": "Embassy of Japan in Uzbekistan (Tashkent)",
-     "address": "1-28 Sadyk Azimov Street, Tashkent 100047, Uzbekistan",
-     "phone": "+998-78-120-80-60 (to 63)",
+     "address": "1-28 Sadyk Azimov Street, Tashkent 100047, Uzbekistan Phones: +998-78-120-80-60 (to 63)",
+     "phone": "+998-78-120-80-60",
      "url": "https://www.uz.emb-japan.go.jp/",
      "confirmed_by": "search_snippet"
     }
@@ -683,13 +810,14 @@
    "other_missions_note_ja": "The local embassy_contacts.csv has no Uzbekistan (UZ) rows, so other missions were not compiled. For reference (unverified): the US Embassy is at 3 Moyqo'rg'on St, Tashkent; most EU and Asian missions are in central Tashkent (Yunusabad/Mirzo-Ulugbek districts); Samarkand and Bukhara have no resident foreign missions.",
    "wri": null,
    "wri_rank": null,
-   "wri_src": "https://weltrisikobericht.de/",
+   "wri_src": "WorldRiskIndex 2025 (IFHV / Bündnis Entwicklung Hilft)",
    "wri_url": "https://weltrisikobericht.de/",
    "wri_confirmed": "unverified",
    "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
    "inform": 3.0,
    "inform_rank": 109,
-   "inform_src": "https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=482&Iso3=UZB",
+   "inform_src": "INFORM Risk Index 2025 (EC JRC)",
+   "inform_url": "https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=482&Iso3=UZB",
    "aal_flood_m": null,
    "aal_src": "",
    "aal_url": "",

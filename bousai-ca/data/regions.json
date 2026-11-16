@@ -532,6 +532,19 @@
      "confirmed_by": "third_party"
     },
     {
+     "date": "1946-11-02",
+     "name_ja": "1946 Chatkal earthquake, Mw 7.5 (ISC-GEM), Chatkal range north of Kerben (Jalal-Abad Region)",
+     "hazard": "quake",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "where": "34 km N of Kerben, Aksy district, Jalal-Abad Region (41.80 N, 71.82 E, depth 25 km); Chatkal and Talas valleys, Toktogul area",
+     "note_ja": "USGS ComCat (ISC-GEM contribution) iscgem898647: Mw 7.54, 1946-11-02 18:28 UTC, depth 25 km. Largest instrumental earthquake inside the Kyrgyz SSR before 1992; casualty figures are not given by USGS or the EM-DAT/OWID series (Soviet-era; sparse population), so deaths are left null. Used as the 500-year benchmark for the southern region.",
+     "src": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem898647 ; https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1946-11-01&endtime=1946-11-05&minmagnitude=6&minlatitude=40&maxlatitude=43.5&minlongitude=69&maxlongitude=75",
+     "src_name": "USGS ComCat (ISC-GEM)",
+     "confirmed_by": "page_read (magnitude, location, time) / unverified (casualties unknown)"
+    },
+    {
      "date": "1992-08-19",
      "name_ja": "1992 Suusamyr (Toluk) earthquake, Mw 7.3",
      "hazard": "quake",
@@ -594,19 +607,6 @@
      "note_ja": "At least 38 killed (17 children, 13 women) when a saturated loess slope buried houses; EM-DAT (OWID) 2003 landslide totals: 38 deaths, 211 affected. ReliefWeb GLIDE SL-2003-000177-KGZ (Landslide - Apr 2003).",
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT (OWID); IRIN; ReliefWeb",
-     "confirmed_by": "page_read"
-    },
-    {
-     "date": "2004-04-26",
-     "name_ja": "2004 Budalyk landslide (Alay district, Osh Region)",
-     "hazard": "landslide",
-     "deaths": 33,
-     "damage_usd_m": null,
-     "scope": "regional",
-     "where": "Budalyk village, Alay district, Osh Region",
-     "note_ja": "Landslide killed 33 people (16 children) and injured 11; Bishkek appealed for international help. EM-DAT (OWID) 2004 landslide totals: 49 deaths, 18 injured (annual, several events). ReliefWeb GLIDE LS-2003-000177-KGZ (Landslides - Apr 2004).",
-     "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
-     "src_name": "EM-DAT (OWID); IRIN (The New Humanitarian)",
      "confirmed_by": "page_read"
     },
     {
@@ -1062,15 +1062,78 @@
    ]
   },
   "TKM": {
-   "name_en": "TKM",
-   "hazards": {},
+   "name_en": "Turkmenistan",
+   "hazards": {
+    "river_flood": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "urban_flood": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "coastal_flood": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "earthquake": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "landslide": {
+     "level": "Low",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "tsunami": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "volcano": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "cyclone": {
+     "level": "Very low",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "extreme_heat": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "wildfire": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "water_scarcity": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    "extreme_cold": {
+     "level": "Medium",
+     "src": "https://en.wikipedia.org/wiki/Ashgabat (climate table: record low -24.1 C, January mean minimum -0.1 C, extremes 1893-present); https://en.wikipedia.org/wiki/T%C3%BCrkmenba%C5%9Fy,_Turkmenistan (record low -21.9 C); https://caspianpolicy.org/research/energy-and-economy-program-eep/freezing-temperatures-complicate-turkmenistans-energy-exports",
+     "confirmed_by": "third_party (climate tables) / search_snippet (January 2023 gas disruption)",
+     "note": "Not a ThinkHazard hazard. Level assumed Medium nationally: winters are short but cold snaps of -15 to -25 C occur in Ashgabat and -25 to -30 C in Dashoguz and Lebap in the north (northern record lows unverified); in January 2023 frost formed gas hydrates at the Galkynysh field, halting exports to Uzbekistan and cutting electricity imports there, and heating/gas supply failures (free-gas era pressure drops) are the main cascading risk.",
+     "assumed": true
+    }
+   },
    "sources": [
     {
      "name": "ThinkHazard! (GFDRR)",
-     "url": ""
+     "url": "https://www.thinkhazard.org/en/report/250-turkmenistan"
     }
    ],
-   "th_url": "",
+   "th_url": "https://www.thinkhazard.org/en/report/250-turkmenistan",
    "flood_curve": {
     "curve_m": {
      "10": 696.4,
@@ -1085,9 +1148,238 @@
     "source_url": "https://github.com/cloudtostreet/MODIS_GlobalFloodDatabase (CSV mirror aqueductcountrydata.csv, downloaded 2026-11-03 in this session)",
     "confirmed_by": "page_read"
    },
-   "season": null,
-   "country_note_ja": null,
-   "history": []
+   "season": {
+    "flood": {
+     "months": [
+      3,
+      4,
+      5
+     ],
+     "note": "Spring rains on the Kopet Dag and Balkan foothills bring flash floods and mudflows March-May (Ashgabat April 2019, May 2024; Etrek/Sumbar basins); Amu Darya snowmelt high water June-July threatens Lebap and Dashoguz embankments."
+    },
+    "urban_flood": {
+     "months": [
+      3,
+      4,
+      5,
+      10,
+      11
+     ],
+     "note": "Short intense rain overwhelms storm drains in Ashgabat and Turkmenabat in spring and again with autumn fronts."
+    },
+    "landslide": {
+     "months": [
+      3,
+      4,
+      5
+     ],
+     "note": "Rain-triggered mudflows in the Kopet Dag foothills (Ahal: Nokhur, Serakhs road washouts) and Koytendag; ThinkHazard rates landslide Low nationally."
+    },
+    "heat": {
+     "months": [
+      6,
+      7,
+      8
+     ],
+     "note": "45-50 C in the Karakum and 45-47 C in Ashgabat (47.2 C June 2015; 50.1 C Repetek 1983); April 2025 already 40 C in Ashgabat."
+    },
+    "cold": {
+     "months": [
+      12,
+      1,
+      2
+     ],
+     "note": "Cold snaps of -15 to -25 C (Ashgabat record -24.1 C), harsher in Dashoguz/Lebap; gas-pressure and heating failures (January 2023)."
+    },
+    "cyclone": {
+     "months": [
+      3,
+      4,
+      5,
+      6
+     ],
+     "note": "Strong-wind events and dust/salt storms peak in spring (April 2020 Lebap windstorm; April 2023 dust storm; May 2018 Aral salt storm); dust also in summer."
+    },
+    "haze": {
+     "months": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "note": "Dust and salt storms from the Karakum and the dried Aral seabed; wildfire smoke from desert/reed fires in summer."
+    },
+    "water": {
+     "months": [
+      6,
+      7,
+      8,
+      9
+     ],
+     "note": "Irrigation shortfalls in dry years (2021) on the Amu Darya/Karakum Canal and Murghab; falling Caspian level is a chronic trend."
+    }
+   },
+   "country_note_ja": "Turkmenistan's dominant catastrophic hazard is earthquake: the Kopet Dag front along the Iranian border destroyed Ashgabat in 1948 (M7.3, tens of thousands dead) and the Balkan region produced M7 events in 1895, 1946 and 2000; ThinkHazard rates earthquake High nationally and in Ahal and Balkan, and GEM puts average annual building loss at USD 4.0 M/yr (0.087 per mille), with 1,000-year losses of about USD 390 M concentrated in Balkan, Ahal, Ashgabat and Lebap. Flood risk is High in the Amu Darya corridor (Lebap) and the Kopet Dag piedmont (Ahal), expressed mostly as spring flash floods and mudflows (Ashgabat 2019, 2024). Extreme heat (High; 47-50 C), water scarcity (High; near-total dependence on the Amu Darya) and dust/salt storms are chronic, and the Caspian's fall to a record low in 2025 threatens Turkmenbashi port and the coastal oil industry. Global indices rate the country low-risk (WorldRiskIndex 2025: 1.29, rank 174/193; INFORM 2025: 3.1, rank 113/191) largely because of low exposure and missing data, not low hazard; the key operational weakness is information - the state rarely reports disasters, so firms should rely on their own monitoring (USGS, hydromet bulletins, independent media) and on the Ministry of Defence civil-defence directorate via the 01/02/03 numbers.",
+   "history": [
+    {
+     "date": "1895-07-08",
+     "name_ja": "1895 Krasnovodsk (Uzun-Ada) earthquake, Ms 7.4, MMI X, Caspian tsunami",
+     "hazard": "quake",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "where": "Uzun-Ada, Caspian coast near Krasnovodsk (today's Turkmenbashi), Balkan Region",
+     "note_ja": "Estimated surface-wave magnitude 7.4 at 60 km depth (NOAA significant-earthquake database); maximum intensity X; tsunami waves formed in the Caspian Sea. Death toll not given by the sources read. Primary study: Ambraseys (1997), Journal of Earthquake Engineering.",
+     "src": "https://en.wikipedia.org/wiki/1895_Balkan_earthquake",
+     "src_name": "Wikipedia (citing NOAA NGDC)",
+     "confirmed_by": "third_party"
+    },
+    {
+     "date": "1946-11-04",
+     "name_ja": "1946 Kazandzhik (Balkan) earthquake, Mw 7.0, 400 deaths",
+     "hazard": "quake",
+     "deaths": 400,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "where": "40 km NE of Balkanabat (Nebitdag), Balkan Region; epicentre 39.81 N 54.64 E, depth 38 km",
+     "note_ja": "GEM profile lists it as 'M6.9 - Turkmenistan - 400 fatalities'; USGS ISC-GEM Mw 7.02. The 'Kazandzhik' name (today's Bereket) is from memory.",
+     "src": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png ; https://earthquake.usgs.gov/earthquakes/eventpage/iscgem898652",
+     "src_name": "GEM / USGS ComCat",
+     "confirmed_by": "page_read"
+    },
+    {
+     "date": "1948-10-05",
+     "name_ja": "1948 Ashgabat earthquake, Ms 7.3 (ISC-GEM Mw 7.15), MMI X - deaths 10,000-110,000 (disputed, up to 176,000 claimed)",
+     "hazard": "quake",
+     "deaths": 110000,
+     "damage_usd_m": null,
+     "scope": "national",
+     "where": "Epicentre 14 km N of Ashgabat (USGS) / 37.95 N 58.32 E (Wikipedia); 20:12 UTC = 01:12 on 6 October local time",
+     "note_ja": "Near-total destruction of Ashgabat; Soviet censorship suppressed reporting. Wikipedia (PAGER-CAT) gives 10,000-110,000 dead; GEM uses 110,000; the Turkmen government later claimed up to 176,000 (from memory, unverified). Deadliest earthquake in Central Asian history; 6 October is a national remembrance day.",
+     "src": "https://en.wikipedia.org/wiki/1948_Ashgabat_earthquake ; https://earthquake.usgs.gov/earthquakes/eventpage/iscgem897583 ; https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png",
+     "src_name": "Wikipedia / USGS ComCat / GEM",
+     "confirmed_by": "third_party (Wikipedia) / page_read (USGS, GEM)"
+    },
+    {
+     "date": "1983-07-28",
+     "name_ja": "National heat record 50.1 C at Repetek (Karakum desert, Lebap)",
+     "hazard": "heat",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "where": "Repetek Biosphere Reserve, south of Turkmenabat",
+     "note_ja": "Highest temperature ever recorded in Turkmenistan; Bakharden (Ahal) reached about 49 C on 1995-07-12 (search snippet, plantmaps). Summer heat above 45 C is routine in the Karakum.",
+     "src": "https://en.wikipedia.org/wiki/Climate_of_Turkmenistan",
+     "src_name": "Wikipedia",
+     "confirmed_by": "third_party"
+    },
+    {
+     "date": "2000-12-06",
+     "name_ja": "2000 Balkanabat (Nebitdag) earthquake, Mw 7.0 (Ms 7.5), 11 deaths",
+     "hazard": "quake",
+     "deaths": 11,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "where": "Balkan Mountains near Balkanabat; epicentre 39.48 N 54.82 E, depth 30 km; 22:11 local time",
+     "note_ja": "MMI VII in Balkanabat and Turkmenbashi; felt in Nukus, Baku, northern Iran and as far as Moscow; 11 deaths and five injuries per Chinese state TV (Gazeta.ru: 4 deaths in Balkanabat); buildings reportedly collapsed in Ashgabat; six aftershocks above Mw 4.0 by 10 December. EM-DAT 2000 earthquake total: 11 deaths. GEM: 'M7.0 Nebitdag-Turkmenbashi, 11 fatalities'.",
+     "src": "https://en.wikipedia.org/wiki/2000_Turkmenistan_earthquake ; https://earthquake.usgs.gov/earthquakes/eventpage/usp000a5m7 ; https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
+     "src_name": "Wikipedia / USGS ComCat / EM-DAT (OWID mirror)",
+     "confirmed_by": "third_party / page_read"
+    },
+    {
+     "date": "2015-06-30",
+     "name_ja": "June 2015 heat wave: Ashgabat 47.2 C, hottest June since records began in 1891",
+     "hazard": "heat",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "where": "Ashgabat and most of the country; also record heat in Uzbekistan",
+     "note_ja": "Turkmenhydromet called it the hottest June day in Ashgabat's recorded history (AFP); the Ashgabat climate table (extremes 1893-present) lists 47.2 C as the June record. Air-conditioning and water-supply strain in the capital.",
+     "src": "https://phys.org/news/2015-07-central-asia-record-breaking-heatwave.amp ; https://en.wikipedia.org/wiki/Ashgabat",
+     "src_name": "AFP via Phys.org / Wikipedia",
+     "confirmed_by": "search_snippet / third_party"
+    },
+    {
+     "date": "2018-05",
+     "name_ja": "Aral Sea salt-and-dust storm reaches Dashoguz and Ashgabat (May 2018); nationwide dust storm April 2023",
+     "hazard": "cyclone",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "where": "Dashoguz Region (airport closed), Ashgabat; April 2023 storm covered most of the country",
+     "note_ja": "Salt smog from the dried Aral seabed left buildings and trees in Ashgabat coated with white salt and disrupted flights at Dashoguz (RFE/RL, May 2018). A 13-14 April 2023 dust storm was the strongest of that year with winds above storm criteria (daryo.uz citing MeteoJournal). Dust storms also damage orchards (freshplaza).",
+     "src": "https://www.rferl.org/a/29257503.html ; https://daryo.uz/en/2023/04/14/dust-storm-hits-turkmenistan",
+     "src_name": "RFE/RL / Daryo",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "date": "2020-04-27",
+     "name_ja": "April 2020 Turkmenabat (Lebap) windstorm - at least 30 deaths, hundreds homeless",
+     "hazard": "cyclone",
+     "deaths": 30,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "where": "Turkmenabat and Lebap Region (also Mary Region)",
+     "note_ja": "Hurricane-force winds with heavy rain tore off roofs (about 35% of buildings on the central avenue damaged), toppled poles and cut power, gas and water for days; RFE/RL correspondents counted at least 30 deaths, turkmen.news quoted a medical official claiming about 300 in the city; the government never acknowledged the storm and activists said foreign aid was blocked. Date 27 April per most sources (some say 17 April).",
+     "src": "https://www.rferl.org/a/turkmen-province-in-chaos-after-deadly-windstorms/30585718.html ; https://en.turkmen.news/2020/05/04/spotlight/storm-battered-turkmenabat-left-to-its-fate/ ; https://crisis24.garda.com/fr/product/349356",
+     "src_name": "RFE/RL / turkmen.news / Crisis24",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "date": "2021-03",
+     "name_ja": "2021 Central Asia drought: irrigation-water shortage in Dashoguz, livestock sell-off",
+     "hazard": "water",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "where": "Dashoguz and Lebap (lower Amu Darya), Mary (Murghab); whole region",
+     "note_ja": "Residents of Dashoguz sold livestock in March 2021 for lack of irrigation water and fodder; low Amu Darya flow after a dry winter hit cotton and wheat. Water scarcity is rated High by ThinkHazard nationally; Turkmenistan is almost entirely dependent on transboundary Amu Darya water via the Karakum Canal.",
+     "src": "https://en.wikipedia.org/wiki/2021_Central_Asia_drought",
+     "src_name": "Wikipedia",
+     "confirmed_by": "third_party"
+    },
+    {
+     "date": "2023-01-12",
+     "name_ja": "January 2023 cold snap: frost forms gas hydrates at Galkynysh, gas exports to Uzbekistan halted",
+     "hazard": "cold",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "where": "Galkynysh field (Mary Region) and national gas grid; Ashgabat lows about -6 C, colder in the north",
+     "note_ja": "Uzbekistan's energy ministry reported an emergency at a Turkmen field on 12 January 2023 that fully halted gas imports and cut electricity imports by 20%; gas hydrates formed in pipes and pumps as temperatures fell well below freezing (Caspian Policy Center). Domestic heating relies on gas; pressure drops in cold spells are a recurring complaint (RFE/RL 2008).",
+     "src": "https://interfax.com/newsroom/top-stories/86987/ ; https://caspianpolicy.org/research/energy-and-economy-program-eep/freezing-temperatures-complicate-turkmenistans-energy-exports",
+     "src_name": "Interfax / Caspian Policy Center",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "date": "2024-05-14",
+     "name_ja": "May 2024 Ashgabat floods and Ahal mudflows (GLIDE FL-2024-000072-TKM)",
+     "hazard": "flood",
+     "deaths": 1,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "where": "Ashgabat (Ankara Street, three railway underpasses), Ahal Region incl. Serakhs on the Iranian border",
+     "note_ja": "About ten days of downpours (21 mm on 14-15 May, 80 mm in the month, nearly a quarter of the annual mean in three days) flooded streets with water and mud; local meteorologists called it possibly the worst since the 1970s; mudflow-prevention structures completed in 2022 limited damage in the capital. Mudflows washed out roads near Serakhs: seven border soldiers went missing on 17 May, one body was found on 18 May (deaths = 1 confirmed, 6 missing). Sentinel Asia activation (ALOS-2 18 May, Sentinel-1 21 May) detected flood water in Ashgabat and Ahal. State media did not report the event. EM-DAT's only flood record for Turkmenistan is 1993 (USD 99.9 M damage, 420 affected; location unverified).",
+     "src": "https://centralasianlight.org/news/heavy-rains-flooded-the-capital-of-turkmenistan ; https://sentinel-asia.org/EO/2024/article20240516TM.html ; https://timesca.com/one-soldier-dead-and-six-missing-in-turkmenistan-mudslides/ ; https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
+     "src_name": "CentralAsianLight / Sentinel Asia / Times of Central Asia / EM-DAT",
+     "confirmed_by": "search_snippet / page_read (EM-DAT 1993 figures)"
+    },
+    {
+     "date": "2025-07",
+     "name_ja": "Caspian Sea falls to its lowest recorded level (below -29 m)",
+     "hazard": "water",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "where": "Turkmen Caspian coast: Turkmenbashi port, Hazar (Cheleken), Awaza resort",
+     "note_ja": "In July 2025 the Caspian reached its lowest level in the instrumental record, below 29 m below sea level (Wikipedia citing Russian scientists). The shore at Hazar had already receded about 800 m by late 2023 (AFP); modelling (Communications Earth & Environment, 2025) projects up to 17 km of shoreline retreat at Turkmenbashi port under an 18 m decline. Threatens port access, refinery cooling water, fisheries and the Awaza tourist zone.",
+     "src": "https://en.wikipedia.org/wiki/Caspian_Sea ; https://www.arabnews.com/node/2429956/world ; https://progres.online/society/environment/declining-caspian-sea-levels-threaten-the-environment-and-human-infrastructure-in-turkmenistan/",
+     "src_name": "Wikipedia / AFP via Arab News / Progres.online",
+     "confirmed_by": "third_party / search_snippet"
+    }
+   ]
   },
   "UZB": {
    "name_en": "Uzbekistan",
@@ -5851,25 +6143,6 @@
      "confirmed_by": "search_snippet"
     },
     {
-     "date": "2023-12-16",
-     "name_ja": "Ala-Archa river overflow floods Bishkek streets; June 2024 storm floods Archa-Beshik",
-     "hazard": "urban_flood",
-     "deaths": null,
-     "damage_usd_m": null,
-     "scope": "regional",
-     "scope_ja": "Bishkek (Ala-Archa channel, Archa-Beshik housing area)",
-     "multi": false,
-     "other_country": false,
-     "countries": [
-      "KGZ"
-     ],
-     "note_ja": "Economist.kg reported the Ala-Archa bursting its banks and flooding streets on 16 Dec 2023 (ice/debris blockage) and the Archa-Beshik housing estate flooded by a downpour on 20 June 2024; typical of the capital's undersized drains.",
-     "jp_ja": "Ground-floor premises along the Ala-Archa and Alamedin channels and the northern (lower) districts flood first; keep stock off the floor.",
-     "src": "https://economist.kg/novosti/2023/12/16/rieka-ala-archa-vyshla-iz-bierieghov-i-zatopila-ulitsy-bishkieka-probliemu-uzhie-rieshili/",
-     "src_name": "Economist.kg",
-     "confirmed_by": "search_snippet"
-    },
-    {
      "date": "2024-01-22",
      "name_ja": "2024 Uqturpan (Wushi) M7.0 earthquake felt in Bishkek; MSK VI in Issyk-Kul",
      "hazard": "quake",
@@ -5908,25 +6181,6 @@
      "src": "https://economist.kg/novosti/2024/07/17/v-bishkiekie-obiavili-riezhim-osoboi-ghotovnosti-iz-za-vozmozhnogho-skhoda-sielia-v-ushchielie-ala-archa.md",
      "src_name": "Economist.kg; 24.kg; intellinews",
      "confirmed_by": "search_snippet"
-    },
-    {
-     "date": "2026-08-12",
-     "name_ja": "M5.0 earthquake 69 km east of Chayek (latest M5+ within 150 km of Bishkek)",
-     "hazard": "quake",
-     "deaths": 0,
-     "damage_usd_m": null,
-     "scope": "regional",
-     "scope_ja": "Jumgal district (Naryn), 115 km from Bishkek",
-     "multi": false,
-     "other_country": false,
-     "countries": [
-      "KGZ"
-     ],
-     "note_ja": "USGS us6000tk5x mb 5.0, 10 km deep; 18 M5+ events within 150 km of Bishkek since 1950 (4 of them M6+), nearest M5.2 18 km SSE of Tokmok in 1972.",
-     "jp_ja": "Felt-but-harmless events happen every 1-2 years; use them to test the staff safety-confirmation drill.",
-     "src": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1950-01-01&endtime=2026-11-17&minmagnitude=5.0&orderby=time&limit=2000&latitude=42.87&longitude=74.59&maxradiuskm=150",
-     "src_name": "USGS ComCat (research-ca/usgs.json)",
-     "confirmed_by": "page_read"
     },
     {
      "date": "annual",
@@ -6052,7 +6306,48 @@
      "name": "24.kg - Bishkek population Feb 2026",
      "url": "https://24.kg/english/372175_Bishkek_population_reaches_13629_million_records_lowest_growth_rate/"
     }
-   ]
+   ],
+   "history_extra": [
+    {
+     "date": "2023-12-16",
+     "name_ja": "Ala-Archa river overflow floods Bishkek streets; June 2024 storm floods Archa-Beshik",
+     "hazard": "urban_flood",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Bishkek (Ala-Archa channel, Archa-Beshik housing area)",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "KGZ"
+     ],
+     "note_ja": "Economist.kg reported the Ala-Archa bursting its banks and flooding streets on 16 Dec 2023 (ice/debris blockage) and the Archa-Beshik housing estate flooded by a downpour on 20 June 2024; typical of the capital's undersized drains.",
+     "jp_ja": "Ground-floor premises along the Ala-Archa and Alamedin channels and the northern (lower) districts flood first; keep stock off the floor.",
+     "src": "https://economist.kg/novosti/2023/12/16/rieka-ala-archa-vyshla-iz-bierieghov-i-zatopila-ulitsy-bishkieka-probliemu-uzhie-rieshili/",
+     "src_name": "Economist.kg",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "date": "2026-08-12",
+     "name_ja": "M5.0 earthquake 69 km east of Chayek (latest M5+ within 150 km of Bishkek)",
+     "hazard": "quake",
+     "deaths": 0,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Jumgal district (Naryn), 115 km from Bishkek",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "KGZ"
+     ],
+     "note_ja": "USGS us6000tk5x mb 5.0, 10 km deep; 18 M5+ events within 150 km of Bishkek since 1950 (4 of them M6+), nearest M5.2 18 km SSE of Tokmok in 1972.",
+     "jp_ja": "Felt-but-harmless events happen every 1-2 years; use them to test the staff safety-confirmation drill.",
+     "src": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1950-01-01&endtime=2026-11-17&minmagnitude=5.0&orderby=time&limit=2000&latitude=42.87&longitude=74.59&maxradiuskm=150",
+     "src_name": "USGS ComCat (research-ca/usgs.json)",
+     "confirmed_by": "page_read"
+    }
+   ],
+   "history_extra_note": "Moved out of 'history' to keep it at 10 entries (brief: 6-10): the 2026-08-12 M5.0 Chayek event (no damage; cited in rp.quake.scen['10']) and the 2023-12-16 Ala-Archa channel overflow (cited in rp.urban_flood.anchor_ja)."
   },
   {
    "id": "kg-osh",
@@ -6385,28 +6680,8 @@
    },
    "history": [
     {
-     "date": "1902-08-22",
-     "name_ja": "1902 Turkestan (Kashgar/Artux) earthquake, Mw 7.7, 5,650-10,000 dead",
-     "hazard": "quake",
-     "deaths": 5650,
-     "damage_usd_m": null,
-     "scope": "regional",
-     "scope_ja": "Epicentre 50 km NNE of Kashgar (Xinjiang), 180 km SE of Osh; Alay/Chong-Alay affected",
-     "multi": true,
-     "other_country": true,
-     "countries": [
-      "CHN",
-      "KGZ"
-     ],
-     "note_ja": "Thrust earthquake under the Tien Shan near the Kyrgyz border, RFS X; 5,650-10,000 deaths mostly in Xinjiang; USGS ISC-GEM Mw 7.7, 30 km deep. Largest event in the Osh-Kashgar corridor.",
-     "jp_ja": "The Irkeshtam-Kashgar trade route and the Alay valley are in the hanging wall of this fault system; freight via Irkeshtam can be cut for weeks.",
-     "src": "https://en.wikipedia.org/wiki/1902_Turkestan_earthquake",
-     "src_name": "Wikipedia; USGS ComCat",
-     "confirmed_by": "third_party"
-    },
-    {
      "date": "1946-11-02",
-     "name_ja": "1946 Chatkal earthquake, Mw 7.5, 34 km north of Kerben (Jalal-Abad)",
+     "name_ja": "1946 Chatkal earthquake, Mw 7.5 (ISC-GEM), 34 km north of Kerben (Aksy district, Jalal-Abad)",
      "hazard": "quake",
      "deaths": null,
      "damage_usd_m": null,
@@ -6417,11 +6692,11 @@
      "countries": [
       "KGZ"
      ],
-     "note_ja": "Mw 7.5-7.6 (USGS iscgem 7.54, 25 km deep), MSK IX, large landslides; casualties unknown (Soviet-era reporting). Largest instrumental event inside Kyrgyzstan after 1911.",
+     "note_ja": "USGS iscgem898647: Mw 7.54, depth 25 km, 1946-11-02 18:28 UTC. Mw 7.5-7.6 (USGS iscgem 7.54, 25 km deep), MSK IX, large landslides; casualties unknown (Soviet-era reporting). Largest instrumental event inside Kyrgyzstan after 1911.",
      "jp_ja": "An M7.5 in the Chatkal/Fergana ranges would isolate Aksy, Ala-Buka and Chatkal districts for weeks (single mountain roads).",
-     "src": "https://en.wikipedia.org/wiki/1946_Chatkal_earthquake",
-     "src_name": "Wikipedia; USGS ComCat",
-     "confirmed_by": "third_party"
+     "src": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem898647 ; https://en.wikipedia.org/wiki/1946_Chatkal_earthquake",
+     "src_name": "USGS ComCat (ISC-GEM); Wikipedia; USGS ComCat",
+     "confirmed_by": "page_read (USGS magnitude Mw 7.54, 41.80 N 71.82 E, depth 25 km) / unverified (casualties)"
     },
     {
      "date": "1994-04-14",
@@ -6440,25 +6715,6 @@
      "jp_ja": "Loess slopes above villages fail in April-May after wet winters; staff housing and warehouses should avoid slope toes mapped by MES.",
      "src": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
      "src_name": "EM-DAT (OWID); ADRC; IRIN",
-     "confirmed_by": "page_read"
-    },
-    {
-     "date": "1998-05-19",
-     "name_ja": "1998 Kugart river dam break: Suzak district (Jalal-Abad) flooded",
-     "hazard": "flood",
-     "deaths": 1,
-     "damage_usd_m": 2.4,
-     "scope": "regional",
-     "scope_ja": "Suzak and Jalal-Abad city area; Osh Region also hit by rains",
-     "multi": false,
-     "other_country": false,
-     "countries": [
-      "KGZ"
-     ],
-     "note_ja": "Torrential rain from 18 May raised the Kugart river, which broke a 100 m wide dam: 1 death, ~7,700 displaced (8,760 resettled), 1,170-1,250 houses, 40 offices, 45 km of power lines and 40 km of the Jalal-Abad-Kara-Suu road destroyed, ~10,000 affected (OCHA). EM-DAT 1998 flood damage USD 2.4 M.",
-     "jp_ja": "Irrigation dams and canals are the weak point: a breach can flood a valley town within hours even when rivers are rated Very low.",
-     "src": "https://reliefweb.int/disaster/fl-1998-000213-kgz",
-     "src_name": "ReliefWeb (OCHA); EM-DAT (OWID)",
      "confirmed_by": "page_read"
     },
     {
@@ -6709,7 +6965,49 @@
      "name": "Wikipedia - 2008 Kyrgyzstan earthquake",
      "url": "https://en.wikipedia.org/wiki/2008_Kyrgyzstan_earthquake"
     }
-   ]
+   ],
+   "history_extra": [
+    {
+     "date": "1902-08-22",
+     "name_ja": "1902 Turkestan (Kashgar/Artux) earthquake, Mw 7.7, 5,650-10,000 dead",
+     "hazard": "quake",
+     "deaths": 5650,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Epicentre 50 km NNE of Kashgar (Xinjiang), 180 km SE of Osh; Alay/Chong-Alay affected",
+     "multi": true,
+     "other_country": true,
+     "countries": [
+      "CHN",
+      "KGZ"
+     ],
+     "note_ja": "Thrust earthquake under the Tien Shan near the Kyrgyz border, RFS X; 5,650-10,000 deaths mostly in Xinjiang; USGS ISC-GEM Mw 7.7, 30 km deep. Largest event in the Osh-Kashgar corridor.",
+     "jp_ja": "The Irkeshtam-Kashgar trade route and the Alay valley are in the hanging wall of this fault system; freight via Irkeshtam can be cut for weeks.",
+     "src": "https://en.wikipedia.org/wiki/1902_Turkestan_earthquake",
+     "src_name": "Wikipedia; USGS ComCat",
+     "confirmed_by": "third_party"
+    },
+    {
+     "date": "1998-05-19",
+     "name_ja": "1998 Kugart river dam break: Suzak district (Jalal-Abad) flooded",
+     "hazard": "flood",
+     "deaths": 1,
+     "damage_usd_m": 2.4,
+     "scope": "regional",
+     "scope_ja": "Suzak and Jalal-Abad city area; Osh Region also hit by rains",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "KGZ"
+     ],
+     "note_ja": "Torrential rain from 18 May raised the Kugart river, which broke a 100 m wide dam: 1 death, ~7,700 displaced (8,760 resettled), 1,170-1,250 houses, 40 offices, 45 km of power lines and 40 km of the Jalal-Abad-Kara-Suu road destroyed, ~10,000 affected (OCHA). EM-DAT 1998 flood damage USD 2.4 M.",
+     "jp_ja": "Irrigation dams and canals are the weak point: a breach can flood a valley town within hours even when rivers are rated Very low.",
+     "src": "https://reliefweb.int/disaster/fl-1998-000213-kgz",
+     "src_name": "ReliefWeb (OCHA); EM-DAT (OWID)",
+     "confirmed_by": "page_read"
+    }
+   ],
+   "history_extra_note": "Moved out of 'history' to keep it at 10 entries (brief: 6-10): the 1902 Kashgar earthquake (mostly Xinjiang, 180 km from Osh) and the 1998 Kugart dam-break flood (1 death; still cited in rp.flood.anchor_ja)."
   },
   {
    "id": "tj-dus",
@@ -8009,6 +8307,1146 @@
     {
      "name": "ReliefWeb - Tajikistan disasters",
      "url": "https://reliefweb.int/country/tjk"
+    }
+   ]
+  },
+  {
+   "id": "tm-ash",
+   "name_ja": "Ashgabat and Ahal Province",
+   "name_en": "Ashgabat and Ahal Province",
+   "country": "TKM",
+   "adm1_ids": [
+    "TKM-352"
+   ],
+   "hazard_adm1_ids": [
+    "TKM-352"
+   ],
+   "center": [
+    58.38,
+    37.95
+   ],
+   "hazard_scope_ja": "ThinkHazard admin-1 level (Ahal, code 147323). Ashgabat city has no ThinkHazard division (search returns nothing), so the Ahal levels are applied to the capital; national levels (code 250) are the same or higher.",
+   "pop_m": 1.9,
+   "pop_src": "Ashgabat 1,030,063 + Ahal Region 886,845 (2022 census; Wikipedia infoboxes) = 1.92 M - third_party. Official census totals are contested by independent media.",
+   "jp_residents": null,
+   "desc_ja": "Capital region on the northern piedmont of the Kopet Dag range (Ashgabat at 273 m), with the Karakum desert and the Karakum Canal to the north. Ashgabat is a planned, marble-clad city rebuilt after the 1948 earthquake; the new administrative city of Arkadag (Ahal capital) lies 30 km west. Hosts ministries, the Embassy of Japan, the international airport and most foreign firms. Earthquakes on the Kopet Dag front are the dominant catastrophic hazard; spring cloudbursts bring flash floods and mudflows from the mountains; summers reach 45-47 C and dust/salt storms are frequent.",
+   "th_url": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal",
+   "hazards": {
+    "river_flood": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "urban_flood": {
+     "level": "Low",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "coastal_flood": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "earthquake": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "landslide": {
+     "level": "Low",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "tsunami": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "volcano": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "cyclone": {
+     "level": "Very low",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "extreme_heat": {
+     "level": "Medium",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "wildfire": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "water_scarcity": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    "extreme_cold": {
+     "level": "Medium",
+     "src": "https://en.wikipedia.org/wiki/Ashgabat (climate table)",
+     "confirmed_by": "third_party",
+     "assumed": true,
+     "note": "Assumed Medium: January mean minimum -0.1 C but record low -24.1 C (extremes 1893-present); cold snaps strain the gas-fired heating supply."
+    }
+   },
+   "hazards_alt": {
+    "division": "Turkmenistan (national), code 250",
+    "url": "https://www.thinkhazard.org/en/report/250-turkmenistan",
+    "levels": {
+     "river_flood": "High",
+     "urban_flood": "High",
+     "coastal_flood": "No data",
+     "earthquake": "High",
+     "landslide": "Low",
+     "tsunami": "No data",
+     "volcano": "No data",
+     "cyclone": "Very low",
+     "extreme_heat": "High",
+     "wildfire": "High",
+     "water_scarcity": "High"
+    },
+    "confirmed_by": "page_read"
+   },
+   "hz_note_ja": "Earthquake High is the headline risk: USGS ComCat lists 19 M5+ events within 150 km of Ashgabat since 1950, the largest being the 1929 Baharly Mw 7.2 (67 km west) and the 1948 Ashgabat Mw 7.15 (14 km north) that levelled the city; GEM's regional split puts about 48% of national seismic building loss in Ahal plus Ashgabat, and 41% of the national building stock by count is adobe/earth. River flood High reflects Kopet Dag flash floods and mudflows reaching the piedmont (May 2024: Ashgabat underpasses flooded, Serakhs road washouts with one soldier dead and six missing); urban flood is rated Low by ThinkHazard but the city floods almost every spring because the storm-drain system cannot take cloudbursts (April 2019, May 2024), so treat urban flood as at least Medium in practice. Extreme heat Medium at admin-1 level understates the capital's 47.2 C record (June 2015) and 40 C in April 2025. Water scarcity High: the region depends on the Karakum Canal. Cyclone Very low refers to tropical cyclones; dust and salt storms (May 2018, April 2023) are a separate, frequent nuisance hazard.",
+   "rp": {
+    "flood": {
+     "anchor_ja": "Anchor: the May 2024 event - about ten days of rain (80 mm in the month, 21 mm on 14-15 May) flooded Ashgabat streets and three railway underpasses with water and mud and triggered mudflows in Ahal (Serakhs: 1 soldier dead, 6 missing; Sentinel Asia FL-2024-000072-TKM); local meteorologists called it possibly the worst since the 1970s; mudflow-prevention structures completed in 2022 limited damage. April 2019: capital inundated after rain from 13 April. EM-DAT's only Turkmenistan flood record is 1993 (USD 99.9 M, location unverified).",
+     "k": {
+      "10": 0.291,
+      "50": 0.511,
+      "100": 0.602,
+      "500": 0.882,
+      "1000": 1.0
+     },
+     "scen": {
+      "10": "Spring cloudburst: streets and underpasses in Ashgabat under 20-40 cm of muddy water for a day, mudflow channels run full",
+      "50": "2024-type: ten days of rain, piedmont mudflows cut roads to Serakhs and Baharly, flooded basements and underpasses in the capital",
+      "100": "Mudflow channels overtopped: southern districts of Ashgabat and Arkadag receive mud and debris, Karakum Canal embankment breaches flood farmland",
+      "500": "Combined Kopet Dag flash floods and canal breach: low-lying districts flooded for weeks, airport and rail access disrupted",
+      "1000": "Extreme multi-day storm with mudflow-dam failures: widespread inundation of the piedmont belt including the capital's southern half"
+     },
+     "depth_max": 1.5,
+     "area_max": 3,
+     "pop_max": 0.05,
+     "downtime_max": 10,
+     "loss_max": 359.0,
+     "share_of_national": 0.15,
+     "method_ja": "loss = loss_max x k. k is the shape of the WRI Aqueduct national riverine urban-damage curve for Turkmenistan (2010 baseline; USD 696.4 M at 10 yr to 2,393.4 M at 1,000 yr), so k[1000]=1. loss_max = an assumed regional share (15%) of the national 1,000-year Aqueduct damage. Depth, area, affected population and downtime scale with the same k (population and downtime with k^2.5 in the app). Screening model, not a hydraulic study.",
+     "assumptions_ja": [
+      "Regional share 15% is assumed: the region holds about 27% of the population and the highest-value assets, but Aqueduct's riverine damage concentrates along the Amu Darya (Lebap/Dashoguz), so the share is set below the population share.",
+      "The May 2024 event is treated as roughly a 50-year event.",
+      "Aqueduct is a 2010-baseline model without the 2022 mudflow-prevention works; losses above 100 years grow because of channel overtopping and canal breaches.",
+      "Affected population 5% at k=1."
+     ],
+     "refs": [
+      {
+       "name": "WRI Aqueduct floods country data (CSV mirror)",
+       "url": "https://github.com/cloudtostreet/MODIS_GlobalFloodDatabase (aqueductcountrydata.csv mirror; see research-ca/aqueduct.json)"
+      },
+      {
+       "name": "ThinkHazard - Ahal",
+       "url": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal"
+      },
+      {
+       "name": "Sentinel Asia activation 2024-05-16 Turkmenistan flood",
+       "url": "https://sentinel-asia.org/EO/2024/article20240516TM.html"
+      },
+      {
+       "name": "CentralAsianLight - heavy rains flooded the capital",
+       "url": "https://centralasianlight.org/news/heavy-rains-flooded-the-capital-of-turkmenistan"
+      },
+      {
+       "name": "Times of Central Asia - one soldier dead and six missing in mudslides",
+       "url": "https://timesca.com/one-soldier-dead-and-six-missing-in-turkmenistan-mudslides/"
+      },
+      {
+       "name": "RFE/RL - Turkmen capital inundated after heavy rains",
+       "url": "https://rferl.org/amp/turkmenistan-ashgabat-floods/29884409.html"
+      }
+     ]
+    },
+    "urban_flood": {
+     "anchor_ja": "Anchor: near-annual spring ponding in Ashgabat when cloudbursts exceed storm-drain capacity (April 2019, May 2024: Ankara Street and three underpasses flooded, cars stuck in mud); no public loss data, values assumed.",
+     "k": {
+      "10": 0.5,
+      "50": 0.75,
+      "100": 0.85,
+      "500": 0.95,
+      "1000": 1.0
+     },
+     "scen": {
+      "10": "Underpasses and low streets flooded for hours; traffic blocked, some basements wet",
+      "50": "2024-type: mud and water on main avenues for days, ground floors and car parks flooded in the south of the city",
+      "100": "Multi-day ponding across southern and central districts, sewage overflow, power substations affected",
+      "500": "Drainage failure coinciding with mudflows from the Kopet Dag",
+      "1000": "City-wide drainage collapse with canal backwater"
+     },
+     "depth_max": 0.5,
+     "area_max": 10,
+     "pop_max": 0.04,
+     "downtime_max": 3,
+     "loss_max": 80,
+     "method_ja": "Loss is a rough product of disrupted business days and affected area; not based on a public loss record.",
+     "assumptions_ja": [
+      "Loss at k=1 assumed USD 80 M.",
+      "Affected population 4% at k=1.",
+      "ThinkHazard rates urban flood Low for Ahal, but observed near-annual flooding in the capital justifies modelling it."
+     ],
+     "refs": [
+      {
+       "name": "CentralAsianLight - heavy rains flooded the capital",
+       "url": "https://centralasianlight.org/news/heavy-rains-flooded-the-capital-of-turkmenistan"
+      },
+      {
+       "name": "ThinkHazard - Ahal",
+       "url": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal"
+      }
+     ]
+    },
+    "quake": {
+     "anchor_ja": "National loss curve: GEM profile (USD 2.1 M at 10 yr, 36.2 M at 50 yr, 73.6 M at 100 yr, 241.2 M at 500 yr, 387.5 M at 1,000 yr). GEM's regional split gives Ahal about USD 1.1 M/yr and Ashgabat 0.846 M/yr of 4.045 M/yr (48%), so share = 0.48. History: 1948 Ashgabat Mw 7.15/Ms 7.3, MMI X, 10,000-110,000 dead; 1929 Baharly Mw 7.2 67 km west; USGS: 19 M5+ within 150 km since 1950, latest M5.1 on 2021-09-13 near Quchan (Iran), 86 km away.",
+     "k": {
+      "10": 0.1,
+      "50": 0.35,
+      "100": 0.5,
+      "500": 0.85,
+      "1000": 1.0
+     },
+     "share": 0.48,
+     "scen": {
+      "10": "M5 event in the Kopet Dag or northern Iran felt in Ashgabat; cracked plaster, brief evacuations",
+      "50": "M6 on the Kopet Dag front 40-80 km away (1929/2021-type): damage to adobe housing in Ahal villages, non-structural damage in the city",
+      "100": "M6.5 within 50 km: collapse of older unreinforced buildings, lifeline outages for days, hospitals overloaded",
+      "500": "1948-type M7+ at 15 km: widespread collapse of pre-code and adobe buildings, thousands of casualties, weeks of outages",
+      "1000": "M7.5 directly under the piedmont with surface rupture: catastrophic damage across Ashgabat and Arkadag"
+     },
+     "pop_max": 0.5,
+     "downtime_max": 90,
+     "method_ja": "loss = GEM national building-loss curve for Turkmenistan (residential+commercial+industrial, 2025 USD) x share. share is the region's fraction of GEM's regional AAL split (Ahal + Ashgabat). k is an assumed relative intensity used only for affected population and downtime.",
+     "assumptions_ja": [
+      "Share 48% follows GEM's regional AAL (Ahal 1.1 + Ashgabat 0.846 of 4.045 M USD/yr).",
+      "Affected population 50% and downtime 90 days at k=1 (1948 precedent).",
+      "GEM covers buildings only; infrastructure, the airport and pipelines are excluded.",
+      "Modern marble-clad government buildings are assumed code-conforming; the 41% adobe share nationally is mostly rural Ahal."
+     ],
+     "refs": [
+      {
+       "name": "GEM Country Seismic Risk Profile - Turkmenistan (CC BY-NC-SA 4.0)",
+       "url": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png"
+      },
+      {
+       "name": "USGS ComCat - 1948 Ashgabat earthquake (ISC-GEM)",
+       "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem897583"
+      },
+      {
+       "name": "USGS ComCat - 1929 Baharly earthquake",
+       "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem908052"
+      },
+      {
+       "name": "Wikipedia - 1948 Ashgabat earthquake",
+       "url": "https://en.wikipedia.org/wiki/1948_Ashgabat_earthquake"
+      }
+     ]
+    },
+    "heat": {
+     "anchor_ja": "Anchor: June 2015 heat wave - Ashgabat 47.2 C on 30 June, the hottest June day on record (records since 1891/1893); April 2025 reached 40 C, the hottest April on record; the national record is 50.1 C at Repetek (1983). Values assumed.",
+     "k": {
+      "10": 0.5,
+      "50": 0.7,
+      "100": 0.8,
+      "500": 0.95,
+      "1000": 1.0
+     },
+     "scen": {
+      "10": "A week above 42 C: outdoor work limited to mornings, water-pressure drops in upper floors",
+      "50": "2015-type: 45-47 C for several days, power demand peaks and localized outages, heat casualties among outdoor workers",
+      "100": "Two weeks above 45 C with Karakum Canal low water and rolling blackouts",
+      "500": "Month-long heat dome near 48 C with water rationing in the capital",
+      "1000": "Record 49-50 C with grid failure and water-supply collapse"
+     },
+     "pop_max": 0.4,
+     "downtime_max": 3,
+     "loss_max": 60,
+     "method_ja": "Loss is an assumed productivity and outage cost; affected population is the share exposed to heat-health risk (outdoor and construction workers, elderly).",
+     "assumptions_ja": [
+      "Loss at k=1 assumed USD 60 M.",
+      "Affected population 40% at k=1."
+     ],
+     "refs": [
+      {
+       "name": "AFP via Phys.org - Central Asia record heat wave (2015)",
+       "url": "https://phys.org/news/2015-07-central-asia-record-breaking-heatwave.amp"
+      },
+      {
+       "name": "Wikipedia - Ashgabat (climate table)",
+       "url": "https://en.wikipedia.org/wiki/Ashgabat"
+      },
+      {
+       "name": "Wikipedia - Climate of Turkmenistan",
+       "url": "https://en.wikipedia.org/wiki/Climate_of_Turkmenistan"
+      }
+     ]
+    }
+   },
+   "history": [
+    {
+     "date": "1948-10-05",
+     "name_ja": "1948 Ashgabat earthquake, Ms 7.3 (Mw 7.15), MMI X",
+     "hazard": "quake",
+     "deaths": 110000,
+     "damage_usd_m": null,
+     "scope": "national",
+     "scope_ja": "Ashgabat and surrounding Ahal villages; also northern Iran",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "IRN"
+     ],
+     "note_ja": "01:12 local time on 6 October; near-total destruction of the city. Deaths 10,000-110,000 (Wikipedia/PAGER-CAT), GEM 110,000, government claims up to 176,000 (unverified). Soviet censorship suppressed reporting.",
+     "jp_ja": "The design-basis event for any site in Ashgabat: expect weeks without lifelines and plan evacuation assembly points away from unreinforced masonry.",
+     "src": "https://en.wikipedia.org/wiki/1948_Ashgabat_earthquake ; https://earthquake.usgs.gov/earthquakes/eventpage/iscgem897583",
+     "src_name": "Wikipedia / USGS ComCat",
+     "confirmed_by": "third_party / page_read"
+    },
+    {
+     "date": "1929-05-01",
+     "name_ja": "1929 Baharly (Bakharden) earthquake, Mw 7.2, 67 km west of Ashgabat",
+     "hazard": "quake",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Kopet Dag front near Baharly, Ahal",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "TKM"
+     ],
+     "note_ja": "USGS ISC-GEM iscgem908052: Mw 7.2, depth 10 km, 40 km SSE of Baharly; largest catalogued event within 150 km of Ashgabat. Casualties not found in sources read.",
+     "jp_ja": "Shows that M7 events occur along the whole Kopet Dag front, not only at the 1948 location.",
+     "src": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem908052",
+     "src_name": "USGS ComCat (research-ca/usgs.json)",
+     "confirmed_by": "page_read"
+    },
+    {
+     "date": "2024-05-14",
+     "name_ja": "May 2024 Ashgabat floods and Ahal mudflows (FL-2024-000072-TKM)",
+     "hazard": "flood",
+     "deaths": 1,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Ashgabat city, Serakhs and the Kopet Dag piedmont",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "TKM"
+     ],
+     "note_ja": "Ten days of rain (80 mm in May) flooded Ankara Street and three underpasses with mud; mudflows washed out roads at Serakhs where seven border soldiers went missing (one found dead). Sentinel Asia detected flood water on 18 and 21 May. Not reported by state media.",
+     "jp_ja": "Expect road closures to Serakhs/Mary and flooded underpasses in the capital; keep vehicles out of mudflow channels.",
+     "src": "https://centralasianlight.org/news/heavy-rains-flooded-the-capital-of-turkmenistan ; https://sentinel-asia.org/EO/2024/article20240516TM.html ; https://timesca.com/one-soldier-dead-and-six-missing-in-turkmenistan-mudslides/",
+     "src_name": "CentralAsianLight / Sentinel Asia / Times of Central Asia",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "date": "2019-04-13",
+     "name_ja": "April 2019 Ashgabat flooding after regional rains",
+     "hazard": "urban_flood",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Ashgabat streets; the same rains flooded Iran and Afghanistan",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "IRN",
+      "AFG"
+     ],
+     "note_ja": "RFE/RL: streets of the capital flooded after severe rains that began on 13 April; the president later dismissed the deputy defence minister overseeing emergencies (yerzemin). Year inferred from the article identifier and context (unverified).",
+     "jp_ja": "Near-annual spring flooding of the capital's streets; a day of disruption rather than a disaster.",
+     "src": "https://rferl.org/amp/turkmenistan-ashgabat-floods/29884409.html ; https://www.yerzemin.com/display/after-ashgabat-flooding-the-turkmen-president-dismisses-deputy-defense-minister-overseeing-emergency-situations-and-reprimands-some-officials/28033",
+     "src_name": "RFE/RL / Yerzemin",
+     "confirmed_by": "search_snippet (year unverified)"
+    },
+    {
+     "date": "2015-06-30",
+     "name_ja": "Ashgabat 47.2 C - hottest June day on record",
+     "hazard": "heat",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "scope_ja": "Ashgabat and the whole country",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "UZB"
+     ],
+     "note_ja": "Turkmenhydromet: hottest June since records began in 1891 (AFP). April 2025 brought 40 C, the hottest April on record.",
+     "jp_ja": "Plan outdoor work and site visits for early morning in June-August; check air-conditioning and water-pressure backup.",
+     "src": "https://phys.org/news/2015-07-central-asia-record-breaking-heatwave.amp ; https://thepeninsulaqatar.com/article/19/05/2025/spring-heat-breaks-records-in-central-asia",
+     "src_name": "AFP via Phys.org / The Peninsula",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "date": "2018-05",
+     "name_ja": "Aral Sea salt storm coats Ashgabat (May 2018); nationwide dust storm 13-14 April 2023",
+     "hazard": "cyclone",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "scope_ja": "Dashoguz to Ashgabat",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "UZB"
+     ],
+     "note_ja": "Salt dust from the dried Aral seabed reached the capital, coating buildings and trees; Dashoguz airport closed. The April 2023 dust storm was the strongest of that year.",
+     "jp_ja": "Respiratory precautions, air filters and vehicle visibility limits; flights can be cancelled.",
+     "src": "https://www.rferl.org/a/29257503.html ; https://daryo.uz/en/2023/04/14/dust-storm-hits-turkmenistan",
+     "src_name": "RFE/RL / Daryo",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "date": "2021-09-13",
+     "name_ja": "M5.1 earthquake near Quchan (Iran), 86 km from Ashgabat - latest M5+ within 150 km",
+     "hazard": "quake",
+     "deaths": 0,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Kopet Dag, Iran-Turkmenistan border",
+     "multi": true,
+     "other_country": true,
+     "countries": [
+      "IRN",
+      "TKM"
+     ],
+     "note_ja": "USGS us7000fans, mb 5.1, depth 10 km. 1950-04-06 Mw 5.5 aftershock 4 km WNW of Ashgabat (iscgem895353) is the nearest catalogued M5+. 19 M5+ events within 150 km since 1950, 5 since 2000.",
+     "jp_ja": "Moderate events are felt in the capital every few years; use them to test staff safety-confirmation drills.",
+     "src": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000fans ; https://earthquake.usgs.gov/earthquakes/eventpage/iscgem895353",
+     "src_name": "USGS ComCat (research-ca/usgs.json)",
+     "confirmed_by": "page_read"
+    },
+    {
+     "date": "2023-01-12",
+     "name_ja": "January 2023 cold snap - gas hydrates at Galkynysh halt exports; heating pressure drops",
+     "hazard": "cold",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "scope_ja": "National gas grid; Ashgabat lows around -6 C, snowfall",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "UZB"
+     ],
+     "note_ja": "Frost formed hydrates in field pipes and pumps, halting gas exports to Uzbekistan from 12 January and cutting its electricity imports 20%; domestic heating is gas-fired.",
+     "jp_ja": "Keep electric heaters and a generator for office/residence; gas pressure can drop during cold spells.",
+     "src": "https://interfax.com/newsroom/top-stories/86987/ ; https://caspianpolicy.org/research/energy-and-economy-program-eep/freezing-temperatures-complicate-turkmenistans-energy-exports",
+     "src_name": "Interfax / Caspian Policy Center",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "season": {
+    "flood": {
+     "months": [
+      3,
+      4,
+      5
+     ],
+     "note_ja": "Kopet Dag cloudbursts and mudflows March-May (April 2019, May 2024)."
+    },
+    "urban_flood": {
+     "months": [
+      3,
+      4,
+      5,
+      10,
+      11
+     ],
+     "note_ja": "Spring storms overwhelm drains; occasional autumn fronts."
+    },
+    "landslide": {
+     "months": [
+      3,
+      4,
+      5
+     ],
+     "note_ja": "Rain-triggered mudflows at Nokhur, Serakhs and the piedmont villages."
+    },
+    "heat": {
+     "months": [
+      6,
+      7,
+      8
+     ],
+     "note_ja": "45-47 C; 47.2 C record (June 2015); 40 C already in April 2025."
+    },
+    "cold": {
+     "months": [
+      12,
+      1,
+      2
+     ],
+     "note_ja": "Record low -24.1 C; cold snaps strain gas heating."
+    },
+    "cyclone": {
+     "months": [
+      3,
+      4,
+      5,
+      6
+     ],
+     "note_ja": "Dust and salt storms, strong spring winds."
+    },
+    "haze": {
+     "months": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "note_ja": "Dust storms and summer haze."
+    },
+    "water": {
+     "months": [
+      6,
+      7,
+      8,
+      9
+     ],
+     "note_ja": "Karakum Canal dependence; drought years (2021) cut irrigation."
+    }
+   },
+   "sources": [
+    {
+     "name": "ThinkHazard - Ahal",
+     "url": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal"
+    },
+    {
+     "name": "ThinkHazard - Turkmenistan (national)",
+     "url": "https://www.thinkhazard.org/en/report/250-turkmenistan"
+    },
+    {
+     "name": "GEM Country Seismic Risk Profile - Turkmenistan (CC BY-NC-SA 4.0)",
+     "url": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png"
+    },
+    {
+     "name": "WRI Aqueduct floods country data (CSV mirror)",
+     "url": "https://github.com/cloudtostreet/MODIS_GlobalFloodDatabase (aqueductcountrydata.csv mirror; see research-ca/aqueduct.json)"
+    },
+    {
+     "name": "USGS ComCat queries (research-ca/usgs.json)",
+     "url": "https://earthquake.usgs.gov/fdsnws/event/1/"
+    },
+    {
+     "name": "Wikipedia - Ashgabat / Ahal Region / 1948 Ashgabat earthquake",
+     "url": "https://en.wikipedia.org/wiki/Ashgabat"
+    },
+    {
+     "name": "Sentinel Asia - Flood in Turkmenistan, 16 May 2024",
+     "url": "https://sentinel-asia.org/EO/2024/article20240516TM.html"
+    },
+    {
+     "name": "EM-DAT (OWID mirror)",
+     "url": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv"
+    }
+   ]
+  },
+  {
+   "id": "tm-tur",
+   "name_ja": "Turkmenbashi and Balkan Province (Caspian coast)",
+   "name_en": "Turkmenbashi and Balkan Province (Caspian coast)",
+   "country": "TKM",
+   "adm1_ids": [
+    "TKM-351"
+   ],
+   "hazard_adm1_ids": [
+    "TKM-351"
+   ],
+   "center": [
+    53.0,
+    40.0
+   ],
+   "hazard_scope_ja": "ThinkHazard admin-1 level (Balkan, code 147322); no city-level division exists for Turkmenbashi or Balkanabat.",
+   "pop_m": 0.53,
+   "pop_src": "Balkan Region 529,895 (2022 census; Wikipedia infobox); Turkmenbashi city 91,745 (2022), Balkanabat 87,822 (2025 estimate) - third_party",
+   "jp_residents": null,
+   "desc_ja": "Western oil-and-gas province on the Caspian: Turkmenbashi (former Krasnovodsk) with the country's largest refinery (over 10 Mt/yr), the international seaport (rebuilt 2018) and the Awaza resort; Balkanabat (Nebitdag) as the regional capital and oilfield hub (Goturdepe, Barsagelmes, Cheleken/Hazar); the Balkan ranges and the Etrek/Sumbar valleys toward Iran. Terrain is desert lowland near or below sea level. Hazards: M7 earthquakes (1895, 1946, 2000), extreme heat (45.6 C Turkmenbashi record), wind and dust storms, and the Caspian's record-low level (2025) which is retreating from port and oilfield infrastructure.",
+   "th_url": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan",
+   "hazards": {
+    "river_flood": {
+     "level": "Low",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "urban_flood": {
+     "level": "Low",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "coastal_flood": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "earthquake": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "landslide": {
+     "level": "Low",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "tsunami": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "volcano": {
+     "level": "No data",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "cyclone": {
+     "level": "Very low",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "extreme_heat": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "wildfire": {
+     "level": "High",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "water_scarcity": {
+     "level": "Medium",
+     "src": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan.json",
+     "confirmed_by": "page_read"
+    },
+    "extreme_cold": {
+     "level": "Low",
+     "src": "https://en.wikipedia.org/wiki/T%C3%BCrkmenba%C5%9Fy,_Turkmenistan (climate table)",
+     "confirmed_by": "third_party",
+     "assumed": true,
+     "note": "Assumed Low: January mean minimum 0.2 C at Turkmenbashi, record low -21.9 C (extremes 1883-present); the Caspian moderates winters, but strong winds add wind-chill."
+    }
+   },
+   "hazards_alt": {
+    "division": "Turkmenistan (national), code 250",
+    "url": "https://www.thinkhazard.org/en/report/250-turkmenistan",
+    "levels": {
+     "river_flood": "High",
+     "urban_flood": "High",
+     "coastal_flood": "No data",
+     "earthquake": "High",
+     "landslide": "Low",
+     "tsunami": "No data",
+     "volcano": "No data",
+     "cyclone": "Very low",
+     "extreme_heat": "High",
+     "wildfire": "High",
+     "water_scarcity": "High"
+    },
+    "confirmed_by": "page_read"
+   },
+   "hz_note_ja": "Earthquake High is well founded: USGS ComCat lists 39 M5+ events within 150 km of Turkmenbashi since 1950 (12 since 2000), the 1946 Mw 7.0 (400 deaths) and 2000 Mw 7.0 Balkanabat (11 deaths, MMI VII in Balkanabat and Turkmenbashi) earthquakes, a Mw 5.3 only 4 km west of Turkmenbashi on 2000-01-26 and a M5.1 60 km north of Balkanabat on 2026-03-11; the 1895 Uzun-Ada Ms 7.4 event produced a Caspian tsunami. GEM puts the largest regional seismic AAL in Balkan (about USD 1.1 M/yr, 27% of the national total). River and urban flood are Low (arid), but torrential rain floods the Etrek/Sumbar valleys (Esenguly district after an Etrek dam failure - year unverified) and desert wadis. Coastal flood is 'No data' because the Caspian lies outside the global coastal model: wind-driven surges of about 1 m occur in the shallow Turkmenbashi Gulf (unverified), while the dominant trend is the opposite - the sea fell to a record low in July 2025, the shore at Hazar has receded about 800 m, and port access and refinery intakes are at risk. Extreme heat High (45.6 C record at Turkmenbashi, higher inland), wildfire High (desert scrub and reed fires), water scarcity Medium (desalination and the Karakum Canal terminus supply the coast). Cyclone Very low refers to tropical cyclones; gales and dust storms off the Caspian and Karakum are frequent.",
+   "rp": {
+    "flood": {
+     "anchor_ja": "Anchor: flash floods in the Etrek and Sumbar valleys and desert wadis after torrential rain (Esenguly district flood with an Etrek river dam failure in early March, year not confirmed); EM-DAT's only Turkmenistan flood record (1993, USD 99.9 M, location unverified). ThinkHazard rates river flood Low for Balkan, so losses are a small assumed share of the national Aqueduct curve.",
+     "k": {
+      "10": 0.291,
+      "50": 0.511,
+      "100": 0.602,
+      "500": 0.882,
+      "1000": 1.0
+     },
+     "scen": {
+      "10": "Wadi flash floods cut the Turkmenbashi-Balkanabat-Ashgabat road and rail line for a day",
+      "50": "Etrek/Sumbar valley flood: villages in Esenguly and Magtymguly districts inundated, irrigation dams damaged",
+      "100": "Etrek dam failure type: several thousand people affected, weeks of road and farm damage",
+      "500": "Multi-day storm: flash floods reach Balkanabat's low districts and oilfield access roads, pipeline washouts",
+      "1000": "Extreme regional storm: coastal lowlands and Etrek delta flooded for weeks"
+     },
+     "depth_max": 1.0,
+     "area_max": 1,
+     "pop_max": 0.03,
+     "downtime_max": 7,
+     "loss_max": 95.7,
+     "share_of_national": 0.04,
+     "method_ja": "loss = loss_max x k. k is the shape of the WRI Aqueduct national riverine urban-damage curve for Turkmenistan (USD 696.4 M at 10 yr to 2,393.4 M at 1,000 yr), so k[1000]=1. loss_max = an assumed regional share (4%) of the national 1,000-year Aqueduct damage.",
+     "assumptions_ja": [
+      "Regional share 4% is assumed: the region holds about 7.5% of the population and the ThinkHazard river-flood level is Low; oilfield assets raise the value at risk slightly.",
+      "Affected population 3% at k=1.",
+      "Aqueduct is a 2010-baseline urban-damage model without local protection or oilfield assets."
+     ],
+     "refs": [
+      {
+       "name": "WRI Aqueduct floods country data (CSV mirror)",
+       "url": "https://github.com/cloudtostreet/MODIS_GlobalFloodDatabase (aqueductcountrydata.csv mirror; see research-ca/aqueduct.json)"
+      },
+      {
+       "name": "ThinkHazard - Balkan",
+       "url": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan"
+      },
+      {
+       "name": "CIMA Foundation - Turkmenistan risk profile (Esenguly/Etrek flood)",
+       "url": "https://www.cimafoundation.org/wp-content/uploads/2023/08/Turkmenistan-risk-profile.pdf"
+      },
+      {
+       "name": "EM-DAT (OWID mirror)",
+       "url": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv"
+      }
+     ]
+    },
+    "urban_flood": {
+     "anchor_ja": "Anchor: ponding in Turkmenbashi and Balkanabat after rare heavy rain (flat terrain, minimal storm drainage); no public loss data, values assumed.",
+     "k": {
+      "10": 0.5,
+      "50": 0.75,
+      "100": 0.85,
+      "500": 0.95,
+      "1000": 1.0
+     },
+     "scen": {
+      "10": "Streets ponded for hours after a winter or spring downpour",
+      "50": "Low districts of Balkanabat and the port area under 20-30 cm for a day",
+      "100": "Multi-day ponding, refinery and port yards partly flooded",
+      "500": "Ponding coincides with a Caspian wind surge blocking outfalls",
+      "1000": "Drainage failure across the coastal towns"
+     },
+     "depth_max": 0.4,
+     "area_max": 8,
+     "pop_max": 0.03,
+     "downtime_max": 2,
+     "loss_max": 25,
+     "method_ja": "Loss is a rough product of disrupted business days and affected area; not based on a public loss record.",
+     "assumptions_ja": [
+      "Loss at k=1 assumed USD 25 M.",
+      "Affected population 3% at k=1."
+     ],
+     "refs": [
+      {
+       "name": "ThinkHazard - Balkan",
+       "url": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan"
+      }
+     ]
+    },
+    "coastal": {
+     "anchor_ja": "Anchor: wind-driven surges in the shallow Turkmenbashi Gulf and historical Caspian level swings (about +2.5 m rise 1978-1995 that flooded coastal oil wells - from memory, unverified); today the sea is at a record low (July 2025, below -29 m) and retreating from Hazar (about 800 m) and the port (2.4 km from shore, up to 17 km under an 18 m decline scenario). ThinkHazard gives no data; all values assumed.",
+     "k": {
+      "10": 0.3,
+      "50": 0.6,
+      "100": 0.75,
+      "500": 0.9,
+      "1000": 1.0
+     },
+     "scen": {
+      "10": "Autumn gale pushes water onto the port apron and Awaza promenade for hours; ferries suspended",
+      "50": "1 m surge floods low quays, the ferry terminal and coastal road at Hazar",
+      "100": "Surge plus heavy rain: refinery and port lowlands flooded, Caspian tanker loading halted for days",
+      "500": "Multi-year level rise (1978-95 type) combined with storm surge: coastal oilfields and Hazar town flooded",
+      "1000": "Tsunami-type event from a Caspian earthquake (1895 precedent) or extreme surge: coastal settlements inundated"
+     },
+     "depth_max": 1.0,
+     "area_max": 1,
+     "pop_max": 0.02,
+     "downtime_max": 5,
+     "loss_max": 40,
+     "method_ja": "Assumed screening values: loss = loss_max x k. The Caspian is outside global coastal-flood models; the near-term trend is recession (navigation and intake risk), not inundation, so the surge losses are kept small.",
+     "assumptions_ja": [
+      "Loss at k=1 assumed USD 40 M (port, ferry terminal, Awaza resort, Hazar oil facilities).",
+      "Surge heights of about 1 m in the Turkmenbashi Gulf are assumed from the shallow bathymetry; no local surge statistics were found.",
+      "The 1895 Caspian tsunami is used only as the 1,000-year scenario anchor.",
+      "Caspian recession (not modelled here) is the larger business-continuity risk for the port."
+     ],
+     "refs": [
+      {
+       "name": "Wikipedia - Caspian Sea (2025 record low)",
+       "url": "https://en.wikipedia.org/wiki/Caspian_Sea"
+      },
+      {
+       "name": "Progres.online - declining Caspian levels threaten infrastructure in Turkmenistan",
+       "url": "https://progres.online/society/environment/declining-caspian-sea-levels-threaten-the-environment-and-human-infrastructure-in-turkmenistan/"
+      },
+      {
+       "name": "AFP via Arab News - Turkmenistan hit as Caspian level drops",
+       "url": "https://www.arabnews.com/node/2429956/world"
+      },
+      {
+       "name": "Wikipedia - 1895 Balkan (Krasnovodsk) earthquake",
+       "url": "https://en.wikipedia.org/wiki/1895_Balkan_earthquake"
+      }
+     ]
+    },
+    "quake": {
+     "anchor_ja": "National loss curve: GEM profile (USD 2.1 M at 10 yr, 36.2 M at 50 yr, 73.6 M at 100 yr, 241.2 M at 500 yr, 387.5 M at 1,000 yr). GEM's regional split gives Balkan about USD 1.1 M/yr of 4.045 M/yr (27%), so share = 0.27. History: 2000-12-06 Mw 7.0 Balkanabat (11 deaths, MMI VII in Balkanabat and Turkmenbashi), 1946-11-04 Mw 7.0 (400 deaths), 1895-07-08 Ms 7.4 Uzun-Ada with Caspian tsunami; USGS: 39 M5+ within 150 km of Turkmenbashi since 1950, Mw 5.3 4 km west of the city on 2000-01-26, M5.1 60 km N of Balkanabat on 2026-03-11.",
+     "k": {
+      "10": 0.15,
+      "50": 0.45,
+      "100": 0.6,
+      "500": 0.9,
+      "1000": 1.0
+     },
+     "share": 0.27,
+     "scen": {
+      "10": "M5 in the Balkan ranges or under the Caspian felt across the region; minor cracks",
+      "50": "M6 within 50 km (2000-01-26 type closer in): damage to adobe housing and old Soviet blocks in Balkanabat, refinery precautionary shutdown for inspection",
+      "100": "2000-type Mw 7.0 at 40 km: MMI VII in both cities, deaths in the tens, port and refinery down for days",
+      "500": "1946-type M7 within 20 km of Balkanabat: widespread collapse of pre-code buildings, hundreds of casualties, weeks of outages",
+      "1000": "M7.5 under the coast with a Caspian tsunami (1895 precedent): catastrophic damage to Turkmenbashi port, refinery and Awaza"
+     },
+     "pop_max": 0.4,
+     "downtime_max": 60,
+     "method_ja": "loss = GEM national building-loss curve for Turkmenistan (residential+commercial+industrial, 2025 USD) x share. share is the region's fraction of GEM's regional AAL split. k is an assumed relative intensity used only for affected population and downtime.",
+     "assumptions_ja": [
+      "Share 27% follows GEM's regional AAL (Balkan 1.1 of 4.045 M USD/yr; the $1.1M label is rounded, +/-0.05).",
+      "Affected population 40% and downtime 60 days at k=1.",
+      "GEM covers buildings only; the refinery, port, pipelines and offshore platforms are excluded and could dominate real losses."
+     ],
+     "refs": [
+      {
+       "name": "GEM Country Seismic Risk Profile - Turkmenistan (CC BY-NC-SA 4.0)",
+       "url": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png"
+      },
+      {
+       "name": "USGS ComCat - 2000 Balkanabat earthquake",
+       "url": "https://earthquake.usgs.gov/earthquakes/eventpage/usp000a5m7"
+      },
+      {
+       "name": "USGS ComCat - 1946 earthquake 40 km NE of Balkanabat",
+       "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem898652"
+      },
+      {
+       "name": "Wikipedia - 2000 Turkmenistan earthquake",
+       "url": "https://en.wikipedia.org/wiki/2000_Turkmenistan_earthquake"
+      }
+     ]
+    },
+    "heat": {
+     "anchor_ja": "Anchor: Turkmenbashi record 45.6 C (July; extremes 1883-present), Balkanabat and the inland desert hotter; the June 2015 and July 2025 heat waves. Values assumed.",
+     "k": {
+      "10": 0.5,
+      "50": 0.7,
+      "100": 0.8,
+      "500": 0.95,
+      "1000": 1.0
+     },
+     "scen": {
+      "10": "A week above 40 C with high humidity on the coast: outdoor work limited, Awaza tourism strained",
+      "50": "Ten days above 43 C: oilfield crews on heat rotation, desalination and power demand peaks",
+      "100": "2015-type: two weeks above 45 C inland, heat casualties among field workers, localized outages",
+      "500": "Month-long heat dome near 47 C with water-supply rationing in Balkanabat",
+      "1000": "Record 48-49 C with grid and desalination failure"
+     },
+     "pop_max": 0.35,
+     "downtime_max": 3,
+     "loss_max": 30,
+     "method_ja": "Loss is an assumed productivity and outage cost; affected population is the share exposed to heat-health risk (oilfield and port crews are most exposed).",
+     "assumptions_ja": [
+      "Loss at k=1 assumed USD 30 M.",
+      "Affected population 35% at k=1."
+     ],
+     "refs": [
+      {
+       "name": "Wikipedia - Türkmenbaşy, Turkmenistan (climate table)",
+       "url": "https://en.wikipedia.org/wiki/T%C3%BCrkmenba%C5%9Fy,_Turkmenistan"
+      },
+      {
+       "name": "AFP via Phys.org - Central Asia record heat wave (2015)",
+       "url": "https://phys.org/news/2015-07-central-asia-record-breaking-heatwave.amp"
+      }
+     ]
+    }
+   },
+   "history": [
+    {
+     "date": "2000-12-06",
+     "name_ja": "2000 Balkanabat (Nebitdag) earthquake, Mw 7.0 (Ms 7.5), 11 deaths",
+     "hazard": "quake",
+     "deaths": 11,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Balkanabat and Turkmenbashi (MMI VII); felt in Baku, Nukus, Moscow",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "AZE",
+      "UZB"
+     ],
+     "note_ja": "22:11 local time, depth 30 km, oblique-slip; 11 deaths and dozens injured, many hospitalised for panic; buildings reportedly collapsed in Ashgabat; six aftershocks above Mw 4.0 within four days. EM-DAT: 11 deaths. GEM: 'M7.0 Nebitdag-Turkmenbashi, 11 fatalities'.",
+     "jp_ja": "Design event for the refinery and port: plan for a precautionary shutdown and structural inspection after any MMI VI+ shaking.",
+     "src": "https://en.wikipedia.org/wiki/2000_Turkmenistan_earthquake ; https://earthquake.usgs.gov/earthquakes/eventpage/usp000a5m7 ; https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv",
+     "src_name": "Wikipedia / USGS ComCat / EM-DAT",
+     "confirmed_by": "third_party / page_read"
+    },
+    {
+     "date": "1946-11-04",
+     "name_ja": "1946 Kazandzhik earthquake, Mw 7.0 - 400 deaths",
+     "hazard": "quake",
+     "deaths": 400,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "40 km NE of Balkanabat (Bereket/Kazandzhik area)",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "TKM"
+     ],
+     "note_ja": "GEM lists 'M6.9 - Turkmenistan - 400 fatalities'; USGS ISC-GEM Mw 7.02, depth 38 km. Place name from memory.",
+     "jp_ja": "Deadliest known event in the province; adobe housing collapse was the main cause of death.",
+     "src": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png ; https://earthquake.usgs.gov/earthquakes/eventpage/iscgem898652",
+     "src_name": "GEM / USGS ComCat",
+     "confirmed_by": "page_read"
+    },
+    {
+     "date": "1895-07-08",
+     "name_ja": "1895 Krasnovodsk (Uzun-Ada) earthquake, Ms 7.4, MMI X, Caspian tsunami",
+     "hazard": "quake",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Uzun-Ada (then the Trans-Caspian railway port) near Krasnovodsk/Turkmenbashi",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "TKM"
+     ],
+     "note_ja": "Surface-wave magnitude 7.4 at 60 km depth (NOAA); tsunami waves in the Caspian; Ambraseys (1997) is the main study. Death toll not found in sources read.",
+     "jp_ja": "The only documented Caspian tsunami precedent for the port; include a 'move to high ground' step in coastal site plans.",
+     "src": "https://en.wikipedia.org/wiki/1895_Balkan_earthquake",
+     "src_name": "Wikipedia (citing NOAA NGDC / Ambraseys 1997)",
+     "confirmed_by": "third_party"
+    },
+    {
+     "date": "2000-01-26",
+     "name_ja": "Mw 5.3 earthquake 4 km west of Turkmenbashi - nearest catalogued M5+",
+     "hazard": "quake",
+     "deaths": 0,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Turkmenbashi city",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "TKM"
+     ],
+     "note_ja": "USGS usp0009mqc, Mw 5.3, depth 33 km, 6 km from the city centre; no damage reports found. 39 M5+ events within 150 km since 1950, 12 since 2000; latest M5.1 on 2026-03-11, 60 km N of Balkanabat (us7000s3ku).",
+     "jp_ja": "Moderate shaking every few years; use for safety-confirmation drills.",
+     "src": "https://earthquake.usgs.gov/earthquakes/eventpage/usp0009mqc ; https://earthquake.usgs.gov/earthquakes/eventpage/us7000s3ku",
+     "src_name": "USGS ComCat (research-ca/usgs.json)",
+     "confirmed_by": "page_read"
+    },
+    {
+     "date": "2025-07",
+     "name_ja": "Caspian Sea at its lowest recorded level (below -29 m); Turkmen shore receding",
+     "hazard": "water",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Turkmenbashi port, Hazar (Cheleken), Awaza",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "KAZ",
+      "RUS",
+      "AZE",
+      "IRN"
+     ],
+     "note_ja": "July 2025 record low (Wikipedia citing Russian scientists); the shore at Hazar had receded about 800 m by late 2023 (AFP); 2025 modelling projects the port's shoreline distance growing from 2.4 km to up to 17 km under an 18 m decline. Dredging, intake relocation and ferry operations are affected.",
+     "jp_ja": "Chronic supply-chain risk for Caspian ferry/tanker routes to Baku and for refinery cooling water.",
+     "src": "https://en.wikipedia.org/wiki/Caspian_Sea ; https://www.arabnews.com/node/2429956/world ; https://progres.online/society/environment/declining-caspian-sea-levels-threaten-the-environment-and-human-infrastructure-in-turkmenistan/",
+     "src_name": "Wikipedia / AFP via Arab News / Progres.online",
+     "confirmed_by": "third_party / search_snippet"
+    },
+    {
+     "date": "1995-12",
+     "name_ja": "Caspian sea-level rise 1978-1995 (about +2.5 m) flooding coastal lowlands and oil wells",
+     "hazard": "coastal",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "regional",
+     "scope_ja": "Turkmen Caspian coast incl. Cheleken and Turkmenbashi",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "KAZ",
+      "RUS",
+      "AZE",
+      "IRN"
+     ],
+     "note_ja": "The Caspian rose about 2.5 m between 1978 and 1995, flooding coastal roads, settlements and oilfields before the trend reversed; from memory, not verified in this session.",
+     "jp_ja": "Coastal exposure can switch between inundation and recession within decades; design for both.",
+     "src": "https://en.wikipedia.org/wiki/Caspian_Sea",
+     "src_name": "Wikipedia (level history not read in this session)",
+     "confirmed_by": "unverified"
+    },
+    {
+     "date": "2015-06-30",
+     "name_ja": "June 2015 heat wave (hottest June on record nationally)",
+     "hazard": "heat",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "scope_ja": "Whole country; Turkmenbashi record 45.6 C is a July value",
+     "multi": true,
+     "other_country": false,
+     "countries": [
+      "TKM",
+      "UZB"
+     ],
+     "note_ja": "Ashgabat 47.2 C; Turkmenhydromet called June 2015 the hottest since 1891. Coastal humidity makes 40-43 C at Turkmenbashi dangerous for outdoor crews.",
+     "jp_ja": "Heat rotation for port and oilfield staff; check desalination and power backup.",
+     "src": "https://phys.org/news/2015-07-central-asia-record-breaking-heatwave.amp ; https://en.wikipedia.org/wiki/T%C3%BCrkmenba%C5%9Fy,_Turkmenistan",
+     "src_name": "AFP via Phys.org / Wikipedia",
+     "confirmed_by": "search_snippet / third_party"
+    },
+    {
+     "date": "2023-04-13",
+     "name_ja": "April 2023 dust storm over most of Turkmenistan",
+     "hazard": "cyclone",
+     "deaths": null,
+     "damage_usd_m": null,
+     "scope": "national",
+     "scope_ja": "Karakum and the Caspian coast",
+     "multi": false,
+     "other_country": false,
+     "countries": [
+      "TKM"
+     ],
+     "note_ja": "Strongest dust storm of the year with winds above storm criteria (daryo.uz citing MeteoJournal); NASA Earth Observatory has imaged repeated dust plumes off the Turkmen coast into the Caspian.",
+     "jp_ja": "Port operations, flights and road visibility disrupted; respiratory precautions.",
+     "src": "https://daryo.uz/en/2023/04/14/dust-storm-hits-turkmenistan ; https://earthobservatory.nasa.gov/images/80552/dust-storm-in-turkmenistan",
+     "src_name": "Daryo / NASA Earth Observatory",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "season": {
+    "flood": {
+     "months": [
+      2,
+      3,
+      4
+     ],
+     "note_ja": "Etrek/Sumbar valley floods and wadi flash floods after late-winter and spring rain (Esenguly)."
+    },
+    "urban_flood": {
+     "months": [
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+     ],
+     "note_ja": "Rare but intense winter-spring rain ponds on flat coastal ground."
+    },
+    "coastal": {
+     "months": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+     ],
+     "note_ja": "Autumn-winter gales drive surges in the shallow gulf; level recession is year-round."
+    },
+    "heat": {
+     "months": [
+      6,
+      7,
+      8
+     ],
+     "note_ja": "July peak, 45.6 C record at Turkmenbashi; hotter inland."
+    },
+    "cold": {
+     "months": [
+      12,
+      1,
+      2
+     ],
+     "note_ja": "Record low -21.9 C; usually mild, strong winds."
+    },
+    "cyclone": {
+     "months": [
+      3,
+      4,
+      5,
+      6,
+      10,
+      11
+     ],
+     "note_ja": "Caspian gales and dust storms, spring and autumn."
+    },
+    "haze": {
+     "months": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "note_ja": "Dust plumes from the Karakum over the coast; summer scrub fires."
+    },
+    "water": {
+     "months": [
+      6,
+      7,
+      8,
+      9
+     ],
+     "note_ja": "Karakum Canal terminus and desalination under summer demand; Caspian recession chronic."
+    }
+   },
+   "sources": [
+    {
+     "name": "ThinkHazard - Balkan",
+     "url": "https://www.thinkhazard.org/en/report/147322-turkmenistan-balkan"
+    },
+    {
+     "name": "ThinkHazard - Turkmenistan (national)",
+     "url": "https://www.thinkhazard.org/en/report/250-turkmenistan"
+    },
+    {
+     "name": "GEM Country Seismic Risk Profile - Turkmenistan (CC BY-NC-SA 4.0)",
+     "url": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Turkmenistan/seismic_risk_profile_Turkmenistan.png"
+    },
+    {
+     "name": "WRI Aqueduct floods country data (CSV mirror)",
+     "url": "https://github.com/cloudtostreet/MODIS_GlobalFloodDatabase (aqueductcountrydata.csv mirror; see research-ca/aqueduct.json)"
+    },
+    {
+     "name": "USGS ComCat queries (research-ca/usgs.json)",
+     "url": "https://earthquake.usgs.gov/fdsnws/event/1/"
+    },
+    {
+     "name": "Wikipedia - Türkmenbaşy, Turkmenistan / Balkan Region / Balkanabat / 2000 Turkmenistan earthquake / 1895 Balkan earthquake / Caspian Sea",
+     "url": "https://en.wikipedia.org/wiki/T%C3%BCrkmenba%C5%9Fy,_Turkmenistan"
+    },
+    {
+     "name": "EM-DAT (OWID mirror)",
+     "url": "https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Natural%20disasters%20(EMDAT)/Natural%20disasters%20(EMDAT).csv"
     }
    ]
   }

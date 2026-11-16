@@ -141,3 +141,5 @@ npm test
 - 表示される位置は投稿のジオタグや本文の地名から推定した **参考値** です。実際の店舗位置とは異なる場合があります。
 - 各SNSの利用規約・APIレート制限・robots等に従って利用してください。本アプリは公開API/公開データのみを対象とします。
 - 地図データ: [dataofjapan/land](https://github.com/dataofjapan/land)（パブリックドメイン）を簡略化して同梱。
+
+- `bousai-ca/`: Disaster Compass Central Asia (English edition for Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan and Uzbekistan; same code base, new data). Build: `node bousai-ca/scripts/build.mjs`.

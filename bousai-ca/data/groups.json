@@ -231,6 +231,201 @@
     "Stock guide (water 3 L/person/day, 3-7 days)",
     "Heat and cold protocols for home"
    ]
+  },
+  "bis-office": {
+   "summary_ja": "40 staff (4 expatriates, 6 with families). Residence shares across districts are assumed in proportion to district population; expatriates concentrated in City-centre high-rise apartments (Erkindik Boulevard / Moskovskaya, Pervomaysky district).",
+   "headcount": 40,
+   "japanese": 4,
+   "families": 6,
+   "vulnerable": 3,
+   "commute_ja": "Car 45%, public transport 40%, taxi/walking 15% (assumed)",
+   "clusters": [
+    {
+     "id": "oktyabr",
+     "name_ja": "Oktyabr",
+     "lat": 42.833,
+     "lon": 74.617,
+     "n": 10,
+     "jp": 4,
+     "fam": 4,
+     "district": null,
+     "home_ja": "City-centre high-rise apartments (Erkindik Boulevard / Moskovskaya, Pervomaysky district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C)"
+    },
+    {
+     "id": "sverdlov",
+     "name_ja": "Sverdlov",
+     "lat": 42.883,
+     "lon": 74.633,
+     "n": 9,
+     "jp": 1,
+     "fam": 2,
+     "district": null,
+     "home_ja": "Asanbai / Jal new high-rise belt south of the centre (Oktyabr and Lenin districts)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C)"
+    },
+    {
+     "id": "lenin",
+     "name_ja": "Lenin",
+     "lat": 42.85,
+     "lon": 74.567,
+     "n": 9,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Kok-Jar / Orto-Sai private houses on the south-eastern foothills (Oktyabr district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C)"
+    },
+    {
+     "id": "birinchi",
+     "name_ja": "Birinchi May",
+     "lat": 42.883,
+     "lon": 74.6,
+     "n": 8,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Vostok-5 Soviet panel microdistrict (east centre, Sverdlov district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C)"
+    }
+   ],
+   "schools_ja": "International school pickup rules to be agreed per family (assumed); public schools used as reception points in emergencies.",
+   "support_ja": [
+    "Family registration in the safety-confirmation system",
+    "Emergency card in English and local language",
+    "Stock guide (water 3 L/person/day, 3-7 days)",
+    "Heat and cold protocols for home"
+   ]
+  },
+  "dus-office": {
+   "summary_ja": "12 staff (2 expatriates, 2 with families). Residence shares across districts are assumed in proportion to district population; expatriates concentrated in Rudaki Avenue centre high-rise apartments (new 12-18 storey blocks between Dushanbe Plaza and Shohtemur St, Ismoili Somoni district).",
+   "headcount": 12,
+   "japanese": 2,
+   "families": 2,
+   "vulnerable": 1,
+   "commute_ja": "Car 45%, public transport 40%, taxi/walking 15% (assumed)",
+   "clusters": [
+    {
+     "id": "sino",
+     "name_ja": "Sino",
+     "lat": 38.5615,
+     "lon": 68.7391,
+     "n": 4,
+     "jp": 2,
+     "fam": 1,
+     "district": null,
+     "home_ja": "Rudaki Avenue centre high-rise apartments (new 12-18 storey blocks between Dushanbe Plaza and Shohtemur St, Ismoili Somoni district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Districts_of_Tajikistan)"
+    },
+    {
+     "id": "firdavsi",
+     "name_ja": "Firdavsi",
+     "lat": 38.5234,
+     "lon": 68.76,
+     "n": 3,
+     "jp": 1,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Ismoili Somoni district private houses in the Varzob valley (Sari Osiyo / north of the Botanical Garden)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Districts_of_Tajikistan)"
+    },
+    {
+     "id": "shohmansur",
+     "name_ja": "Shohmansur",
+     "lat": 38.5507,
+     "lon": 68.8305,
+     "n": 2,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Sino district Soviet microdistricts (91st microdistrict / Mehrabad, 4-9 storey panel and brick blocks)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Districts_of_Tajikistan)"
+    },
+    {
+     "id": "ismoili",
+     "name_ja": "Ismoili Somoni",
+     "lat": 38.5835,
+     "lon": 68.7892,
+     "n": 2,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Shohmansur old quarter houses and 2-5 storey blocks near the railway station and bazaar (Bofanda / Nazarshoev streets)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Districts_of_Tajikistan)"
+    }
+   ],
+   "schools_ja": "International school pickup rules to be agreed per family (assumed); public schools used as reception points in emergencies.",
+   "support_ja": [
+    "Family registration in the safety-confirmation system",
+    "Emergency card in English and local language",
+    "Stock guide (water 3 L/person/day, 3-7 days)",
+    "Heat and cold protocols for home"
+   ]
+  },
+  "ash-office": {
+   "summary_ja": "18 staff (3 expatriates, 2 with families). Residence shares across districts are assumed in proportion to district population; expatriates concentrated in Berzengi / 10 yyl Abadancylyk white-marble high-rise apartments (11th Line, Kopetdag district).",
+   "headcount": 18,
+   "japanese": 3,
+   "families": 2,
+   "vulnerable": 1,
+   "commute_ja": "Car 45%, public transport 40%, taxi/walking 15% (assumed)",
+   "clusters": [
+    {
+     "id": "bagtyyarlyk",
+     "name_ja": "Bagtyyarlyk",
+     "lat": 37.9919,
+     "lon": 58.3232,
+     "n": 5,
+     "jp": 3,
+     "fam": 1,
+     "district": null,
+     "home_ja": "Berzengi / 10 yyl Abadancylyk white-marble high-rise apartments (11th Line, Kopetdag district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Bagty%C3%BDarlyk_District)"
+    },
+    {
+     "id": "kopetdag",
+     "name_ja": "Kopetdag",
+     "lat": 37.8593,
+     "lon": 58.3593,
+     "n": 4,
+     "jp": 1,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Old-centre Soviet 4-5 storey blocks (Magtymguly - Gorogly - Azady; Berkararlyk / Kopetdag districts)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Kopetdag_District)"
+    },
+    {
+     "id": "berkararlyk",
+     "name_ja": "Berkararlyk",
+     "lat": 37.9506,
+     "lon": 58.4198,
+     "n": 4,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Parahat (Mir) microdistricts 1-8: Soviet 9-storey panel blocks and new Parahat-7 towers",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Berkararlyk_District)"
+    },
+    {
+     "id": "buzmeyin",
+     "name_ja": "Buzmeyin",
+     "lat": 38.0548,
+     "lon": 58.1496,
+     "n": 3,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Koshi / Gazha single-family houses (older low-rise quarters, Bagtyyarlyk district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/B%C3%BCzme%C3%BDin_District)"
+    }
+   ],
+   "schools_ja": "International school pickup rules to be agreed per family (assumed); public schools used as reception points in emergencies.",
+   "support_ja": [
+    "Family registration in the safety-confirmation system",
+    "Emergency card in English and local language",
+    "Stock guide (water 3 L/person/day, 3-7 days)",
+    "Heat and cold protocols for home"
+   ]
   }
  },
  "supply": {
@@ -509,6 +704,237 @@
     "alt_ja": "Alternative route/supplier to be identified (assumed)",
     "note_ja": "Afrosiyob high-speed and conventional freight; 40% of national freight by rail (Wikipedia). (relationship assumed)"
    }
+  ],
+  "bis-office": [
+   {
+    "id": "s-bis-1",
+    "kind": "supplier",
+    "name_ja": "Bishkek Free Economic Zone (light industry, packaging)",
+    "tier": "Tier1",
+    "lat": 42.98,
+    "lon": 74.63,
+    "share": 0.35,
+    "single": false,
+    "inventory_days": 12,
+    "alt_ja": "Almaty suppliers (2-3 days by road)",
+    "note_ja": "Chuy valley; seismic hazard High; coordinates approximate (unverified)",
+    "region": "kg-bis",
+    "district": null
+   },
+   {
+    "id": "s-bis-2",
+    "kind": "customer",
+    "name_ja": "Kumtor Gold Company (Issyk-Kul region)",
+    "tier": "Major customer",
+    "lat": 41.87,
+    "lon": 78.19,
+    "share": 0.3,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "None (single large customer)",
+    "note_ja": "Mine site in the Tien Shan; road closures in winter and after landslides (assumed relationship)",
+    "region": "kg-bis",
+    "district": null
+   },
+   {
+    "id": "s-bis-3",
+    "kind": "logistics",
+    "name_ja": "Manas International Airport cargo",
+    "tier": "Air freight",
+    "lat": 43.06,
+    "lon": 74.48,
+    "share": 0.4,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Almaty airport via road (240 km)",
+    "note_ja": "Only international cargo airport near Bishkek",
+    "region": "kg-bis",
+    "district": null
+   },
+   {
+    "id": "s-bis-4",
+    "kind": "logistics",
+    "name_ja": "Bishkek-Almaty highway (A365/A2) and Ak-Zhol border crossing",
+    "tier": "Road",
+    "lat": 42.9,
+    "lon": 75.4,
+    "share": 0.6,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Torugart/Irkeshtam from China (slow)",
+    "note_ja": "Main import corridor; closed by snow and border incidents in the past",
+    "region": "kg-bis",
+    "district": null
+   },
+   {
+    "id": "s-bis-5",
+    "kind": "utility",
+    "name_ja": "Bishkek CHP (thermal power plant) and Toktogul hydropower system",
+    "tier": "Utility",
+    "lat": 42.88,
+    "lon": 74.68,
+    "share": 1.0,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Diesel generator at the office",
+    "note_ja": "January 2018 CHP failure left the city without heating in -25 C (Wikipedia); winter power deficits 2022-2023",
+    "region": "kg-bis",
+    "district": null
+   }
+  ],
+  "dus-office": [
+   {
+    "id": "s-dus-1",
+    "kind": "supplier",
+    "name_ja": "TALCO aluminium plant (Tursunzoda)",
+    "tier": "Tier1",
+    "lat": 38.51,
+    "lon": 68.23,
+    "share": 0.3,
+    "single": true,
+    "inventory_days": 14,
+    "alt_ja": "Import via Uzbekistan",
+    "note_ja": "60 km west of Dushanbe; assumed relationship",
+    "region": "tj-dus",
+    "district": null
+   },
+   {
+    "id": "s-dus-2",
+    "kind": "customer",
+    "name_ja": "Rogun and Nurek hydropower projects (Vakhsh valley)",
+    "tier": "Major customer",
+    "lat": 38.37,
+    "lon": 69.35,
+    "share": 0.35,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Other infrastructure clients",
+    "note_ja": "Access roads cut by mudflows and landslides in spring (assumed)",
+    "region": "tj-dus",
+    "district": null
+   },
+   {
+    "id": "s-dus-3",
+    "kind": "logistics",
+    "name_ja": "Dushanbe International Airport",
+    "tier": "Air freight",
+    "lat": 38.54,
+    "lon": 68.82,
+    "share": 0.5,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Road via Uzbekistan (Termez)",
+    "note_ja": "Only international airport in the capital",
+    "region": "tj-dus",
+    "district": null
+   },
+   {
+    "id": "s-dus-4",
+    "kind": "logistics",
+    "name_ja": "Dushanbe-Khujand road (Anzob tunnel / Shahriston)",
+    "tier": "Road",
+    "lat": 39.1,
+    "lon": 68.9,
+    "share": 0.4,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Via Uzbekistan (longer)",
+    "note_ja": "Avalanche and rockfall closures in winter",
+    "region": "tj-dus",
+    "district": null
+   },
+   {
+    "id": "s-dus-5",
+    "kind": "utility",
+    "name_ja": "Barqi Tojik power supply (winter rationing)",
+    "tier": "Utility",
+    "lat": 38.56,
+    "lon": 68.78,
+    "share": 1.0,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Generator; solar battery",
+    "note_ja": "Seasonal electricity limits in winter are routine",
+    "region": "tj-dus",
+    "district": null
+   }
+  ],
+  "ash-office": [
+   {
+    "id": "s-ash-1",
+    "kind": "customer",
+    "name_ja": "Turkmengas / Turkmenneft (gas field services)",
+    "tier": "Major customer",
+    "lat": 37.95,
+    "lon": 58.38,
+    "share": 0.4,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "None",
+    "note_ja": "State energy companies; assumed relationship",
+    "region": "tm-ash",
+    "district": null
+   },
+   {
+    "id": "s-ash-2",
+    "kind": "logistics",
+    "name_ja": "Turkmenbashi International Seaport (Caspian ferry to Baku)",
+    "tier": "Sea",
+    "lat": 40.02,
+    "lon": 52.97,
+    "share": 0.5,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Rail via Kazakhstan (Bolashak)",
+    "note_ja": "Caspian storms and low water levels affect ferry schedules",
+    "region": "tm-ash",
+    "district": null
+   },
+   {
+    "id": "s-ash-3",
+    "kind": "logistics",
+    "name_ja": "Ashgabat International Airport cargo",
+    "tier": "Air freight",
+    "lat": 37.99,
+    "lon": 58.36,
+    "share": 0.3,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Road from Turkmenbashi",
+    "note_ja": "Dust storms close the airport for hours (assumed)",
+    "region": "tm-ash",
+    "district": null
+   },
+   {
+    "id": "s-ash-4",
+    "kind": "supplier",
+    "name_ja": "Mary industrial zone (fertilizer, power)",
+    "tier": "Tier2",
+    "lat": 37.6,
+    "lon": 61.83,
+    "share": 0.2,
+    "single": false,
+    "inventory_days": 20,
+    "alt_ja": "Imports via Iran or Kazakhstan",
+    "note_ja": "350 km east; coordinates approximate",
+    "region": "tm-ash",
+    "district": null
+   },
+   {
+    "id": "s-ash-5",
+    "kind": "utility",
+    "name_ja": "Ashgabat power and water (Karakum canal supply)",
+    "tier": "Utility",
+    "lat": 37.9,
+    "lon": 58.4,
+    "share": 1.0,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Water tanks; generator",
+    "note_ja": "Summer demand peaks at 45 C; water from the Karakum canal",
+    "region": "tm-ash",
+    "district": null
+   }
   ]
  },
  "residents": {
@@ -588,6 +1014,20 @@
    "foreign_share": 0.02,
    "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
    "channels_ja": "CoES SMS weather and road warnings via mobile operators, Tajikhydromet (Agency for Hydrometeorology) storm warnings and forecasts, meteo.tj, Khovar state news agency, TV Tojikiston/Safina and radio bulletins, CoES duty-officer telephone lines"
+  },
+  "tm-ash": {
+   "summary_ja": "Ashgabat and Ahal Province: about 1.9 million residents (Ashgabat 1,030,063 + Ahal Region 886,845 (2022 census; Wikipedia infoboxes) = 1.92 M - third_party. Official census totals are contested by independent media.). Capital region on the northern piedmont of the Kopet Dag range (Ashgabat at 273 m), with the Karakum desert and the Karakum Canal to the north. Ashgabat is a pl",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "Turkmenhydromet daily 3-day forecast bulletin and storm warnings, State TV/radio (Altyn Asyr and other state channels) and government portals, SMS via mobile operators (TM Cell / Altyn Asyr), Sirens, voice alarms and mobile apps (Amu Darya early-warning project, 2025)"
+  },
+  "tm-tur": {
+   "summary_ja": "Turkmenbashi and Balkan Province (Caspian coast): about 0.53 million residents (Balkan Region 529,895 (2022 census; Wikipedia infobox); Turkmenbashi city 91,745 (2022), Balkanabat 87,822 (2025 estimate) - third_party). Western oil-and-gas province on the Caspian: Turkmenbashi (former Krasnovodsk) with the country's largest refinery (over 10 Mt/yr), the international seaport (r",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "Turkmenhydromet daily 3-day forecast bulletin and storm warnings, State TV/radio (Altyn Asyr and other state channels) and government portals, SMS via mobile operators (TM Cell / Altyn Asyr), Sirens, voice alarms and mobile apps (Amu Darya early-warning project, 2025)"
   },
   "default": {
    "summary_ja": "Residents of the selected region (see regions.json for population and sources).",
@@ -926,6 +1366,52 @@
     "cap_ja": "Community emergency response teams, hazard mapping",
     "url": "https://www.akdn.org/our-agencies/aga-khan-agency-habitat",
     "coverage": "Mountain regions"
+   }
+  ],
+  "tm-ash": [
+   {
+    "name_ja": "Red Crescent Society of Turkmenistan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items (capacity assumed)",
+    "url": "https://www.ifrc.org/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Turkmenistan",
+    "kind": "UN agency",
+    "cap_ja": "Climate and DRR programmes",
+    "url": "https://www.undp.org/turkmenistan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNICEF Turkmenistan",
+    "kind": "UN agency",
+    "cap_ja": "Children and health",
+    "url": "https://www.unicef.org/turkmenistan/",
+    "coverage": "National"
+   }
+  ],
+  "tm-tur": [
+   {
+    "name_ja": "Red Crescent Society of Turkmenistan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items (capacity assumed)",
+    "url": "https://www.ifrc.org/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Turkmenistan",
+    "kind": "UN agency",
+    "cap_ja": "Climate and DRR programmes",
+    "url": "https://www.undp.org/turkmenistan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNICEF Turkmenistan",
+    "kind": "UN agency",
+    "cap_ja": "Children and health",
+    "url": "https://www.unicef.org/turkmenistan/",
+    "coverage": "National"
    }
   ]
  },

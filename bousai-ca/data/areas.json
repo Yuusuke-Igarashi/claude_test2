@@ -585,14 +585,16 @@
      "kind": "hospital",
      "lat": 43.2346,
      "lon": 76.9114,
-     "why_ja": "Large public multi-profile hospital 2 km north-west of the office; nearest major emergency receiving hospital for the Esentai / Koktem area",
+     "why_ja": "Large public multi-profile hospital 2 km north-west of the office; nearest major emergency receiving hospital for the Esentai / Koktem area Solid multi-storey hospital outside the mudflow corridors; upper floors usable as a flood refuge",
      "source_url": "https://nominatim.openstreetmap.org/search?q=Central%20clinical%20hospital%20Almaty&format=jsonv2&countrycodes=kz",
      "coord_src": "page_read",
      "coord_url": "https://nominatim.openstreetmap.org/search?q=Central%20clinical%20hospital%20Almaty&format=jsonv2&countrycodes=kz",
      "label_dx": -9,
      "label_dy": 12,
      "coord_note_ja": "Nominatim relation 17032170 (building=hospital, 6 Zhandosov street, Bostandyk district)",
-     "shelter_for": [],
+     "shelter_for": [
+      "flood"
+     ],
      "floors": 7
     },
     {
@@ -601,14 +603,16 @@
      "kind": "hospital",
      "lat": 43.2548,
      "lon": 76.9287,
-     "why_ja": "City trauma / emergency hospital in the Golden Square; primary destination for earthquake casualties in the center",
+     "why_ja": "City trauma / emergency hospital in the Golden Square; primary destination for earthquake casualties in the center Multi-storey hospital north of the centre, away from the river corridors",
      "source_url": "https://nominatim.openstreetmap.org/search?q=Kazybek%20bi%2096%20Almaty&format=jsonv2&countrycodes=kz",
      "coord_src": "page_read",
      "coord_url": "https://nominatim.openstreetmap.org/search?q=Kazybek%20bi%2096%20Almaty&format=jsonv2&countrycodes=kz",
      "label_dx": 9,
      "label_dy": -8,
      "coord_note_ja": "Nominatim way 244842479 (building=hospital, 96 Kazybek Bi Street, Almaly district)",
-     "shelter_for": [],
+     "shelter_for": [
+      "flood"
+     ],
      "floors": 5
     },
     {
@@ -816,7 +820,7 @@
      "kind": "school",
      "lat": 43.2175,
      "lon": 76.933,
-     "why_ja": "British international school 300 m east of Esentai Tower (est. 2008); many staff children; school grounds double as a family reunification point",
+     "why_ja": "British international school 300 m east of Esentai Tower (est. 2008); many staff children; school grounds double as a family reunification point Modern campus buildings south of Al-Farabi; refuge for families of the school",
      "source_url": "https://en.wikipedia.org/wiki/Haileybury_Almaty",
      "coord_src": "page_read",
      "coord_url": "https://nominatim.openstreetmap.org/search?q=Haileybury%20Almaty&format=jsonv2&countrycodes=kz",
@@ -824,9 +828,11 @@
      "label_dy": 12,
      "coord_note_ja": "Nominatim relation 18291464 (amenity=school); Wikipedia coord 43.217281,76.933651",
      "shelter_for": [
+      "flood",
       "quake"
      ],
-     "cap": 1500
+     "cap": 1500,
+     "floors": 5
     },
     {
      "name": "Almaty City Akimat (Republic Square 4)",
@@ -834,14 +840,17 @@
      "kind": "government",
      "lat": 43.2363,
      "lon": 76.9457,
-     "why_ja": "City government headquarters; the city emergency commission convenes here and the Almaty Department for Emergency Situations (DChS) coordinates response (DChS building not geocoded)",
+     "why_ja": "City government headquarters; the city emergency commission convenes here and the Almaty Department for Emergency Situations (DChS) coordinates response (DChS building not geocoded) Eight-storey public building on Republic Square; upper floors as a refuge from debris flows",
      "source_url": "https://nominatim.openstreetmap.org/search?q=Almaty%20City%20Akimat&format=jsonv2&countrycodes=kz",
      "coord_src": "page_read",
      "coord_url": "https://nominatim.openstreetmap.org/search?q=Almaty%20City%20Akimat&format=jsonv2&countrycodes=kz",
      "label_dx": 9,
      "label_dy": -8,
      "coord_note_ja": "Nominatim relation 3244397 (amenity=townhall)",
-     "floors": 8
+     "floors": 8,
+     "shelter_for": [
+      "flood"
+     ]
     },
     {
      "name": "Kok Tobe hill (1,100 m) and Almaty TV Tower",
@@ -2432,7 +2441,7 @@
    "rotation_deg": 9,
    "grid_m": 200,
    "rotation_note_ja": "The central street grid (Navoi Street N99E, Amir Temur Avenue N9E in the fetched OSM segments) is rotated about 9 degrees clockwise from the cardinal axes; with the app's rotation convention (x=u*cos-v*sin, y down) a positive value tilts the east-west grid lines down-right to match (derived). Mustaqillik Avenue (N68E) and the Chilanzar grid (N45E) deviate from this and are drawn as real polylines",
-   "frame_note_ja": "The app draws 960x640 px for extent_km 8, i.e. 8.0 km east-west by 5.3 km north-south: lat 41.282-41.330, lon 69.230-69.326. RSCEMP, Akfa Medline, Tashkent International Clinic/School, the MES HQ, the US Embassy and the TV tower lie outside the frame; they are kept in pois (with true coordinates) or in _meta.facts so that distance tables still work",
+   "frame_note_ja": "The app draws 960x640 px for extent_km 8, i.e. 8.0 km east-west by 5.3 km north-south: lat 41.282-41.330, lon 69.230-69.326. RSCEMP, AKFA Medline, Tashkent International Clinic/School, the MES HQ, the MoD Central Military Hospital, the US Embassy and the TV tower lie outside the frame; they are kept in pois (with true coordinates) or in _meta.facts so that distance tables still work. Babur Street and the Chilanzar end of Bunyodkor Avenue are clipped at the frame edge",
    "flood_context_ja": "ThinkHazard rates river flood and urban flood Low for Tashkent city (report 39698, page_read), while the surrounding Tashkent Region is High for both (report 3295): the city sits on the Chirchik alluvial fan at about 455 m, drained by the Soviet-era canal network (Bozsu, Anhor, Salar, Oqtepa; OSM relations via Nominatim) fed from the Chirchik below the Charvak reservoir, and the river itself passes 10 km south-east of the centre. No river flood has reached the central districts in the modern record; the regional reference event is the May 2020 Sardoba reservoir failure in neighbouring Sirdaryo Region (about 70,000 evacuated; ECHO via ReliefWeb). The practical water hazard in the centre is pluvial: spring thunderstorms (March-June) flood underpasses, basements and the low Mirabad / railway-station ground for hours (assumption; no public pluvial map was found). Mudflow and debris-flow corridors do not reach the city frame - they lie in the Bostanliq, Parkent and Akhangaran foothills 40-70 km to the north-east and east (Tashkent Region landslide High).",
    "earthquake_context_ja": "ThinkHazard rates earthquake High for Tashkent city (page_read). At 05:23 on 26 April 1966 a shallow M5.2 earthquake (USGS ISC-GEM M5.3, 10 km, 41.345N 69.184E; Wikipedia: 3-8 km deep with the epicentre in the centre) destroyed most of the old adobe city, left 200,000-300,000 of about 1.5 million residents homeless and killed between 15 and 200; the Monument of Courage on Sharof Rashidov Street marks the epicentral zone and the city was rebuilt with wide boulevards and panel housing over three and a half years (Wikipedia; UNDP/ReliefWeb 2016). USGS lists M5.2 in 1970 (5 km SSE of the city) and M5.1 in 1980 (4 km W) as well as the 1959 Gazalkent M6.0 (62 km NE) and the 1946 Chatkal M7.5 (190 km) as regional references (page_read, sibling usgs.json). Tashkent is in zone 8-9 (MSK-64) of the national seismic building code on up to 15 m of loess and alluvium that amplify shaking (search_snippet; Wikipedia for the deposits); self-built mahalla houses remain the most vulnerable stock (UNDP/ReliefWeb 2014). For a high-rise office the governing issues are elevator entrapment, facade and glass fall, gas shut-off and assembly in open parks rather than collapse.",
    "heat_cold_haze_context_ja": "Hot-summer continental climate at 455 m: July mean 28.3 C with an all-time record of 44.6 C (18 July 1997, Wikipedia) and 44.3 C on 19 July 2026 (kun.uz, search_snippet); Open-Meteo daily data for 16 August - 22 November 2026 near the city show a maximum of 37.7 C (19 August), 12 days at or above 35 C and a minimum of 0.6 C (page_read); ThinkHazard rates extreme heat Medium and water scarcity Medium. Winters are cold (January mean 2.3 C, record low -29.5 C, Wikipedia): the January 2023 cold wave (about -20 C) coincided with the halt of Turkmen gas imports and power rationing, leaving apartment blocks unheated and prompting protests and the mayor's dismissal (bne IntelliNews, search_snippet). Air quality: the 4 November 2021 dust storm (dust 30 times the limit, about 4,000 ambulance calls; UNCCD, search_snippet) and winter inversion smog recur; ThinkHazard wildfire High refers to steppe and grass fires outside the built-up area.",
@@ -2444,8 +2453,8 @@
      "confirmed_by": "page_read"
     },
     {
-     "name": "ThinkHazard! Tashkent city JSON (FL/UF Low, EQ High, LS Low, DG Medium, EH Medium, WF High)",
-     "url": "https://www.thinkhazard.org/en/report/39698.json",
+     "name": "ThinkHazard! Tashkent city JSON, slug form (FL/UF Low, EQ High, LS Low, DG Medium, EH Medium, WF High; the numeric-only /39698.json form returns 404)",
+     "url": "https://www.thinkhazard.org/en/report/39698-uzbekistan-tashkent.json",
      "confirmed_by": "page_read"
     },
     {
@@ -2748,68 +2757,60 @@
      "coord_note_ja": "Shota Rustaveli ko'chasi OSM segments (ways 880319170, 1561127320, 1463525674) south-west of 41.2915,69.2607; the Sharof Rashidov section between Amir Temur Square and Oybek station (41.2987,69.2733, Wikipedia) is interpolated between those verified points (+/-150 m)"
     },
     {
-     "name": "Nukus Street (Nukus ko'chasi)",
+     "name": "Mirabad Street (Mirobod ko'chasi)",
+     "major": false,
+     "label_offset": "55%",
+     "pts": [
+      [
+       41.3049,
+       69.2657
+      ],
+      [
+       41.3032,
+       69.2656
+      ],
+      [
+       41.3007,
+       69.2675
+      ],
+      [
+       41.2955,
+       69.2688
+      ],
+      [
+       41.2894,
+       69.2747
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Mirabad%20Street%2C%20Tashkent&polygon_geojson=1&dedupe=0&limit=40",
+     "coord_note_ja": "OSM primary-road segments (18 ways incl. 636093169, 166717418, 174680647, 203279720, 188492282, 83892271) via Nominatim, ordered along the street axis and simplified to 5 vertices; runs from Sharof Rashidov Avenue near Oybek station south-east past the Gospitalny (hospital) quarter to the railway-station area"
+    },
+    {
+     "name": "Babur Street (Bobur ko'chasi, Yakkasaray)",
      "major": false,
      "label_offset": "40%",
      "pts": [
       [
-       41.2817,
-       69.2595
+       41.3001,
+       69.2492
       ],
       [
-       41.2844,
-       69.2659
+       41.2945,
+       69.2508
       ],
       [
-       41.2867,
-       69.2711
+       41.2916,
+       69.2508
       ],
       [
-       41.2905,
-       69.2765
-      ],
-      [
-       41.295,
-       69.2833
-      ],
-      [
-       41.2967,
-       69.286
+       41.2702,
+       69.2605
       ]
      ],
      "coord_src": "page_read",
-     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Nukus%20Street%2C%20Tashkent",
-     "coord_note_ja": "OSM primary segments (ways 180918804, 509368118, 390181129, 182143369) from Yakkasaray to the Tashkent railway station; one 600 m gap interpolated"
-    },
-    {
-     "name": "Osiyo Street (Yunusabad C-5/C-6)",
-     "major": false,
-     "label_offset": "30%",
-     "pts": [
-      [
-       41.3287,
-       69.2745
-      ],
-      [
-       41.3278,
-       69.2832
-      ],
-      [
-       41.3269,
-       69.2909
-      ],
-      [
-       41.3249,
-       69.2986
-      ],
-      [
-       41.325,
-       69.3041
-      ]
-     ],
-     "coord_src": "page_read",
-     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Osiyo%20Street%2C%20Tashkent",
-     "coord_note_ja": "OSM secondary segments (ways 116064784, 33074431, 181748296, 385228866) across the Yunusabad quarters to the Cardiology Centre"
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Babur%20Street%2C%20Tashkent&polygon_geojson=1&dedupe=0&limit=40",
+     "coord_note_ja": "OSM primary-road segments (40 ways incl. 129303788, 616551479, 784005513, 180933295) via Nominatim, ordered along the street axis and simplified; north-south spine of Yakkasaray parallel to Shota Rustaveli Street, clipped at the southern frame edge"
     }
    ],
    "rails": [
@@ -3149,23 +3150,6 @@
      "floors": 6
     },
     {
-     "name": "Republican Specialized Cardiology Centre (Osiyo St 4)",
-     "name_ja": "Republican Specialized Cardiology Centre (Osiyo St 4)",
-     "kind": "hospital",
-     "lat": 41.325,
-     "lon": 69.2993,
-     "why_ja": "Large public specialised hospital at the eastern end of Osiyo Street (Mirzo-Ulugbek/Yunusabad border), 1.6 km from the C-1 expatriate quarter; emergency cardiology and ICU capacity",
-     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Kardiologiya%20markazi%2C%20Toshkent",
-     "coord_src": "page_read",
-     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Kardiologiya%20markazi%2C%20Toshkent",
-     "coord_note_ja": "Nominatim node 4315261389 'Kardiologiya markazi, Osiyo ko'chasi, Mirzo Ulug'bek Tumani'",
-     "label_dx": 9,
-     "label_dy": -8,
-     "shelter_for": [],
-     "cap": 0,
-     "floors": 9
-    },
-    {
      "name": "Alisher Navoi National Park (Milliy Bog)",
      "name_ja": "Alisher Navoi National Park (Milliy Bog)",
      "kind": "park_open_space",
@@ -3412,6 +3396,80 @@
       "fire"
      ],
      "cap": 5000
+    },
+    {
+     "name": "Navruz Park (Navro'z bog'i, Shaykhantakhur)",
+     "name_ja": "Navruz Park (Navro'z bog'i, Shaykhantakhur)",
+     "kind": "park_open_space",
+     "lat": 41.326,
+     "lon": 69.2661,
+     "why_ja": "Park north of the Mustaqillik Square / Pakhtakor quarter between Navoi Street and Sharof Rashidov Avenue; open assembly space for residents of the northern centre, 1.9 km north-east of the office and 500 m from the Monument of Courage",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Navruz%20park%2C%20Tashkent",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Navruz%20park%2C%20Tashkent",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 1099443923 'Navro'z bog'i' (leisure=park) centroid 41.32601,69.26611",
+     "radius_m": 200,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 8000,
+     "assembly": true
+    },
+    {
+     "name": "Ecopark (Mustaqillik Avenue / Hamid Olimjon St, C-1)",
+     "name_ja": "Ecopark (Mustaqillik Avenue / Hamid Olimjon St, C-1)",
+     "kind": "park_open_space",
+     "lat": 41.3145,
+     "lon": 69.2935,
+     "why_ja": "Landscaped park between Mustaqillik Avenue and the C-1 quarter (opening year not verified); nearest open assembly space for the expatriate housing (300 m) and for the Japan and British embassies (about 1 km)",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Ecopark%2C%20Tashkent",
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Ecopark%2C%20Tashkent",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "No park polygon returned by Nominatim (English, Uzbek or Russian spelling); placed next to the 'Breadly Ecopark' cafe node 10856275378 (41.31375,69.29367, Hamid Olimjon street, Buyuk Ipak Yo'li C-1 quarter) and 400 m south of Hamid Olimjon metro (+/-250 m)",
+     "radius_m": 150,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 4000,
+     "assembly": true
+    },
+    {
+     "name": "Central Military Clinical Hospital of the Ministry of Defence (Mirzo-Ulugbek)",
+     "name_ja": "Central Military Clinical Hospital of the Ministry of Defence (Mirzo-Ulugbek)",
+     "kind": "hospital",
+     "lat": 41.34,
+     "lon": 69.3295,
+     "why_ja": "Main military hospital (trauma, burns, ICU) that is mobilised for mass-casualty response in national emergencies; 7.2 km north-east of the office, outside the drawn frame",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D0%B2%D0%BE%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9%20%D0%B3%D0%BE%D1%81%D0%BF%D0%B8%D1%82%D0%B0%D0%BB%D1%8C%20%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=%D0%A6%D0%B5%D0%BD%D1%82%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D0%B2%D0%BE%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9%20%D0%B3%D0%BE%D1%81%D0%BF%D0%B8%D1%82%D0%B0%D0%BB%D1%8C%20%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim relation 11552836 'Mudofaa vazirligi Markaziy gospital' (amenity=hospital, Oliy Himmat mahalla, Mirzo Ulug'bek district) 41.34000,69.32945; a second, older 'Voenniy gospital' (way 147464980) lies in the Mirabad Gospitalny quarter at 41.28828,69.27765, 650 m south of Mirabad Street",
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "AKFA Medline private hospital (5A Kichik Halqa Yoli, Olmazor)",
+     "name_ja": "AKFA Medline private hospital (5A Kichik Halqa Yoli, Olmazor)",
+     "kind": "hospital",
+     "lat": 41.3429,
+     "lon": 69.2089,
+     "why_ja": "Large private multi-profile hospital with a 24-hour emergency department used by corporate clients and expatriates (service claims not verified in this session); 5.0 km north-west of the office, outside the drawn frame",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Akfa%20Medline%2C%20Tashkent",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Akfa%20Medline%2C%20Tashkent",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim relation 8343612 (amenity=clinic 'Akfa Medline', 5A Kichik Halqa yo'li, Orzu quarter, Olmazor district) 41.34287,69.20885",
+     "shelter_for": [],
+     "cap": 0
     }
    ],
    "homes": [
@@ -3428,13 +3486,10 @@
       "nest one",
       "нест ван",
       "gardens residence",
-      "boulevard",
       "shayxontohur",
       "shaykhantakhur",
       "шайхантахур",
-      "uqchi",
-      "beshyogoch",
-      "бешагач"
+      "beshyogoch"
      ],
      "coord_src": "page_read",
      "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Tashkent%20City%2C%20Tashkent",
@@ -3453,17 +3508,10 @@
       "mirzo ulugbek",
       "mirzo-ulugbek",
       "мирзо-улугбек",
-      "мирзо улугбек",
       "buyuk ipak yoli",
-      "великий шелковый путь",
       "sodiq azimov",
       "садык азимов",
-      "yahyo gulomov",
-      "яхъё гулямов",
-      "c-2",
-      "ц-2",
-      "oloy",
-      "алайский"
+      "yahyo gulomov"
      ],
      "coord_src": "page_read",
      "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=%D0%A6-1%2C%20%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82",
@@ -3484,14 +3532,8 @@
       "минор",
       "c-5",
       "ц-5",
-      "c-6",
-      "ц-6",
       "qiyot",
-      "кият",
-      "bodomzor",
-      "бадамзар",
-      "amir temur",
-      "амир темур"
+      "bodomzor"
      ],
      "coord_src": "page_read",
      "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Qiyot%20%28C-5%29%20dahasi%2C%20Toshkent",
@@ -3513,11 +3555,7 @@
       "novza",
       "новза",
       "bunyodkor",
-      "бунёдкор",
-      "qatortol",
-      "катартал",
-      "mukimi",
-      "мукими"
+      "qatortol"
      ],
      "coord_src": "derived",
      "coord_url": "https://en.wikipedia.org/wiki/Novza_(Tashkent_Metro)",
@@ -3750,6 +3788,3871 @@
        [
         41.3085,
         69.2435
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "area_id": "bis_center",
+   "city_ja": "Bishkek",
+   "area_ja": "Central Bishkek (Ala-Too Square - Chuy Avenue - Toktogul Street; Pervomaysky, Lenin, Sverdlov and Oktyabr districts)",
+   "center_lat": 42.8685,
+   "center_lon": 74.5965,
+   "extent_km": 7.0,
+   "rotation_deg": 2,
+   "grid_m": 200,
+   "rotation_note_ja": "Bishkek's Soviet grid is almost cardinal: the fetched OSM geometry of Chuy Avenue bears 1.5 deg south of east and Chyngyz Aytmatov (Manas) Avenue 2.3 deg east of north, i.e. about 2 deg clockwise; with the app's rotation convention (x=u*cos-v*sin, y down; the Almaty frame used -6 for a 5-6 deg counter-clockwise tilt) a small positive value matches (derived)",
+   "flood_context_ja": "River flood is rated Low for Chuy Region and the Bishkek city division has no ThinkHazard data at all (page_read), but the city has three live water hazards. (1) Mudflow and ice jams on the Ala-Archa, which enters the frame from the south at Ataturk Park, runs diagonally north-west past Akhunbaev/Maldybaev streets and then north along the former Molodaya Gvardiya boulevard 1 km west of the office: on 16 December 2023 an avalanche-fed frazil-ice (shuga) jam pushed the river out of its channel and flooded Akhunbaev and Maldybaev streets, and on 17 July 2024 the city declared a special readiness regime for a possible mudflow from the Ala-Archa gorge (economist.kg, kaktus.media; search_snippet). The river is small (mean 4.2 m3/s, max 50 m3/s; Wikipedia) but channelized and hemmed in by housing, and MES clears the channel every spring and autumn. (2) The Alamudun (Alamedin) along the eastern edge of the frame (mean 6.4 m3/s, max 300 m3/s) needs winter ice-clearing (11 km cleared in 2024-25; Wikipedia third_party). (3) The Great Chuy Canal (BChK, 43-55 m3/s at its head) crosses the north of the frame from east to west 1 km north of Jibek Jolu; it is an unlined earth canal built 1941-58 with buildings inside its former mudflow channels (CABAR, search_snippet), so a breach or blocked culvert floods the flat northern districts. Short, intense summer storms (May-July) also pond water in the low northern blocks and at underpasses (ThinkHazard: urban flood High nationally, Low for Chuy; assumption for the city).",
+   "earthquake_context_ja": "ThinkHazard rates earthquake hazard High for Chuy Region and nationally (page_read). Bishkek sits on the alluvial fans of the northern Kyrgyz Ala-Too immediately north of the Issyk-Ata marginal fault, whose nearest segment runs along the Chon-Aryk and Pospeldek foothills 5-8 km south of this frame (kaktus.media, search_snippet). The national zoning places the city in the 9-point (MSK-64) zone and Gosstroy states that modern high-rises are designed for intensity 9 (24.kg, search_snippet; design intensity itself unverified); a 2019 SNiP re-rated the 700 m fault-adjacent zone from 9 to 8 points while banning construction in two 250 m strips. Published scenarios for a Mw 7.5 Issyk-Ata rupture give 7,900 +/- 2,600 completely damaged buildings and 2,400 +/- 1,500 deaths (Amey and Elliott 2023), with site effects adding up to 2 intensity units in the flat, water-saturated north of the city (Bindi et al. 2011; search_snippet). History: 1885 Belovodsk (about 9 points, 45 km west), 1887 Verny (9-10), 1911 Kemin M8.0 (180 km east, destroyed Almaty and damaged Pishpek), 1938 Kemin-Chu M7.0 (110 km east) and 1992 Suusamyr M7.3 (116 km south-west); USGS lists 18 M5+ events within 150 km since 1950, the latest M5.0 on 12 August 2026 (page_read). The M7.0 Wushi earthquake of 22 January 2024 produced 124 USGS felt reports from Bishkek (intensity 3.8) and sent residents into the streets. Soviet 1960s-80s panel and brick housing (Vostok-5, microdistricts) and the fast-built high-rises of the southern Kosmos/Asanbai belt are the vulnerability concern; ThinkHazard landslide is High for the region but slope failure matters only on the southern foothills, outside this frame.",
+   "heat_cold_haze_context_ja": "Continental climate at 760-800 m: Open-Meteo daily data for 16 Aug - 22 Nov 2026 show 35.7 C and -3.4 C (page_read); summer peaks reach 39-42 C (country file) and ThinkHazard rates extreme heat Medium. Winter is the critical season: in December 2012 Bishkek declared a state of emergency during the coldest spell in 76 years (-30 to -35 C, 16 dead nationally; ReliefWeb/IFRC page_read), and the single district-heating source, the Soviet-era Bishkek CHP (TETs) on Chuy Avenue 206 just east of the frame, failed in January 2018 (three days without heat at -25 C) and again on 2 February 2024 when a boiler exploded (five injured, heating and hot water limited for days, schools online; search_snippet). Power rationing under the 2023-2026 energy emergency compounds this. Heating-season smog from coal stoves and inversions puts Bishkek among the world's most polluted cities on winter days (IQAir: most polluted major city on 16 March 2026, AQI 160; 2024 annual PM2.5 21.2 ug/m3; search_snippet), so FFP2 masks, purifiers and a heating fallback (electric heaters, generator fuel) belong in the office and home stock.",
+   "zone_src_ja": "Demo zones are assumptions drawn from fetched geometry and published events: mudflow/ice-jam corridors are +/-200 m buffers along the OSM channel of the Ala-Archa and +/-150 m along the Alamudun (Nominatim relations 7062681 and 19640713, page_read), a +/-80 m breach strip along the Great Chuy Canal (relation 10674491); the urban-flood patches mark the Akhunbaev/Maldybaev area flooded on 16 December 2023 (search_snippet) and the flat northern blocks (assumed); seismic bands use the 9-point national zone (unverified), the +2 intensity site-amplification finding for the north of the city (Bindi et al., search_snippet) and the fault proximity of the southern belt. No official microzonation or mudflow hazard polygons were fetched.",
+   "sources": [
+    {
+     "name": "ThinkHazard! Chuy Region (GAUL 147294) JSON - hazard levels used for Bishkek",
+     "url": "https://www.thinkhazard.org/en/report/147294.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! Bishkek city division (147293) JSON - all hazards No data",
+     "url": "https://www.thinkhazard.org/en/report/147293.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! Kyrgyz Republic (138) JSON",
+     "url": "https://www.thinkhazard.org/en/report/138.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS FDSN event service - M5+ within 150 km of Bishkek since 1950 (18 events) and M6.5+ within 250 km since 1900",
+     "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1950-01-01&endtime=2026-11-17&minmagnitude=5.0&orderby=time&limit=2000&latitude=42.875&longitude=74.60&maxradiuskm=150",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS event page - 1992-08-19 M7.3 Suusamyr earthquake (usp0005cq0)",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/usp0005cq0",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS event page - 1911 Kemin M8.0 (iscgem16958130)",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem16958130",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS event page - 2024-01-22 M7.0 Wushi earthquake (us7000lsze), 124 DYFI reports from Bishkek (via the project's usgs.json)",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000lsze",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Open-Meteo forecast API, Bishkek, past 92 days",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=42.875&longitude=74.60&daily=temperature_2m_max,temperature_2m_min&past_days=92&timezone=auto",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "OpenStreetMap via Nominatim (POI, road, river and canal geometry; ODbL)",
+     "url": "https://nominatim.openstreetmap.org/",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ReliefWeb - Kyrgyzstan: Cold Wave Dec 2012 (state of emergency in Bishkek 2012-12-18)",
+     "url": "https://reliefweb.int/disaster/cw-2012-000209-kgz",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - Bishkek (population, Issyk-Ata fault note, air quality)",
+     "url": "https://en.wikipedia.org/wiki/Bishkek",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Ala-Archa (river), Alamudun (river), Great Chuy Canal",
+     "url": "https://en.wikipedia.org/wiki/Great_Ch%C3%BCy_Canal",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Dolen Omurzakov Stadium, Panfilov Park, Ala-Too Square, Victory Square, Bishkek International School, Bishkek district pages (coordinates, dates)",
+     "url": "https://en.wikipedia.org/wiki/Dolen_Omurzakov_Stadium",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "City Population (citypopulation.de) - Bishkek districts, 2022 census",
+     "url": "https://citypopulation.de/en/kyrgyzstan/admin/11__bi%C5%A1kek_%C5%A1aary/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "MOFA Japan overseas mission list - Embassy of Japan in the Kyrgyz Republic (Tashkent St 35/1)",
+     "url": "https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/kilgith.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "24.kg - Embassy of Japan moves from 16 Razzakov Street",
+     "url": "https://24.kg/english/228551_Embassy_of_Japan_in_Kyrgyzstan_moves_to_another_location",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "PwC Kyrgyzstan contact page - Business center Avangard, Toktogula 125/1, Tower B",
+     "url": "https://www.pwc.com/kg/en/contact.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "MES Kyrgyz Republic - reception schedule page (central office address, 101/112)",
+     "url": "https://www.mchs.gov.kg/en/zharandardy-kabyl-aluu-grafigi",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "UK FCDO - List of medical facilities in Kyrgyzstan (Neomed, Eldik; English-speaking staff)",
+     "url": "https://www.gov.uk/government/publications/kyrgyzstan-list-of-medical-facilitiespractitioners/list-of-medical-facilities-in-kyrgyzstan",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "24.kg - state pharmacies list with hospital addresses (GKB No. 1 Fuchik 15; emergency hospital Krivonosov 206)",
+     "url": "https://24.kg/obschestvo/279574_gosudarstvennyie_apteki_vnbspkyirgyizstane_adresa_vnbspbishkeke_inbspdrugih_gorodah/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Kaktus.media - construction in the restricted Issyk-Ata fault zone (700 m / 250 m zones, 9 to 8 points)",
+     "url": "https://kaktus.media/doc/393091_specreportaj:_zastroyka_zapreshennoy_zony_razloma_k_ugy_ot_bishkeka_foto_video.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Amey and Elliott 2023, Natural Hazards - Bishkek earthquake scenario losses (OpenQuake)",
+     "url": "https://ideas.repec.org/a/spr/nathaz/v116y2023i1d10.1007_s11069-022-05678-0.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Bindi et al. 2011 - Towards an improved seismic risk scenario for Bishkek",
+     "url": "https://arts.units.it/handle/11368/3033485",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "economist.kg - Ala-Archa left its banks and flooded Bishkek streets (2023-12-16); special readiness regime for Ala-Archa mudflow (2024-07-17)",
+     "url": "https://economist.kg/novosti/2023/12/16/rieka-ala-archa-vyshla-iz-bierieghov-i-zatopila-ulitsy-bishkieka-probliemu-uzhie-rieshili/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "IQAir newsroom - Bishkek among the most polluted cities, 2026-03-16",
+     "url": "https://www.iqair.cn/cn-en/newsroom/bishkek-among-top-10-most-polluted-cities-in-the-world-3-16-2026",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "24.kg - Bishkek CHP breakdown 2024-02-02, criminal case",
+     "url": "https://24.kg/english/285827_Bishkek_HPP_breakdown_Criminal_case_initiated_on_the_fact/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Kaktus.media - 2026 street renamings (Manas Avenue merged into Chyngyz Aytmatov Avenue)",
+     "url": "https://kaktus.media/doc/552127_molodoy_gvardii_bolshe_net._v_bishkeke_pereimenovali_riad_ylic.html",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "roads": [
+    {
+     "name": "Chuy Avenue (Chuy prospekti, ex-Lenin Ave)",
+     "major": true,
+     "label_offset": "45%",
+     "pts": [
+      [
+       42.8768,
+       74.5527
+      ],
+      [
+       42.878,
+       74.5605
+      ],
+      [
+       42.875,
+       74.6267
+      ],
+      [
+       42.8751,
+       74.6397
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Chuy%20Avenue,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM highway=primary ways via Nominatim (21 results, 136 vertices in the frame), sorted west-east and simplified to 4 vertices; the east-west spine past Ala-Too Square, City Hall and TSUM"
+    },
+    {
+     "name": "Chyngyz Aytmatov Avenue (ex-Manas Avenue / Mira Avenue)",
+     "major": true,
+     "label_offset": "40%",
+     "pts": [
+      [
+       42.8366,
+       74.5856
+      ],
+      [
+       42.8658,
+       74.5873
+      ],
+      [
+       42.8849,
+       74.5892
+      ],
+      [
+       42.8897,
+       74.5884
+      ],
+      [
+       42.8925,
+       74.5887
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Chyngyz%20Aytmatov%20avenue,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM primary/secondary/tertiary ways named Chyngyz Aytmatov avenue (Manas Avenue merged into it by the 2026 renaming decision), simplified to 5 vertices; the north-south spine 800 m west of the office"
+    },
+    {
+     "name": "Yusup Abdrakhmanov Street (ex-Sovetskaya)",
+     "major": true,
+     "label_offset": "55%",
+     "pts": [
+      [
+       42.8642,
+       74.611
+      ],
+      [
+       42.8807,
+       74.6118
+      ],
+      [
+       42.8958,
+       74.6115
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Yusup%20Abdrahmanov%20street,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM highway=primary ways via Nominatim (7 results), simplified to 3 vertices; continues south as Baytik Baatyr Street"
+    },
+    {
+     "name": "Jibek Jolu Avenue",
+     "major": true,
+     "label_offset": "50%",
+     "pts": [
+      [
+       42.884,
+       74.5556
+      ],
+      [
+       42.8851,
+       74.5694
+      ],
+      [
+       42.8836,
+       74.5969
+      ],
+      [
+       42.8847,
+       74.6058
+      ],
+      [
+       42.8853,
+       74.6195
+      ],
+      [
+       42.8886,
+       74.6412
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Jibek%20Jolu%20avenue,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM highway=primary ways via Nominatim (17 results, 157 vertices), simplified to 6 vertices; a dual-carriageway jog at Erkindik was averaged out (+/-60 m)"
+    },
+    {
+     "name": "Akhunbaev Street",
+     "major": true,
+     "label_offset": "40%",
+     "pts": [
+      [
+       42.8439,
+       74.5572
+      ],
+      [
+       42.8431,
+       74.604
+      ],
+      [
+       42.8417,
+       74.637
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Akhunbaev%20Isy%20street,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM highway=primary ways via Nominatim (18 results), simplified to 3 vertices; runs along the southern frame edge past the Ala-Archa crossing flooded in December 2023"
+    },
+    {
+     "name": "Toktogul Street",
+     "major": false,
+     "label_offset": "30%",
+     "pts": [
+      [
+       42.8734,
+       74.5757
+      ],
+      [
+       42.8713,
+       74.6261
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Toktogul%20Street,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM highway=secondary/tertiary ways via Nominatim, simplified to 2 vertices; the office (125/1) and the National Hospital stand on it"
+    },
+    {
+     "name": "Bolot Yunusaliev Street",
+     "major": false,
+     "label_offset": "50%",
+     "pts": [
+      [
+       42.8403,
+       74.6225
+      ],
+      [
+       42.8564,
+       74.6236
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Yunusaliev%20Bolot%20street,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM highway=primary ways via Nominatim (3 results in microdistricts 3-4), simplified to 2 vertices; north-south street in the south-east of the frame"
+    },
+    {
+     "name": "Kyiv (Kievskaya) Street",
+     "major": false,
+     "label_offset": "60%",
+     "pts": [
+      [
+       42.8763,
+       74.5684
+      ],
+      [
+       42.8742,
+       74.6174
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Kyiv%20Street,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM highway=secondary/tertiary ways via Nominatim, simplified to 2 vertices; parallel to Chuy one block south, passes Bishkek Park and Ala-Too Square"
+    },
+    {
+     "name": "Erkindik Boulevard",
+     "major": false,
+     "label_offset": "35%",
+     "pts": [
+      [
+       42.8644,
+       74.6052
+      ],
+      [
+       42.8847,
+       74.6075
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Erkindik%20Boulevard,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM ways via Nominatim, simplified to 2 vertices; tree-lined linear park from Bishkek-2 station to Oak Park, usable as an assembly strip"
+    }
+   ],
+   "rails": [
+    {
+     "name": "Turksib branch railway (Bishkek-2 station; Bishkek-Lugovaya / Balykchy line)",
+     "pts": [
+      [
+       42.8645,
+       74.5541
+      ],
+      [
+       42.8638,
+       74.6057
+      ],
+      [
+       42.863,
+       74.6399
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bishkek-2%20railway%20station&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "Only the station node (Nominatim node 240449433, 42.8638,74.6057) was fetched; the east-west alignment through the frame is derived from it (+/-150 m). Single-track diesel line with a few trains a day; no metro in Bishkek"
+    }
+   ],
+   "water": [
+    {
+     "name": "Ala-Archa river - channelized mudflow / ice-jam corridor",
+     "kind": "river",
+     "width_m": 12,
+     "pts": [
+      [
+       42.8376,
+       74.6
+      ],
+      [
+       42.8407,
+       74.6
+      ],
+      [
+       42.8506,
+       74.5961
+      ],
+      [
+       42.8548,
+       74.5919
+      ],
+      [
+       42.8592,
+       74.5772
+      ],
+      [
+       42.8735,
+       74.5692
+      ],
+      [
+       42.8799,
+       74.5623
+      ],
+      [
+       42.9004,
+       74.5636
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/lookup?osm_ids=R7062681&format=jsonv2&polygon_geojson=1",
+     "coord_note_ja": "OSM waterway relation 7062681 via Nominatim lookup (3,170 vertices), clipped to the frame and simplified to 8 vertices; enters from the south at Ataturk Park, runs north-west to the former Molodaya Gvardiya boulevard and north past Osh Bazaar"
+    },
+    {
+     "name": "Alamudun (Alamedin) river",
+     "kind": "river",
+     "width_m": 12,
+     "pts": [
+      [
+       42.8376,
+       74.6324
+      ],
+      [
+       42.8542,
+       74.6293
+      ],
+      [
+       42.8659,
+       74.6259
+      ],
+      [
+       42.8773,
+       74.625
+      ],
+      [
+       42.8885,
+       74.6315
+      ],
+      [
+       42.9004,
+       74.6322
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/lookup?osm_ids=R19640713&format=jsonv2&polygon_geojson=1",
+     "coord_note_ja": "OSM waterway relation 19640713 via Nominatim lookup, clipped to the eastern frame edge and simplified to 6 vertices; flows north past Vostok-5 to the Bishkek CHP"
+    },
+    {
+     "name": "Great Chuy Canal (BChK, Western branch)",
+     "kind": "canal",
+     "width_m": 10,
+     "pts": [
+      [
+       42.8964,
+       74.5541
+      ],
+      [
+       42.8952,
+       74.5695
+      ],
+      [
+       42.8964,
+       74.5794
+      ],
+      [
+       42.8973,
+       74.6052
+      ],
+      [
+       42.8935,
+       74.6249
+      ],
+      [
+       42.8946,
+       74.638
+      ],
+      [
+       42.8924,
+       74.6399
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Great%20Chuy%20Canal&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "OSM waterway=canal relation 10674491 via Nominatim (771 vertices across the Chuy valley), clipped to the frame and simplified to 7 vertices; crosses the north of the frame east to west about 1 km north of Jibek Jolu"
+    }
+   ],
+   "pois": [
+    {
+     "name": "National Hospital of the Ministry of Health (Togolok Moldo St 1)",
+     "name_ja": "National Hospital of the Ministry of Health (Togolok Moldo St 1)",
+     "kind": "hospital",
+     "lat": 42.8713,
+     "lon": 74.5973,
+     "why_ja": "Largest public multi-profile hospital of the country, directly south of the Avangard Business Centre across Toktogul Street (150 m); first destination for office casualties Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=National%20Hospital,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Togolok%20Moldo%20Street%201,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 25487639 (amenity=hospital, 1 Togolok Moldo street, Pervomaysky district)",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 7
+    },
+    {
+     "name": "City Clinical Hospital No. 1 (Fuchik St 15)",
+     "name_ja": "City Clinical Hospital No. 1 (Fuchik St 15)",
+     "kind": "hospital",
+     "lat": 42.8849,
+     "lon": 74.554,
+     "why_ja": "Main municipal hospital in the north-west (Fuchik / Jibek Jolu); receiving hospital for the western and northern districts and for staff living west of the Ala-Archa Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://24.kg/obschestvo/279574_gosudarstvennyie_apteki_vnbspkyirgyizstane_adresa_vnbspbishkeke_inbspdrugih_gorodah/",
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Fuchik%20Street%2015,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Address Yu. Fuchik St 15 (or 15/1) from 24.kg lists (search_snippet); the hospital is not tagged in OSM, so the point is Nominatim's house-number match '15 Fuchik Julius street' (way 330891233) at the western frame edge (+/-150 m)",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 5
+    },
+    {
+     "name": "Neomed private clinic (Orozbekov St 46)",
+     "name_ja": "Neomed private clinic (Orozbekov St 46)",
+     "kind": "hospital",
+     "lat": 42.8712,
+     "lon": 74.602,
+     "why_ja": "Private clinic used by expatriates and diplomatic missions; listed by the UK FCDO with some English-speaking staff (+996 312 906090); 400 m east of the office Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://www.gov.uk/government/publications/kyrgyzstan-list-of-medical-facilitiespractitioners/list-of-medical-facilities-in-kyrgyzstan",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Neomed%20clinic%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 64441687 (amenity=clinic 'neomed', house 46; OSM gives the street as Sagynbai while the FCDO list says Orozbekova 46)",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 3
+    },
+    {
+     "name": "Ala-Too Square",
+     "name_ja": "Ala-Too Square",
+     "kind": "park_open_space",
+     "lat": 42.8761,
+     "lon": 74.6037,
+     "why_ja": "Central paved square (1984) in front of the State History Museum, 550 m north-east of the office; main open assembly space of the centre away from tall facades",
+     "source_url": "https://en.wikipedia.org/wiki/Ala-Too_Square",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Ala-Too%20Square,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 10,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 181568920 (place=square); Wikipedia 42.87639,74.60389",
+     "radius_m": 150,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 20000,
+     "assembly": true
+    },
+    {
+     "name": "Panfilov Park",
+     "name_ja": "Panfilov Park",
+     "kind": "park_open_space",
+     "lat": 42.8792,
+     "lon": 74.5998,
+     "why_ja": "Amusement park with lawns between the White House and the stadium, 700 m north of the office; shaded assembly area in summer",
+     "source_url": "https://en.wikipedia.org/wiki/Panfilov_Park_(Bishkek)",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Panfilov%20Park,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 25487201 (tourism=theme_park) centroid; Wikipedia 42.8796,74.6002",
+     "radius_m": 180,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 8000,
+     "assembly": true
+    },
+    {
+     "name": "Dolen Omurzakov (Spartak) Stadium",
+     "name_ja": "Dolen Omurzakov (Spartak) Stadium",
+     "kind": "park_open_space",
+     "lat": 42.8802,
+     "lon": 74.598,
+     "why_ja": "23,000-seat national stadium (1941) with surrounding sports grounds; large open area for assembly and relief staging 800 m north of the office",
+     "source_url": "https://en.wikipedia.org/wiki/Dolen_Omurzakov_Stadium",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Dolen%20Omurzakov%20Stadium%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 25487169 (leisure=stadium); Wikipedia 42.88018,74.59794",
+     "radius_m": 150,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 20000,
+     "assembly": true
+    },
+    {
+     "name": "Oak (Dubovy) Park",
+     "name_ja": "Oak (Dubovy) Park",
+     "kind": "park_open_space",
+     "lat": 42.8773,
+     "lon": 74.6074,
+     "why_ja": "Historic oak park (1890s) with the open-air sculpture museum between Erkindik Boulevard and Razzakov Street; mature trees - keep away from them in strong wind, otherwise a good assembly point for the Golden Square",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Oak%20Park,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Oak%20Park,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "The park polygon itself was not matched by Nominatim; the point is the OSM node 5393155826 ('Oak park' artwork on Pushkin street) inside the park (+/-100 m)",
+     "radius_m": 160,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 8000,
+     "assembly": true
+    },
+    {
+     "name": "Victory Square",
+     "name_ja": "Victory Square",
+     "kind": "park_open_space",
+     "lat": 42.8792,
+     "lon": 74.6162,
+     "why_ja": "Memorial square (1985) with the eternal flame on the site of the old central market; assembly space for the Hyatt / Abdrakhmanov area and the western edge of Vostok-5",
+     "source_url": "https://en.wikipedia.org/wiki/Victory_Square,_Bishkek",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Victory%20Square,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 22774750 (place=square); Wikipedia 42.8793,74.6162",
+     "radius_m": 120,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 10000,
+     "assembly": true
+    },
+    {
+     "name": "Ataturk Park",
+     "name_ja": "Ataturk Park",
+     "kind": "park_open_space",
+     "lat": 42.8373,
+     "lon": 74.5944,
+     "why_ja": "Large park on the Ala-Archa in the south (Microdistrict 9); assembly space for the Kosmos / Aytmatov Avenue high-rises, but stay on the upper lawns during mudflow or ice-jam warnings",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Ataturk%20Park,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Ataturk%20Park,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 50743214 (leisure=park) centroid at the southern frame edge",
+     "radius_m": 250,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 15000,
+     "assembly": true
+    },
+    {
+     "name": "Embassy of Japan in the Kyrgyz Republic (Tashkent St 35/1)",
+     "name_ja": "Embassy of Japan in the Kyrgyz Republic (Tashkent St 35/1)",
+     "kind": "embassy",
+     "lat": 42.8852,
+     "lon": 74.5897,
+     "why_ja": "Consular section for Japanese nationals (ORRnet/Tabi-Regi registration, emergency mail, evacuation information); moved here from 16 Razzakov Street - not a shelter",
+     "source_url": "https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/kilgith.html",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Embassy%20of%20Japan,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 1186151358 (office=diplomatic 'Embassy of Japan', Professora Zimy street / Tashkent Street block, Salam-Alik); address and phones from the MOFA list (search_snippet)",
+     "floors": 2
+    },
+    {
+     "name": "QSI International School of Bishkek (Tynystanov St 14A)",
+     "name_ja": "QSI International School of Bishkek (Tynystanov St 14A)",
+     "kind": "school",
+     "lat": 42.8443,
+     "lon": 74.6062,
+     "why_ja": "American-curriculum international school in Kosmos, 3.2 km south of the office; family reunification point for staff children",
+     "source_url": "https://www.ischooladvisor.com/kyrgyzstan/biskek/bishkek/qsi-international-school-of-bishkek/en",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Tynystanov%20Street%2014A,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 81076837 (amenity=school, 14A Tynystanov street, 720055)",
+     "shelter_for": [
+      "quake"
+     ],
+     "cap": 800
+    },
+    {
+     "name": "Bishkek International School (Bronirovannaya St 67A)",
+     "name_ja": "Bishkek International School (Bronirovannaya St 67A)",
+     "kind": "school",
+     "lat": 42.8539,
+     "lon": 74.5804,
+     "why_ja": "IB international school (est. 2010, about 110 teaching staff) 1.7 km south-west of the office; reunification point",
+     "source_url": "https://en.wikipedia.org/wiki/Bishkek_International_School",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bishkek%20International%20School&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 152341327 (amenity=school, 67a Bronirovannaya street, Lenin district); Wikipedia 42.8540,74.5803",
+     "shelter_for": [
+      "quake"
+     ],
+     "cap": 1000
+    },
+    {
+     "name": "Hope Academy of Bishkek (Ogonbaev St, Vostok-5)",
+     "name_ja": "Hope Academy of Bishkek (Ogonbaev St, Vostok-5)",
+     "kind": "school",
+     "lat": 42.8769,
+     "lon": 74.6218,
+     "why_ja": "English-medium international school in the Vostok-5 microdistrict; reunification point for families living in the east of the centre",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Hope%20Academy%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Hope%20Academy%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 429234084 (amenity=college 'Hope Academy')",
+     "shelter_for": [
+      "quake"
+     ],
+     "cap": 500
+    },
+    {
+     "name": "Ministry of Emergency Situations (Toktonaliev St 2/1)",
+     "name_ja": "Ministry of Emergency Situations (Toktonaliev St 2/1)",
+     "kind": "government",
+     "lat": 42.8536,
+     "lon": 74.5928,
+     "why_ja": "National disaster-management ministry with the Crisis Management Centre and the 112 dispatch service; the ministry website lists the central office as 101/1 Manas Avenue (search_snippet) - verify which building hosts public reception",
+     "source_url": "https://www.mchs.gov.kg/en/zharandardy-kabyl-aluu-grafigi",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Министерство%20чрезвычайных%20ситуаций%20Бишкек&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 53369165 (office=government 'Ministry of Emergency Situations', 2/1 A. Toktonaliev street, Kosmos)",
+     "floors": 5
+    },
+    {
+     "name": "Bishkek City Hall (Chuy Ave 166)",
+     "name_ja": "Bishkek City Hall (Chuy Ave 166)",
+     "kind": "government",
+     "lat": 42.8761,
+     "lon": 74.5865,
+     "why_ja": "City administration (Mayor's office); the city emergency commission and Bishkekvodkhoz (river and canal maintenance) are coordinated from here",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Bishkek%20City%20Hall&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bishkek%20City%20Hall&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 36823753 (amenity=townhall, 166 Chuy avenue)",
+     "floors": 6
+    },
+    {
+     "name": "Bishkek-2 railway station",
+     "name_ja": "Bishkek-2 railway station",
+     "kind": "station",
+     "lat": 42.8638,
+     "lon": 74.6057,
+     "why_ja": "Main railway station (1938) at the south end of Erkindik Boulevard; landmark and evacuation railhead toward Balykchy / Kazakhstan, not a shelter",
+     "source_url": "https://en.wikipedia.org/wiki/Bishkek-2_railway_station",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bishkek-2%20railway%20station&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 13,
+     "coord_note_ja": "Nominatim node 240449433 (railway=station 'Bishkek 2', Tugolbay Ata Street)"
+    },
+    {
+     "name": "Osh Bazaar",
+     "name_ja": "Osh Bazaar",
+     "kind": "landmark",
+     "lat": 42.8751,
+     "lon": 74.5698,
+     "why_ja": "Largest bazaar of the centre (1983), beside the Ala-Archa channel and the Western Bus Station; crowd, fire and flash-flood exposure; avoid as a route after shaking",
+     "source_url": "https://en.wikipedia.org/wiki/Osh_Bazaar",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Osh%20Bazaar,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim relation 4775068 (amenity=marketplace) centroid; Wikipedia 42.875,74.570"
+    }
+   ],
+   "homes": [
+    {
+     "name_ja": "City-centre high-rise apartments (Erkindik Boulevard / Moskovskaya, Pervomaysky district)",
+     "lat": 42.8695,
+     "lon": 74.6073,
+     "type": "highrise",
+     "floor": 9,
+     "keys": [
+      "erkindik",
+      "эркиндик",
+      "moskovskaya",
+      "московская",
+      "bokonbaev",
+      "боконбаева",
+      "toktogul",
+      "токтогула",
+      "razzakov",
+      "раззакова",
+      "isanov",
+      "исанова",
+      "pervomaysky",
+      "первомайский",
+      "биринчи май"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Erkindik%20Boulevard,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "Nominatim node 630837965 (bus stop Erkindik boulevard / Moscow Street) used as the anchor of the Golden Square infill high-rises 1 km east of the office"
+    },
+    {
+     "name_ja": "Asanbai / Jal new high-rise belt south of the centre (Oktyabr and Lenin districts)",
+     "lat": 42.8188,
+     "lon": 74.6245,
+     "type": "highrise",
+     "floor": 12,
+     "keys": [
+      "asanbai",
+      "asanbay",
+      "асанбай",
+      "jal",
+      "djal",
+      "джал",
+      "жал",
+      "yug-2",
+      "юг-2",
+      "tokombaev",
+      "токомбаева",
+      "oktyabrsky",
+      "октябрьский",
+      "6 микрорайон",
+      "mikrorayon 6"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Asanbai,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "Nominatim way 76228493 (place=quarter Asanbay microdistrict) centroid, south of the frame; the Jal microdistrict counterpart is at 42.8391,74.5659 (node 1938188805). Fast-built 12-16 storey towers closest to the Issyk-Ata fault"
+    },
+    {
+     "name_ja": "Kok-Jar / Orto-Sai private houses on the south-eastern foothills (Oktyabr district)",
+     "lat": 42.8455,
+     "lon": 74.6447,
+     "type": "house",
+     "floor": 2,
+     "keys": [
+      "kok-jar",
+      "kok jar",
+      "кок-жар",
+      "көк-жар",
+      "orto-sai",
+      "orto sai",
+      "орто-сай",
+      "орто сай",
+      "ulan",
+      "улан",
+      "4 микрорайон",
+      "mikrorayon 4"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Kok-Jar,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "Nominatim way 161847490 (place=quarter Kok-Jar residential massif) centroid just east of the frame; Orto-Sai market at 42.8362,74.6169. Self-built brick houses with coal/gas heating on the fan slopes above the Alamudun"
+    },
+    {
+     "name_ja": "Vostok-5 Soviet panel microdistrict (east centre, Sverdlov district)",
+     "lat": 42.8749,
+     "lon": 74.6318,
+     "type": "lowrise",
+     "floor": 5,
+     "keys": [
+      "vostok",
+      "vostok-5",
+      "восток-5",
+      "восток 5",
+      "чыгыш-5",
+      "mikrorayon",
+      "микрорайон",
+      "mkr",
+      "sverdlovsky",
+      "свердловский",
+      "ibraimov",
+      "ибраимова",
+      "alamedin",
+      "аламедин"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Vostok-5,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+     "coord_note_ja": "Nominatim node 6348960576 (bus stop Vostok-5 on Chuy Avenue) as the centroid of the 1970s-80s 5-9 storey panel-block belt between Abdrakhmanov Street and the Alamudun river"
+    }
+   ],
+   "zones": {
+    "flood": [
+     {
+      "depth_m": 1.5,
+      "note_ja": "mudflow / ice-jam corridor - Ala-Archa river: on 16 Dec 2023 a frazil-ice jam put the river onto Akhunbaev and Maldybaev streets, and in July 2024 the city declared mudflow readiness for the Ala-Archa gorge (search_snippet). Corridor +/-200 m along the fetched OSM channel is an assumption for the demo",
+      "pts": [
+       [
+        42.8376,
+        74.6025
+       ],
+       [
+        42.8407,
+        74.6025
+       ],
+       [
+        42.8506,
+        74.5986
+       ],
+       [
+        42.8548,
+        74.5944
+       ],
+       [
+        42.8592,
+        74.5797
+       ],
+       [
+        42.8735,
+        74.5717
+       ],
+       [
+        42.8799,
+        74.5648
+       ],
+       [
+        42.9004,
+        74.5661
+       ],
+       [
+        42.9004,
+        74.5611
+       ],
+       [
+        42.8799,
+        74.5598
+       ],
+       [
+        42.8735,
+        74.5667
+       ],
+       [
+        42.8592,
+        74.5747
+       ],
+       [
+        42.8548,
+        74.5894
+       ],
+       [
+        42.8506,
+        74.5936
+       ],
+       [
+        42.8407,
+        74.5975
+       ],
+       [
+        42.8376,
+        74.5975
+       ]
+      ]
+     },
+     {
+      "depth_m": 1.0,
+      "note_ja": "mudflow / ice-jam corridor - Alamudun (Alamedin) river along the eastern frame edge (max discharge 300 m3/s; winter ice-clearing 2024-25, Wikipedia). +/-150 m assumed",
+      "pts": [
+       [
+        42.8376,
+        74.6342
+       ],
+       [
+        42.8542,
+        74.6311
+       ],
+       [
+        42.8659,
+        74.6277
+       ],
+       [
+        42.8773,
+        74.6268
+       ],
+       [
+        42.8885,
+        74.6333
+       ],
+       [
+        42.9004,
+        74.634
+       ],
+       [
+        42.9004,
+        74.6304
+       ],
+       [
+        42.8885,
+        74.6297
+       ],
+       [
+        42.8773,
+        74.6232
+       ],
+       [
+        42.8659,
+        74.6241
+       ],
+       [
+        42.8542,
+        74.6275
+       ],
+       [
+        42.8376,
+        74.6306
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.5,
+      "note_ja": "Great Chuy Canal breach / overtopping strip across the north of the frame (unlined earth canal, 43-55 m3/s at the head; buildings inside former mudflow channels along the BChK per CABAR). +/-80 m assumed",
+      "pts": [
+       [
+        42.8972,
+        74.5541
+       ],
+       [
+        42.896,
+        74.5695
+       ],
+       [
+        42.8972,
+        74.5794
+       ],
+       [
+        42.8981,
+        74.6052
+       ],
+       [
+        42.8943,
+        74.6249
+       ],
+       [
+        42.8954,
+        74.638
+       ],
+       [
+        42.8932,
+        74.6399
+       ],
+       [
+        42.8916,
+        74.6399
+       ],
+       [
+        42.8938,
+        74.638
+       ],
+       [
+        42.8927,
+        74.6249
+       ],
+       [
+        42.8965,
+        74.6052
+       ],
+       [
+        42.8956,
+        74.5794
+       ],
+       [
+        42.8944,
+        74.5695
+       ],
+       [
+        42.8956,
+        74.5541
+       ]
+      ]
+     }
+    ],
+    "urban_flood": [
+     {
+      "depth_m": 0.3,
+      "note_ja": "Akhunbaev / Maldybaev / Ataturk Park blocks around the Ala-Archa crossing: flooded by the 16 Dec 2023 ice-jam overflow (search_snippet); storm ponding in summer (assumed extent)",
+      "pts": [
+       [
+        42.8485,
+        74.5885
+       ],
+       [
+        42.8485,
+        74.6045
+       ],
+       [
+        42.8371,
+        74.6045
+       ],
+       [
+        42.8371,
+        74.5885
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.3,
+      "note_ja": "Flat northern blocks between Jibek Jolu and the Great Chuy Canal with shallow groundwater: storm-water and canal seepage ponding (assumed; ThinkHazard urban flood High nationally, Low for Chuy)",
+      "pts": [
+       [
+        42.8965,
+        74.5536
+       ],
+       [
+        42.8965,
+        74.6394
+       ],
+       [
+        42.887,
+        74.6394
+       ],
+       [
+        42.887,
+        74.5536
+       ]
+      ]
+     }
+    ],
+    "quake": [
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX",
+      "note_ja": "Design seismic zone 9 (MSK-64) for the whole city per the national zoning map (unverified; Gosstroy says modern high-rises are built for 9, search_snippet); 1885 Belovodsk and 1911 Kemin reached IX-X in the Chuy valley. Band boundary is the frame; no microzonation map was fetched",
+      "pts": [
+       [
+        42.8999,
+        74.5536
+       ],
+       [
+        42.8999,
+        74.6394
+       ],
+       [
+        42.8371,
+        74.6394
+       ],
+       [
+        42.8371,
+        74.5536
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX-X",
+      "note_ja": "Northern strip from Jibek Jolu to the Great Chuy Canal: flat, water-saturated alluvium where Bindi et al. (2011) found site effects adding up to 2 intensity units (search_snippet); band assumed",
+      "pts": [
+       [
+        42.8999,
+        74.5536
+       ],
+       [
+        42.8999,
+        74.6394
+       ],
+       [
+        42.885,
+        74.6394
+       ],
+       [
+        42.885,
+        74.5536
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX (near-fault)",
+      "note_ja": "Southern belt (Kosmos, Akhunbaev, toward Asanbai) of fast-built post-2010 high-rises 5-8 km from the Issyk-Ata fault; the 700 m fault-adjacent 9-point zone and the 250 m no-build strips (2019 SNiP) lie further south, outside the frame. Polygon assumed",
+      "pts": [
+       [
+        42.85,
+        74.5536
+       ],
+       [
+        42.85,
+        74.6394
+       ],
+       [
+        42.8371,
+        74.6394
+       ],
+       [
+        42.8371,
+        74.5536
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "area_id": "dus_center",
+   "city_ja": "Dushanbe",
+   "area_ja": "Central Dushanbe (Rudaki Avenue - Ismoili Somoni Avenue - Varzob river; Ismoili Somoni, Shohmansur, Sino and Firdavsi districts)",
+   "center_lat": 38.567,
+   "center_lon": 68.78,
+   "extent_km": 7.0,
+   "rotation_deg": 0,
+   "grid_m": 200,
+   "rotation_note_ja": "Dushanbe's east-west spines are almost exactly east-west in the fetched OSM geometry (Ismoili Somoni Avenue principal axis -6.2 deg, Nazarshoev -2.0 deg, Shohtemur +2.9 deg from east), while Rudaki Avenue runs NNW (axis -78.1 deg) as a diagonal; the grid is therefore left unrotated (derived)",
+   "flood_context_ja": "ThinkHazard rates river flood only Low for the Dushanbe/DRS division but urban flood and landslide High (page_read): the water hazard here is the Varzob - called Dushanbinka inside the city - a 71 km mountain torrent (basin 1,740 km2) that enters the frame from the north past the Botanical Garden, passes 350 m west of the Flagpole Park and Rudaki Park and leaves south of Saadi Sherozi Avenue, joined by the Luchob from the west (Wikipedia; OSM geometry). Rain-on-snow and glacier-melt mudflows in the Varzob gorge repeatedly damage the single water intake: in July 2004 about 400,000 residents of the capital were without clean water and 26 km of the Varzob road were destroyed (EM-DAT / IRIN, via the regional file), in May 2016 a Varzob mudslide again cut downtown water for a day (ReliefWeb), and the 1993 flood of about 1,000 m3/s destroyed bridges and intakes (JICA, search_snippet). Late-August 2023 rains killed 21 people in Vahdat, Rudaki and Varzob and damaged houses in Luchob village (Crisis24, search_snippet). Inside the frame the exposure is concentrated in the riverside strips (Sari Osiyo houses, Flagpole Park, Navruzgoh, the Firdavsi lowland) and in water-supply disruption for every office and home; spring (Mar-Jun) and Jul-Aug are the danger months.",
+   "earthquake_context_ja": "ThinkHazard rates earthquake hazard High (page_read) and the city sits in the 9-point zone of the Tajik MSK-64 code (SNiP RT 22-07-2018; UNDP risk profile 'high-seismicity zone, estimated 8-9' - search_snippet, official zone value unverified). The 1907 Qaratog earthquake (Mw 7.44, 99 km west, intensity IX, 12,000-15,000 dead; USGS ISC-GEM and Wikipedia) is the regional maximum; the 1949 Khait M7.5 earthquake 190 km north-east killed about 7,200, mostly in loess flowslides; and on 22 January 1989 the mb5.3 Gissar earthquake only 14 km west triggered loess flowslides that buried Sharora and killed 274 (Wikipedia). USGS lists 50 M5+ events within 150 km since 1950 and six within 50 km, the latest the M5.2 Vahdat earthquake of 10 November 2013 (20 km, 104 houses destroyed, felt strongly in the capital; Asia-Plus snippet). Wikipedia puts the maximum credible magnitude near the city at 7.5-8. A 1975 microzonation map exists and a 2021 site-amplification study shows strong soil dependence (search_snippet): the Varzob valley gravels and fill amplify, the loess hills east of Lohuti Street are prone to flowslides, and the housing stock mixes 1920s-50s adobe/brick quarters (Shohmansur), 1970s-80s panel microdistricts (Sino, Firdavsi) and new 12-25 storey towers along Rudaki Avenue. For a 20-storey office this means elevator outage, glass/facade damage, stairway evacuation from the 9th floor and assembly in Rudaki Park or the Flagpole Park.",
+   "heat_cold_haze_context_ja": "Hot-summer Mediterranean climate at 820 m: record highs 44.1 C (June) and 45.0 C (August), with Open-Meteo showing 37.6 C on 19 August 2026 and 2.5 C by mid-November (page_read); ThinkHazard rates extreme heat Medium and water scarcity Medium. Summer power and water interruptions coincide with heat waves, and Afghan dust storms (June-October) and winter inversion smog degrade air quality (regional file). Winters are mild (January mean about 3 C) but the January 2008 cold wave (below -20 C, heating and electricity failures, coldest in 44 years; ReliefWeb) showed how fragile district heating and the hydropower-dependent grid are: keep heaters, fuel and water reserves for both seasons.",
+   "zone_src_ja": "Demo zones are assumptions drawn from published history and terrain logic: mudflow/flood corridors as +/-250 m (Varzob) and +/-150 m (Luchob) buffers along the fetched OSM channels (Wikipedia Varzob; ReliefWeb 2016; IRIN 2004; UNDP profile snippet); seismic bands from the 9-point code zone (search_snippet), soft-soil amplification along the river and loess slopes east of Lohuti Street (1989 Sharora analogy); urban-flood patches on the low Firdavsi/Shohmansur terrace and the Mehrabad confluence terrace (ThinkHazard urban flood High). No official microzonation, mudflow-hazard or flood polygons were fetched; the UNDP Dushanbe risk profile and the Geosciences 2021 paper are blocked for fetching.",
+   "sources": [
+    {
+     "name": "ThinkHazard! Tadzhikistan Territories / DRS incl. Dushanbe (GAUL 2850) - hazard levels",
+     "url": "https://www.thinkhazard.org/en/report/2850-tajikistan-tadzhikistan-territories",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! 2850 JSON (FL Low, UF High, EQ High, LS High, EH Med, DG Med, WF High)",
+     "url": "https://www.thinkhazard.org/en/report/2850.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS FDSN event service - M5+ within 150 km of Dushanbe (63 events 1900-2026, 50 since 1950)",
+     "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1900-01-01&endtime=2026-11-17&minmagnitude=5.0&orderby=time&limit=2000&latitude=38.57&longitude=68.78&maxradiuskm=150",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - 1907 Qaratog earthquake",
+     "url": "https://en.wikipedia.org/wiki/1907_Qaratog_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - 1989 Gissar earthquake (Sharora loess flowslides, 274 dead)",
+     "url": "https://en.wikipedia.org/wiki/1989_Gissar_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - 1949 Khait earthquake",
+     "url": "https://en.wikipedia.org/wiki/1949_Khait_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Dushanbe (geography, seismicity, climate, population)",
+     "url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Districts of Tajikistan (city districts of Dushanbe, 2019 estimates)",
+     "url": "https://en.wikipedia.org/wiki/Districts_of_Tajikistan",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Varzob (river)",
+     "url": "https://en.wikipedia.org/wiki/Varzob_(river)",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Dushanbe Flagpole",
+     "url": "https://en.wikipedia.org/wiki/Dushanbe_Flagpole",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - List of hospitals in Tajikistan (addresses and coordinates)",
+     "url": "https://en.wikipedia.org/wiki/List_of_hospitals_in_Tajikistan",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - QSI International School of Dushanbe",
+     "url": "https://en.wikipedia.org/wiki/QSI_International_School_of_Dushanbe",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "OpenStreetMap via Nominatim (POI, road, river and district geometry; ODbL)",
+     "url": "https://nominatim.openstreetmap.org/",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Open-Meteo forecast API, Dushanbe, past 92 days (temperature extremes)",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=38.57&longitude=68.78&daily=temperature_2m_max,temperature_2m_min&past_days=92&timezone=auto",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ReliefWeb - Tajikistan mudslides May 2016 (ms-2016-000049-tjk), via region_tj-dus.json",
+     "url": "https://reliefweb.int/disaster/ms-2016-000049-tjk",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ReliefWeb - Tajikistan cold wave January 2008 (cw-2008-000015-tjk), via region_tj-dus.json",
+     "url": "https://reliefweb.int/disaster/cw-2008-000015-tjk",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "IRIN / The New Humanitarian - capital's water supply critical after July 2004 floods",
+     "url": "https://www.thenewhumanitarian.org/news/2004/07/19/capitals-water-supply-still-critical-following-floods-and-landslides",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Crisis24 - Tajikistan heavy rainfall, flooding and landslides, 29 Aug 2023",
+     "url": "https://crisis24.garda.com/alerts/2023/08/tajikistan-heavy-rainfall-causes-flooding-and-landslides-across-the-country-as-of-aug-29",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "UNDP - Risk profile of Dushanbe (2026; blocked for fetching)",
+     "url": "https://www.undp.org/sites/g/files/zskgke326/files/2026-02/risk_profile_of_dushanbe_0.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Geosciences 2021 - Site amplification analysis of Dushanbe city area to support seismic microzonation",
+     "url": "https://ui.adsabs.harvard.edu/abs/2021Geosc..11..154H",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "SNiP RT 22-07-2018 Seismic construction (Tajik code, MSK-64 zones 7-9+)",
+     "url": "https://kazniisa.kz/wp-content/uploads/2023/04/Таджикистан-СНиП-РТ-22-07-2018-Сейсмостойкое-строительство.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Asia-Plus - Dushanbe Plaza inauguration 2011-09-06 (20 storeys, 92 m)",
+     "url": "https://asiaplus.news/en/2011/09/06/president-rahmon-inaugurates-dushanbes-tallest-building-today/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Asia-Plus - Vahdat earthquake 2013-11-10 destroys 104 houses",
+     "url": "https://old.asiaplustj.info/en/news/tajikistan/incidents/20131111/vahdat-earthquake-reportedly-destroys-104-houses",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Embassy of Japan in Tajikistan - relocation notice (53/71 Shohtemur St from 2026-06-08)",
+     "url": "https://www.tj.emb-japan.go.jp/files/100939407.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "MOFA Japan - overseas missions list, Tajikistan (80A Kh. Nazarov St, Oct 2023)",
+     "url": "https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/taji.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Devex - Committee of Emergency Situations and Civil Defense (Lohuti St 26)",
+     "url": "https://www.devex.com/organizations/committee-of-emergency-situations-civil-defense-tajikistan-127247",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "UK Government - list of medical facilities in Tajikistan (Prospekt Medical, 55 Shohtemur St)",
+     "url": "https://www.gov.uk/government/publications/tajikistan-doctors/list-of-medical-facilitiespractitioners-in-tajikistan",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Hyatt newsroom - Hyatt Regency Dushanbe opening (2009)",
+     "url": "https://newsroom.hyatt.com/2009-03-18-HYATT-HOTELS-RESORTS-OPENS-FIRST-PROPERTY-IN-TAJIKISTAN",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "roads": [
+    {
+     "name": "Rudaki Avenue (khiyoboni Rudaki, ex-Lenin Ave)",
+     "major": true,
+     "label_offset": "45%",
+     "pts": [
+      [
+       38.606,
+       68.7868
+      ],
+      [
+       38.5996,
+       68.7869
+      ],
+      [
+       38.5948,
+       68.7868
+      ],
+      [
+       38.583,
+       68.7866
+      ],
+      [
+       38.5786,
+       68.787
+      ],
+      [
+       38.572,
+       68.7895
+      ],
+      [
+       38.5705,
+       68.7901
+      ],
+      [
+       38.5682,
+       68.7925
+      ],
+      [
+       38.5676,
+       68.7932
+      ],
+      [
+       38.5667,
+       68.7941
+      ],
+      [
+       38.5632,
+       68.798
+      ],
+      [
+       38.562,
+       68.799
+      ],
+      [
+       38.5579,
+       68.7992
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Rudaki+Avenue%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM way geometry via Nominatim (8 named segments), PCA-ordered and simplified to 10 vertices; the avenue runs NNW from the railway station past Dushanbe Plaza and Rudaki Park; the sparse middle section is anchored with fetched points on the avenue (way 1425281646 at 38.5830,68.7866; the Shohtemur crossing; Dushanbe Plaza way 1076018828), ordered north to south"
+    },
+    {
+     "name": "Ismoili Somoni Avenue",
+     "major": true,
+     "label_offset": "30%",
+     "pts": [
+      [
+       38.5831,
+       68.7389
+      ],
+      [
+       38.5837,
+       68.7468
+      ],
+      [
+       38.5841,
+       68.7507
+      ],
+      [
+       38.5845,
+       68.7552
+      ],
+      [
+       38.5841,
+       68.7581
+      ],
+      [
+       38.584,
+       68.7614
+      ],
+      [
+       38.5835,
+       68.7702
+      ],
+      [
+       38.5831,
+       68.7806
+      ],
+      [
+       38.5745,
+       68.7822
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Ismoili+Somoni+Avenue%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM trunk-road geometry via Nominatim (11 segments), clipped to the frame and simplified; east-west spine from the US Embassy / Sino district past Hyatt Regency, the Flagpole Park and the Varzob bridge to Rudaki Avenue; principal axis -6.2 deg from east"
+    },
+    {
+     "name": "Saadi Sherozi Avenue (A384 to Hisor / Tursunzoda)",
+     "major": true,
+     "label_offset": "25%",
+     "pts": [
+      [
+       38.5581,
+       68.7415
+      ],
+      [
+       38.5588,
+       68.7638
+      ],
+      [
+       38.5615,
+       68.7769
+      ],
+      [
+       38.5615,
+       68.7821
+      ],
+      [
+       38.5623,
+       68.7848
+      ],
+      [
+       38.5629,
+       68.7854
+      ],
+      [
+       38.5631,
+       68.7868
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Saadi+Sherozi+Avenue%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM trunk/primary geometry via Nominatim (5 segments), simplified; the western exit road through Sino and Firdavsi districts across the Varzob (Dushanbinka)"
+    },
+    {
+     "name": "Nazarshoev Street (M. Nazarshoev / ex-Druzhby Narodov)",
+     "major": false,
+     "label_offset": "60%",
+     "pts": [
+      [
+       38.5609,
+       68.7838
+      ],
+      [
+       38.5589,
+       68.7857
+      ],
+      [
+       38.5572,
+       68.7891
+      ],
+      [
+       38.5575,
+       68.7928
+      ],
+      [
+       38.5583,
+       68.8012
+      ],
+      [
+       38.558,
+       68.8079
+      ],
+      [
+       38.5578,
+       68.8144
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Nazarshoev+Street%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM residential-road geometry via Nominatim (4 segments), simplified; east-west street south of the center through Shohmansur toward the airport road"
+    },
+    {
+     "name": "Bukhoro Street",
+     "major": false,
+     "label_offset": "50%",
+     "pts": [
+      [
+       38.5664,
+       68.7782
+      ],
+      [
+       38.5667,
+       68.7795
+      ],
+      [
+       38.5671,
+       68.7808
+      ],
+      [
+       38.5685,
+       68.7851
+      ],
+      [
+       38.57,
+       68.7874
+      ],
+      [
+       38.5713,
+       68.7892
+      ],
+      [
+       38.5739,
+       68.7932
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bukhoro+Street%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM tertiary-road geometry via Nominatim (3 segments), simplified; diagonal SW-NE street from Rudaki Avenue past Dushanbe Plaza toward Lohuti Street"
+    },
+    {
+     "name": "Aini Street (Sadriddin Ayni)",
+     "major": false,
+     "label_offset": "50%",
+     "pts": [
+      [
+       38.5609,
+       68.7996
+      ],
+      [
+       38.563,
+       68.8045
+      ],
+      [
+       38.563,
+       68.8119
+      ],
+      [
+       38.5629,
+       68.82
+      ],
+      [
+       38.5603,
+       68.8261
+      ],
+      [
+       38.5551,
+       68.8267
+      ],
+      [
+       38.5535,
+       68.8265
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Aini+Street%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM geometry via Nominatim (8 segments named Ayni), clipped and simplified; Nominatim returned only short segments, so the drawn line may cover part of the street"
+    },
+    {
+     "name": "Shohtemur Street",
+     "major": false,
+     "label_offset": "55%",
+     "pts": [
+      [
+       38.5782,
+       68.7822
+      ],
+      [
+       38.5784,
+       68.7839
+      ],
+      [
+       38.5788,
+       68.7937
+      ],
+      [
+       38.5788,
+       68.7962
+      ],
+      [
+       38.5788,
+       68.7972
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Shotemur+Street%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM geometry via Nominatim (2 segments), simplified; east-west street one block north of Rudaki Park; Prospekt Medical (No. 55) and the Japan Embassy's new premises (53/71, since June 2026) are on this street (search_snippet)"
+    },
+    {
+     "name": "Tursunzoda Street",
+     "major": false,
+     "label_offset": "40%",
+     "pts": [
+      [
+       38.5758,
+       68.7937
+      ],
+      [
+       38.5745,
+       68.7937
+      ],
+      [
+       38.5734,
+       68.7948
+      ],
+      [
+       38.5714,
+       68.7969
+      ],
+      [
+       38.5705,
+       68.7979
+      ],
+      [
+       38.5691,
+       68.7994
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Mirzo+Tursunzoda+Street%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM tertiary-road geometry via Nominatim (2 segments), simplified; diagonal NW-SE street between Rudaki Avenue and Lohuti Street"
+    }
+   ],
+   "rails": [
+    {
+     "name": "Termez - Dushanbe - Vahdat railway (Dushanbe-1 station; no metro)",
+     "pts": [
+      [
+       38.5555,
+       68.7745
+      ],
+      [
+       38.5562,
+       68.7905
+      ],
+      [
+       38.5569,
+       68.7997
+      ],
+      [
+       38.5595,
+       68.8202
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Dushanbe+railway+station&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "Only the Dushanbe-1 station node (252791512) was fetched; the east-west alignment south of the center (past the thermal power plant toward the airport) is sketched +/-400 m and labelled derived"
+    }
+   ],
+   "water": [
+    {
+     "name": "Varzob river (Dushanbinka) - mudflow / flash-flood corridor and the city's water intake",
+     "kind": "river",
+     "width_m": 40,
+     "pts": [
+      [
+       38.6012,
+       68.774
+      ],
+      [
+       38.594,
+       68.7761
+      ],
+      [
+       38.5868,
+       68.7766
+      ],
+      [
+       38.5813,
+       68.7759
+      ],
+      [
+       38.5762,
+       68.775
+      ],
+      [
+       38.5706,
+       68.7722
+      ],
+      [
+       38.5586,
+       68.7714
+      ],
+      [
+       38.5489,
+       68.7662
+      ],
+      [
+       38.5356,
+       68.7691
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Varzob+river+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM waterway geometry via Nominatim (ways 33136440, 1148122498, 1148122496 named Varzob; called Dushanbinka in the lower reaches per Wikipedia), clipped to the frame and simplified to 9 vertices ordered north to south"
+    },
+    {
+     "name": "Luchob river (right tributary joining the Varzob north of the center)",
+     "kind": "river",
+     "width_m": 12,
+     "pts": [
+      [
+       38.6009,
+       68.7647
+      ],
+      [
+       38.5979,
+       68.7665
+      ],
+      [
+       38.5943,
+       68.7676
+      ],
+      [
+       38.5925,
+       68.7685
+      ],
+      [
+       38.5898,
+       68.7702
+      ],
+      [
+       38.5873,
+       68.7719
+      ],
+      [
+       38.5853,
+       68.7741
+      ],
+      [
+       38.5844,
+       68.7758
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Luchob+river+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "OSM waterway geometry via Nominatim (ways 192178254, 192178248, 1148122508), clipped and simplified; the Luchob drains the western Varzob-district slopes and regularly carries mudflows (UNDP risk profile, search_snippet)"
+    }
+   ],
+   "pois": [
+    {
+     "name": "National Medical Centre of Tajikistan 'Shifobakhsh' (ex-Karabolo complex, Ikromi St, Mehrabad)",
+     "name_ja": "National Medical Centre of Tajikistan 'Shifobakhsh' (ex-Karabolo complex, Ikromi St, Mehrabad)",
+     "kind": "hospital",
+     "lat": 38.5818,
+     "lon": 68.7576,
+     "why_ja": "Largest public multi-profile hospital complex of the country, 2.5 km north-west of the office next to Ismoili Somoni Avenue; main receiving hospital for mass-casualty events (the 'Shifobakhsh' name is the centre's current title; OSM labels it National Medical Center) Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_hospitals_in_Tajikistan",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=National+Medical+Center+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 27390404 (amenity=hospital, 'Национальный Медицинский Центр Республики Таджикистан', Ikromi Street, Mehrabad, Sino district) - polygon centroid; the Shifobakhsh alias is unverified in this session",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 9
+    },
+    {
+     "name": "Istiqlol Medical Centre (Sohili St 6A / Karabaev Ave 61, 46th microdistrict)",
+     "name_ja": "Istiqlol Medical Centre (Sohili St 6A / Karabaev Ave 61, 46th microdistrict)",
+     "kind": "hospital",
+     "lat": 38.5359,
+     "lon": 68.7653,
+     "why_ja": "Large modern hospital complex (opened 2010s) in Firdavsi district at the southern edge of the frame, 4 km south-west of the office; secondary receiving hospital and burns/trauma capacity Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_hospitals_in_Tajikistan",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Istiklol+hospital+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 574435525 (amenity=hospital 'Маркази тиббии Истиқлол', 6A Sohili Street, 46th microdistrict, Firdavsi district); Wikipedia list gives 61 Karabaev Ave, 38.536056,68.764395; lies at the southern frame edge",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 9
+    },
+    {
+     "name": "Ibn Sino hospital (International Ibn Sina Clinic, near Rudaki Ave / Shohtemur St)",
+     "name_ja": "Ibn Sino hospital (International Ibn Sina Clinic, near Rudaki Ave / Shohtemur St)",
+     "kind": "hospital",
+     "lat": 38.5815,
+     "lon": 68.7824,
+     "why_ja": "Private hospital in the center 1 km north of the office, nearest inpatient facility to Rudaki Avenue; Asia-Plus describes an Iranian-built 9-storey private hospital named after Abu Ali ibn Sina opened September 2009 with 105 beds (search_snippet) - whether it is the same facility as the Wikipedia list's 'International Ibn Sina Clinic' coordinate used here is not verified Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_hospitals_in_Tajikistan",
+     "coord_src": "third_party",
+     "coord_url": "https://en.wikipedia.org/wiki/List_of_hospitals_in_Tajikistan",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Coordinate 38.581548,68.782413 from the Wikipedia 'List of hospitals in Tajikistan' table (International Ibn Sina Clinic); Nominatim did not resolve the hospital by name",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 9
+    },
+    {
+     "name": "Prospekt Medical Clinic (Shohtemur St 55)",
+     "name_ja": "Prospekt Medical Clinic (Shohtemur St 55)",
+     "kind": "hospital",
+     "lat": 38.5786,
+     "lon": 68.7885,
+     "why_ja": "Private clinic used by embassies and expatriates; English-speaking staff 'Yes' in the UK government list, 24/7 emergency line (+992 93 570 99 04); first contact for office staff and families (gov.uk and MOFA medical pages, search_snippet)",
+     "source_url": "https://www.gov.uk/government/publications/tajikistan-doctors/list-of-medical-facilitiespractitioners-in-tajikistan",
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Shohtemur+Street+55%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Address 55 Shohtemur Street (gov.uk list; MOFA notes the move there in August 2020) - search_snippet; Nominatim has no house number 55, so the point is placed on the fetched Shohtemur Street geometry one block east of Rudaki Avenue (+/-400 m along the street)",
+     "shelter_for": [],
+     "floors": 3
+    },
+    {
+     "name": "Rudaki Park (Boghi Rudaki) and Palace of Nations",
+     "name_ja": "Rudaki Park (Boghi Rudaki) and Palace of Nations",
+     "kind": "park_open_space",
+     "lat": 38.5755,
+     "lon": 68.7817,
+     "why_ja": "Central park with wide lawns and fountains in front of the Palace of Nations, 500 m north-west of the office; first assembly point for office staff after shaking stops",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Rudaki+Park%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 10,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 520892162 (leisure=park 'Боғи устод Рӯдакӣ') centroid; Palace of Nations way 520892164 at 38.5763,68.7787",
+     "radius_m": 300,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 20000,
+     "assembly": true
+    },
+    {
+     "name": "Flagpole Park (Boghi Parchami Tojikiston, 165 m flagpole) and Independence Square",
+     "name_ja": "Flagpole Park (Boghi Parchami Tojikiston, 165 m flagpole) and Independence Square",
+     "kind": "park_open_space",
+     "lat": 38.579,
+     "lon": 68.7801,
+     "why_ja": "Open paved park around the 165 m Dushanbe Flagpole (completed 2011, world's tallest 2011-2014) on Ismoili Somoni Avenue beside the Varzob; large open area but close to the river - avoid during mudflow warnings",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe_Flagpole",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Dushanbe+Flagpole&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim node 2418169686 (tourism=attraction 'Боғи парчами Тоҷикистон'); Wikipedia coord 38.5790,68.7801",
+     "radius_m": 200,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 15000,
+     "assembly": true
+    },
+    {
+     "name": "Botanical Garden (Boghi botaniki, Ismoili Somoni district)",
+     "name_ja": "Botanical Garden (Boghi botaniki, Ismoili Somoni district)",
+     "kind": "park_open_space",
+     "lat": 38.598,
+     "lon": 68.7806,
+     "why_ja": "Large botanical garden (OSM polygon about 1.3 km long) on the Varzob's left bank in the north of the frame; large open space for residents of northern Ismoili Somoni district (stay on the upper, eastern side away from the river during floods)",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Botanical+Garden+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 521605259 (leisure=garden) polygon spans 38.5966-38.6083; the point marks its southern part inside the frame (centroid 38.6027,68.7806 lies just north of the frame edge)",
+     "radius_m": 350,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 20000,
+     "assembly": true
+    },
+    {
+     "name": "Navruzgoh grounds (Ipodromi Navruzgoh, Lermontov St)",
+     "name_ja": "Navruzgoh grounds (Ipodromi Navruzgoh, Lermontov St)",
+     "kind": "park_open_space",
+     "lat": 38.5705,
+     "lon": 68.7764,
+     "why_ja": "Open ceremonial / hippodrome ground in the center-west used for Navruz celebrations, 1.3 km west of the office across the Varzob bridge; staging area for relief",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Navruzgoh+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 27564724 (leisure=pitch 'Ипподром Наврузгох', Lermontov Street, Sino district) centroid",
+     "radius_m": 200,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 10000,
+     "assembly": true
+    },
+    {
+     "name": "Victory Park (Parki Ghalaba, Shohmansur)",
+     "name_ja": "Victory Park (Parki Ghalaba, Shohmansur)",
+     "kind": "park_open_space",
+     "lat": 38.5628,
+     "lon": 68.786,
+     "why_ja": "Neighbourhood park 1 km south of the office between Rudaki Avenue and the railway; assembly point for Shohmansur residents and the DIS school",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Victory+Park+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 1075650540 (leisure=park 'Парки Ғалаба', Shohmansur district) centroid",
+     "radius_m": 150,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 5000,
+     "assembly": true
+    },
+    {
+     "name": "Javonon (Komsomol) Lake park",
+     "name_ja": "Javonon (Komsomol) Lake park",
+     "kind": "park_open_space",
+     "lat": 38.5826,
+     "lon": 68.7729,
+     "why_ja": "Lakeside park and open ground in the center-west; secondary assembly area",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%9A%D3%AF%D0%BB%D0%B8+%D2%B6%D0%B0%D0%B2%D0%BE%D0%BD%D0%BE%D0%BD%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 538492564 (Боғи фарҳанги фароғатии «Кули ҷавонон»)",
+     "radius_m": 250,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 10000,
+     "assembly": true
+    },
+    {
+     "name": "Embassy of Japan in Tajikistan (Shohtemur St 53/71, since 8 June 2026)",
+     "name_ja": "Embassy of Japan in Tajikistan (Shohtemur St 53/71, since 8 June 2026)",
+     "kind": "embassy",
+     "lat": 38.5787,
+     "lon": 68.7905,
+     "why_ja": "Consular protection, registration (ORR) and emergency information for Japanese nationals; the embassy announced relocation to new premises on Shohtemur Street from 8 June 2026 (tel +992 44 600 5477/5478) - not a shelter",
+     "source_url": "https://www.tj.emb-japan.go.jp/files/100939407.pdf",
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Shohtemur+Street+53%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Address 53/71 Shohtemur Street from the embassy's relocation notice (search_snippet; tj.emb-japan.go.jp is blocked for fetching). Nominatim has no matching house number, so the point is placed on the fetched Shohtemur Street geometry between Rudaki Avenue and Tursunzoda Street (+/-500 m along the street); verify before use",
+     "floors": 3
+    },
+    {
+     "name": "Embassy of Japan - previous premises (Kh. Nazarov St 80A, until June 2026)",
+     "name_ja": "Embassy of Japan - previous premises (Kh. Nazarov St 80A, until June 2026)",
+     "kind": "embassy",
+     "lat": 38.5668,
+     "lon": 68.7824,
+     "why_ja": "OSM still maps the embassy at 80A Habibullo Nazarov Street (the address shown on MOFA's October 2023 mission list); kept as a landmark because directories and taxi drivers may still use it",
+     "source_url": "https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/taji.html",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Embassy+of+Japan+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim node 4686821259 (office=diplomatic 'Сафоратхонаи Чопон', 80A Nazarov Street, Ismoili Somoni district)",
+     "floors": 2
+    },
+    {
+     "name": "Dushanbe International School (Bofanda St 9, Shohmansur)",
+     "name_ja": "Dushanbe International School (Bofanda St 9, Shohmansur)",
+     "kind": "school",
+     "lat": 38.5646,
+     "lon": 68.7939,
+     "why_ja": "English-medium international school 1 km south-east of the office; children of expatriate staff; school grounds as a family reunification point",
+     "source_url": "https://www.tj.emb-japan.go.jp/j/",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Dushanbe+International+School&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim node 4746733021 (amenity=school 'Мактаби байналмиллалӣ', 9 Bofanda Street) and building way 938802135; address confirmed by the Japan Embassy school listing (search_snippet)",
+     "shelter_for": [
+      "quake"
+     ],
+     "cap": 800
+    },
+    {
+     "name": "Committee of Emergency Situations and Civil Defence (CoES / KHF, Lohuti St 26)",
+     "name_ja": "Committee of Emergency Situations and Civil Defence (CoES / KHF, Lohuti St 26)",
+     "kind": "government",
+     "lat": 38.5714,
+     "lon": 68.8002,
+     "why_ja": "National emergency-management agency headquarters; issues mudflow, flood and earthquake bulletins and runs the National Crisis Management Center (commissioned December 2023); 1 km east of the office",
+     "source_url": "https://www.devex.com/organizations/committee-of-emergency-situations-civil-defense-tajikistan-127247",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Committee+of+Emergency+Situations+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 662929617 (office=government 'КҲФ', Abulqosim Lohuti Street, Shohmansur district); house number 26 per the Devex profile (search_snippet)",
+     "floors": 4
+    },
+    {
+     "name": "Dushanbe railway station (Dushanbe-1, Rudaki Ave south end)",
+     "name_ja": "Dushanbe railway station (Dushanbe-1, Rudaki Ave south end)",
+     "kind": "station",
+     "lat": 38.5569,
+     "lon": 68.7997,
+     "why_ja": "Terminus of the Termez-Dushanbe-Vahdat line at the southern end of Rudaki Avenue; landmark and departure point for the overland evacuation route west toward Uzbekistan",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Dushanbe+railway+station&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 13,
+     "coord_note_ja": "Nominatim node 252791512 (railway=station 'Душанбе', Ubaidi Zokoni Street, Shohmansur district)"
+    },
+    {
+     "name": "Hyatt Regency Dushanbe (Ismoili Somoni Ave 26/1)",
+     "name_ja": "Hyatt Regency Dushanbe (Ismoili Somoni Ave 26/1)",
+     "kind": "landmark",
+     "lat": 38.5826,
+     "lon": 68.767,
+     "why_ja": "International hotel on Ismoili Somoni Avenue by Javonon Lake, 2 km north-west of the office; alternative office / meeting fallback with generators (opened 2009; Hyatt press release, search_snippet)",
+     "source_url": "https://newsroom.hyatt.com/2009-03-18-HYATT-HOTELS-RESORTS-OPENS-FIRST-PROPERTY-IN-TAJIKISTAN",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Hyatt+Regency+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 538492475 (tourism=hotel, 26/1 Ismoili Somoni Avenue, Mehrabad, Sino district) centroid",
+     "floors": 7
+    },
+    {
+     "name": "Serena Hotel Dushanbe (Rudaki Ave 14)",
+     "name_ja": "Serena Hotel Dushanbe (Rudaki Ave 14)",
+     "kind": "landmark",
+     "lat": 38.5641,
+     "lon": 68.7981,
+     "why_ja": "Hotel at the southern end of Rudaki Avenue near the station and the Japan Embassy's former premises; secondary meeting point for staff living in Shohmansur",
+     "source_url": "https://www.serenahotels.com/dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Serena+Hotel+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 520288278 (tourism=hotel 'Мехмонхонаи Серена', 14 Rudaki Avenue, Shohmansur district)",
+     "floors": 4
+    },
+    {
+     "name": "Ayni Opera and Ballet Theatre (Rudaki Ave 28)",
+     "name_ja": "Ayni Opera and Ballet Theatre (Rudaki Ave 28)",
+     "kind": "landmark",
+     "lat": 38.5687,
+     "lon": 68.7948,
+     "why_ja": "1940s neoclassical theatre on Rudaki Avenue 400 m south of the office; orientation landmark and family meeting point on the avenue",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%A2%D0%B5%D0%B0%D1%82%D1%80%D0%B8+%D0%BE%D0%BF%D0%B5%D1%80%D0%B0+%D0%B2%D0%B0+%D0%B1%D0%B0%D0%BB%D0%B5%D1%82%D0%B8+%D0%90%D0%B9%D0%BD%D3%A3%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 520868770 (amenity=theatre, 28 Rudaki Avenue)",
+     "floors": 3
+    },
+    {
+     "name": "Shohmansur bazaar",
+     "name_ja": "Shohmansur bazaar",
+     "kind": "landmark",
+     "lat": 38.5667,
+     "lon": 68.8012,
+     "why_ja": "Main food market of the south-east center between Lohuti Street and Aini Street; crowded, informal structures - orientation landmark and informal relief distribution point",
+     "source_url": "https://en.wikipedia.org/wiki/Dushanbe",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%91%D0%BE%D0%B7%D0%BE%D1%80%D0%B8+%D0%A8%D0%BE%D2%B3%D0%BC%D0%B0%D0%BD%D1%81%D1%83%D1%80%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 27389256 (Бозори Шоҳмансур) centroid"
+    }
+   ],
+   "homes": [
+    {
+     "name_ja": "Rudaki Avenue centre high-rise apartments (new 12-18 storey blocks between Dushanbe Plaza and Shohtemur St, Ismoili Somoni district)",
+     "lat": 38.5762,
+     "lon": 68.7882,
+     "type": "highrise",
+     "floor": 12,
+     "keys": [
+      "rudaki",
+      "рудаки",
+      "рӯдакӣ",
+      "prospekt rudaki",
+      "хиёбони рӯдакӣ",
+      "ismoili somoni",
+      "исмоили сомони",
+      "исмоили сомонӣ",
+      "shohtemur",
+      "шохтемур",
+      "шоҳтемур",
+      "markaz",
+      "центр",
+      "734025"
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Rudaki+Avenue%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "Point on the fetched Rudaki Avenue geometry 500 m north of Dushanbe Plaza (derived); the elite high-rise belt of the 2010s-2020s along the avenue (CABAR 'Dushanbe: from Soviet past towards elite future', search_snippet)"
+    },
+    {
+     "name_ja": "Ismoili Somoni district private houses in the Varzob valley (Sari Osiyo / north of the Botanical Garden)",
+     "lat": 38.6035,
+     "lon": 68.7775,
+     "type": "house",
+     "floor": 1,
+     "keys": [
+      "sari osiyo",
+      "сари осиё",
+      "сари-осие",
+      "vodanasos",
+      "водонасос",
+      "varzob",
+      "варзоб",
+      "botanical",
+      "ботаника",
+      "ismoili somoni",
+      "исмоили сомони",
+      "dushanbinka",
+      "душанбинка"
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%A1%D0%B0%D1%80%D0%B8+%D0%9E%D1%81%D0%B8%D1%91%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "Point 150 m east of the fetched Varzob channel just north of the Botanical Garden polygon (derived, +/-300 m); the mahalla name Sari Osiyo for this area is unverified (Nominatim returned only a cafe of that name on Tursunzoda St); north of the frame edge; one- and two-storey brick/adobe houses with courtyards within 100-300 m of the river - mudflow and flood exposure"
+    },
+    {
+     "name_ja": "Sino district Soviet microdistricts (91st microdistrict / Mehrabad, 4-9 storey panel and brick blocks)",
+     "lat": 38.5893,
+     "lon": 68.7528,
+     "type": "lowrise",
+     "floor": 4,
+     "keys": [
+      "sino",
+      "сино",
+      "mikrorayon",
+      "микрорайон",
+      "mkr",
+      "мкр",
+      "91",
+      "92",
+      "mehrabad",
+      "мехрабад",
+      "ikromi",
+      "икроми",
+      "ismoili somoni avenue",
+      "хиёбони исмоили сомонӣ"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=101+microdistrict+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "Nominatim relation 11017029 (91st microdistrict, Sino district) centroid; 1970s-80s prefabricated panel housing (seismic design 9 points but ageing), next to the National Medical Centre"
+    },
+    {
+     "name_ja": "Shohmansur old quarter houses and 2-5 storey blocks near the railway station and bazaar (Bofanda / Nazarshoev streets)",
+     "lat": 38.5612,
+     "lon": 68.7958,
+     "type": "house",
+     "floor": 2,
+     "keys": [
+      "shohmansur",
+      "шохмансур",
+      "шоҳмансур",
+      "zheleznodorozhny",
+      "железнодорожный",
+      "bofanda",
+      "бофанда",
+      "nazarshoev",
+      "назаршоев",
+      "vokzal",
+      "вокзал",
+      "bazaar",
+      "бозор",
+      "aini",
+      "айни"
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Shohmansur%2C+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "Derived from the fetched Shohmansur district court and prosecutor buildings on Ghaffor Valomatzoda Street (ways 108067416/108067424 at 38.5616,68.7949) and DIS at Bofanda 9; dense private housing with adobe/brick walls and narrow streets, flat low ground near the railway"
+    },
+    {
+     "name_ja": "Firdavsi district 1980s microdistricts (46th / 61st / 62nd mkr around Istiqlol hospital)",
+     "lat": 38.538,
+     "lon": 68.762,
+     "type": "lowrise",
+     "floor": 5,
+     "keys": [
+      "firdavsi",
+      "фирдавси",
+      "фирдавсӣ",
+      "46",
+      "61",
+      "62",
+      "sohili",
+      "сохили",
+      "karabaev",
+      "карабаев",
+      "jomi",
+      "ҷомӣ",
+      "tsentralny",
+      "центральный"
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Istiklol+hospital+Dushanbe&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "coord_note_ja": "Point between the fetched Istiqlol Medical Centre (46th microdistrict) and the 61st-microdistrict supermarket on Jomi Avenue (38.5244,68.7670); 5-9 storey panel blocks on the lowest river terrace south of the center; south of the frame"
+    }
+   ],
+   "zones": {
+    "flood": [
+     {
+      "depth_m": 1.5,
+      "note_ja": "Varzob (Dushanbinka) mudflow / flash-flood corridor through the city: the 1993 flood (about 1,000 m3/s) destroyed bridges, the Dushanbe-Khujand road and the water intakes; July 2004 and May 2016 mudflows cut the city's water supply (400,000 without clean water in 2004). Corridor +/-250 m along the fetched OSM channel is an assumption for the demo",
+      "pts": [
+       [
+        38.6012,
+        68.7711
+       ],
+       [
+        38.594,
+        68.7732
+       ],
+       [
+        38.5868,
+        68.7737
+       ],
+       [
+        38.5813,
+        68.773
+       ],
+       [
+        38.5762,
+        68.7721
+       ],
+       [
+        38.5706,
+        68.7693
+       ],
+       [
+        38.5586,
+        68.7685
+       ],
+       [
+        38.5489,
+        68.7633
+       ],
+       [
+        38.5356,
+        68.7662
+       ],
+       [
+        38.5356,
+        68.772
+       ],
+       [
+        38.5489,
+        68.7691
+       ],
+       [
+        38.5586,
+        68.7743
+       ],
+       [
+        38.5706,
+        68.7751
+       ],
+       [
+        38.5762,
+        68.7779
+       ],
+       [
+        38.5813,
+        68.7788
+       ],
+       [
+        38.5868,
+        68.7795
+       ],
+       [
+        38.594,
+        68.779
+       ],
+       [
+        38.6012,
+        68.7769
+       ]
+      ],
+      "assumed": true
+     },
+     {
+      "depth_m": 0.8,
+      "note_ja": "Luchob river mudflow corridor (western tributary): intensive flow and heavy rain regularly trigger mudflows and inundation (UNDP Dushanbe risk profile, search_snippet; Luchob village houses damaged in Aug 2023, search_snippet). Width +/-150 m assumed",
+      "pts": [
+       [
+        38.6009,
+        68.763
+       ],
+       [
+        38.5979,
+        68.7648
+       ],
+       [
+        38.5943,
+        68.7659
+       ],
+       [
+        38.5925,
+        68.7668
+       ],
+       [
+        38.5898,
+        68.7685
+       ],
+       [
+        38.5873,
+        68.7702
+       ],
+       [
+        38.5853,
+        68.7724
+       ],
+       [
+        38.5844,
+        68.7741
+       ],
+       [
+        38.5844,
+        68.7775
+       ],
+       [
+        38.5853,
+        68.7758
+       ],
+       [
+        38.5873,
+        68.7736
+       ],
+       [
+        38.5898,
+        68.7719
+       ],
+       [
+        38.5925,
+        68.7702
+       ],
+       [
+        38.5943,
+        68.7693
+       ],
+       [
+        38.5979,
+        68.7682
+       ],
+       [
+        38.6009,
+        68.7664
+       ]
+      ],
+      "assumed": true
+     }
+    ],
+    "urban_flood": [
+     {
+      "depth_m": 0.3,
+      "note_ja": "Flat low terrace between the railway and the Dushanbinka (Firdavsi / Shohmansur south of Nazarshoev St, around the thermal power plant): storm-water ponding and sewer backflow during spring thunderstorms; ThinkHazard rates urban flood High for the division; polygon assumed",
+      "pts": [
+       [
+        38.5585,
+        68.772
+       ],
+       [
+        38.5585,
+        68.8
+       ],
+       [
+        38.5386,
+        68.8
+       ],
+       [
+        38.5386,
+        68.772
+       ]
+      ],
+      "assumed": true
+     },
+     {
+      "depth_m": 0.3,
+      "note_ja": "Mehrabad / Sino microdistrict terrace at the Luchob-Varzob confluence (NMC, 91st mkr): drainage canals overflow when the Luchob is high; polygon assumed",
+      "pts": [
+       [
+        38.5945,
+        68.748
+       ],
+       [
+        38.5945,
+        68.766
+       ],
+       [
+        38.584,
+        68.766
+       ],
+       [
+        38.584,
+        68.748
+       ]
+      ],
+      "assumed": true
+     }
+    ],
+    "quake": [
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX (design zone)",
+      "note_ja": "Dushanbe lies in the 9-point zone of the Tajik seismic code (SNiP RT 22-07-2018 covers 7, 8, 9 and >9 point areas; 'zone 9' per the UNDP risk profile and construction notices - search_snippet, official zone value unverified). The 1907 Qaratog M7.4 earthquake (99 km W, 12,000-15,000 dead) and the 1989 Gissar mb5.3 event (14 km W, 274 dead in Sharora loess flowslides) define the regional scenario; band covers the whole frame",
+      "pts": [
+       [
+        38.59844089112469,
+        68.73978806935939
+       ],
+       [
+        38.59844089112469,
+        68.82021193064061
+       ],
+       [
+        38.53555910887531,
+        68.82021193064061
+       ],
+       [
+        38.53555910887531,
+        68.73978806935939
+       ]
+      ],
+      "assumed": true
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX-X (soft alluvium)",
+      "note_ja": "Varzob/Dushanbinka valley floor and the young river terraces: saturated gravels and soft fill amplify shaking (the 1975 microzonation and the 2021 Geosciences site-amplification study show strong soil-dependent variation - search_snippet); band +/-600 m along the river, assumed",
+      "pts": [
+       [
+        38.6012,
+        68.7671
+       ],
+       [
+        38.594,
+        68.7692
+       ],
+       [
+        38.5868,
+        68.7697
+       ],
+       [
+        38.5813,
+        68.769
+       ],
+       [
+        38.5762,
+        68.7681
+       ],
+       [
+        38.5706,
+        68.7653
+       ],
+       [
+        38.5586,
+        68.7645
+       ],
+       [
+        38.5489,
+        68.7593
+       ],
+       [
+        38.5356,
+        68.7622
+       ],
+       [
+        38.5356,
+        68.776
+       ],
+       [
+        38.5489,
+        68.7731
+       ],
+       [
+        38.5586,
+        68.7783
+       ],
+       [
+        38.5706,
+        68.7791
+       ],
+       [
+        38.5762,
+        68.7819
+       ],
+       [
+        38.5813,
+        68.7828
+       ],
+       [
+        38.5868,
+        68.7835
+       ],
+       [
+        38.594,
+        68.783
+       ],
+       [
+        38.6012,
+        68.7809
+       ]
+      ],
+      "assumed": true
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX + loess slope failure",
+      "note_ja": "Loess hills east of Lohuti Street (Victory Park / Anzob St slopes) and the Ismoili Somoni district hillside housing: earthquake- or rain-triggered loess flowslides of the 1949 Khait / 1989 Sharora type; informal construction on slopes heightens landslide risk (UNDP profile, search_snippet). Polygon assumed",
+      "pts": [
+       [
+        38.59,
+        68.806
+       ],
+       [
+        38.59,
+        68.82021193064061
+       ],
+       [
+        38.566,
+        68.82021193064061
+       ],
+       [
+        38.566,
+        68.806
+       ]
+      ],
+      "assumed": true
+     }
+    ]
+   }
+  },
+  {
+   "area_id": "ash_center",
+   "city_ja": "Ashgabat",
+   "area_ja": "Central and southern Ashgabat (Berzengi / Archabil white-marble district - Olympic complex - Parahat - old centre; Kopetdag, Berkararlyk and Bagtyyarlyk districts)",
+   "center_lat": 37.912,
+   "center_lon": 58.372,
+   "extent_km": 9.6,
+   "rotation_deg": 20,
+   "grid_m": 200,
+   "rotation_note_ja": "Ashgabat has two grids: the old centre (Magtymguly, Gorogly, the railway) runs WNW-ESE with a principal axis about 34 deg clockwise from east, while the post-2000 southern district (10 yyl Abadancylyk, Archabil, Chandybil) is tilted only 8-21 deg (axes computed from the fetched OSM geometry, derived). A compromise rotation of +20 deg (positive = clockwise in the app's x=u*cos-v*sin, y-down convention) makes both roughly horizontal",
+   "flood_context_ja": "ThinkHazard rates river flood High and urban flood Low for the Ahal division that contains Ashgabat (page_read); the city itself has no river, only the Karakum Canal 2-7 km north of this frame (between the centre and the airport) and the Ashgabat irrigation canal crossing the middle of the city. The real water hazard is flash flooding and mudflow (sil) from the Kopet Dag foothills 10-25 km to the south, plus pluvial flooding of the flat central districts: on 15-17 May 2024 three days of rain (about a quarter of the 221 mm annual average) flooded central Ashgabat, Ankara Street in Parahat was covered in water and mud, Sentinel Asia mapped floodwater from ALOS-2 imagery, and the deputy defence minister responsible for emergencies was dismissed (search_snippet: Central Asian Light, Sentinel Asia, bne/yerzemin). A 52-km complex of mudflow-diversion canals with 1-6 million m3 accumulators built by Vozrozhdenie on the main Kopet Dag channels (due September 2022) now intercepts debris flows south of Archabil Avenue and is credited with limiting the 2024 damage. The UNDP Ashgabat Risk Profile (June 2026) lists mudflows among the capital's key hazards and notes that most flood/mudflow risk originates outside city limits. Wikipedia's flood list names 1969, 1993, 1997 and 2024 as notable flood years (search_snippet). Zones in this file are assumptions: a mudflow run-out band along the southern (upslope) edge and pluvial-flood patches around Ankara Street / Parahat and the railway underpasses.",
+   "earthquake_context_ja": "ThinkHazard rates earthquake hazard High (Ahal division and Turkmenistan; page_read). Ashgabat was destroyed on the night of 5-6 October 1948 by an Ms 7.3 / Mw 7.15 earthquake with its ISC-GEM epicentre only 14 km north of the city (USGS iscgem897583 via the project's USGS dataset): two shocks in 10 seconds flattened nearly every adobe and fired-brick building, with 10,000-110,000 dead (Wikipedia, PAGER-CAT; official Soviet figure about 40,000, later USGS/press figure 110,000, EGU 2022 re-evaluation >38,000 - search_snippet). Epicentral shaking reached MSK-64 9-10 and pre-war standards were two to three intensity points too low (Science Council of Japan presentation, search_snippet). The city has been rebuilt twice since: Soviet 4-9-storey housing designed for intensity 8-9 and, since the 2000s, white-marble reinforced-concrete towers designed for the MSK-64 intensity 9 zone that covers all of Ashgabat (17WCEE paper 6f-0002; the 2001 national zoning map also puts the airport in zone 9 - search_snippet). USGS lists 19 M5+ events within 150 km since 1950; the largest in the region was the M7.2 Baharly (Germab) earthquake of 1 May 1929, 67 km west, and the latest M5+ was an M5.1 near Quchan, Iran, on 13 September 2021 (86 km). UNDP's 2018-2025 seismic project produced GIS hazard/risk platforms for Ashgabat whose results remain unpublished, and the 2026 regional project pilots a school earthquake-alert system in the city (search_snippet). For a 16-storey office tower the governing scenario is a repeat of 1948 at night: elevator and power outages, facade/glass and partition damage, stairway evacuation and assembly in the wide avenues and parks of Berzengi. Landslide hazard is Low (ThinkHazard) and limited to the foothill slopes south of the frame.",
+   "heat_cold_haze_context_ja": "Cold desert climate (BWk) at 250-280 m on the Kopet Dag piedmont, 25 km from the mountains and touching the Karakum desert to the north (Wikipedia). ThinkHazard rates extreme heat Medium for Ahal and High nationally, water scarcity High and wildfire High (page_read). Records: 47.2 C on 30 June 2015 (hottest June day on record; June 2015 was the hottest June since 1891 with 16 days above 40 C - phys.org, search_snippet), July record 46.8 C, 40 C already in April 2025 (April record since 1891), and February 2026 among the warmest on record; record low -24.1 C in January (Wikipedia climate table, third_party). Open-Meteo daily data for 16 Aug - 22 Nov 2026 show 41.3 C on 16 August, 20 days at or above 35 C and 4 days at or above 40 C (page_read). Dust is the main air-quality hazard: the strongest dust storm of 2023 crossed all regions on 13-14 April 2023 with dust from the Arabian Peninsula and West Asia (daryo.uz, search_snippet), and Aral Sea salt storms have reached the capital (RFE/RL). Summer heat with 45+ C days means cooling shelters, water, UPS for cooling in server rooms and protected outdoor assembly points; winter cold snaps to -20 C occur in January (record low -24.1 C). Air pollution from traffic is moderate and wildfire smoke is rare; FFP2 masks are kept mainly for dust days (assumption).",
+   "zone_src_ja": "Demo zones assumed from published history and terrain logic: the mudflow run-out band follows the southern (upslope) frame edge below the 2022 Vozrozhdenie diversion canals (newscentralasia / yerzemin, search_snippet); pluvial-flood patches are placed on Ankara Street / Parahat 1-4 (flooded 15-17 May 2024, Central Asian Light, search_snippet) and at the railway underpasses of the old centre (assumption); seismic bands apply the MSK-64 intensity 9 zone that covers the whole city (17WCEE 6f-0002, search_snippet), with an assumed 9-10 band over the old core north of Magtymguly Avenue where the 1948 destruction was total and groundwater is shallow. No official microzonation, mudflow or flood polygons were fetched; the UNDP 2026 risk-profile maps were not accessible.",
+   "sources": [
+    {
+     "name": "ThinkHazard! Ahal, Turkmenistan (GAUL 147323) - hazard levels (slug JSON)",
+     "url": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! Ahal report page (EQ High etc.)",
+     "url": "https://www.thinkhazard.org/en/report/147323-turkmenistan-ahal",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! Turkmenistan (250) national levels",
+     "url": "https://www.thinkhazard.org/en/report/250-turkmenistan.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS event page - 1948-10-05 Ashgabat Mw 7.15 (iscgem897583), read via the project's usgs.json",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem897583",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS event page - 1929-05-01 M7.2 Baharly (iscgem908052), 67 km W",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem908052",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS event page - 2021-09-13 M5.1 Quchan, Iran (us7000fans)",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000fans",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - 1948 Ashgabat earthquake",
+     "url": "https://en.wikipedia.org/wiki/1948_Ashgabat_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Ashgabat (history, climate table, districts, 2022 census 1,030,063)",
+     "url": "https://en.wikipedia.org/wiki/Ashgabat",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Bagtyyarlyk, Berkararlyk, Kopetdag and Buzmeyin District pages (2022 census, areas)",
+     "url": "https://en.wikipedia.org/wiki/Kopetdag_District",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Karakum Canal",
+     "url": "https://en.wikipedia.org/wiki/Karakum_Canal",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Yyldyz Hotel (24 storeys, 107 m, 2013)",
+     "url": "https://en.wikipedia.org/wiki/Yyldyz_Hotel",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Neutrality Monument (95 m, moved to the southern outskirts 2010)",
+     "url": "https://en.wikipedia.org/wiki/Neutrality_Monument",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Ashgabat Park (1887 City Summer Garden)",
+     "url": "https://en.wikipedia.org/wiki/Ashgabat_(park)",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Ashgabat Olympic Stadium (45,000; 2017)",
+     "url": "https://en.wikipedia.org/wiki/Saparmurat_Turkmenbashy_Olympic_Stadium",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Archabil Avenue (25.5 km eight-lane avenue hosting the ministries)",
+     "url": "https://en.wikipedia.org/wiki/Archabil_Avenue",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Ministry of Defense (Turkmenistan): General Directorate of Civil Defense and Rescue; HQ 4 Galkynysh St",
+     "url": "https://en.wikipedia.org/wiki/Ministry_of_Defense_(Turkmenistan)",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Ashgabat railway station (opened 1888)",
+     "url": "https://en.wikipedia.org/wiki/Ashgabat_railway_station",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "OpenStreetMap via Nominatim (POI, road and canal geometry, district boundaries; ODbL)",
+     "url": "https://nominatim.openstreetmap.org/",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Open-Meteo forecast API, Ashgabat, past 92 days (temperature extremes, precipitation)",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=37.93&longitude=58.37&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&past_days=92&timezone=auto",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "MOFA Japan - Embassy of Japan in Turkmenistan (Paytagt trading centre, 1945 street bldg 60, 744017)",
+     "url": "https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/tolk.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Central Asian Light - heavy rains flooded the capital of Turkmenistan (17 May 2024)",
+     "url": "https://www.centralasianlight.org/news/heavy-rains-flooded-the-capital-of-turkmenistan",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Sentinel Asia - flood in Turkmenistan 16 May 2024 (ALOS-2 flood detection, Ashgabat)",
+     "url": "https://sentinel-asia.org/EO/2024/article20240516TM.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "News Central Asia - anti-mudflow structures in Ashgabat near completion (29 Sep 2022); yerzemin: 52 km of canals, 1-6 million m3 accumulators",
+     "url": "https://newscentralasia.net/2022/09/29/construction-of-anti-mudflow-structures-in-ashgabat-to-complete-soon",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "UNDP - The Ashgabat Risk Profile (6 June 2026)",
+     "url": "https://www.undp.org/turkmenistan/publications/ashgabat-risk-profile",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "phys.org / AFP - Central Asia record-breaking heat wave, Ashgabat 47.2 C on 30 June 2015",
+     "url": "https://phys.org/news/2015-07-central-asia-record-breaking-heatwave.amp",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Daryo - dust storm hits Turkmenistan 13-14 April 2023",
+     "url": "https://daryo.uz/en/2023/04/14/dust-storm-hits-turkmenistan",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "RFE/RL - toxic Aral Sea salt storm sweeps over parts of Uzbekistan and Turkmenistan",
+     "url": "https://www.rferl.org/a/29257503.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "17WCEE paper 6f-0002 - MSK-64 intensity 9 zone covers Ashgabat City",
+     "url": "https://wcee.nicee.org/wcee/article/17WCEE/6f-0002.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Science Council of Japan presentation - 1948 Ashgabat 9-10 MSK-64, standards underestimated",
+     "url": "https://www.scj.go.jp/ja/int/kaisai/jizoku2023/pdf/presentation-3.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "UK government - list of medical facilities in Turkmenistan (Berzengi international medical centres, 1970 street)",
+     "url": "https://gov.uk/government/publications/list-of-medical-facilitiespractitioners-in-turkmenistan/list-of-medical-facilities-in-turkmenistan",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Ministry of Health of Turkmenistan - International Medical Centres Directorate addresses (saglykhm.gov.tm)",
+     "url": "https://saglykhm.gov.tm/en/halkara-lukmancylyk-merkezleri/halkara-saglyk-merkezleri-mudiriyetinin-halkara-ic-keselleri-merkezi",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "QSI Ashgabat International School - facilities / location near the US Embassy",
+     "url": "https://ashgabat.qsi.org/about-us/facilities",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Wikipedia (snippet) - Floods in Turkmenistan: notable floods 1969, 1993, 1997, 2024",
+     "url": "https://en.wikipedia.org/wiki/Floods_in_Turkmenistan",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "roads": [
+    {
+     "name": "Archabil Avenue (Arcabil sayoly)",
+     "major": true,
+     "label_offset": "55%",
+     "pts": [
+      [
+       37.896,
+       58.3311
+      ],
+      [
+       37.8882,
+       58.3513
+      ],
+      [
+       37.8789,
+       58.3827
+      ],
+      [
+       37.8786,
+       58.3989
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Arçabil%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Eight-lane 25.5-km avenue along the southern edge hosting the ministries (Wikipedia) (OSM ways via Nominatim, 8 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "10 yyl Abadancylyk Avenue (1945 street; Japan Embassy, business centres)",
+     "major": true,
+     "label_offset": "50%",
+     "pts": [
+      [
+       37.9078,
+       58.3284
+      ],
+      [
+       37.9001,
+       58.3503
+      ],
+      [
+       37.8972,
+       58.3703
+      ],
+      [
+       37.8961,
+       58.3726
+      ],
+      [
+       37.8951,
+       58.4229
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=10%20ýyl%20Abadançylyk%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Primary avenue through Berzengi; the Paytagt and Olympic business centres and the 11th Line towers stand on it (OSM ways via Nominatim, 8 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Bitarap Turkmenistan Avenue",
+     "major": true,
+     "label_offset": "45%",
+     "pts": [
+      [
+       37.8836,
+       58.3336
+      ],
+      [
+       37.8887,
+       58.3333
+      ],
+      [
+       37.8886,
+       58.3342
+      ],
+      [
+       37.9051,
+       58.3358
+      ],
+      [
+       37.9081,
+       58.3375
+      ],
+      [
+       37.9136,
+       58.343
+      ],
+      [
+       37.9272,
+       58.3721
+      ],
+      [
+       37.9475,
+       58.3879
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bitarap%20Türkmenistan%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Diagonal avenue from the Neutrality Monument past Yyldyz / Oguzkent hotels and City Hall to the old centre (OSM ways via Nominatim, 9 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Magtymguly Avenue",
+     "major": true,
+     "label_offset": "50%",
+     "pts": [
+      [
+       37.9534,
+       58.3668
+      ],
+      [
+       37.9272,
+       58.4157
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Magtymguly%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Old-centre spine parallel to the railway (WNW-ESE); only 4 OSM segments returned, so the line is a two-point chord +/-150 m (OSM ways via Nominatim, 4 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Beyik Saparmyrat Turkmenbashi Avenue (Turkmenbashi Ave)",
+     "major": true,
+     "label_offset": "40%",
+     "pts": [
+      [
+       37.8734,
+       58.3765
+      ],
+      [
+       37.9211,
+       58.3825
+      ],
+      [
+       37.9299,
+       58.3859
+      ],
+      [
+       37.9424,
+       58.3956
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Beýik%20Saparmyrat%20Türkmenbaşy%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "North-south spine from the old centre past the Ministry of Defence and the Olympic complex to Archabil (OSM ways via Nominatim, 8 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Atamyrat Nyyazow Avenue",
+     "major": true,
+     "label_offset": "50%",
+     "pts": [
+      [
+       37.9218,
+       58.3898
+      ],
+      [
+       37.9187,
+       58.4034
+      ],
+      [
+       37.9186,
+       58.4233
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Atamyrat%20Nyýazow%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "East-west avenue through the eastern microdistricts (Howdan, 4th Etrap) toward the airport road (OSM ways via Nominatim, 10 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Garashsyzlyk Avenue",
+     "major": true,
+     "label_offset": "45%",
+     "pts": [
+      [
+       37.888,
+       58.3514
+      ],
+      [
+       37.9034,
+       58.3651
+      ],
+      [
+       37.9089,
+       58.3658
+      ],
+      [
+       37.9184,
+       58.3732
+      ],
+      [
+       37.9332,
+       58.38
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Garaşsyzlyk%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Diagonal avenue linking the Presidential quarter, the Olympic watersports complex and Berzengi (OSM ways via Nominatim, 7 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Nurmuhammet Andalyp Street",
+     "major": false,
+     "label_offset": "60%",
+     "pts": [
+      [
+       37.8724,
+       58.3865
+      ],
+      [
+       37.9266,
+       58.391
+      ],
+      [
+       37.9489,
+       58.4082
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Nurmuhammet%20Andalyp%20köçesi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "North-south street east of the Olympic complex, past the Paytagt centre to Garadamak (OSM ways via Nominatim, 5 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Ankara Street (ex-Yubileinaya; flooded 15-17 May 2024)",
+     "major": false,
+     "label_offset": "35%",
+     "pts": [
+      [
+       37.8789,
+       58.3935
+      ],
+      [
+       37.8865,
+       58.3938
+      ],
+      [
+       37.8961,
+       58.3969
+      ],
+      [
+       37.9096,
+       58.3978
+      ],
+      [
+       37.9109,
+       58.3979
+      ],
+      [
+       37.9199,
+       58.3988
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Ankara%20köçesi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Low-lying north-south street through Parahat 1-4 that was under water and mud in May 2024 (OSM ways via Nominatim, 4 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Oguzhan Street",
+     "major": false,
+     "label_offset": "50%",
+     "pts": [
+      [
+       37.9103,
+       58.3979
+      ],
+      [
+       37.9101,
+       58.4228
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Oguzhan%20köçesi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "East-west street along the Niyazov Hospital and Parahat 7 (OSM ways via Nominatim, 3 way segments merged along the principal axis and simplified; +/-80 m)"
+    },
+    {
+     "name": "Chandybil Avenue",
+     "major": false,
+     "label_offset": "40%",
+     "pts": [
+      [
+       37.8893,
+       58.3161
+      ],
+      [
+       37.8892,
+       58.3345
+      ],
+      [
+       37.8792,
+       58.3545
+      ],
+      [
+       37.8724,
+       58.3776
+      ],
+      [
+       37.872,
+       58.3896
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Çandybil%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Southernmost avenue at the foot of the Kopet Dag fans (International Neurology Centre); upslope of the mudflow canals (OSM ways via Nominatim, 7 way segments merged along the principal axis and simplified; +/-80 m)"
+    }
+   ],
+   "rails": [
+    {
+     "name": "Trans-Caspian Railway (Turkmenbashi - Ashgabat - Mary); Ashgabat station opened 1888",
+     "pts": [
+      [
+       37.9552,
+       58.373
+      ],
+      [
+       37.9432,
+       58.3961
+      ],
+      [
+       37.933,
+       58.416
+      ],
+      [
+       37.929,
+       58.4268
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://en.wikipedia.org/wiki/Ashgabat_railway_station",
+     "coord_note_ja": "No track geometry fetched: line drawn through the Nominatim station point (37.9432,58.3961) along the old-centre axis (about 34 deg clockwise from east, parallel to Magtymguly Avenue); +/-300 m"
+    }
+   ],
+   "water": [
+    {
+     "name": "Karakum Canal (Garagum deryasy) - north of the frame",
+     "kind": "canal",
+     "width_m": 60,
+     "pts": [
+      [
+       38.0668,
+       58.2546
+      ],
+      [
+       38.0467,
+       58.2952
+      ],
+      [
+       38.0214,
+       58.3239
+      ],
+      [
+       38.0104,
+       58.3404
+      ],
+      [
+       37.9843,
+       58.3937
+      ],
+      [
+       37.9545,
+       58.4348
+      ],
+      [
+       37.9539,
+       58.4859
+      ],
+      [
+       37.9558,
+       58.4958
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Garagum%20kanaly&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "OSM relation 3009757 via Nominatim, clipped to 58.25-58.50E and simplified; the canal passes 2-7 km north of this frame (lat 37.98-38.07) between the centre and the airport, so it is drawn off-frame as context only"
+    },
+    {
+     "name": "Ashgabat Canal (irrigation/drainage canal through the city)",
+     "kind": "canal",
+     "width_m": 8,
+     "pts": [
+      [
+       37.9128,
+       58.329
+      ],
+      [
+       37.9117,
+       58.3412
+      ],
+      [
+       37.91,
+       58.365
+      ],
+      [
+       37.9083,
+       58.3887
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=canal&viewbox=58.30,37.98,58.44,37.86&bounded=1&format=jsonv2&countrycodes=tm",
+     "coord_note_ja": "Three OSM ways named 'Ashgabat Kanal' (24868158, 493955628, 493955629) were returned without geometry; the line joins their centroids east-west through the middle of the city, +/-200 m"
+    },
+    {
+     "name": "Kopet Dag mudflow channels and 2022 diversion canal belt (south of Archabil / Chandybil)",
+     "kind": "river",
+     "width_m": 10,
+     "pts": [
+      [
+       37.87,
+       58.32
+      ],
+      [
+       37.8705,
+       58.345
+      ],
+      [
+       37.869,
+       58.37
+      ],
+      [
+       37.868,
+       58.395
+      ],
+      [
+       37.869,
+       58.42
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://newscentralasia.net/2022/09/29/construction-of-anti-mudflow-structures-in-ashgabat-to-complete-soon",
+     "coord_note_ja": "Schematic line along the southern frame edge representing the 52-km mudflow-diversion canal complex and the seasonal Kopet Dag streams it intercepts (search_snippet); no OSM geometry fetched (the only named river found, Keltichynar, is 15 km east at Anew). Assumption +/-1 km"
+    }
+   ],
+   "pois": [
+    {
+     "name": "Cardiological Center (Atamyrat Nyyazow Ave 192)",
+     "name_ja": "Cardiological Center (Atamyrat Nyyazow Ave 192)",
+     "kind": "hospital",
+     "lat": 37.9412,
+     "lon": 58.3638,
+     "why_ja": "Ministry of Health cardiology hospital in the north-west centre; nearest large public hospital to the Yyldyz / Bitarap area Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Kardiologiýa%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Kardiologiýa%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 655980240 (amenity=hospital, operator Ministry of Health)",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 5
+    },
+    {
+     "name": "International Trauma Hospital and Emergency Medical Center (Gorogly St 118-120)",
+     "name_ja": "International Trauma Hospital and Emergency Medical Center (Gorogly St 118-120)",
+     "kind": "hospital",
+     "lat": 37.9507,
+     "lon": 58.3385,
+     "why_ja": "Adjacent trauma hospital and emergency (ambulance) centre tagged emergency=yes in OSM; primary destination for earthquake casualties from the centre Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=hospital%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=hospital&viewbox=58.30,37.98,58.44,37.86&bounded=1&format=jsonv2&countrycodes=tm",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim ways 409094362 (37.9506,58.3398) and 410844106 (37.9508,58.3373); midpoint used",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 6
+    },
+    {
+     "name": "Niyazov Hospital (Oguzhan St 11, Parahat 7)",
+     "name_ja": "Niyazov Hospital (Oguzhan St 11, Parahat 7)",
+     "kind": "hospital",
+     "lat": 37.9086,
+     "lon": 58.4185,
+     "why_ja": "Large public hospital on the eastern side serving Parahat; alternative receiving hospital if Berzengi roads are blocked Solid multi-storey building usable as a refuge from flash floods and mudflows (upper floors; assumption).",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Merkezi%20hassahana%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Merkezi%20hassahana%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 398076703 (amenity=hospital); OSM name 'Niyazov Hospital'",
+     "shelter_for": [
+      "flood"
+     ],
+     "floors": 7
+    },
+    {
+     "name": "Central Hospital building, Yunus Emre St 1 (ex-Turkish hospital, Emperyal International Business Center)",
+     "name_ja": "Central Hospital building, Yunus Emre St 1 (ex-Turkish hospital, Emperyal International Business Center)",
+     "kind": "hospital",
+     "lat": 37.9034,
+     "lon": 58.3807,
+     "why_ja": "Listed by the US Embassy (2013) as 'Central Hospital (Turkish)' in the International Business Center building; OSM tags it as a former hospital - verify before relying on it",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Central%20Hospital%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Central%20Hospital%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 169318566 'former Turkish (Central) Hospital, 1 Yunus Emre (1951) kocesi, 744017'; status uncertain",
+     "shelter_for": [],
+     "floors": 5
+    },
+    {
+     "name": "International Medical Centres complex, Berzengi (1970 street 30: International Cardiology Centre, Internal Diseases, Ene Mahri centre)",
+     "name_ja": "International Medical Centres complex, Berzengi (1970 street 30: International Cardiology Centre, Internal Diseases, Ene Mahri centre)",
+     "kind": "hospital",
+     "lat": 37.8686,
+     "lon": 58.3553,
+     "why_ja": "State international medical centres used by expatriates and officials, 2.9 km south-west of the office; Ene Mahri maternity centre is listed at the same address (Halkbank, search_snippet). Lies just south of the frame edge",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Halkara%20kardiologiýa%20merkezi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Halkara%20kardiologiýa%20merkezi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 157540762 'International Cardiology Center, 30, Kardiomerkeze gidyan (1970) kocesi'; Ene Mahri itself not geocoded (only a Gokdepe branch found)",
+     "shelter_for": [],
+     "floors": 6
+    },
+    {
+     "name": "Oncology Center (Archabil Ave 22)",
+     "name_ja": "Oncology Center (Archabil Ave 22)",
+     "kind": "hospital",
+     "lat": 37.8811,
+     "lon": 58.3625,
+     "why_ja": "Scientific-Clinical Center of Oncology on Archabil Avenue; part of the Berzengi medical cluster",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=clinic%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=clinic&viewbox=58.30,37.98,58.44,37.86&bounded=1&format=jsonv2&countrycodes=tm",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 339382670 (amenity=clinic); address matches saglykhm.gov.tm (Archabil 22)",
+     "shelter_for": [],
+     "floors": 4
+    },
+    {
+     "name": "Independence Park and Monument (Garashsyzlyk seyilgahi)",
+     "name_ja": "Independence Park and Monument (Garashsyzlyk seyilgahi)",
+     "kind": "park_open_space",
+     "lat": 37.8865,
+     "lon": 58.3828,
+     "why_ja": "Large landscaped park around the Independence Monument 1 km south-east of the office; primary post-earthquake assembly area for Berzengi residents and staff",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Garaşsyzlyk%20seýilgähi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Garaşsyzlyk%20seýilgähi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 10,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 259602655 (leisure=park) centroid; monument way 259552289 at 37.8812,58.3823",
+     "radius_m": 450,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 30000,
+     "assembly": true
+    },
+    {
+     "name": "Olympic complex (Olimpiya saherchesi, 157 ha; Olympic Stadium 45,000)",
+     "name_ja": "Olympic complex (Olimpiya saherchesi, 157 ha; Olympic Stadium 45,000)",
+     "kind": "park_open_space",
+     "lat": 37.9045,
+     "lon": 58.3752,
+     "why_ja": "157-ha sports complex built for the 2017 Asian Indoor and Martial Arts Games, 1 km north of the office; wide plazas and the stadium forecourt suit mass assembly and relief staging",
+     "source_url": "https://en.wikipedia.org/wiki/Saparmurat_Turkmenbashy_Olympic_Stadium",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Olimpiýa%20şäherçesi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 347523120 (leisure=sports_centre) centroid; stadium way 147533322 at 37.9044,58.3771",
+     "radius_m": 600,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 40000,
+     "assembly": true
+    },
+    {
+     "name": "Ashgabat Park (Pervyy Park, 1887 City Summer Garden)",
+     "name_ja": "Ashgabat Park (Pervyy Park, 1887 City Summer Garden)",
+     "kind": "park_open_space",
+     "lat": 37.9387,
+     "lon": 58.3902,
+     "why_ja": "Oldest park of the city in the old centre next to Magtymguly Avenue and the railway station; assembly space for central residents",
+     "source_url": "https://en.wikipedia.org/wiki/Ashgabat_(park)",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Ashgabat%20Park&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 34063268 (leisure=park)",
+     "radius_m": 200,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 8000,
+     "assembly": true
+    },
+    {
+     "name": "Neutrality Monument area (Bitaraplyk binasy, 95 m, relocated 2010)",
+     "name_ja": "Neutrality Monument area (Bitaraplyk binasy, 95 m, relocated 2010)",
+     "kind": "park_open_space",
+     "lat": 37.8821,
+     "lon": 58.3333,
+     "why_ja": "Monument and open plazas at the south-western end of Bitarap Turkmenistan Avenue, on the Kopet Dag piedmont above the mudflow canals",
+     "source_url": "https://en.wikipedia.org/wiki/Neutrality_Monument",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Neutrality%20Monument%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 257737556 (tourism=attraction 'Bitaraplyk arkasy')",
+     "radius_m": 250,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 10000,
+     "assembly": true
+    },
+    {
+     "name": "Botanical Garden (Botanika bagy)",
+     "name_ja": "Botanical Garden (Botanika bagy)",
+     "kind": "park_open_space",
+     "lat": 37.9528,
+     "lon": 58.3471,
+     "why_ja": "Shaded botanical garden in the north-west of the frame near the Trauma Hospital and Agricultural University; cooler refuge in heat waves",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Botanical%20Garden%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Botanical%20Garden%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 207329467 (leisure=park)",
+     "radius_m": 250,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 8000,
+     "assembly": true
+    },
+    {
+     "name": "Kopetdag Stadium (Mahmyt Kashgary St)",
+     "name_ja": "Kopetdag Stadium (Mahmyt Kashgary St)",
+     "kind": "park_open_space",
+     "lat": 37.9493,
+     "lon": 58.371,
+     "why_ja": "City stadium in the north-centre; open pitch and forecourt for assembly of old-centre residents",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Köpetdag%20stadiony%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Köpetdag%20stadiony%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim relation 14346390 (leisure=stadium)",
+     "radius_m": 150,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 10000,
+     "assembly": true
+    },
+    {
+     "name": "Embassy of Japan (Paytagt Trading Centre, 1945 / 10 yyl Abadancylyk Ave 60, 9th-10th floors)",
+     "name_ja": "Embassy of Japan (Paytagt Trading Centre, 1945 / 10 yyl Abadancylyk Ave 60, 9th-10th floors)",
+     "kind": "embassy",
+     "lat": 37.8938,
+     "lon": 58.3896,
+     "why_ja": "Consular window for Japanese nationals in Turkmenistan: registration (ORR), emergency mail and evacuation information - not a shelter; 1.5 km east of the office on the same avenue",
+     "source_url": "https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/tolk.html",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Embassy%20of%20Japan%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim node 3780447208 'Embassy of Japan, 60, 10 yyl Abadancylyk (1945) sayoly, 744017'; address matches the MOFA list (search_snippet); floors 9-10 per directory sites",
+     "floors": 10
+    },
+    {
+     "name": "U.S. Embassy (Pushkin St 9, old centre)",
+     "name_ja": "U.S. Embassy (Pushkin St 9, old centre)",
+     "kind": "embassy",
+     "lat": 37.9413,
+     "lon": 58.3883,
+     "why_ja": "Reference point in the old centre (OSM); the new US compound in Berzengi next to the international school is not in OSM data fetched",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Embassy%20of%20the%20United%20States%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Embassy%20of%20the%20United%20States%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 340379440 (office=diplomatic)"
+    },
+    {
+     "name": "Ashgabat railway station (Gurbansoltan eje Ave 1)",
+     "name_ja": "Ashgabat railway station (Gurbansoltan eje Ave 1)",
+     "kind": "station",
+     "lat": 37.9432,
+     "lon": 58.3961,
+     "why_ja": "Trans-Caspian main-line station (1888) on the northern edge of the old centre; landmark for family meeting points and rail evacuation toward Mary or Turkmenbashi",
+     "source_url": "https://en.wikipedia.org/wiki/Ashgabat_railway_station",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Ashgabat%20railway%20station&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim node 8895975404 (railway=station)"
+    },
+    {
+     "name": "Ashgabat International School (QSI, Ataturk St, Berzengi)",
+     "name_ja": "Ashgabat International School (QSI, Ataturk St, Berzengi)",
+     "kind": "school",
+     "lat": 37.8802,
+     "lon": 58.358,
+     "why_ja": "US-curriculum international school on a five-hectare campus behind the US Embassy compound; many expatriate children; family reunification point",
+     "source_url": "https://ashgabat.qsi.org/about-us/facilities",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Ashgabat%20International%20School&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 261184378 (amenity=school, operator Quality Schools International)",
+     "shelter_for": [
+      "quake"
+     ],
+     "cap": 800
+    },
+    {
+     "name": "Ashgabat City Hall (Hakimlik, Bitarap Turkmenistan Ave)",
+     "name_ja": "Ashgabat City Hall (Hakimlik, Bitarap Turkmenistan Ave)",
+     "kind": "government",
+     "lat": 37.9401,
+     "lon": 58.3826,
+     "why_ja": "City administration; the city emergency commission convenes here with the Ministry of Defence's General Directorate of Civil Defense and Rescue (directorate office not geocoded)",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Aşgabat%20şäher%20häkimligi&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Aşgabat%20şäher%20häkimligi&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 211114108 (amenity=townhall)",
+     "floors": 6
+    },
+    {
+     "name": "Ministry of Defence (civil defence and rescue directorate; Beyik Saparmyrat Turkmenbashi Ave)",
+     "name_ja": "Ministry of Defence (civil defence and rescue directorate; Beyik Saparmyrat Turkmenbashi Ave)",
+     "kind": "government",
+     "lat": 37.9293,
+     "lon": 58.3853,
+     "why_ja": "Parent ministry of the General Directorate of Civil Defense and Rescue and of the Center for Emergency Management (2011); official HQ address 4 Galkynysh St (Wikipedia) could not be geocoded",
+     "source_url": "https://en.wikipedia.org/wiki/Ministry_of_Defense_(Turkmenistan)",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Goranmak%20ministrligi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim bus-stop node 5850666986 'Goranmak ministrligi (Ministry of Defense)' used as proxy; +/-200 m",
+     "floors": 5
+    },
+    {
+     "name": "Fire Station 109 (Jepbarow St, 11th Line, Berzengi)",
+     "name_ja": "Fire Station 109 (Jepbarow St, 11th Line, Berzengi)",
+     "kind": "government",
+     "lat": 37.8952,
+     "lon": 58.3541,
+     "why_ja": "Nearest fire and rescue station to the office (1.6 km west); other stations at Howdan (37.9175,58.3976), Mati Kosayew St 18 (37.9451,58.3794) and Magtymguly Ave (37.9319,58.4078)",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=fire%20station&viewbox=58.30,37.98,58.44,37.86&bounded=1&format=jsonv2&countrycodes=tm",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=fire%20station&viewbox=58.30,37.98,58.44,37.86&bounded=1&format=jsonv2&countrycodes=tm",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 326743160 (amenity=fire_station)"
+    },
+    {
+     "name": "Yyldyz Hotel (24 storeys, 107 m; Bagtyyarlyk St 17)",
+     "name_ja": "Yyldyz Hotel (24 storeys, 107 m; Bagtyyarlyk St 17)",
+     "kind": "landmark",
+     "lat": 37.9294,
+     "lon": 58.3332,
+     "why_ja": "Star-shaped luxury hotel with business centre and conference halls at the western edge; alternative hotel-office location and landmark",
+     "source_url": "https://en.wikipedia.org/wiki/Yyldyz_Hotel",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Yyldyz%20Hotel%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 327521112 (tourism=hotel, building:levels 24)",
+     "floors": 24
+    },
+    {
+     "name": "Oguzkent Hotel (ex-Sofitel, Bitarap Turkmenistan Ave 231)",
+     "name_ja": "Oguzkent Hotel (ex-Sofitel, Bitarap Turkmenistan Ave 231)",
+     "kind": "landmark",
+     "lat": 37.9292,
+     "lon": 58.3721,
+     "why_ja": "Large central hotel opposite the Presidential quarter; meeting point and back-up workplace with generators (assumption)",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Oguzkent%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Oguzkent%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 257735039 (tourism=hotel)",
+     "floors": 12
+    }
+   ],
+   "homes": [
+    {
+     "name_ja": "Berzengi / 10 yyl Abadancylyk white-marble high-rise apartments (11th Line, Kopetdag district)",
+     "lat": 37.898,
+     "lon": 58.356,
+     "type": "highrise",
+     "floor": 9,
+     "keys": [
+      "berzengi",
+      "берзенги",
+      "berzeňňi",
+      "archabil",
+      "арчабил",
+      "arçabil",
+      "abadançylyk",
+      "абаданчылык",
+      "10 yyl abadancylyk",
+      "744036"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=10%20ýyl%20Abadançylyk%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Centroid of the '11-nji Nobatdaky' (11th Line, 2012: 17 high-rise apartment buildings along 10 yyl Abadancylyk) segment, Nominatim way 89090423 at 37.9007,58.3483, shifted 700 m east onto the towers (+/-300 m); Berzengi neighbourhood node 1188750251 at 37.8859,58.3711"
+    },
+    {
+     "name_ja": "Old-centre Soviet 4-5 storey blocks (Magtymguly - Gorogly - Azady; Berkararlyk / Kopetdag districts)",
+     "lat": 37.9405,
+     "lon": 58.3875,
+     "type": "lowrise",
+     "floor": 3,
+     "keys": [
+      "magtymguly",
+      "магтымгулы",
+      "gorogly",
+      "гёроглы",
+      "görogly",
+      "azady",
+      "азади",
+      "centre",
+      "центр",
+      "berkararlyk"
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Magtymguly%20şaýoly%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Midpoint between the City Hall (Nominatim way 211114108, 37.9401,58.3826) and Ashgabat Park (way 34063268, 37.9387,58.3902) in the post-1948 Soviet core; +/-300 m"
+    },
+    {
+     "name_ja": "Parahat (Mir) microdistricts 1-8: Soviet 9-storey panel blocks and new Parahat-7 towers",
+     "lat": 37.9008,
+     "lon": 58.3842,
+     "type": "lowrise",
+     "floor": 6,
+     "keys": [
+      "parahat",
+      "парахат",
+      "mir",
+      "мир",
+      "parahat 7",
+      "мир-7",
+      "parahat-7",
+      "ankara",
+      "анкара",
+      "oguzhan"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Mir%207%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Nominatim way 383103531 (Parahat 2 boundary) centroid; Parahat 7 relation 20448527 at 37.8949,58.4119 (60 nine-storey blocks decreed 2014, Wikipedia)"
+    },
+    {
+     "name_ja": "Koshi / Gazha single-family houses (older low-rise quarters, Bagtyyarlyk district)",
+     "lat": 37.9644,
+     "lon": 58.3384,
+     "type": "house",
+     "floor": 1,
+     "keys": [
+      "köşi",
+      "koshi",
+      "кеши",
+      "кёши",
+      "gazha",
+      "gaža",
+      "гажа",
+      "gaje",
+      "choganly",
+      "чоганлы"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Köşi%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "coord_note_ja": "Nominatim way 413875681 (Koshi boundary, village annexed 2013; '16th Line' redevelopment since 2018 per Wikipedia); Gazha historical quarter way 422679828 at 37.9424,58.3499; both lie north-west of the office and Koshi is just outside the frame"
+    }
+   ],
+   "zones": {
+    "flood": [
+     {
+      "depth_m": 1.0,
+      "note_ja": "Mudflow / flash-flood run-out band along the southern (upslope) edge below Chandybil and Archabil avenues: seasonal Kopet Dag streams and debris flows are now intercepted by the 52-km diversion-canal complex with 1-6 million m3 accumulators (Vozrozhdenie, due Sept 2022; search_snippet). Band is an assumption for the demo; the canals protect but overflow in >100-year events is possible",
+      "pts": [
+       [
+        37.8688,
+        58.3172
+       ],
+       [
+        37.8688,
+        58.4268
+       ],
+       [
+        37.876,
+        58.4268
+       ],
+       [
+        37.879,
+        58.39
+       ],
+       [
+        37.88,
+        58.35
+       ],
+       [
+        37.878,
+        58.3172
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.5,
+      "note_ja": "Ashgabat Canal corridor: overtopping of the east-west irrigation canal and its drains during intense spring storms (assumed +/-150 m buffer; no observed event documented)",
+      "pts": [
+       [
+        37.9145,
+        58.329
+       ],
+       [
+        37.9135,
+        58.365
+       ],
+       [
+        37.91,
+        58.3887
+       ],
+       [
+        37.9065,
+        58.3887
+       ],
+       [
+        37.908,
+        58.365
+       ],
+       [
+        37.911,
+        58.329
+       ]
+      ]
+     }
+    ],
+    "urban_flood": [
+     {
+      "depth_m": 0.4,
+      "note_ja": "Ankara Street / Parahat 1-4 lowland: under water and mud after three days of rain on 15-17 May 2024 (about a quarter of the annual 221 mm; Central Asian Light, Sentinel Asia - search_snippet). Patch outline assumed",
+      "pts": [
+       [
+        37.912,
+        58.389
+       ],
+       [
+        37.912,
+        58.401
+       ],
+       [
+        37.885,
+        58.401
+       ],
+       [
+        37.885,
+        58.389
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.3,
+      "note_ja": "Old-centre railway underpasses and the flat Magtymguly - Gurbansoltan eje belt north of the centre: stormwater ponding where drains are undersized (assumption; ThinkHazard urban flood Low for Ahal)",
+      "pts": [
+       [
+        37.95,
+        58.38
+       ],
+       [
+        37.947,
+        58.415
+       ],
+       [
+        37.938,
+        58.415
+       ],
+       [
+        37.94,
+        58.38
+       ]
+      ]
+     }
+    ],
+    "quake": [
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX",
+      "note_ja": "MSK-64 intensity 9 design zone covering all of Ashgabat (17WCEE 6f-0002; 2001 national zoning map, search_snippet). Post-2000 white-marble towers (Berzengi, Olympic complex, Parahat 7) are designed for 9; the office tower falls in this band. Boundaries are the frame itself",
+      "pts": [
+       [
+        37.935,
+        58.3172
+       ],
+       [
+        37.935,
+        58.4268
+       ],
+       [
+        37.8688,
+        58.4268
+       ],
+       [
+        37.8688,
+        58.3172
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX-X",
+      "note_ja": "Old core north of Magtymguly Avenue toward the railway: zone of total destruction in 1948 (epicentral shaking 9-10 MSK-64; epicentre 14 km north per ISC-GEM) with shallow groundwater; post-1948 Soviet 4-9 storey housing designed for 8-9 plus surviving 1950s brick. Band assumed; the official microzonation was not fetched",
+      "pts": [
+       [
+        37.9552,
+        58.3172
+       ],
+       [
+        37.9552,
+        58.4268
+       ],
+       [
+        37.935,
+        58.4268
+       ],
+       [
+        37.935,
+        58.3172
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX + slope failure",
+      "note_ja": "Kopet Dag piedmont south of Chandybil Avenue: earthquake-triggered rockfall/debris flows and blocked mountain roads (ThinkHazard landslide Low); polygon assumed",
+      "pts": [
+       [
+        37.876,
+        58.3172
+       ],
+       [
+        37.876,
+        58.35
+       ],
+       [
+        37.87,
+        58.4
+       ],
+       [
+        37.8688,
+        58.4268
+       ],
+       [
+        37.8688,
+        58.3172
        ]
       ]
      }

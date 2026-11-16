@@ -373,7 +373,7 @@
     "ural",
     "atyrau region"
    ],
-   "addr_example": "Bayterek Plaza, 25 Studenchesky Ave (Student Ave), Atyrau 060011, Kazakhstan",
+   "addr_example": "Bayterek Plaza, 25 Studenchesky Ave, Atyrau 060011, Kazakhstan",
    "districts": [
     {
      "name": "Atyrau city (whole city, 2024)",
@@ -656,7 +656,7 @@
    "jp_staff": 5,
    "families": 8,
    "staff_assumed": true,
-   "building_ja": "Nest One, 1A/1 Yangi Toshkent Street, Tashkent City International Business Center: 51-storey, 266.5 m mixed-use tower (offices, apartments, hotel, retail; 34 elevators), completed 2022 and opened 2023, the tallest building in Uzbekistan (Wikipedia). Office assumed on the 15th floor; standby generator serves common areas only (assumption)",
+   "building_ja": "Nest One, 1A/1 Yangi Toshkent Street, Tashkent City International Business Center: 51-storey, 266.5 m mixed-use tower (offices, apartments, hotel, retail; 34 elevators), completed 2022 and opened 2023, the tallest building in Uzbekistan (Wikipedia). Office assumed on the 15th floor; standby generator serves common areas only (assumption) Alternative verified business-centre address for a smaller sales team: the Poytaxt business/trade centre, 9 Bukhara Street at Amir Temur Square (Nominatim node 4218887189, 41.3114,69.2750; not used in the demo).",
    "desc_ja": "In the Tashkent City business district on the former Olmazor mahalla site, 600 m north of the Anhor canal and 2 km south-west of the Monument of Courage that marks the epicentre of the 26 April 1966 earthquake, which destroyed the adobe old city just north of here and left 200,000-300,000 people homeless. The district was built 2018-2023 to current seismic codes; recent stresses were the January 2023 cold wave with gas and power shortages, the record-level heat of July 2026 (44.3 C) and the November 2021 dust storm.",
    "risk_note_ja": "ThinkHazard (Tashkent city): earthquake High, wildfire High, extreme heat Medium, water scarcity Medium, river/urban flood Low, landslide Low. For this tower the governing risks are strong shaking in seismic zone 8-9 with elevator entrapment and facade damage, summer heat with grid failures and winter gas/power shortages; flood exposure is limited to canal corridors and underpasses away from the site.",
    "home": {
@@ -1022,6 +1022,865 @@
       "id": "f3",
       "label": "Gas shut-off valve and extinguishers checked; hazardous materials inventory",
       "s": 1,
+      "pri": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "bis-office",
+   "label": "D",
+   "name_ja": "Bishkek country office (Avangard Business Centre, Toktogul Street 125/1)",
+   "short_ja": "Bishkek office",
+   "type_ja": "Country office (Kyrgyzstan)",
+   "region": "kg-bis",
+   "country": "KGZ",
+   "area": "bis_center",
+   "lat": 42.8727,
+   "lon": 74.5974,
+   "coord_src": "page_read",
+   "coord_url": "https://nominatim.openstreetmap.org/search?q=Toktogul%20Street%20125/1,%20Bishkek&format=jsonv2&countrycodes=kg&polygon_geojson=1",
+   "coord_note_ja": "Nominatim way 1186153469 (building=office 'Avangard - Business Centre', 125/1 Toktogul Street, Pervomaysky district, 720040) at 42.87274,74.59739; Tower B hosts PwC Kyrgyzstan on the 4th floor (PwC contact page, search_snippet)",
+   "staff": 40,
+   "jp_staff": 4,
+   "families": 6,
+   "staff_assumed": true,
+   "building_ja": "Avangard Business Centre, Toktogul Street 125/1 (Towers A and B), a post-2010 reinforced-concrete office complex in the Golden Square between Chyngyz Aytmatov (Manas) Avenue and Togolok Moldo Street, next to the National Hospital. Storey count not verified (assumed about 9); office assumed on the 5th floor of Tower B; backup generator assumed to serve common areas only; district heating from the Bishkek CHP (assumptions)",
+   "desc_ja": "In the flat city centre (about 780 m), 1 km east of the channelized Ala-Archa river and 2.5 km west of the Alamudun, on the alluvial plain north of the Issyk-Ata fault. Bishkek lies in the 9-point (MSK-64) seismic zone: the 1885 Belovodsk (IX-X), 1911 Kemin M8.0 and 1938 Kemin-Chu M7.0 earthquakes struck the Chuy valley, USGS lists 18 M5+ events within 150 km since 1950 (latest 12 Aug 2026) and a Mw 7.5 Issyk-Ata scenario is modelled at about 2,400 deaths (Amey and Elliott 2023). Water hazards are river-specific: the Ala-Archa flooded Akhunbaev and Maldybaev streets after an ice jam on 16 Dec 2023 and triggered a mudflow readiness regime in July 2024, while the Great Chuy Canal crosses the north of the frame. Winter brings -30 C cold spells (state of emergency Dec 2012), CHP heating failures (Jan 2018, 2 Feb 2024) and some of the world's worst daily smog.",
+   "risk_note_ja": "ThinkHazard (Chuy Region; the Bishkek division has no data): earthquake High, landslide High, wildfire High, extreme heat Medium, river and urban flood Low, water scarcity Very low. For this mid-rise office the governing risks are strong shaking (design intensity 9) with stairway evacuation and elevator outage, winter heating/power failures and smog (coal season, CHP breakdowns), and heat above 35 C in July-August; mudflow and ice-jam risk is confined to the Ala-Archa and Alamudun corridors and the BChK strip, not the building itself.",
+   "home": {
+    "name_ja": "Expatriate housing (city-centre high-rise apartments, Erkindik Boulevard / Moskovskaya)",
+    "lat": 42.8695,
+    "lon": 74.6073
+   },
+   "city_keys": [
+    "bishkek",
+    "бишкек",
+    "бишкек шаары",
+    "bishkek city",
+    "frunze",
+    "фрунзе",
+    "pishpek",
+    "пишпек",
+    "fru",
+    "bishkek kg",
+    "bishkek kyrgyzstan",
+    "кыргызстан бишкек"
+   ],
+   "addr_example": "Toktogul Street 125/1, Avangard Business Centre, Tower B, Pervomaysky District, Bishkek 720040",
+   "districts": [
+    {
+     "name": "Lenin (Leninsky)",
+     "pop": 265451,
+     "pop_src": "https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C5%A1aary/11110__lenin",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2022,
+     "lat": 42.85,
+     "lon": 74.567,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Leninsky_District,_Bishkek",
+     "adm1": "KGZ-1115",
+     "note_ja": "West and south-west (Osh Bazaar, Jal, Ak-Orgo, Archa-Beshik); crossed by the Ala-Archa; City Hall and the emergency hospital (GKB No. 4) are here"
+    },
+    {
+     "name": "Oktyabr (Oktyabrsky)",
+     "pop": 316745,
+     "pop_src": "https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C5%A1aary/11120__okt%C3%A2br",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2022,
+     "lat": 42.833,
+     "lon": 74.617,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Oktyabrsky_District,_Bishkek",
+     "adm1": "KGZ-1115",
+     "note_ja": "South and south-east (microdistricts 3-12, Asanbai, Kok-Jar, Orto-Sai, Tunguch); fastest-growing high-rise belt, closest to the Issyk-Ata fault"
+    },
+    {
+     "name": "Birinchi May (Pervomaysky)",
+     "pop": 237385,
+     "pop_src": "https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C5%A1aary/11130__birin%C4%8Di_maj",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2022,
+     "lat": 42.883,
+     "lon": 74.6,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Pervomaysky_District,_Bishkek",
+     "adm1": "KGZ-1115",
+     "note_ja": "City centre and north (Ala-Too Square, Golden Square, Kosmos); location of the office, the National Hospital, the Japanese Embassy and MES"
+    },
+    {
+     "name": "Sverdlov (Sverdlovsky)",
+     "pop": 283981,
+     "pop_src": "https://citypopulation.de/en/kyrgyzstan/admin/bi%C5%A1kek_%C5%A1aary/11140__sverdlov",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2022,
+     "lat": 42.883,
+     "lon": 74.633,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Sverdlovsky_District,_Bishkek",
+     "adm1": "KGZ-1115",
+     "note_ja": "East and north-east (Vostok-5, Alamedin bazaar, Uchkun, the CHP plant); Soviet panel housing, crossed by the Alamudun and the BChK"
+    }
+   ],
+   "districts_note_ja": "Populations are 2022 census counts of the National Statistical Committee as shown by citypopulation.de (search_snippet; district sum 1,103,562 against a city total of 1,120,827 on the same site and 1,137,882 in the NSC census release reported by 24.kg). Wikipedia's district pages still show 2009/2017 figures (third_party). stat.gov.kg and citypopulation.de are blocked for fetching in this session.",
+   "flood_trigger_ja": "Mudflow and ice jams are warning-led hazards: when MES / Kyrgyzhydromet or the City Hall announce a mudflow readiness regime for the Ala-Archa or Alamudun gorges (June-August after heat waves or heavy rain) or a frazil-ice (shuga) jam alert in December-February, staff living within 300 m of the Ala-Archa, the Alamudun or the Great Chuy Canal move to the agreed assembly points away from the channels (Ala-Too Square, Panfilov Park, Victory Square) by car or on foot without crossing river bridges; the office is outside the corridors and switches to remote work if Akhunbaev, Jibek Jolu or the Aytmatov Avenue crossings are closed. Procedure is an assumption for the demo.",
+   "alerts": {
+    "app_112_kyrgyzstan": true,
+    "sms_alerts": false,
+    "public_alert_sirens": true,
+    "hydromet_storm_warnings": true,
+    "mes_press_social": false,
+    "embassy_reg": true,
+    "consular_mail": true,
+    "embassy_app": false
+   },
+   "prep": {
+    "info": [
+     {
+      "id": "i1",
+      "label": "Mass alerts (SMS / cell broadcast / 112 app) enabled on every staff phone",
+      "s": 1,
+      "pri": 1,
+      "ref": "cb_alert"
+     },
+     {
+      "id": "i2",
+      "label": "Duty roster monitoring Ministry of Emergency Situations of the Kyrgyz Republic (MES KR; Kyrgyz: Ozgocho kyrdaaldar ministrligi; Russian: MChS KR), including the Crisis Management Centre, the Unified Duty-Dispatch Service 112, the State Integrated Public Alert and Warning System and Kyrgyzhydromet and hydromet warnings (two people, 24 h during warnings)",
+      "s": 0.5,
+      "pri": 2,
+      "note": "Single point of failure today"
+     },
+     {
+      "id": "i3",
+      "label": "Embassy emergency mail received at a shared mailbox and forwarded to all expatriate staff",
+      "s": 0,
+      "pri": 2,
+      "ref": "consular_mail"
+     }
+    ],
+    "evac": [
+     {
+      "id": "e1",
+      "label": "Scenario-specific evacuation plan documented (earthquake, mudflow, fire)",
+      "s": 1,
+      "pri": 1,
+      "ref": "evac_drill"
+     },
+     {
+      "id": "e2",
+      "label": "Assembly point and secondary shelter agreed with the building manager; signage in English and local language",
+      "s": 0.5,
+      "pri": 1
+     },
+     {
+      "id": "e3",
+      "label": "Annual drill including families and remote staff",
+      "s": 0,
+      "pri": 2,
+      "ref": "evac_drill"
+     }
+    ],
+    "safety": [
+     {
+      "id": "s1",
+      "label": "Safety-confirmation system with all staff and accompanying family members registered",
+      "s": 1,
+      "pri": 1,
+      "ref": "safety_check_system"
+     },
+     {
+      "id": "s2",
+      "label": "Contact tree with two channels (SMS and messenger) plus one out-of-country contact",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "ifrc_family_plan"
+     },
+     {
+      "id": "s3",
+      "label": "Embassy registration checked for every expatriate once a year",
+      "s": 1,
+      "pri": 1,
+      "ref": "embassy_reg"
+     }
+    ],
+    "stock": [
+     {
+      "id": "k1",
+      "label": "Drinking water 3 L per person per day for 3 days at the office",
+      "s": 0,
+      "pri": 1,
+      "ref": "sphere_water"
+     },
+     {
+      "id": "k2",
+      "label": "Food, first-aid kit, chronic medicines list and blankets for an overnight stay",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "readygov_kit"
+     },
+     {
+      "id": "k3",
+      "label": "N95 masks for smog and dust",
+      "s": 1,
+      "pri": 3,
+      "ref": "air_quality_n95"
+     }
+    ],
+    "power": [
+     {
+      "id": "p1",
+      "label": "Backup power for the server room and one cool/warm room (generator or battery, 48 h fuel)",
+      "s": 1,
+      "pri": 1,
+      "ref": "heating_backup"
+     },
+     {
+      "id": "p2",
+      "label": "Satellite phone or messenger with roaming SIM tested quarterly",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "satellite_comm"
+     },
+     {
+      "id": "p3",
+      "label": "Power banks and car chargers for duty staff",
+      "s": 0,
+      "pri": 3
+     }
+    ],
+    "bcp": [
+     {
+      "id": "b1",
+      "label": "Critical processes with recovery targets (RTO) and an alternate site in another city",
+      "s": 1,
+      "pri": 1,
+      "ref": "iso22301_bcp"
+     },
+     {
+      "id": "b2",
+      "label": "Supplier and logistics alternatives agreed for the main routes (see Supply chain)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "undrr_sme_bcp"
+     },
+     {
+      "id": "b3",
+      "label": "Data backed up outside the country; remote-work setup for all staff",
+      "s": 0,
+      "pri": 2
+     }
+    ],
+    "people": [
+     {
+      "id": "h1",
+      "label": "List of staff and family members needing support (pregnancy, chronic conditions, mobility, small children)",
+      "s": 1,
+      "pri": 1
+     },
+     {
+      "id": "h2",
+      "label": "Heat and cold protocols (shifted hours, cool/warm rooms, check calls)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "who_heat"
+     },
+     {
+      "id": "h3",
+      "label": "School and nursery pickup rules agreed with families",
+      "s": 1,
+      "pri": 2
+     }
+    ],
+    "facility": [
+     {
+      "id": "f1",
+      "label": "Non-structural seismic fixing: shelves, servers, glass film, suspended ceilings",
+      "s": 0,
+      "pri": 1,
+      "ref": "readygov_quake"
+     },
+     {
+      "id": "f2",
+      "label": "Roof, drainage and glazing checked before the storm season",
+      "s": 0.5,
+      "pri": 3
+     },
+     {
+      "id": "f3",
+      "label": "Gas shut-off valve and extinguishers checked; hazardous materials inventory",
+      "s": 1,
+      "pri": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "dus-office",
+   "label": "E",
+   "name_ja": "Dushanbe liaison office (Dushanbe Plaza, Rudaki Avenue)",
+   "short_ja": "Dushanbe office",
+   "type_ja": "Liaison office (Tajikistan)",
+   "region": "tj-dus",
+   "country": "TJK",
+   "area": "dus_center",
+   "lat": 38.572,
+   "lon": 68.7895,
+   "coord_src": "page_read",
+   "coord_url": "https://nominatim.openstreetmap.org/search?q=Dushanbe+Plaza&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+   "coord_note_ja": "Nominatim way 1076018828 (building=commercial 'Душанбе Плаза', Rudaki Avenue, Ismoili Somoni district) centroid; house number not in OSM",
+   "staff": 12,
+   "jp_staff": 2,
+   "families": 2,
+   "staff_assumed": true,
+   "building_ja": "Dushanbe Plaza, Rudaki Avenue: 20-storey, 92 m office/hotel tower opened September 2011 (about 40,000 m2; offices on floors 7-15, hotel apartments on 17-20, 12 elevators, two basement parking levels - Asia-Plus, search_snippet). Office assumed on the 9th floor; building generator assumed to serve common areas only (assumption)",
+   "desc_ja": "On Rudaki Avenue in the heart of the capital (Ismoili Somoni district, about 820 m), 600 m east of the Varzob (Dushanbinka) river, 500 m south of Rudaki Park and the Palace of Nations and 1 km from the CoES headquarters. Dushanbe sits in the 9-point seismic zone: the 1907 Qaratog M7.4 earthquake struck 99 km west (12,000-15,000 dead), the 1989 Gissar mb5.3 earthquake 14 km west killed 274 in loess flowslides, and the M5.2 Vahdat earthquake of 2013 shook the city (USGS, Wikipedia). Mudflows in the Varzob gorge cut the city's water supply in July 2004 (400,000 without clean water) and May 2016, and August 2023 rains killed 21 in the commuter districts.",
+   "risk_note_ja": "ThinkHazard (DRS division incl. Dushanbe): earthquake High, landslide High, urban flood High, wildfire High, extreme heat Medium, water scarcity Medium, river flood Low. For this tower the governing risks are strong shaking (MSK-64 9 design zone) with elevator outage and facade damage, loss of city water after Varzob mudflows, summer heat with power cuts, and winter heating/electricity failure; the building itself stands 600 m from the river corridor.",
+   "home": {
+    "name_ja": "Expatriate housing (Rudaki Avenue centre high-rise apartments)",
+    "lat": 38.5762,
+    "lon": 68.7882
+   },
+   "city_keys": [
+    "dushanbe",
+    "душанбе",
+    "dyushambe",
+    "stalinabad",
+    "сталинабад",
+    "сталинобод",
+    "dushanbe city",
+    "шаҳри душанбе",
+    "dyu",
+    "dushanbe tj",
+    "dushanbe tajikistan"
+   ],
+   "addr_example": "Rudaki Avenue, Dushanbe Plaza, Ismoili Somoni District, Dushanbe 734025",
+   "districts": [
+    {
+     "name": "Ismoili Somoni (ex-Oktyabrsky)",
+     "pop": 148700,
+     "pop_src": "https://en.wikipedia.org/wiki/Districts_of_Tajikistan",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2019,
+     "lat": 38.5835,
+     "lon": 68.7892,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%9D%D0%BE%D2%B3%D0%B8%D1%8F%D0%B8+%D0%98%D1%81%D0%BC%D0%BE%D0%B8%D0%BB%D0%B8+%D0%A1%D0%BE%D0%BC%D0%BE%D0%BD%D3%A3%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "adm1": "TJK-5491",
+     "note_ja": "North and north-east of the center (25.8 km2): Rudaki Avenue north of Rudaki Park, the Varzob valley (Botanical Garden, Sari Osiyo), the loess hills around Victory Park; location of Dushanbe Plaza and the embassies; Nominatim relation 11018181 (boundary=administrative) centroid"
+    },
+    {
+     "name": "Sino (Ibn Sina, ex-Frunze)",
+     "pop": 326100,
+     "pop_src": "https://en.wikipedia.org/wiki/Districts_of_Tajikistan",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2019,
+     "lat": 38.5615,
+     "lon": 68.7391,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%9D%D0%BE%D2%B3%D0%B8%D1%8F%D0%B8+%D0%A1%D0%B8%D0%BD%D0%BE%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "adm1": "TJK-5491",
+     "note_ja": "Largest district (43.8 km2) covering the west: Soviet 1970s-80s panel microdistricts (Mehrabad, 15th-104th mkr, Zarafshon, Ispechak), the National Medical Centre and the Luchob valley; Nominatim relation 11018182 (boundary=administrative) centroid"
+    },
+    {
+     "name": "Firdavsi (ex-Central / Tsentralny)",
+     "pop": 209000,
+     "pop_src": "https://en.wikipedia.org/wiki/Districts_of_Tajikistan",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2019,
+     "lat": 38.5234,
+     "lon": 68.76,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%9D%D0%BE%D2%B3%D0%B8%D1%8F%D0%B8+%D0%A4%D0%B8%D1%80%D0%B4%D0%B0%D0%B2%D1%81%D3%A3%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "adm1": "TJK-5491",
+     "note_ja": "South-west (29.1 km2) along Saadi Sherozi Avenue and the lower Dushanbinka: 46th-62nd microdistricts, Istiqlol hospital, the Dushanbe thermal power plant; lowest ground in the city (about 750-800 m); Nominatim relation 11018179 (boundary=administrative) centroid"
+    },
+    {
+     "name": "Shohmansur (ex-Zheleznodorozhny)",
+     "pop": 162600,
+     "pop_src": "https://en.wikipedia.org/wiki/Districts_of_Tajikistan",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2019,
+     "lat": 38.5507,
+     "lon": 68.8305,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=%D0%9D%D0%BE%D2%B3%D0%B8%D1%8F%D0%B8+%D0%A8%D0%BE%D2%B3%D0%BC%D0%B0%D0%BD%D1%81%D1%83%D1%80%2C+%D0%94%D1%83%D1%88%D0%B0%D0%BD%D0%B1%D0%B5&format=jsonv2&polygon_geojson=1&countrycodes=tj",
+     "adm1": "TJK-5491",
+     "note_ja": "South-east (27.9 km2): railway station, the airport, Shohmansur bazaar, CoES headquarters, Dushanbe International School and dense private housing; Nominatim relation 11018180 (boundary=administrative) centroid"
+    }
+   ],
+   "districts_note_ja": "Populations are the 2019 estimates in the Wikipedia 'Districts of Tajikistan' table (third_party; sum 846,400). The city total is 1,228,400 as of March 2024 (Wikipedia infobox, third_party; the 2024 figure includes areas annexed from Rudaki district in 2016-2019, so district shares are indicative only). stat.tj and the city administration site are blocked for fetching; the egov.tj snippet gives 802,200 for 2016-01-01.",
+   "flood_trigger_ja": "Mudflow / flood is a warning-led hazard: when CoES and the Agency for Hydrometeorology issue mudflow or high-water warnings for the Varzob basin (typically April-June and after July-August heat or heavy rain), staff living within 300 m of the Varzob/Dushanbinka or Luchob channels (Sari Osiyo, riverside parts of Mehrabad and Firdavsi) move to pre-agreed higher ground away from the river (Rudaki Park, Victory Park) without crossing the river bridges; the office keeps a 3-day bottled-water stock because the single Varzob intake fails after every large mudflow (2004, 2016), and switches to remote work if city water or the Ismoili Somoni Avenue bridge is cut. Procedure is an assumption for the demo.",
+   "alerts": {
+    "coes_sms": false,
+    "hydromet_warnings": true,
+    "khovar_state_media": true,
+    "coes_duty_lines": false,
+    "akah_community_ews": true,
+    "embassy_reg": true,
+    "consular_mail": false,
+    "embassy_app": true
+   },
+   "prep": {
+    "info": [
+     {
+      "id": "i1",
+      "label": "Mass alerts (SMS / cell broadcast / 112 app) enabled on every staff phone",
+      "s": 1,
+      "pri": 1,
+      "ref": "cb_alert"
+     },
+     {
+      "id": "i2",
+      "label": "Duty roster monitoring Committee of Emergency Situations and Civil Defence under the Government of the Republic of Tajikistan (CoES; Tajik: Kumitai holathoi favqulodda va mudofiai grazhdani, KChS) and hydromet warnings (two people, 24 h during warnings)",
+      "s": 0.5,
+      "pri": 2,
+      "note": "Single point of failure today"
+     },
+     {
+      "id": "i3",
+      "label": "Embassy emergency mail received at a shared mailbox and forwarded to all expatriate staff",
+      "s": 0,
+      "pri": 2,
+      "ref": "consular_mail"
+     }
+    ],
+    "evac": [
+     {
+      "id": "e1",
+      "label": "Scenario-specific evacuation plan documented (earthquake, flood, mudflow, fire)",
+      "s": 1,
+      "pri": 1,
+      "ref": "evac_drill"
+     },
+     {
+      "id": "e2",
+      "label": "Assembly point and secondary shelter agreed with the building manager; signage in English and local language",
+      "s": 0.5,
+      "pri": 1
+     },
+     {
+      "id": "e3",
+      "label": "Annual drill including families and remote staff",
+      "s": 1,
+      "pri": 2,
+      "ref": "evac_drill"
+     }
+    ],
+    "safety": [
+     {
+      "id": "s1",
+      "label": "Safety-confirmation system with all staff and accompanying family members registered",
+      "s": 0,
+      "pri": 1,
+      "ref": "safety_check_system"
+     },
+     {
+      "id": "s2",
+      "label": "Contact tree with two channels (SMS and messenger) plus one out-of-country contact",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "ifrc_family_plan"
+     },
+     {
+      "id": "s3",
+      "label": "Embassy registration checked for every expatriate once a year",
+      "s": 1,
+      "pri": 1,
+      "ref": "embassy_reg"
+     }
+    ],
+    "stock": [
+     {
+      "id": "k1",
+      "label": "Drinking water 3 L per person per day for 3 days at the office",
+      "s": 1,
+      "pri": 1,
+      "ref": "sphere_water"
+     },
+     {
+      "id": "k2",
+      "label": "Food, first-aid kit, chronic medicines list and blankets for an overnight stay",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "readygov_kit"
+     },
+     {
+      "id": "k3",
+      "label": "N95 masks for smog and dust",
+      "s": 0,
+      "pri": 3,
+      "ref": "air_quality_n95"
+     }
+    ],
+    "power": [
+     {
+      "id": "p1",
+      "label": "Backup power for the server room and one cool/warm room (generator or battery, 48 h fuel)",
+      "s": 1,
+      "pri": 1
+     },
+     {
+      "id": "p2",
+      "label": "Satellite phone or messenger with roaming SIM tested quarterly",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "satellite_comm"
+     },
+     {
+      "id": "p3",
+      "label": "Power banks and car chargers for duty staff",
+      "s": 0,
+      "pri": 3
+     }
+    ],
+    "bcp": [
+     {
+      "id": "b1",
+      "label": "Critical processes with recovery targets (RTO) and an alternate site in another city",
+      "s": 1,
+      "pri": 1,
+      "ref": "iso22301_bcp"
+     },
+     {
+      "id": "b2",
+      "label": "Supplier and logistics alternatives agreed for the main routes (see Supply chain)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "undrr_sme_bcp"
+     },
+     {
+      "id": "b3",
+      "label": "Data backed up outside the country; remote-work setup for all staff",
+      "s": 1,
+      "pri": 2
+     }
+    ],
+    "people": [
+     {
+      "id": "h1",
+      "label": "List of staff and family members needing support (pregnancy, chronic conditions, mobility, small children)",
+      "s": 0,
+      "pri": 1
+     },
+     {
+      "id": "h2",
+      "label": "Heat and cold protocols (shifted hours, cool/warm rooms, check calls)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "who_heat"
+     },
+     {
+      "id": "h3",
+      "label": "School and nursery pickup rules agreed with families",
+      "s": 1,
+      "pri": 2
+     }
+    ],
+    "facility": [
+     {
+      "id": "f1",
+      "label": "Non-structural seismic fixing: shelves, servers, glass film, suspended ceilings",
+      "s": 1,
+      "pri": 1,
+      "ref": "readygov_quake"
+     },
+     {
+      "id": "f2",
+      "label": "Flood trigger levels, vehicle relocation and sandbag plan",
+      "s": 0.5,
+      "pri": 1,
+      "ref": "vertical_evac"
+     },
+     {
+      "id": "f3",
+      "label": "Gas shut-off valve and extinguishers checked; hazardous materials inventory",
+      "s": 0,
+      "pri": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "ash-office",
+   "label": "F",
+   "name_ja": "Ashgabat representative office (Olympic Business Center, 10 yyl Abadancylyk Avenue, Berzengi)",
+   "short_ja": "Ashgabat office",
+   "type_ja": "Representative office (Turkmenistan)",
+   "region": "tm-ash",
+   "country": "TKM",
+   "area": "ash_center",
+   "lat": 37.8954,
+   "lon": 58.3725,
+   "coord_src": "page_read",
+   "coord_url": "https://nominatim.openstreetmap.org/search?q=business%20center%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+   "coord_note_ja": "Nominatim way 387583371 'Olympic Business Center, 10 yyl Abadancylyk (1945) sayoly, Kopetdag etraby, 744028' (building=commercial, building:levels 16). Alternatives verified in the same data: Paytagt Business Center (way 355588118, 37.8940,58.3902, hosts the Embassy of Japan), Berkarar Business Center (Ataturk St 82), Yyldyz Hotel business centre (37.9294,58.3332)",
+   "staff": 18,
+   "jp_staff": 3,
+   "families": 2,
+   "staff_assumed": true,
+   "building_ja": "Olympic Business Center, 10 yyl Abadancylyk Avenue (1945 street), Berzengi: 16-storey white-marble-clad reinforced-concrete office building of the 2010s next to the Olympic complex (OSM building:levels 16; year and structure are assumptions - no building page found). Office assumed on the 11th floor with a 2-hour UPS; building generator serves lifts and lobby only (assumption)",
+   "desc_ja": "On 10 yyl Abadancylyk Avenue in Berzengi, the post-2000 government and diplomatic district on the upper (southern) piedmont of Ashgabat at about 270 m, 1.5 km west of the Embassy of Japan (Paytagt centre, same avenue) and 1 km south of the Olympic complex. Ashgabat lies in the MSK-64 intensity 9 zone and was destroyed by the Ms 7.3 earthquake of 6 October 1948 (epicentre 14 km north; 10,000-110,000 dead). Seasonal Kopet Dag mudflows are intercepted by the 2022 diversion canals 2-3 km to the south, while the flat central districts flooded after three days of rain on 15-17 May 2024. Summers reach 45-47 C (record 47.2 C, 30 June 2015) and dust storms arrive with spring cyclones.",
+   "risk_note_ja": "ThinkHazard (Ahal): earthquake High, river flood High, water scarcity High, wildfire High, extreme heat Medium, urban flood Low, landslide Low, cyclone Very low. For this 16-storey tower the governing risks are strong shaking (MSK-64 9 design zone; 1948 precedent), extreme heat with power-demand outages, and dust storms; mudflow and pluvial flood risk is confined to the canal belt south of Archabil and the Parahat lowlands rather than the building itself.",
+   "home": {
+    "name_ja": "Expatriate housing (Berzengi / 10 yyl Abadancylyk white-marble high-rise apartments)",
+    "lat": 37.898,
+    "lon": 58.356
+   },
+   "city_keys": [
+    "ashgabat",
+    "ашхабад",
+    "aşgabat",
+    "asgabat",
+    "ashkhabad",
+    "ашгабат",
+    "ashgabat tm",
+    "poltoratsk",
+    "berzengi",
+    "ahal"
+   ],
+   "addr_example": "10 yyl Abadancylyk Avenue, Olympic Business Center, Kopetdag District, Ashgabat 744028",
+   "districts": [
+    {
+     "name": "Bagtyyarlyk",
+     "pop": 309619,
+     "pop_src": "https://en.wikipedia.org/wiki/Bagty%C3%BDarlyk_District",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2022,
+     "lat": 37.9919,
+     "lon": 58.3232,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bagtyýarlyk%20etraby%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "adm1": "TKM-352",
+     "note_ja": "North-western district (272 km2): airport, Koshi, Choganly, Gypjak; crossed by the Karakum Canal; loess plain with the 1948 ISC-GEM epicentre 14 km north of the centre"
+    },
+    {
+     "name": "Berkararlyk",
+     "pop": 266425,
+     "pop_src": "https://en.wikipedia.org/wiki/Berkararlyk_District",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2022,
+     "lat": 37.9506,
+     "lon": 58.4198,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Berkararlyk%20etraby%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "adm1": "TKM-352",
+     "note_ja": "Eastern district (70.9 km2, densest): railway station, old centre east of Turkmenbashi Ave, Parahat 7, Garadamak industrial zone"
+    },
+    {
+     "name": "Kopetdag",
+     "pop": 278840,
+     "pop_src": "https://en.wikipedia.org/wiki/Kopetdag_District",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2022,
+     "lat": 37.8593,
+     "lon": 58.3593,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Köpetdag%20etraby%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "adm1": "TKM-352",
+     "note_ja": "Southern district (187.7 km2): Berzengi / Archabil government quarter, Olympic complex, Parahat 1-4, Howdan; location of the office, embassy and international school; piedmont mudflow belt"
+    },
+    {
+     "name": "Buzmeyin",
+     "pop": 175179,
+     "pop_src": "https://en.wikipedia.org/wiki/B%C3%BCzme%C3%BDin_District",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2022,
+     "lat": 38.0548,
+     "lon": 58.1496,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Büzmeýin%20etraby%20Aşgabat&format=jsonv2&countrycodes=tm&polygon_geojson=1",
+     "adm1": "TKM-352",
+     "note_ja": "Western district (419.85 km2): former city of Buzmeyin/Abadan (industrial suburb, 2011 ammunition-depot blast), Bekrewe, Alem centre, Turkmenistan Tower; expanded 2018 with former Archabil and Chandybil districts"
+    }
+   ],
+   "districts_note_ja": "Populations are the 17 December 2022 census counts shown on the English Wikipedia district pages (third_party; the four districts sum to 1,030,063, the city total on the Ashgabat page and in OSM). stat.gov.tm and citypopulation.de are blocked for fetching in this session; the WebSearch summary of stat.gov.tm gives the same four figures (search_snippet). Natural Earth has no separate Ashgabat city unit, so adm1 = TKM-352 Ahal.",
+   "flood_trigger_ja": "Flash flood / mudflow is a forecast-led hazard here: when Turkmenhydromet forecasts heavy rain (more than about 20 mm/day, typically March-May) or the Ministry of Defence civil-defence directorate issues a mudflow warning for the Kopet Dag foothills, staff living in Parahat 1-4 and along Ankara Street move cars out of underpasses and basements, avoid the Ashgabat Canal and the southern diversion-canal belt, and the office switches to remote work for the day; after the May 2024 flooding, roads in the centre were impassable for a day. Procedure and thresholds are assumptions for the demo.",
+   "alerts": {
+    "hydromet_bulletin": true,
+    "state_media": true,
+    "sms_operators": false,
+    "sirens_apps_planned": true,
+    "independent_media": true,
+    "embassy_reg": false,
+    "consular_mail": true,
+    "embassy_app": false
+   },
+   "prep": {
+    "info": [
+     {
+      "id": "i1",
+      "label": "Mass alerts (SMS / cell broadcast / 112 app) enabled on every staff phone",
+      "s": 1,
+      "pri": 1,
+      "ref": "cb_alert"
+     },
+     {
+      "id": "i2",
+      "label": "Duty roster monitoring Main Directorate of Civil Defence and Rescue Operations of the Ministry of Defence of Turkmenistan (lead operational agency; headed by a Deputy Minister of Defence) and the State Commission of Turkmenistan for Emergency Situations (interagency commission); an Interagency Working Group for Disaster Risk Reduction launched with UNDRR; policy framework: State Programme on civil defence 2019-2030 and hydromet warnings (two people, 24 h during warnings)",
+      "s": 0.5,
+      "pri": 2,
+      "note": "Single point of failure today"
+     },
+     {
+      "id": "i3",
+      "label": "Embassy emergency mail received at a shared mailbox and forwarded to all expatriate staff",
+      "s": 1,
+      "pri": 2,
+      "ref": "consular_mail"
+     }
+    ],
+    "evac": [
+     {
+      "id": "e1",
+      "label": "Scenario-specific evacuation plan documented (earthquake, flood, fire)",
+      "s": 0,
+      "pri": 1,
+      "ref": "evac_drill"
+     },
+     {
+      "id": "e2",
+      "label": "Assembly point and secondary shelter agreed with the building manager; signage in English and local language",
+      "s": 0.5,
+      "pri": 1
+     },
+     {
+      "id": "e3",
+      "label": "Annual drill including families and remote staff",
+      "s": 1,
+      "pri": 2,
+      "ref": "evac_drill"
+     }
+    ],
+    "safety": [
+     {
+      "id": "s1",
+      "label": "Safety-confirmation system with all staff and accompanying family members registered",
+      "s": 1,
+      "pri": 1,
+      "ref": "safety_check_system"
+     },
+     {
+      "id": "s2",
+      "label": "Contact tree with two channels (SMS and messenger) plus one out-of-country contact",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "ifrc_family_plan"
+     },
+     {
+      "id": "s3",
+      "label": "Embassy registration checked for every expatriate once a year",
+      "s": 0,
+      "pri": 1,
+      "ref": "embassy_reg"
+     }
+    ],
+    "stock": [
+     {
+      "id": "k1",
+      "label": "Drinking water 3 L per person per day for 3 days at the office",
+      "s": 1,
+      "pri": 1,
+      "ref": "sphere_water"
+     },
+     {
+      "id": "k2",
+      "label": "Food, first-aid kit, chronic medicines list and blankets for an overnight stay",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "readygov_kit"
+     },
+     {
+      "id": "k3",
+      "label": "N95 masks for smog and dust",
+      "s": 0,
+      "pri": 3,
+      "ref": "air_quality_n95"
+     }
+    ],
+    "power": [
+     {
+      "id": "p1",
+      "label": "Backup power for the server room and one cool/warm room (generator or battery, 48 h fuel)",
+      "s": 1,
+      "pri": 1,
+      "ref": "heating_backup"
+     },
+     {
+      "id": "p2",
+      "label": "Satellite phone or messenger with roaming SIM tested quarterly",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "satellite_comm"
+     },
+     {
+      "id": "p3",
+      "label": "Power banks and car chargers for duty staff",
+      "s": 1,
+      "pri": 3
+     }
+    ],
+    "bcp": [
+     {
+      "id": "b1",
+      "label": "Critical processes with recovery targets (RTO) and an alternate site in another city",
+      "s": 0,
+      "pri": 1,
+      "ref": "iso22301_bcp"
+     },
+     {
+      "id": "b2",
+      "label": "Supplier and logistics alternatives agreed for the main routes (see Supply chain)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "undrr_sme_bcp"
+     },
+     {
+      "id": "b3",
+      "label": "Data backed up outside the country; remote-work setup for all staff",
+      "s": 1,
+      "pri": 2
+     }
+    ],
+    "people": [
+     {
+      "id": "h1",
+      "label": "List of staff and family members needing support (pregnancy, chronic conditions, mobility, small children)",
+      "s": 1,
+      "pri": 1
+     },
+     {
+      "id": "h2",
+      "label": "Heat and cold protocols (shifted hours, cool/warm rooms, check calls)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "who_heat"
+     },
+     {
+      "id": "h3",
+      "label": "School and nursery pickup rules agreed with families",
+      "s": 0,
+      "pri": 2
+     }
+    ],
+    "facility": [
+     {
+      "id": "f1",
+      "label": "Non-structural seismic fixing: shelves, servers, glass film, suspended ceilings",
+      "s": 1,
+      "pri": 1,
+      "ref": "readygov_quake"
+     },
+     {
+      "id": "f2",
+      "label": "Flood trigger levels, vehicle relocation and sandbag plan",
+      "s": 0.5,
+      "pri": 1,
+      "ref": "vertical_evac"
+     },
+     {
+      "id": "f3",
+      "label": "Gas shut-off valve and extinguishers checked; hazardous materials inventory",
+      "s": 0,
       "pri": 2
      }
     ]
