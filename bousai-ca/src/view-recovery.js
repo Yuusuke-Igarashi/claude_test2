@@ -5,7 +5,7 @@ const logi = (d, half, k) => 1 / (1 + Math.exp(-(d - half) / Math.max(0.5, k)));
 const fmtD = (d) => `D+${Math.round(d)}`;
 const fmtDays = (d) => { d = Math.round(d); if (d < 14) return `D+${d}`; if (d < 84) return `W+${Math.round(d / 7)}`; return `M+${Math.round(d / 30)}`; };
 const PERSP = [['region', 'home', 'Region (local government)'], ['company', 'building', 'Company (site & supply chain)'], ['personal', 'users', 'Personal (public services)']];
-const TABS = PERSP.concat([['simulator', 'gauge', 'Scenario simulator (what-if)']]);
+const TABS = PERSP;
 
 /* ---------- What-if levers (per perspective). `rec` = value used when the simulator asks "what if this were in place". ---------- */
 const LEVERS = {
@@ -186,10 +186,22 @@ function prepList(sc, persp, p, cur, opts) {
 
 App.views.recovery = {
   st: { scen: null, day: null, persp: Store.get('rcPersp', 'region'), simPersp: Store.get('rcSimPersp', 'company'), dist: null, done: Store.get('rcDone', {}), sim: Store.get('rcSim', {}), simOpen: Store.get('rcSimOpen', true) },
-  curPersp() { return this.st.persp === 'simulator' ? (this.st.simPersp || 'company') : this.st.persp; },
-  init(root) {
-    const self = this;
-    root.innerHTML = `
+  perspFor(root) { return root && root.dataset.mode === 'scenario' ? (this.st.simPersp || 'company') : this.st.persp; },
+  init(root) { this.initShell(root, 'recovery'); },
+  initShell(root, mode) {
+    const self = this; root.dataset.mode = mode;
+    root.innerHTML = mode === 'scenario' ? `
+      <div class="vh">
+        <div>
+          <div class="eyebrow"><span class="eb">04 · Scenario simulator</span><span class="aud">${ic('users')}Audience: managers of companies and local governments, and staff</span></div>
+          <h1>What if we were prepared? <em>Levers, speed, cost and what to prepare</em></h1>
+          <p class="q"><b>Question:</b> Set the preparedness measures as checkboxes and numbers and see how recovery speed and cost move against the baseline scenario, for the region, the company and for you. The gaps become a preparation list ranked by effect, with timing from the recovery timeline.</p>
+        </div>
+        <div class="vh-r"><span class="tag asm">Lever effects and cost bases are model assumptions</span><span class="tag neutral">Settings are shared with the Recovery screen</span></div>
+      </div>
+      <div class="card" id="rcCtl"></div>
+      <div class="tabs" role="tablist" id="rcTabs" hidden></div>
+      <div class="tabpanel" id="rcPanel"></div>` : `
       <div class="vh">
         <div>
           <div class="eyebrow"><span class="eb">03 · Recovery monitoring</span><span class="aud">${ic('users')}Audience: managers of companies and local governments, and staff</span></div>
@@ -202,21 +214,22 @@ App.views.recovery = {
       <div class="tabs" role="tablist" id="rcTabs"></div>
       <div class="tabpanel" id="rcPanel"></div>`;
     root.addEventListener('click', (e) => {
+      const gs = e.target.closest('[data-goscenario]'); if (gs) { e.preventDefault(); self.st.simPersp = gs.dataset.goscenario || self.st.persp; Store.set('rcSimPersp', self.st.simPersp); location.hash = 'scenario'; return; }
       const tb = e.target.closest('[data-persp]'); if (tb) { self.st.persp = tb.dataset.persp; Store.set('rcPersp', self.st.persp); self.renderTabs(root); self.renderPanel(root); return; }
       const ck = e.target.closest('[data-rchk]'); if (ck) { const k = ck.dataset.rchk; self.st.done[k] = !self.st.done[k]; Store.set('rcDone', self.st.done); ck.closest('.chk').dataset.done = self.st.done[k] ? 1 : 0; return; }
       const mb = e.target.closest('[data-more]'); if (mb) { const tl = $('#' + mb.dataset.more, root); tl.classList.toggle('collapsed-ms'); mb.textContent = tl.classList.contains('collapsed-ms') ? 'Show more' : 'Show less'; return; }
-      const rs = e.target.closest('[data-simreset]'); if (rs) { const sc = self.scenario(); const pp = self.curPersp(); self.st.sim[sc.id + '|' + pp] = leverDefaults(pp, sc); Store.set('rcSim', self.st.sim); self.renderPanel(root); return; }
+      const rs = e.target.closest('[data-simreset]'); if (rs) { const sc = self.scenario(); const pp = self.perspFor(root); self.st.sim[sc.id + '|' + pp] = leverDefaults(pp, sc); Store.set('rcSim', self.st.sim); self.renderPanel(root); return; }
       const sp = e.target.closest('[data-simpersp]'); if (sp) { self.st.simPersp = sp.dataset.simpersp; Store.set('rcSimPersp', self.st.simPersp); self.renderPanel(root); return; }
       const tg = e.target.closest('[data-simtoggle]'); if (tg) { self.st.simOpen = !self.st.simOpen; Store.set('rcSimOpen', self.st.simOpen); self.renderPanel(root); return; }
     });
-    root.addEventListener('input', (e) => { const lv = e.target.closest('[data-lv]'); if (!lv) return; const sc = self.scenario(); const pp = self.curPersp(); const key = sc.id + '|' + pp; const p = self.st.sim[key] || (self.st.sim[key] = leverDefaults(pp, sc)); p[lv.dataset.lv] = lv.type === 'checkbox' ? lv.checked : +lv.value; Store.set('rcSim', self.st.sim); const out = lv.closest('.lever') && lv.closest('.lever').querySelector('output'); if (out) out.textContent = lv.type === 'checkbox' ? '' : lv.value + (lv.dataset.unit || ''); cancelAnimationFrame(self._raf2); self._raf2 = requestAnimationFrame(() => self.renderPanel(root, true)); });
+    root.addEventListener('input', (e) => { const lv = e.target.closest('[data-lv]'); if (!lv) return; const sc = self.scenario(); const pp = self.perspFor(root); const key = sc.id + '|' + pp; const p = self.st.sim[key] || (self.st.sim[key] = leverDefaults(pp, sc)); p[lv.dataset.lv] = lv.type === 'checkbox' ? lv.checked : +lv.value; Store.set('rcSim', self.st.sim); const out = lv.closest('.lever') && lv.closest('.lever').querySelector('output'); if (out) out.textContent = lv.type === 'checkbox' ? '' : lv.value + (lv.dataset.unit || ''); cancelAnimationFrame(self._raf2); self._raf2 = requestAnimationFrame(() => self.renderPanel(root, true)); });
     document.addEventListener('ctxchange', () => { if (App.current === 'recovery') self.renderPanel(root); });
     this.update(root);
   },
   show(root) { if (typeof Live !== 'undefined' && Live.st.scen && Live.st.scen !== this.st.scen) { this.st.scen = Live.st.scen; this.st.day = null; } this.update(root); },
   scenario() { let sc = M.scenario(this.st.scen || (typeof Live !== 'undefined' ? Live.st.scen : null)); if (!sc) sc = M.scenarios()[0]; this.st.scen = sc.id; return sc; },
   params(sc, persp) { const key = sc.id + '|' + persp; const d = leverDefaults(persp, sc); const p = Object.assign({}, d, this.st.sim[key] || {}); return p; },
-  update(root) { this.renderCtl(root); this.renderTabs(root); this.renderPanel(root); },
+  update(root) { this.renderCtl(root); if (root.dataset.mode !== 'scenario') this.renderTabs(root); this.renderPanel(root); },
   renderCtl(root) {
     const sc = this.scenario(); const R = sc.recovery || { horizon_d: 90, phases: [] }; const H = R.horizon_d || 90; const self = this;
     if (this.st.day == null || this.st.day > H) this.st.day = Math.min(H, R.default_d != null ? R.default_d : Math.round(H / 6));
@@ -253,7 +266,7 @@ App.views.recovery = {
   renderPanel(root, keepScroll) {
     const sc = this.scenario(); const R = sc.recovery; const box = $('#rcPanel', root);
     if (!R) { box.innerHTML = `<div class="note">${ic('info')}<span>No recovery timeline is defined for this event.</span></div>`; return; }
-    const d = this.st.day; const H = R.horizon_d || 90; const persp = this.curPersp(); const isSim = this.st.persp === 'simulator'; const p = this.params(sc, persp);
+    const d = this.st.day; const H = R.horizon_d || 90; const isSim = root.dataset.mode === 'scenario'; const persp = this.perspFor(root); const p = this.params(sc, persp);
     const dists = sc.districts || []; if (persp === 'personal') { const did = this.st.dist && dists.find((x) => x.id === this.st.dist) ? this.st.dist : (sc.area_district && dists.find((x) => x.id === sc.area_district) ? sc.area_district : (dists[0] || {}).id); this.st.dist = did; }
     const opts = { district: this.st.dist };
     const cur = outcomes(sc, persp, p, opts); const base = outcomes(sc, persp, leverDefaults(persp, sc), opts); const ctx = cur.ctx; const ctx0 = base.ctx; const ph = phaseAt(R, d);
@@ -279,13 +292,13 @@ App.views.recovery = {
     const ms = (R.milestones || {})[persp] || []; const nMs = ms.length; const y = keepScroll ? window.scrollY : null;
     const defaults = leverDefaults(persp, sc); const active = leversFor(persp, sc).filter((lv) => String(p[lv.key]) !== String(defaults[lv.key]));
     if (isSim) {
-      box.innerHTML = `<div class="card sim-head"><div class="card-h"><h2>${ic('gauge')}Scenario simulator</h2><span class="sub">Choose the perspective, then tick the measures you have or set the numbers. Recovery speed and cost are recomputed against the baseline scenario; the gaps become a preparation list ranked by effect, and the timeline below tells you by when.</span></div><div class="seg big" role="group" aria-label="Perspective">${PERSP.map(([k, i, l]) => `<button data-simpersp="${k}" aria-pressed="${persp === k}">${ic(i)}${l}</button>`).join('')}</div></div>
+      box.innerHTML = `<div class="card sim-head"><div class="card-h"><h2>${ic('users')}Perspective</h2><span class="sub">Choose whose recovery to simulate, then tick the measures you have or set the numbers. Recovery speed and cost are recomputed against the baseline scenario; the gaps become a preparation list ranked by effect, and the timeline below tells you by when.</span></div><div class="seg big" role="group" aria-label="Perspective">${PERSP.map(([k, i, l]) => `<button data-simpersp="${k}" aria-pressed="${persp === k}">${ic(i)}${l}</button>`).join('')}</div></div>
         ${this.renderSim(sc, persp, p, cur, base, opts)}
         <div class="card"><div class="card-h"><h2>Recovery indicators: your scenario vs baseline</h2><span class="r"><span class="tag neutral">${esc(fmtD(d))} · ${esc(ph.ja)}</span></span></div><div class="chart" id="rcChart"></div><div class="chart-cap">${pctInds.map((ind, si) => `<span><i class="ln" style="background:${ind.color || CAT[si % CAT.length]}"></i>${esc(ind.ja)}</span>`).join('')}<span><i class="ln" style="background:var(--fg2);opacity:.5"></i>dotted = baseline scenario</span></div></div>`;
       if (chartSeries.length) lineChart($('#rcChart', root), { now: d, xMax: H, xTicks: xTicksFor(H), xFmt: (x) => fmtD(x), yLabel: 'Recovery indicators', series: chartSeries, yFmt: (v) => `${Math.round(v * 100)}%`, height: 230 });
       if (y != null) window.scrollTo({ top: y }); if (window.updateScales) setTimeout(window.updateScales, 20); return;
     }
-    box.innerHTML = `${active.length ? `<div class="note sim-active">${ic('gauge')}<span><b>Simulator settings active for this perspective:</b> ${active.map((lv) => esc(lv.ja) + (lv.type !== 'check' ? ` = ${p[lv.key]}${lv.unit || ''}` : '')).join(' · ')}. Figures and curves below reflect them (baseline dotted). <button class="btn sm" data-persp="simulator">Open the simulator</button></span></div>` : `<div class="note sim-active muted-note">${ic('gauge')}<span>Baseline scenario. Use the <button class="btn sm" data-persp="simulator">Scenario simulator</button> tab to see how preparedness measures change recovery speed, cost and what to prepare.</span></div>`}
+    box.innerHTML = `${active.length ? `<div class="note sim-active">${ic('gauge')}<span><b>Simulator settings active for this perspective:</b> ${active.map((lv) => esc(lv.ja) + (lv.type !== 'check' ? ` = ${p[lv.key]}${lv.unit || ''}` : '')).join(' · ')}. Figures and curves below reflect them (baseline dotted). <button class="btn sm" data-goscenario="${persp}">Open the Scenario simulator</button></span></div>` : `<div class="note sim-active muted-note">${ic('gauge')}<span>Baseline scenario. Open the <button class="btn sm" data-goscenario="${persp}">Scenario simulator</button> (screen 4) to see how preparedness measures change recovery speed, cost and what to prepare.</span></div>`}
       <div class="kpis">${kpis.map(kpiTileR).join('')}</div>
       <div class="grid map"><div class="card"><div class="card-h"><h2>Recovery indicators over time</h2><span class="r"><span class="tag neutral">${esc(fmtD(d))} · ${esc(ph.ja)}</span></span></div><div class="chart" id="rcChart"></div><div class="chart-cap">${pctInds.map((ind, si) => `<span><i class="ln" style="background:${ind.color || CAT[si % CAT.length]}"></i>${esc(ind.ja)}</span>`).join('')}<span><i class="ln" style="background:var(--fg2);opacity:.5"></i>dotted = baseline scenario</span></div>${R.note_ja ? `<div class="note" style="margin-top:10px">${ic('info')}<span>${esc(R.note_ja)}</span></div>` : ''}</div>
         <div class="stack"><div class="card"><div class="card-h"><h2>Milestones · ${esc(PERSP.find((x) => x[0] === persp)[2])}</h2><span class="r"><span class="tag neutral">${ms.filter((m) => m.d <= d).length}/${nMs} reached</span></span></div><div id="rcMs" class="${nMs > 9 ? 'collapsed-ms' : ''}">${msList(ms, d, sc)}</div>${nMs > 9 ? '<button class="btn sm" data-more="rcMs">Show more</button>' : ''}</div></div></div>
@@ -298,4 +311,9 @@ App.views.recovery = {
     if (y != null) window.scrollTo({ top: y });
     if (window.updateScales) setTimeout(window.updateScales, 20);
   },
+};
+/* Screen 4: Scenario simulator — same engine and shared settings as Recovery monitoring, as its own screen */
+App.views.scenario = {
+  init(root) { App.views.recovery.initShell(root, 'scenario'); },
+  show(root) { App.views.recovery.show(root); },
 };

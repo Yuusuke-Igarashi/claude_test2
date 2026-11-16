@@ -16,7 +16,7 @@ App.views.me = {
     root.innerHTML = `
       <div class="vh">
         <div>
-          <div class="eyebrow"><span class="eb">03 · Personalized dashboard</span><span class="aud">${ic('home')}Audience: staff and their families</span></div>
+          <div class="eyebrow"><span class="eb">05 · Personalized dashboard</span><span class="aud">${ic('home')}Audience: staff and their families</span></div>
           <h1>Tailored to your address and family: <em>what to prepare and what is happening now</em></h1>
           <p class="q"><b>Question:</b> Given my address, household and ages, where and how should we evacuate for each type of hazard, and what should we stock, in what quantity? And in an ongoing incident, what still works in my district and what support is available?</p>
         </div>

@@ -66,8 +66,8 @@ const Ctx = {
   isGov() { return this.org === 'gov'; }, isStaff() { return this.persona === 'staff'; },
 };
 /* Router (hash = view name) */
-const VIEWS = ['risk', 'live', 'recovery', 'me'];
-const HASH_ALIAS = { region: 'risk', site: 'risk', personal: 'me', 'live-support': 'live', 'live-local': 'live', recover: 'recovery', rebuild: 'recovery' };
+const VIEWS = ['risk', 'live', 'recovery', 'scenario', 'me'];
+const HASH_ALIAS = { region: 'risk', site: 'risk', personal: 'me', 'live-support': 'live', 'live-local': 'live', recover: 'recovery', rebuild: 'recovery', simulator: 'scenario', whatif: 'scenario' };
 const App = { views: {}, current: null, inited: new Set() };
 function currentView() { let h = (location.hash || '').replace('#', ''); h = HASH_ALIAS[h] || h; return VIEWS.includes(h) ? h : 'risk'; }
 function showView(name) {
