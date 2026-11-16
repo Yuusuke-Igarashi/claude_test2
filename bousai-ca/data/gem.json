@@ -1,0 +1,463 @@
+{
+ "_source": {
+  "name": "GEM Foundation, Country/Territory Seismic Risk Profiles v2026.0.0 (Global Seismic Risk Model)",
+  "url": "https://github.com/gem/risk-profiles",
+  "file_pattern": "https://github.com/gem/risk-profiles/blob/master/Central_Asia/{Country}/seismic_risk_profile_{Country}.png",
+  "citation": "A. Rao, K. Aljawhari, M. Baiguera, A. Calderon, M. Caruso, C. Costa, D. Gonzalez, A. M. B Nafeh, M. Nastasi, M. Simionato, V. Silva, C. Yepes-Estrada (2026), Country/Territory Seismic Risk Profiles of the GEM Foundation. https://github.com/gem/risk-profiles/",
+  "license": "CC BY-NC-SA 4.0 (non-commercial, share-alike, attribution). Commercial use needs a separate licence from GEM.",
+  "how_read": "Profile PNGs were downloaded in the build session and the risk-indicator table, loss curve, loss-by-region chart and major-earthquake list were transcribed from image crops (confirmed_by page_read; chart readings carry the stated precision)."
+ },
+ "units": {
+  "replacement_cost": "Billion USD",
+  "aal": "Thousand USD / year",
+  "aalr": "per mille",
+  "loss_curve": "Million USD (mean loss at return period)",
+  "pop": "Million (2026)",
+  "gdp": "Billion USD (2024)"
+ },
+ "countries": {
+  "KAZ": {
+   "name_ja": "Kazakhstan",
+   "iso3": "KAZ",
+   "pop_m": 21.1,
+   "gdp_b": 291.5,
+   "hdi": 0.837,
+   "social_extra": {
+    "pop_growth_pct": 1.11,
+    "gdp_per_capita_usd": 14155,
+    "gini": 29.2
+   },
+   "replacement_b": {
+    "res": 251.4,
+    "com": 27.2,
+    "ind": 7.8,
+    "total": 286.4
+   },
+   "aal_k": {
+    "res": 14559,
+    "com": 1405,
+    "ind": 292,
+    "total": 16255
+   },
+   "aalr_permille": 0.057,
+   "aalr_permille_by_lob": {
+    "res": 0.058,
+    "com": 0.052,
+    "ind": 0.037
+   },
+   "loss_curve_m": {
+    "10": 13.6,
+    "50": 162.5,
+    "100": 332.3,
+    "500": 1100,
+    "1000": 1700
+   },
+   "read_note": "Values transcribed from the GEM profile PNG (5847x4134 px) using a 1200 px overview plus four crops (indicators table, loss curves, loss-by-region chart, major-earthquake list). The 10/50/100-year losses are printed on the chart to 0.1 M USD ($13.6M, $162.5M, $332.3M); the 500- and 1000-year values are printed only as $1.1B and $1.7B, so they are rounded to +/-50 M USD. Loss-by-region values are the bar labels ($6.9M, $5.7M, $1.8M, $756.4k, ...), converted to M USD. Region names follow GEM's (pre-2018/2022) boundaries: 'South Kazakhstan Region' includes Shymkent, 'Almaty Region' includes today's Jetisu Region.",
+   "major_eq": [
+    [
+     1911,
+     "M8.2",
+     "Kemin (Chon-Kemin), Kyrgyzstan/Almaty (GEM marks with * = outside or on border)",
+     452
+    ],
+    [
+     1990,
+     "M6.8",
+     "Ust, Zaysan (East Kazakhstan)",
+     1
+    ],
+    [
+     2009,
+     "M5.4",
+     "Tekeli (Almaty Region, now Jetisu)",
+     1
+    ]
+   ],
+   "loss_by_region_m": [
+    [
+     "South Kazakhstan Region",
+     6.9
+    ],
+    [
+     "Almaty Region",
+     5.7
+    ],
+    [
+     "Almaty",
+     1.8
+    ],
+    [
+     "Jambyl Region",
+     0.7564
+    ],
+    [
+     "East Kazakhstan Region",
+     0.5802
+    ],
+    [
+     "Karaganda Region",
+     0.2181
+    ],
+    [
+     "West Kazakhstan Region",
+     0.1172
+    ],
+    [
+     "Kostanay Region",
+     0.1163
+    ],
+    [
+     "Pavlodar Region",
+     0.037
+    ],
+    [
+     "Atyrau Region",
+     0.0296
+    ],
+    [
+     "Rest Of Country",
+     0.0339
+    ]
+   ],
+   "loss_by_region_check": "Sum of bar labels = 16.29 M USD vs. table total AAL 16.255 M USD (difference is label rounding).",
+   "src": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Kazakhstan/seismic_risk_profile_Kazakhstan.png",
+   "src_readme": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Kazakhstan/README.md",
+   "version": "GEM Country Seismic Risk Profiles (risk-profiles repository, master branch; README states social indicators for 2026 population / 2024 GDP / 2023 HDI, costs in 2025 USD)",
+   "license": "CC BY-NC-SA 4.0",
+   "confirmed_by": "page_read",
+   "gaps": [
+    "500- and 1000-year losses are only printed as $1.1B and $1.7B on the chart (precision +/-50 M USD).",
+    "Loss by line of business per return period is not labelled (only stacked bars); not transcribed.",
+    "Building-class percentages were not transcribed (not requested)."
+   ]
+  },
+  "KGZ": {
+   "name_ja": "Kyrgyzstan",
+   "iso3": "KGZ",
+   "pop_m": 7.4,
+   "gdp_b": 17.5,
+   "hdi": 0.72,
+   "social_extra": {
+    "pop_growth_pct": 1.4,
+    "gdp_per_capita_usd": 2432,
+    "gini": 27.5
+   },
+   "replacement_b": {
+    "res": 37.5,
+    "com": 13.8,
+    "ind": 1.1,
+    "total": 52.3
+   },
+   "aal_k": {
+    "res": 25613,
+    "com": 5568,
+    "ind": 401,
+    "total": 31582
+   },
+   "aalr_permille": 0.603,
+   "aalr_permille_by_lob": {
+    "res": 0.684,
+    "com": 0.404,
+    "ind": 0.363
+   },
+   "loss_curve_m": {
+    "10": 25.3,
+    "50": 418.8,
+    "100": 800,
+    "500": 2100,
+    "1000": 2700
+   },
+   "read_note": "Values transcribed from the GEM profile PNG (5847x4134 px) using a 1200 px overview plus four crops (social/risk indicator table, loss-curve chart, loss-by-region bar chart, major-earthquake list). The 10- and 50-year losses are printed on the chart to 0.1 M USD ($25.3M, $418.8M); the 100-, 500- and 1000-year values are printed only as $0.8B, $2.1B and $2.7B, so they are rounded to +/-50 M USD. Loss-by-region values are the bar labels ($11.4M, $10.0M, $4.6M, $2.3M, $960.9k, $811.5k, $726.7k, $622.0k, $80.6k) converted to M USD; 'Osh Shaary' and 'Bishkek Shaary' are the city units (shaary = city), 'Osh' and 'Jalal-Abad' the oblasts. The table total replacement cost (52.3) is 0.1 below the sum of the three lines (52.4) because of rounding in the source.",
+   "major_eq": [
+    [
+     1911,
+     "M7.x",
+     "Kemin (Chon-Kemin); printed as M 8.2 with an asterisk = epicentre outside or on the border (Kyrgyzstan/Kazakhstan)",
+     452
+    ],
+    [
+     1992,
+     "M7.5",
+     "Toluk (Suusamyr valley)",
+     75
+    ],
+    [
+     2008,
+     "M6.6",
+     "Nura (Alay district, Osh Region)",
+     74
+    ]
+   ],
+   "major_eq_note": "The 'M7.x' column is the literal magnitude printed on the profile: 1911 M 8.2, 1992 M 7.5, 2008 M 6.6 (USGS ComCat gives Mw 8.02, Mwb 7.3 and Mwc 6.7 respectively).",
+   "loss_by_region_m": [
+    [
+     "Osh (oblast)",
+     11.4
+    ],
+    [
+     "Jalal-Abad",
+     10.0
+    ],
+    [
+     "Osh Shaary (Osh city)",
+     4.6
+    ],
+    [
+     "Ysyk-Kol",
+     2.3
+    ],
+    [
+     "Bishkek Shaary (Bishkek city)",
+     0.9609
+    ],
+    [
+     "Batken",
+     0.8115
+    ],
+    [
+     "Chuy",
+     0.7267
+    ],
+    [
+     "Naryn",
+     0.622
+    ],
+    [
+     "Talas",
+     0.0806
+    ]
+   ],
+   "loss_by_region_check": "Sum of bar labels = 31.50 M USD vs. table total AAL 31.582 M USD (difference is label rounding).",
+   "src": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Kyrgyzstan/seismic_risk_profile_Kyrgyzstan.png",
+   "src_readme": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Kyrgyzstan/README.md",
+   "version": "GEM Country Seismic Risk Profiles (risk-profiles repository, master branch; README states social indicators for 2026 population / 2024 GDP / 2023 HDI, costs in 2025 USD; 100,000-year event-based simulation, residential+commercial+industrial buildings only)",
+   "license": "CC BY-NC-SA 4.0",
+   "confirmed_by": "page_read",
+   "gaps": [
+    "100-, 500- and 1000-year losses are printed only as $0.8B, $2.1B and $2.7B on the chart (precision +/-50 M USD).",
+    "Loss by line of business per return period is not labelled (only stacked bars); not transcribed.",
+    "Building-class percentages were not transcribed (not requested); the chart shows adobe/earth and unreinforced masonry as a large share of the building count."
+   ]
+  },
+  "TJK": {
+   "name_ja": "Tajikistan",
+   "iso3": "TJK",
+   "pop_m": 11.0,
+   "gdp_b": 13.9,
+   "hdi": 0.691,
+   "social_extra": {
+    "pop_growth_pct": 1.74,
+    "gdp_per_capita_usd": 1317,
+    "gini": 36.1
+   },
+   "replacement_b": {
+    "res": 33.5,
+    "com": 4.9,
+    "ind": 2.6,
+    "total": 41.0
+   },
+   "aal_k": {
+    "res": 22297,
+    "com": 2239,
+    "ind": 733,
+    "total": 25270
+   },
+   "aalr_permille": 0.617,
+   "aalr_permille_by_lob": {
+    "res": 0.666,
+    "com": 0.46,
+    "ind": 0.279
+   },
+   "loss_curve_m": {
+    "10": 29.1,
+    "50": 268.7,
+    "100": 478.1,
+    "500": 1400,
+    "1000": 2500
+   },
+   "read_note": "Values transcribed from the GEM profile PNG (5847x4134 px) using a 1200 px overview plus four crops (social/risk indicator table, loss-curve chart, loss-by-region chart, major-earthquake list). The 10/50/100-year losses are printed on the chart to 0.1 M USD ($29.1M, $268.7M, $478.1M); the 500- and 1000-year values are printed only as $1.4B and $2.5B, so they are rounded to +/-50 M USD. Loss-by-region values are the bar labels ($10.3M, $6.5M, $4.6M, $3.0M, $797.5k) converted to M USD; their sum (25.2 M) matches the table total AAL 25.27 M within label rounding. Region names are GEM's: 'Nohiyahoi Tobei Jumhuri' = Districts of Republican Subordination (DRS), 'Kuhistoni Badakhshon' = Gorno-Badakhshan (GBAO). The 475-year PGA map shades the Dushanbe-Hisor area and the Rasht/Surkhob valley in the 0.2-0.5 g class and most of the rest of the country in 0.1-0.2 g (read from the map colours, not from a legend value).",
+   "major_eq": [
+    [
+     1907,
+     "M7.4",
+     "Karatag (Qaratog, Hisor range, Tajikistan-Uzbekistan border; GEM marks with * = outside or on border)",
+     12000
+    ],
+    [
+     1949,
+     "M7.4",
+     "Tajikistan (Khait/Hoit, Rasht valley; USGS ISC-GEM gives Mw 7.5)",
+     3500
+    ],
+    [
+     1989,
+     "M5.3",
+     "Sharora, Gissar (Hisor), 13 km from Dushanbe",
+     274
+    ]
+   ],
+   "major_eq_note": "GEM's 3,500 deaths for 1949 is lower than Wikipedia's ~7,200 (earthquake plus the Khait landslide); some estimates give up to 28,000. GEM's 12,000 for 1907 is the low end of the 12,000-15,000 range.",
+   "loss_by_region_m": [
+    [
+     "Khatlon",
+     10.3
+    ],
+    [
+     "Nohiyahoi Tobei Jumhuri (Districts of Republican Subordination)",
+     6.5
+    ],
+    [
+     "Dushanbe",
+     4.6
+    ],
+    [
+     "Sughd",
+     3.0
+    ],
+    [
+     "Kuhistoni Badakhshon (GBAO)",
+     0.7975
+    ]
+   ],
+   "loss_by_region_check": "Sum of bar labels = 25.20 M USD vs. table total AAL 25.27 M USD (difference is label rounding).",
+   "building_classes_note": "Building-class chart (by replacement value): unreinforced masonry about 40%, concrete about 25%, adobe/earth about 13%, other about 10%, with the remaining classes small; by count the stock is dominated by adobe/earth (about 36%) and unreinforced masonry (about 33%) - read approximately from the stacked bars.",
+   "src": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Tajikistan/seismic_risk_profile_Tajikistan.png",
+   "src_readme": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Tajikistan/README.md",
+   "version": "GEM Country Seismic Risk Profiles (risk-profiles repository, master branch, fetched 2026-11-16; README states social indicators for 2026 population / 2024 GDP / 2023 HDI, replacement costs in 2025 USD; risk from an event-based analysis simulating 100,000 years of earthquakes; residential, commercial and industrial buildings only)",
+   "license": "CC BY-NC-SA 4.0",
+   "confirmed_by": "page_read",
+   "gaps": [
+    "500- and 1000-year losses are printed only as $1.4B and $2.5B on the chart (precision +/-50 M USD).",
+    "Loss by line of business per return period is not labelled (only stacked bars); not transcribed.",
+    "Building-class percentages are read approximately from stacked-bar labels and may be off by a few points.",
+    "The profile gives no uncertainty ranges; GEM's 1949 and 1907 fatality counts differ from Wikipedia/NGDC-based figures."
+   ]
+  },
+  "UZB": {
+   "name_ja": "Uzbekistan",
+   "iso3": "UZB",
+   "pop_m": 37.7,
+   "pop_growth_pct": 1.75,
+   "gdp_b": 115.0,
+   "gdp_per_capita_usd": 3162,
+   "gini": 32.7,
+   "hdi": 0.74,
+   "replacement_b": {
+    "res": 286.1,
+    "com": 66.8,
+    "ind": 23.1,
+    "total": 376.0
+   },
+   "aal_k": {
+    "res": 119036,
+    "com": 21593,
+    "ind": 5557,
+    "total": 146186
+   },
+   "aalr_permille": 0.389,
+   "aalr_permille_by_lob": {
+    "res": 0.416,
+    "com": 0.323,
+    "ind": 0.24
+   },
+   "loss_curve_m": {
+    "10": 203.6,
+    "50": 1500,
+    "100": 3000,
+    "500": 8900,
+    "1000": 12300
+   },
+   "read_note": "Values transcribed from the GEM profile image (seismic_risk_profile_Uzbekistan.png, v2026.0.0) at full resolution. Loss-curve values are the bar labels: 10-yr $203.6M (exact to 0.1M); 50/100/500/1000-yr labels are rounded to 0.1 B USD ($1.5B, $3.0B, $8.9B, $12.3B), so those four values carry +/-50 M USD rounding uncertainty. Loss-by-region bars are labelled to 0.1 M USD. Social indicators: population and growth for 2026 (UN WPP 2024), GDP and GDP per capita for 2024, HDI for 2023, replacement costs in 2025 USD (per README).",
+   "major_eq": [
+    [
+     1902,
+     "M6.4",
+     "Andizhan (Andijan)",
+     4880
+    ],
+    [
+     2011,
+     "M6.1",
+     "Fargona Viloyati (Fergana Region; epicentre just inside Kyrgyzstan)",
+     14
+    ],
+    [
+     1966,
+     "M5.0",
+     "Tashkent",
+     10
+    ]
+   ],
+   "major_eq_note": "As printed on the profile ('1902 M 6.4 - Andizhan - 4,880 fatalities; 2011 M 6.1 - Fargona, Violyati* - 14 fatalities; 1966 M 5.0 - Tashkent - 10 fatalities'). The asterisk is GEM's own mark. Other sources give the 1966 Tashkent event as Mw 5.2 with 15-200 deaths (Wikipedia) and the 2011 event as Mw 6.1 (USGS).",
+   "loss_by_region_m": [
+    [
+     "Andijon Viloyati",
+     49.6
+    ],
+    [
+     "Farg'ona Viloyati",
+     15.2
+    ],
+    [
+     "Toshkent Viloyati",
+     13.8
+    ],
+    [
+     "Namangan Viloyati",
+     12.7
+    ],
+    [
+     "Samarqand Viloyati",
+     10.3
+    ],
+    [
+     "Qashqadaryo Viloyati",
+     10.2
+    ],
+    [
+     "Toshkent (city)",
+     9.6
+    ],
+    [
+     "Sirdaryo Viloyati",
+     6.3
+    ],
+    [
+     "Jizzax Viloyati",
+     6.1
+    ],
+    [
+     "Buxoro Viloyati",
+     5.9
+    ],
+    [
+     "Rest Of Country",
+     6.5
+    ]
+   ],
+   "loss_by_region_note": "Bar chart 'Loss by region' (average annual loss, M USD). Sum of listed bars = 146.2 M USD, matching the national AAL total of 146,186 k USD. 'Toshkent' without 'Viloyati' is read as Tashkent city.",
+   "building_classes_note": "Building-class pie (proportion of exposed value / count): confined masonry, steel, concrete, wood, other, unreinforced masonry, adobe/earth; by value the largest shares read as about 36% unreinforced masonry, 34% confined masonry, 19% concrete, 6% other/steel (approximate; small labels).",
+   "hazard_map_note": "PGA map (475-yr, rock): highest class (>0.2g to 0.5g) over the Fergana Valley / Tashkent region and the Gazli area west of Bukhara; 0.1-0.2g over Tashkent and Samarkand; lowest (<0.05g) in the Kyzylkum desert and Karakalpakstan.",
+   "src": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Uzbekistan/seismic_risk_profile_Uzbekistan.png",
+   "src_readme": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Uzbekistan/README.md",
+   "local_files": {
+    "png": "/tmp/claude-0/-home-user-claude-test2/e1fdc55a-0330-57a5-a5b4-f3afd5d82091/scratchpad/ca_dl/gem_UZB/seismic_risk_profile_Uzbekistan.png",
+    "overview": "/tmp/claude-0/-home-user-claude-test2/e1fdc55a-0330-57a5-a5b4-f3afd5d82091/scratchpad/ca_dl/gem_UZB/overview_1200.png",
+    "crops": [
+     "crop_indicators.png",
+     "crop_loss_by_region.png",
+     "crop_loss_curves.png",
+     "crop_major_eq.png"
+    ]
+   },
+   "version": "GEM Country Seismic Risk Profiles v2026.0.0 (README states values for population 2026, GDP 2024, HDI 2023, costs in 2025 USD)",
+   "license": "CC BY-NC-SA 4.0",
+   "confirmed_by": "page_read",
+   "gaps": [
+    "Loss-curve values for 50-1000 yr are rounded bar labels (0.1 B USD precision); the underlying CSV was not downloaded.",
+    "Building-class percentages are approximate readings of small pie labels.",
+    "Population 37.7 M (UN WPP 2024 projection for 2026) differs from the national statistics figure of about 38.2-39 M (Jan 2026, stat.uz via Wikipedia); the GEM value is kept here for consistency with the loss model."
+   ]
+  }
+ }
+}

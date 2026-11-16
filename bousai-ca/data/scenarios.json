@@ -1,0 +1,3451 @@
+{
+ "_note": "Live-reporting scenarios for the Central Asia edition. Real references (2024 Kazakhstan floods, 1887/1911 Almaty earthquakes, 2025-2026 Tashkent heat waves) anchor the numbers; exposure fractions, timings, shelters, supplies and company sites are labelled assumptions.",
+ "scenarios": [
+  {
+   "id": "alm-quake-m73",
+   "type": "quake",
+   "status": "active",
+   "country": "KAZ",
+   "region": "kz-alm",
+   "name_ja": "Almaty M7.3 earthquake (Verny-type, Trans-Ili Alatau front)",
+   "short_ja": "ALA earthquake M7.3",
+   "desc_ja": "Scenario: a M7.3 Verny-type earthquake on the Trans-Ili Alatau frontal fault zone just south of Almaty (the 1887 source area), at 10:40 on a weekday in late November. MSK IX-X in the foothill districts (Nauryzbay, Bostandyk, Medeu), IX in the centre and on the soft, water-saturated loess plain of the north (Almaly, Alatau, Zhetysu), VIII-IX in Auezov, Turksib and Talgar, VIII in Karasay, VII-VIII in Ile. Soviet-era brick and panel housing collapses, gas fires, loss of power, water and district heating with frost at night, and a M6.0 aftershock at 36 h. Intensities, exposure fractions and timings are assumptions built on the 2020-21 microzonation (whole city in the MSK 9-10 zone), the 2017-18 seismic certification (19% of floor area needs strengthening, 12% slated for demolition) and the January 2024 M7.0 reaction (mass night-time egress into the cold).",
+   "t0_ja": "t=0: Thursday 19 Nov 2026, 10:40 local (+05:00), M7.3 main shock (assumed)",
+   "t0_iso": "2026-11-19T10:40:00+05:00",
+   "city_ja": "Almaty",
+   "country_ja": "Kazakhstan",
+   "hazard_ja": "Earthquake M7.3 (Verny-type)",
+   "agency_ja": "Institute of Seismology (Almaty) / Ministry of Emergency Situations",
+   "kpi_dead_note_ja": "Refs: 1887 Verny 332 dead, 1911 Kemin 452 dead (city then under 50k); Amey et al. 2021: 4,100 +/- 3,500 deaths for a M6.5 under today's city; experts: up to 30% of buildings destroyed at MSK IX-X. Rate 0.003 assumed; demo model",
+   "fatality_rate": 0.003,
+   "bbox": [
+    75.6,
+    42.7,
+    78.4,
+    44.3
+   ],
+   "map_adm1": [
+    "KAZ-4829",
+    "KAZ-3207"
+   ],
+   "area_id": "alm_center",
+   "area_district": "bostandyk",
+   "area_site": "alm-hq",
+   "default_district": "bostandyk",
+   "default_t": 30,
+   "supply_sites": [
+    "alm-hq"
+   ],
+   "assumptions_ja": [
+    "District populations: 2021 census district counts (citypopulation.de) scaled x1.123 to the 2024-11-01 city total of 2,280,296 (stat.gov.kz); Talgar 265k (akim, 2025); Karasay and Ile grown from 2013 census figures (assumed).",
+    "jp = expatriate residents per district: no published figure; values are order-of-magnitude assumptions concentrated in Medeu (Samal, Dostyk), Bostandyk (Koktem, Esentai) and Almaly.",
+    "Exposure fractions follow the assumed MSK intensity by district (foothill source zone vs loess/high-groundwater north) and building stock (self-built, 1950s-70s brick, large-panel, modern RC); no official microzonation polygons were available.",
+    "fatality_rate 0.003 sits between the historical city tolls (1887: 332; 1911: 452) and Amey et al. 2021 (4,100 +/- 3,500 for a M6.5 under the city); the model total is a demo, not a forecast.",
+    "Shelter capacities, utility restoration times, logistics states, supply stocks, company sites (staff, locations) and all t-values are assumptions; the real references are the 2024-01-23 reaction (384 reception points opened within 1-1.5 h, some closed), the 2024-03-04 metro inspection (5 h) and MES mobilization plans (55,000 personnel)."
+   ],
+   "districts": [
+    {
+     "id": "nauryzbay",
+     "name_ja": "Nauryzbay (Kalkaman, Kargaly)",
+     "adm1": "KAZ-4829",
+     "lat": 43.1797,
+     "lon": 76.8313,
+     "pop": 181000,
+     "jp": 120,
+     "exposure": 0.8,
+     "intensity_ja": "MSK IX-X",
+     "note_ja": "South-western foothill fans, 9 km from the 1887 epicentre; former villages with unreinforced brick and adobe houses; City Hospital No. 7",
+     "local_ja": "Widespread collapse of low-rise housing; roads to Kalkaman blocked by debris"
+    },
+    {
+     "id": "bostandyk",
+     "name_ja": "Bostandyk (Esentai, Koktem, Orbita)",
+     "adm1": "KAZ-4829",
+     "lat": 43.21,
+     "lon": 76.92,
+     "pop": 339000,
+     "jp": 2000,
+     "exposure": 0.7,
+     "intensity_ja": "MSK IX-X",
+     "note_ja": "Most populous district (akim: 365k); foothill fans of the Bolshaya/Malaya Almatinka and Vesnovka; Soviet 9-storey panel blocks plus new high-rises; location of the HQ (Esentai Tower)",
+     "local_ja": "Panel blocks cracked, balconies fallen; towers standing but evacuated; elevators out"
+    },
+    {
+     "id": "medeu",
+     "name_ja": "Medeu (Dostyk, Samal, Gorny Gigant)",
+     "adm1": "KAZ-4829",
+     "lat": 43.245,
+     "lon": 76.965,
+     "pop": 245000,
+     "jp": 2500,
+     "exposure": 0.65,
+     "intensity_ja": "MSK IX-X (foothills)",
+     "note_ja": "Diplomatic quarter and expatriate housing; foothill slopes near Kok-Tobe and east of Dostyk rated unfavourable; Kishi Almaty mudflow corridor; Medeu road",
+     "local_ja": "Slope failures on Kok-Tobe and in Gorny Gigant; Medeu road closed by rockfall"
+    },
+    {
+     "id": "almaly",
+     "name_ja": "Almaly (city centre, Golden Square)",
+     "adm1": "KAZ-4829",
+     "lat": 43.2518,
+     "lon": 76.9057,
+     "pop": 275000,
+     "jp": 800,
+     "exposure": 0.7,
+     "intensity_ja": "MSK IX",
+     "note_ja": "Dense historic centre where Verny stood in 1887/1911; many 1930s-70s brick and panel buildings; collapsible loess-like soils with high groundwater in the middle of the city",
+     "local_ja": "Several brick apartment blocks partly collapsed; metro halted"
+    },
+    {
+     "id": "auezov",
+     "name_ja": "Auezov (western microdistricts)",
+     "adm1": "KAZ-4829",
+     "lat": 43.2247,
+     "lon": 76.8514,
+     "pop": 389000,
+     "jp": 150,
+     "exposure": 0.55,
+     "intensity_ja": "MSK VIII-IX",
+     "note_ja": "1970s-80s large-panel microdistricts designed for seismic loads but at end of service life; Almaty Su headquarters",
+     "local_ja": "Panel blocks mostly standing; gas-riser fires; stairwell damage"
+    },
+    {
+     "id": "alatau",
+     "name_ja": "Alatau (Shanyrak, Aqbulaq)",
+     "adm1": "KAZ-4829",
+     "lat": 43.2931,
+     "lon": 76.8298,
+     "pop": 369000,
+     "jp": 50,
+     "exposure": 0.7,
+     "intensity_ja": "MSK IX (soft soils)",
+     "note_ja": "Northern loess plain with groundwater at 5-10 m; newest and lowest-income self-built housing; CHP-2 and Almaty Arena",
+     "local_ja": "Liquefaction and ground cracks; self-built houses collapsed; reception points over capacity"
+    },
+    {
+     "id": "zhetysu",
+     "name_ja": "Zhetysu (north, Almaty-1 rail yards)",
+     "adm1": "KAZ-4829",
+     "lat": 43.3207,
+     "lon": 76.918,
+     "pop": 209000,
+     "jp": 60,
+     "exposure": 0.65,
+     "intensity_ja": "MSK IX (soft soils)",
+     "note_ja": "Industrial and rail land north of Raiymbek Avenue, rated the least favourable soils by the Institute of Seismology; low-rise private housing; company warehouse",
+     "local_ja": "Water mains broken; warehouse racking collapsed"
+    },
+    {
+     "id": "turksib",
+     "name_ja": "Turksib (airport, Almaty-1)",
+     "adm1": "KAZ-4829",
+     "lat": 43.3483,
+     "lon": 76.9849,
+     "pop": 273000,
+     "jp": 100,
+     "exposure": 0.55,
+     "intensity_ja": "MSK VIII-IX",
+     "note_ja": "Lowest-lying industrial district with the airport (ALA) and Almaty-1 station; highest groundwater; City Hospital No. 4",
+     "local_ja": "Airport closed for runway inspection; industrial fires"
+    },
+    {
+     "id": "talgar",
+     "name_ja": "Talgar district (Almaty Region)",
+     "adm1": "KAZ-3207",
+     "lat": 43.3,
+     "lon": 77.24,
+     "pop": 265000,
+     "jp": 100,
+     "exposure": 0.5,
+     "intensity_ja": "MSK VIII-IX",
+     "note_ja": "Commuter belt 25 km east on the Talgar River apron below the frontal fault; private housing and horticulture; pop. 265k official (2025)",
+     "local_ja": "Older houses damaged; Talgar town centre cordoned"
+    },
+    {
+     "id": "karasay",
+     "name_ja": "Karasay district (Kaskelen)",
+     "adm1": "KAZ-3207",
+     "lat": 43.2,
+     "lon": 76.62,
+     "pop": 300000,
+     "jp": 150,
+     "exposure": 0.4,
+     "intensity_ja": "MSK VIII",
+     "note_ja": "Fast-growing commuter belt west of the city on the A2 to Bishkek; new low-rise housing, logistics parks and food industry; pop. 281k in 2013, growth to 300k assumed",
+     "local_ja": "A2 overpasses closed for inspection; moderate housing damage"
+    },
+    {
+     "id": "ili",
+     "name_ja": "Ili district (Otegen Batyr, Boralday)",
+     "adm1": "KAZ-3207",
+     "lat": 43.4163,
+     "lon": 77.0175,
+     "pop": 200000,
+     "jp": 80,
+     "exposure": 0.25,
+     "intensity_ja": "MSK VII-VIII",
+     "note_ja": "Northern industrial and logistics belt (Zhetygen rail junction toward Khorgos, DAMU Logistics at Bayserke); farther from the source; pop. 192k in 2013, 200k assumed",
+     "local_ja": "Light damage; warehouses inspected; convoys held at Zhetygen"
+    }
+   ],
+   "sites": [
+    {
+     "id": "alm-hq",
+     "label": "A",
+     "name_ja": "Almaty regional HQ (Esentai Tower, Al-Farabi Avenue 77/7)",
+     "short_ja": "Almaty HQ",
+     "lat": 43.2192,
+     "lon": 76.9293,
+     "district": "bostandyk",
+     "district_ja": "Bostandyk district, Esentai / Al-Farabi Ave",
+     "staff": 85,
+     "resp_tau": 4,
+     "exposure_mult": 0.9,
+     "need_crit_ja": "Structural inspection before any re-entry; staff hold at Esentai Park then heated reception point; satellite comms; blankets and warm clothing",
+     "need_warn_ja": "Facade glass, partition and elevator checks; drinking water; power banks; limited re-entry for IT backup"
+    },
+    {
+     "id": "alm-warehouse",
+     "label": "W",
+     "name_ja": "Almaty warehouse (northern industrial belt, Zhetysu district; scenario-only, assumed)",
+     "short_ja": "Almaty warehouse",
+     "lat": 43.33,
+     "lon": 76.905,
+     "district": "zhetysu",
+     "district_ja": "Zhetysu district, near the Almaty-1 rail yards",
+     "staff": 40,
+     "resp_tau": 6,
+     "exposure_mult": 1.0,
+     "need_crit_ja": "Racking collapse and stock-loss check; roof and dock inspection; forklift fuel; move dispatch to the Khorgos hub",
+     "need_warn_ja": "Inspect racking and loading docks; generator fuel; partial dispatch from undamaged bays"
+    },
+    {
+     "id": "khorgos-hub",
+     "label": "K",
+     "name_ja": "Khorgos cross-border hub (Altynkol dry port area, Jetisu Region; scenario-only, assumed)",
+     "short_ja": "Khorgos hub",
+     "lat": 44.205,
+     "lon": 80.33,
+     "district": "",
+     "district_ja": "Panfilov district, Jetisu Region (about 300 km east; MSK IV-V felt, unaffected)",
+     "staff": 30,
+     "resp_tau": 3,
+     "exposure_mult": 0.0,
+     "need_crit_ja": "n/a",
+     "need_warn_ja": "Hold Almaty-bound consignments; stage relief goods; reroute by rail via Zhetygen when cleared"
+    }
+   ],
+   "shelters": [
+    {
+     "id": "sh_cstad",
+     "name_ja": "Central Stadium pitch and sports grounds (open-air assembly; heated tents from day 2)",
+     "district": "bostandyk",
+     "cap": 15000,
+     "share": 0.3,
+     "open_h": 1,
+     "poi": "Central Stadium (Satbayev St 29/3)"
+    },
+    {
+     "id": "sh_rsq",
+     "name_ja": "Republic Square (official assembly point; triage and relief staging)",
+     "district": "bostandyk",
+     "cap": 10000,
+     "share": 0.15,
+     "open_h": 0,
+     "poi": "Republic Square (Respublika Alany)"
+    },
+    {
+     "id": "sh_botgar",
+     "name_ja": "Main Botanical Garden (open-air assembly)",
+     "district": "bostandyk",
+     "cap": 8000,
+     "share": 0.1,
+     "open_h": 0,
+     "poi": "Main Botanical Garden"
+    },
+    {
+     "id": "sh_kaznu",
+     "name_ja": "KazNU campus lawns (assembly for Esentai / Koktem)",
+     "district": "bostandyk",
+     "cap": 6000,
+     "share": 0.1,
+     "open_h": 0,
+     "poi": "Al-Farabi Kazakh National University campus"
+    },
+    {
+     "id": "sh_esentai",
+     "name_ja": "Esentai Park (company assembly point behind the tower)",
+     "district": "bostandyk",
+     "cap": 3000,
+     "share": 0.05,
+     "open_h": 0,
+     "poi": "Esentai Park"
+    },
+    {
+     "id": "sh_bost_sch",
+     "name_ja": "Bostandyk school reception points (about 60 schools; heated after inspection)",
+     "district": "bostandyk",
+     "cap": 9000,
+     "share": 0.3,
+     "open_h": 2
+    },
+    {
+     "id": "sh_gorky",
+     "name_ja": "Central Park (Gorky Park) open-air assembly",
+     "district": "medeu",
+     "cap": 20000,
+     "share": 0.35,
+     "open_h": 0,
+     "poi": "Central Park of Culture and Recreation (Gorky Park)"
+    },
+    {
+     "id": "sh_halyk",
+     "name_ja": "Halyk Arena (heated indoor shelter after structural check)",
+     "district": "medeu",
+     "cap": 2500,
+     "share": 0.15,
+     "open_h": 24
+    },
+    {
+     "id": "sh_medeu_sch",
+     "name_ja": "Medeu school reception points (about 40 schools; heated)",
+     "district": "medeu",
+     "cap": 5500,
+     "share": 0.35,
+     "open_h": 2
+    },
+    {
+     "id": "sh_alm_sch",
+     "name_ja": "Almaly school reception points (about 45 schools; heated)",
+     "district": "almaly",
+     "cap": 8000,
+     "share": 0.45,
+     "open_h": 2
+    },
+    {
+     "id": "sh_alm2",
+     "name_ja": "Almaty-2 station forecourt and Abai / Zheltoksan open spaces (open-air)",
+     "district": "almaly",
+     "cap": 5000,
+     "share": 0.2,
+     "open_h": 0
+    },
+    {
+     "id": "sh_auez_sch",
+     "name_ja": "Auezov school reception points (about 55 schools; heated)",
+     "district": "auezov",
+     "cap": 10000,
+     "share": 0.45,
+     "open_h": 2
+    },
+    {
+     "id": "sh_sairan",
+     "name_ja": "Sairan lake embankment and microdistrict courtyards (open-air)",
+     "district": "auezov",
+     "cap": 15000,
+     "share": 0.3,
+     "open_h": 0
+    },
+    {
+     "id": "sh_arena",
+     "name_ja": "Almaty Arena (12,000-seat ice arena; heated shelter after structural check)",
+     "district": "alatau",
+     "cap": 3000,
+     "share": 0.2,
+     "open_h": 24
+    },
+    {
+     "id": "sh_alatau_sch",
+     "name_ja": "Alatau school reception points (about 40 schools; heated)",
+     "district": "alatau",
+     "cap": 7000,
+     "share": 0.4,
+     "open_h": 3
+    },
+    {
+     "id": "sh_zhet_sch",
+     "name_ja": "Zhetysu school reception points (about 30 schools; heated)",
+     "district": "zhetysu",
+     "cap": 5000,
+     "share": 0.45,
+     "open_h": 2
+    },
+    {
+     "id": "sh_naur_sch",
+     "name_ja": "Nauryzbay school reception points (about 25 schools; heated)",
+     "district": "nauryzbay",
+     "cap": 4500,
+     "share": 0.4,
+     "open_h": 3
+    },
+    {
+     "id": "sh_turk_sch",
+     "name_ja": "Turksib school reception points (about 35 schools; heated)",
+     "district": "turksib",
+     "cap": 6000,
+     "share": 0.45,
+     "open_h": 2
+    },
+    {
+     "id": "sh_talgar",
+     "name_ja": "Talgar town schools and stadium (reception points)",
+     "district": "talgar",
+     "cap": 6000,
+     "share": 0.5,
+     "open_h": 3
+    },
+    {
+     "id": "sh_kaskelen",
+     "name_ja": "Kaskelen schools and sports complex (reception points)",
+     "district": "karasay",
+     "cap": 6000,
+     "share": 0.5,
+     "open_h": 3
+    },
+    {
+     "id": "sh_ili",
+     "name_ja": "Otegen Batyr and Boralday school reception points",
+     "district": "ili",
+     "cap": 3000,
+     "share": 0.5,
+     "open_h": 4
+    }
+   ],
+   "supplies": [
+    {
+     "key": "water",
+     "name_ja": "Drinking water (tankers and bottled)",
+     "unit": "L/day",
+     "icon": "drop",
+     "per_person": 3,
+     "per_day": false,
+     "lead_h": 12,
+     "ramp_h": 18,
+     "cap": 1.0,
+     "stock": 80000
+    },
+    {
+     "key": "food",
+     "name_ja": "Hot meals and food packs",
+     "unit": "meals/day",
+     "icon": "box",
+     "per_person": 3,
+     "per_day": false,
+     "lead_h": 18,
+     "ramp_h": 20,
+     "cap": 1.0,
+     "stock": 60000
+    },
+    {
+     "key": "warm",
+     "name_ja": "Blankets, sleeping mats, winter clothing",
+     "unit": "sets",
+     "icon": "home",
+     "per_person": 1,
+     "lead_h": 10,
+     "ramp_h": 24,
+     "cap": 0.9,
+     "stock": 25000
+    },
+    {
+     "key": "heat",
+     "name_ja": "Shelter heaters and heated tents",
+     "unit": "units",
+     "icon": "bolt",
+     "per_person": 0.02,
+     "lead_h": 24,
+     "ramp_h": 36,
+     "cap": 0.8,
+     "stock": 400
+    },
+    {
+     "key": "trauma",
+     "name_ja": "Trauma and medical kits",
+     "unit": "kits",
+     "icon": "heart",
+     "per_person": 0.03,
+     "lead_h": 8,
+     "ramp_h": 16,
+     "cap": 0.9,
+     "stock": 1200
+    },
+    {
+     "key": "tent",
+     "name_ja": "Winterized tents (MES / Red Crescent)",
+     "unit": "tents",
+     "icon": "home",
+     "per_person": 0.2,
+     "lead_h": 30,
+     "ramp_h": 36,
+     "cap": 0.8,
+     "stock": 3000
+    },
+    {
+     "key": "hyg",
+     "name_ja": "Hygiene kits and portable toilets",
+     "unit": "sets",
+     "icon": "box",
+     "per_person": 0.5,
+     "lead_h": 36,
+     "ramp_h": 30,
+     "cap": 0.9,
+     "stock": 6000
+    },
+    {
+     "key": "gen",
+     "name_ja": "Generators and fuel",
+     "unit": "units",
+     "icon": "bolt",
+     "per_person": 0.001,
+     "lead_h": 36,
+     "ramp_h": 36,
+     "cap": 0.8,
+     "stock": 60
+    },
+    {
+     "key": "sar",
+     "name_ja": "Search-and-rescue teams and tools",
+     "unit": "teams",
+     "icon": "box",
+     "per_person": 0.001,
+     "lead_h": 6,
+     "ramp_h": 18,
+     "cap": 0.8,
+     "stock": 70
+    },
+    {
+     "key": "mask",
+     "name_ja": "Dust masks (N95 / FFP2)",
+     "unit": "pcs",
+     "icon": "mask",
+     "per_person": 2,
+     "lead_h": 24,
+     "ramp_h": 24,
+     "cap": 1.0,
+     "stock": 100000
+    }
+   ],
+   "supply_note_ja": "Cold-season earthquake: the first 24 h are dominated by trauma kits, search-and-rescue and blankets (frost at night), from 48 h by winterized tents, heaters, hygiene kits and water. Demand = evacuees x per-person rate; supply = stock plus an arrival curve. All stocks and lead times are assumptions; references: MES plan to mobilize 55,000 personnel and 9,000 equipment units within 24-72 h, and relief items reaching the January 2024 epicentre within about 12 h.",
+   "utilities": [
+    {
+     "key": "power",
+     "name_ja": "Electricity (AZhK grid, AlES plants)",
+     "icon": "bolt",
+     "q_mult": 1.1,
+     "rest_h": 30,
+     "rest_tau": 36,
+     "eta_default_ja": "City-wide trip at t=0; feeders return over 1-7 days after substation and line inspections, hospitals and airport first (assumed)",
+     "eta_ja": {
+      "alatau": "CHP-2 area and damaged informal housing: last to return, 7+ days (assumed)",
+      "turksib": "Airport and Hospital No. 4 fed first; rest of the district 3-7 days (assumed)",
+      "bostandyk": "Esentai / Koktem feeders back within 2-4 days (assumed)"
+     }
+    },
+    {
+     "key": "water",
+     "name_ja": "Water supply (Almaty Su)",
+     "icon": "drop",
+     "q_mult": 1.0,
+     "rest_h": 96,
+     "rest_tau": 72,
+     "eta_default_ja": "Mains broken on collapsible soils (network wear 53%); bulk supply 2-5 days, full pressure 1-3 weeks; tanker water at reception points (assumed)",
+     "eta_ja": {
+      "zhetysu": "Northern districts last: shallow groundwater, many breaks, 2-3 weeks (assumed)",
+      "alatau": "2-3 weeks; tankers only (assumed)",
+      "turksib": "2-3 weeks; tankers only (assumed)",
+      "bostandyk": "Foothill wells and intakes; partial supply from day 3-4 (assumed)"
+     }
+    },
+    {
+     "key": "gas",
+     "name_ja": "Gas (QazaqGaz Aimak)",
+     "icon": "fire",
+     "q_mult": 1.2,
+     "rest_h": 240,
+     "rest_tau": 96,
+     "eta_default_ja": "Network shut down manually (no automatic seismic valves); house-by-house checks before re-pressurizing, 1-4 weeks (assumed)"
+    },
+    {
+     "key": "heating",
+     "name_ja": "District heating (Almaty Heat Networks)",
+     "icon": "home",
+     "q_mult": 1.1,
+     "rest_h": 168,
+     "rest_tau": 72,
+     "eta_default_ja": "Heating season under way; broken mains and CHP outages leave flats unheated for 1-3 weeks; electric heaters once power returns (assumed)"
+    },
+    {
+     "key": "telecom",
+     "name_ja": "Mobile and fixed telecom",
+     "icon": "radio",
+     "q_mult": 0.9,
+     "rest_h": 12,
+     "rest_tau": 16,
+     "eta_default_ja": "Congestion for 1-3 h, then base stations drop as batteries run down; SMS and messengers preferred; mass-alert SMS may lag 1-3 h (March 2024 experience)"
+    },
+    {
+     "key": "roads",
+     "name_ja": "Roads, bridges and metro",
+     "icon": "car",
+     "q_mult": 0.8,
+     "rest_h": 24,
+     "rest_tau": 30,
+     "eta_default_ja": "Debris, queues and overpass inspections for 12-48 h; emergency lanes on Al-Farabi, Raiymbek and Sain; Medeu road closed by rockfall; metro closed for inspection (assumed)",
+     "eta_ja": {
+      "medeu": "Medeu / Shymbulak road closed by rockfall for about 5 days (assumed)",
+      "karasay": "A2 overpasses: emergency vehicles from day 1, general traffic from day 3 (assumed)"
+     }
+    }
+   ],
+   "logistics": [
+    {
+     "name_ja": "Almaty International Airport (ALA)",
+     "icon": "plane",
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Closed; runway and terminal inspection",
+       "note": "9 flights diverted to Astana and Shymkent"
+      },
+      {
+       "t": 10,
+       "cls": "warn",
+       "ja": "Relief and military flights only"
+      },
+      {
+       "t": 60,
+       "cls": "ok",
+       "ja": "Commercial flights partly resumed",
+       "note": "Terminal 2 operating with delays; relocation flights need booking"
+      }
+     ]
+    },
+    {
+     "name_ja": "Almaty-1 / Almaty-2 stations (KTZ rail)",
+     "icon": "train",
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Suspended; track and bridge inspection"
+      },
+      {
+       "t": 30,
+       "cls": "warn",
+       "ja": "Freight and evacuation trains from Almaty-1"
+      },
+      {
+       "t": 96,
+       "cls": "ok",
+       "ja": "Passenger services partly resumed"
+      }
+     ]
+    },
+    {
+     "name_ja": "Almaty Metro (Line 1)",
+     "icon": "train",
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Halted; passengers evacuated, tunnels inspected",
+       "note": "March 2024 non-damaging shock: 5 h closure; damage found means days"
+      },
+      {
+       "t": 72,
+       "cls": "warn",
+       "ja": "Partial service after inspection"
+      }
+     ]
+    },
+    {
+     "name_ja": "A2 highway to Bishkek via Kaskelen",
+     "icon": "car",
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Closed west of Kaskelen; overpass inspection"
+      },
+      {
+       "t": 24,
+       "cls": "warn",
+       "ja": "Emergency vehicles only"
+      },
+      {
+       "t": 72,
+       "cls": "ok",
+       "ja": "Open to general traffic"
+      }
+     ]
+    },
+    {
+     "name_ja": "A3 / Khorgos corridor via Qonaev and Zhetygen",
+     "icon": "truck",
+     "states": [
+      {
+       "t": 0,
+       "cls": "warn",
+       "ja": "Bridge checks; convoys held at Zhetygen"
+      },
+      {
+       "t": 36,
+       "cls": "ok",
+       "ja": "Relief convoys from Khorgos moving",
+       "note": "About 6 h Khorgos to Almaty"
+      }
+     ]
+    },
+    {
+     "name_ja": "Medeu / Shymbulak mountain road",
+     "icon": "car",
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Closed by rockfall"
+      },
+      {
+       "t": 120,
+       "cls": "warn",
+       "ja": "One lane open for residents and Kazselezashchita"
+      }
+     ]
+    },
+    {
+     "name_ja": "Almaty warehouse (company, Zhetysu)",
+     "icon": "box",
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Racking collapsed; stock check under way"
+      },
+      {
+       "t": 48,
+       "cls": "warn",
+       "ja": "Partial dispatch from undamaged bays"
+      },
+      {
+       "t": 120,
+       "cls": "ok",
+       "ja": "Dispatch resumed; relief orders first"
+      }
+     ]
+    },
+    {
+     "name_ja": "Khorgos hub (Altynkol dry port)",
+     "icon": "truck",
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Unaffected; holding Almaty-bound consignments"
+      },
+      {
+       "t": 24,
+       "cls": "ok",
+       "ja": "Relief consignments prioritized; trucks staged",
+       "note": "Backup dispatch point for the region"
+      }
+     ]
+    }
+   ],
+   "requests": [
+    {
+     "t": 1,
+     "from": "Almaty HQ",
+     "what": "Structural engineer for the Esentai Tower re-entry decision",
+     "detail": "Facade glass fell; stairwell cracks on floors 10-14; 85 staff holding at Esentai Park",
+     "cls": "crit",
+     "ack_t": 3,
+     "resolved_t": 30
+    },
+    {
+     "t": 2,
+     "from": "Staff families (Samal-2 / Koktem)",
+     "what": "Warm clothing, blankets and water for families outdoors",
+     "detail": "Elevators stopped; families with infants waiting outside at 4 C, frost expected after dark",
+     "cls": "crit",
+     "ack_t": 4,
+     "resolved_t": 14
+    },
+    {
+     "t": 5,
+     "from": "Almaty warehouse",
+     "what": "Forklift fuel, tarpaulins and 6 workers for stock recovery",
+     "detail": "Racking collapsed in 2 of 5 bays; roof panels loose",
+     "cls": "warn",
+     "ack_t": 8,
+     "resolved_t": 50
+    },
+    {
+     "t": 12,
+     "from": "Red Crescent Society of Kazakhstan (Almaty branch)",
+     "what": "Winterized tents and heaters for Alatau school points",
+     "detail": "Reception points over capacity; night temperature near 0 C",
+     "cls": "crit",
+     "ack_t": 14,
+     "resolved_t": 40
+    },
+    {
+     "t": 26,
+     "from": "Consular Office of Japan in Almaty",
+     "what": "Confirm safety of 9 Japanese staff and 14 family members",
+     "detail": "Consolidated list requested; 2 family members not yet reached",
+     "cls": "warn",
+     "ack_t": 27,
+     "resolved_t": 36
+    },
+    {
+     "t": 48,
+     "from": "Almaty HQ",
+     "what": "Temporary office space and satellite internet",
+     "detail": "Tower closed for 2+ weeks pending detailed survey",
+     "cls": "warn",
+     "ack_t": 50,
+     "resolved_t": 96
+    },
+    {
+     "t": 72,
+     "from": "Almaty HQ",
+     "what": "Relocation flights for 11 staff and family members",
+     "detail": "Commercial flights partly resumed at ALA; seats scarce",
+     "cls": "warn",
+     "ack_t": 74,
+     "resolved_t": 110
+    }
+   ],
+   "actions": [
+    {
+     "t": 0,
+     "ja": "Drop, cover, hold; then evacuate by the stairs to Esentai Park; roll call; triage injuries",
+     "why": "Aftershocks and falling facade glass; never use elevators (2024: injuries from running out and jumping)"
+    },
+    {
+     "t": 0,
+     "ja": "Start safety confirmation by SMS, messenger and satellite phone; avoid voice calls",
+     "why": "Network congestion; official mass alerts can lag 1-3 h"
+    },
+    {
+     "t": 1,
+     "ja": "Shut off gas and power in the office and staff flats where safe; bring families down from high-rise flats to assembly points",
+     "why": "No automatic gas shut-off in Almaty; fire risk from broken risers"
+    },
+    {
+     "t": 3,
+     "ja": "Issue warm clothing, blankets and hot drinks; move infants, elderly and the injured to heated reception points before dark (about 17:30)",
+     "why": "Frost at night in late November; hypothermia risk outdoors or in cars"
+    },
+    {
+     "t": 6,
+     "ja": "Keep the tower closed; book a structural inspection; no re-entry for belongings",
+     "why": "Looking intact is not structural safety; a M6 aftershock is expected"
+    },
+    {
+     "t": 12,
+     "ja": "Route water, trauma kits and blankets to Alatau and Nauryzbay through the Red Crescent",
+     "why": "Lowest-income districts with the most collapses; reception points over capacity"
+    },
+    {
+     "t": 24,
+     "ja": "Activate the BCP: dispatch from the Khorgos hub and work remotely; declare the warehouse down",
+     "why": "Warehouse racking collapsed; the A3 / Khorgos corridor reopens first"
+    },
+    {
+     "t": 48,
+     "ja": "Survey staff on relocation or temporary leave; coordinate lists with the consular office",
+     "why": "Commercial flights at ALA expected from about 60 h"
+    },
+    {
+     "t": 72,
+     "ja": "Set up a temporary office; arrange counselling for staff and children",
+     "why": "Aftershocks continue 2-4 weeks; tower closed for weeks"
+    },
+    {
+     "t": 120,
+     "ja": "Move to recovery: staff housing checks, school reopening, insurance claims, warehouse repair plan",
+     "why": "Water and heating restoration take 1-3 weeks"
+    }
+   ],
+   "timeline": [
+    {
+     "t": 0,
+     "who": "Institute of Seismology",
+     "ja": "M7.3 at 10:40 local, epicentre in the Trans-Ili Alatau foothills 15-20 km south of the centre; MSK IX-X",
+     "cls": "crit"
+    },
+    {
+     "t": 0.1,
+     "who": "Almaty DChS",
+     "ja": "Sirens and Mass Alert SMS; residents told to leave buildings for open areas and switch off gas",
+     "cls": "crit"
+    },
+    {
+     "t": 0.3,
+     "who": "Almaty HQ",
+     "ja": "All 85 staff down the stairs to Esentai Park; 3 minor injuries; roll call under way",
+     "cls": "warn"
+    },
+    {
+     "t": 0.5,
+     "who": "MES",
+     "ja": "Operational HQ opened; civil protection at highest readiness; 112 lines overloaded",
+     "cls": "crit"
+    },
+    {
+     "t": 1,
+     "who": "HR",
+     "ja": "Safety confirmation started via SMS and satellite; 48% of staff reached in the first hour",
+     "cls": "warn"
+    },
+    {
+     "t": 1.5,
+     "who": "Almaty akimat",
+     "ja": "384 school reception points ordered open; first points admitting people (2024 practice: 1-1.5 h)",
+     "cls": "warn"
+    },
+    {
+     "t": 2,
+     "who": "Prime Minister",
+     "ja": "National emergency declared for Almaty and Almaty Region; MES mobilizing up to 55,000 personnel",
+     "cls": "crit"
+    },
+    {
+     "t": 4,
+     "who": "AZhK (grid)",
+     "ja": "Power out across the city; priority restoration to hospitals, water intakes and the airport",
+     "cls": "crit"
+    },
+    {
+     "t": 6,
+     "who": "Consular Office of Japan in Almaty",
+     "ja": "Safety-check e-mail to registered nationals; consular hotline open",
+     "cls": "warn"
+    },
+    {
+     "t": 6.7,
+     "who": "Almaty HQ",
+     "ja": "Dusk at 17:20; 1 C at Esentai Park; staff families moved to the heated Koktem-2 school point",
+     "cls": "warn"
+    },
+    {
+     "t": 14,
+     "who": "Red Crescent Society",
+     "ja": "First blankets and winterized tents issued at Central Stadium and Alatau school points",
+     "cls": "ok"
+    },
+    {
+     "t": 24,
+     "who": "HR",
+     "ja": "Safety confirmation 92%; 2 staff hospitalized with fractures; 1 family home collapsed in Nauryzbay",
+     "cls": "warn"
+    },
+    {
+     "t": 36,
+     "who": "Institute of Seismology",
+     "ja": "M6.0 aftershock; damaged buildings collapse further; renewed evacuation of reception points",
+     "cls": "crit"
+    },
+    {
+     "t": 48,
+     "who": "Head office",
+     "ja": "First relief consignment from the Khorgos hub reaches Almaty (water, heaters, blankets)",
+     "cls": "ok"
+    },
+    {
+     "t": 60,
+     "who": "ALA airport",
+     "ja": "Commercial flights partly resumed; relocation bookings opened",
+     "cls": "ok"
+    },
+    {
+     "t": 72,
+     "who": "Almaty Su",
+     "ja": "Tanker water at all reception points; bulk supply back in the southern districts",
+     "cls": "ok"
+    },
+    {
+     "t": 96,
+     "who": "Consular Office of Japan in Almaty",
+     "ja": "Mobile consular service at the Koktem-2 reception point",
+     "cls": "ok"
+    },
+    {
+     "t": 120,
+     "who": "Almaty HQ",
+     "ja": "Temporary office opened (co-working in Medeu); tower closed pending detailed survey",
+     "cls": "ok"
+    },
+    {
+     "t": 168,
+     "who": "Head office",
+     "ja": "Recovery phase; relocations complete; warehouse partial dispatch; aftershocks continuing",
+     "cls": "ok"
+    }
+   ],
+   "events": [
+    {
+     "t": 1,
+     "dur": 72,
+     "ja": "Field triage post (trauma)",
+     "short_ja": "First aid",
+     "where_ja": "Republic Square",
+     "district": "bostandyk",
+     "for": [
+      "Injured"
+     ],
+     "by": "City Health Department / Red Crescent",
+     "lat": 43.2389,
+     "lon": 76.9455
+    },
+    {
+     "t": 3,
+     "dur": 120,
+     "ja": "Hot drinks, blankets and warm clothing",
+     "short_ja": "Warmth",
+     "where_ja": "Central Stadium forecourt",
+     "district": "bostandyk",
+     "for": [
+      "Everyone"
+     ],
+     "by": "Red Crescent Society of Kazakhstan",
+     "lat": 43.2384,
+     "lon": 76.924
+    },
+    {
+     "t": 8,
+     "dur": 120,
+     "ja": "Tanker water (bring containers; 10 L per person)",
+     "short_ja": "Water",
+     "where_ja": "KazNU campus, Al-Farabi entrance",
+     "district": "bostandyk",
+     "for": [
+      "Everyone"
+     ],
+     "by": "Almaty Su",
+     "lat": 43.2206,
+     "lon": 76.9233
+    },
+    {
+     "t": 12,
+     "dur": 36,
+     "ja": "Hot meals (field kitchen)",
+     "short_ja": "Meals",
+     "where_ja": "Main Botanical Garden, main gate",
+     "district": "bostandyk",
+     "for": [
+      "Everyone"
+     ],
+     "by": "MES / volunteers",
+     "lat": 43.2194,
+     "lon": 76.9144
+    },
+    {
+     "t": 20,
+     "dur": 48,
+     "ja": "Phone charging and Wi-Fi hotspot",
+     "short_ja": "Charging",
+     "where_ja": "Esentai Park",
+     "district": "bostandyk",
+     "for": [
+      "Everyone"
+     ],
+     "by": "Kcell / Beeline",
+     "lat": 43.2206,
+     "lon": 76.9304
+    },
+    {
+     "t": 30,
+     "dur": 60,
+     "ja": "Company information desk and family reunification point",
+     "short_ja": "Company desk",
+     "where_ja": "Haileybury Almaty school grounds",
+     "district": "bostandyk",
+     "for": [
+      "Staff and families"
+     ],
+     "by": "Almaty HQ",
+     "lat": 43.2175,
+     "lon": 76.933
+    },
+    {
+     "t": 96,
+     "dur": 8,
+     "ja": "Mobile consular service (passports, safety registration, flight advice)",
+     "short_ja": "Consular",
+     "where_ja": "Koktem-2 school reception point",
+     "district": "bostandyk",
+     "for": [
+      "Japanese nationals"
+     ],
+     "by": "Consular Office of Japan in Almaty",
+     "lat": 43.2273,
+     "lon": 76.9211
+    },
+    {
+     "t": 2,
+     "dur": 72,
+     "ja": "Field triage post (trauma)",
+     "short_ja": "First aid",
+     "where_ja": "Gorky Park main entrance",
+     "district": "medeu",
+     "for": [
+      "Injured"
+     ],
+     "by": "City Health Department",
+     "lat": 43.2616,
+     "lon": 76.9693
+    },
+    {
+     "t": 10,
+     "dur": 120,
+     "ja": "Tanker water (bring containers)",
+     "short_ja": "Water",
+     "where_ja": "Samal-2, Zholdasbekov St",
+     "district": "medeu",
+     "for": [
+      "Everyone"
+     ],
+     "by": "Almaty Su",
+     "lat": 43.2313,
+     "lon": 76.9547
+    },
+    {
+     "t": 100,
+     "dur": 6,
+     "ja": "Psychological support in English and Russian for staff and children",
+     "short_ja": "Counselling",
+     "where_ja": "Interteach clinic, Nazarbayev Ave 275E",
+     "district": "medeu",
+     "for": [
+      "Staff families",
+      "Children"
+     ],
+     "by": "Interteach / head office",
+     "lat": 43.2251,
+     "lon": 76.9525
+    }
+   ],
+   "hospitals": [
+    {
+     "name_ja": "Central City Clinical Hospital (Zhandosov St 6)",
+     "district": "bostandyk",
+     "district_ja": "Bostandyk district",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Mass-casualty mode; severe trauma only",
+       "note": "Older blocks evacuated; triage in the yard"
+      },
+      {
+       "t": 48,
+       "cls": "warn",
+       "ja": "Emergencies first"
+      },
+      {
+       "t": 120,
+       "cls": "ok",
+       "ja": "Normal admissions"
+      }
+     ]
+    },
+    {
+     "name_ja": "City Emergency Hospital (BSNP, Kazybek Bi 96)",
+     "district": "almaly",
+     "district_ja": "Almaly district",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Trauma surge; crush injuries",
+       "note": "Primary trauma centre for the city centre; blood and dialysis shortfall"
+      },
+      {
+       "t": 72,
+       "cls": "warn",
+       "ja": "Emergency priority"
+      }
+     ]
+    },
+    {
+     "name_ja": "City Clinical Hospital No. 7 (Kalkaman)",
+     "district": "nauryzbay",
+     "district_ja": "Nauryzbay district",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Severe cases only",
+       "note": "Largest hospital in the city; 6 of 11 pavilions under reconstruction since 2025"
+      },
+      {
+       "t": 60,
+       "cls": "warn",
+       "ja": "Emergency priority"
+      }
+     ]
+    },
+    {
+     "name_ja": "City Clinical Hospital No. 4 (Papanin St 220)",
+     "district": "turksib",
+     "district_ja": "Turksib district",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Severe cases only"
+      },
+      {
+       "t": 72,
+       "cls": "warn",
+       "ja": "Emergency priority"
+      }
+     ]
+    },
+    {
+     "name_ja": "Interteach clinic (Nazarbayev Ave 275E)",
+     "district": "medeu",
+     "district_ja": "Medeu district",
+     "jp": true,
+     "states": [
+      {
+       "t": 0,
+       "cls": "warn",
+       "ja": "Open; outpatient trauma, English-speaking staff",
+       "note": "Building passed a quick check (assumed); 24 h ambulance; direct billing with International SOS"
+      },
+      {
+       "t": 24,
+       "cls": "ok",
+       "ja": "Normal service (appointments)"
+      }
+     ]
+    },
+    {
+     "name_ja": "International SOS Almaty clinic",
+     "district": "medeu",
+     "district_ja": "Medeu district",
+     "jp": true,
+     "states": [
+      {
+       "t": 0,
+       "cls": "warn",
+       "ja": "Open for members; telemedicine in English",
+       "note": "Location not geocoded in the research files"
+      },
+      {
+       "t": 48,
+       "cls": "ok",
+       "ja": "Normal service"
+      }
+     ]
+    }
+   ],
+   "weather": {
+    "temp": 4,
+    "rh": 70,
+    "desc_ja": "Overcast; about 4 C by day and -1 C at night; light rain or wet snow midweek (late-November normals: max 8.1 / min -1.0 C)",
+    "rain_ja": "Light rain or wet snow, 5-12 mm/day on days 3 and 6 (forecast-style assumption); dry otherwise",
+    "advice_ja": [
+     "Frost at night: do not sleep outdoors or in unheated gyms without blankets; move infants, elderly and the injured to heated reception points before dark",
+     "Never run generators, braziers or gas heaters indoors or in tents (carbon monoxide)",
+     "Wear N95 / FFP2 masks near collapsed masonry; dust plus winter smog",
+     "Boil or use bottled water: broken mains on shallow groundwater may be contaminated"
+    ],
+    "src": "https://en.wikipedia.org/wiki/Almaty",
+    "src_name": "Climate normals 1991-2020 (Wikipedia) and Open-Meteo forecast 16-22 Nov 2026"
+   },
+   "forcing": [
+    {
+     "key": "quake",
+     "group": "Seismic",
+     "name_ja": "Main shock and aftershocks (Institute of Seismology bulletin; assumed)",
+     "unit": "M",
+     "kind": "quake",
+     "events": [
+      [
+       0,
+       7.3,
+       "Main shock (Trans-Ili Alatau front, Verny-type)"
+      ],
+      [
+       0.08,
+       5.8,
+       ""
+      ],
+      [
+       1.5,
+       5.5,
+       ""
+      ],
+      [
+       7,
+       5.3,
+       ""
+      ],
+      [
+       14,
+       4.9,
+       ""
+      ],
+      [
+       26,
+       5.2,
+       ""
+      ],
+      [
+       36,
+       6.0,
+       "Largest aftershock"
+      ],
+      [
+       52,
+       4.8,
+       ""
+      ],
+      [
+       80,
+       5.1,
+       ""
+      ],
+      [
+       120,
+       4.7,
+       ""
+      ],
+      [
+       160,
+       5.0,
+       ""
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 5.0,
+       "ja": "M5+: re-inspect buildings, halt lifts and metro"
+      }
+     ],
+     "src": "Main shock = lower bound of the 1887 Verny estimate (Mw 7.3-7.8, Wikipedia); aftershock pattern after the 2024 Uqturpan M7.0 sequence (USGS); timings assumed"
+    },
+    {
+     "key": "temp",
+     "group": "Weather",
+     "name_ja": "Air temperature, Almaty (Kazhydromet / Open-Meteo; curve assumed)",
+     "unit": "°C",
+     "kind": "temp",
+     "base": 2,
+     "amp": 5,
+     "peak": 2,
+     "peak_h": 0,
+     "width": 1,
+     "thresholds": [
+      {
+       "v": 0,
+       "ja": "frost line 0 °C: outdoor sheltering risk"
+      }
+     ],
+     "src": "November normals max 8.1 / min -1.0 C (Wikipedia); forecast 16-22 Nov 2026 max 6.9 / min -0.8 C (Open-Meteo); diurnal curve assumed"
+    },
+    {
+     "key": "precip",
+     "group": "Precipitation",
+     "name_ja": "Daily precipitation, rain or wet snow (Kazhydromet; assumed)",
+     "unit": "mm/day",
+     "kind": "rain",
+     "base": 0.5,
+     "bursts": [
+      [
+       60,
+       18,
+       7
+      ],
+      [
+       130,
+       24,
+       12
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 10,
+       "ja": "10 mm/day: wet snow or rain soaks open-air assembly points; move to covered shelters"
+      },
+      {
+       "v": 20,
+       "ja": "20 mm/day: rockfall and landslide risk on foothill roads"
+      }
+     ],
+     "src": "November normal 55 mm over 6.7 days (Wikipedia); bursts assumed"
+    }
+   ],
+   "incidents": [
+    {
+     "t": 0.05,
+     "type": "collapse",
+     "district": "nauryzbay",
+     "sev": 3,
+     "where_ja": "Kalkaman and Kargaly (Nauryzbay)",
+     "ja": "Dozens of unreinforced brick and adobe houses collapsed; people trapped; neighbours digging by hand",
+     "src": "Almaty DChS"
+    },
+    {
+     "t": 0.1,
+     "type": "collapse",
+     "district": "almaly",
+     "sev": 3,
+     "where_ja": "Golden Square (Almaly)",
+     "ja": "Several 1950s-60s brick apartment blocks on Tole Bi and Zheltoksan partly collapsed; stairwells failed",
+     "src": "Almaty DChS"
+    },
+    {
+     "t": 0.15,
+     "type": "power",
+     "district": "",
+     "sev": 3,
+     "where_ja": "City-wide",
+     "ja": "Grid tripped across Almaty and Almaty Region; CHP-2 and CHP-3 shut down; hospitals on generators",
+     "src": "AZhK / AlES"
+    },
+    {
+     "t": 0.2,
+     "type": "collapse",
+     "district": "alatau",
+     "sev": 3,
+     "where_ja": "Shanyrak and Aqbulaq (Alatau)",
+     "ja": "Self-built housing on wet loess collapsed widely; ground cracks and sand boils; water in the streets",
+     "src": "Almaty DChS"
+    },
+    {
+     "t": 0.25,
+     "type": "collapse",
+     "district": "bostandyk",
+     "sev": 2,
+     "where_ja": "Koktem / Orbita panel blocks (Bostandyk)",
+     "ja": "9-storey panel blocks standing but cracked, balconies fallen; Esentai Tower facade glass down on Al-Farabi",
+     "src": "Company / Almaty DChS"
+    },
+    {
+     "t": 0.3,
+     "type": "fire",
+     "district": "auezov",
+     "sev": 3,
+     "where_ja": "Microdistricts 6-12 (Auezov)",
+     "ja": "Gas leaks from broken risers; 4 apartment fires; QazaqGaz Aimak shutting the district network",
+     "src": "Fire service 101 / QazaqGaz Aimak"
+    },
+    {
+     "t": 0.4,
+     "type": "rail",
+     "district": "almaly",
+     "sev": 3,
+     "where_ja": "Almaty Metro Line 1",
+     "ja": "Trains halted between stations; about 1,400 passengers walked out of the tunnels; inspection ordered",
+     "src": "Almaty Metro"
+    },
+    {
+     "t": 0.5,
+     "type": "road",
+     "district": "medeu",
+     "sev": 3,
+     "where_ja": "Medeu road and upper Dostyk Ave (Medeu)",
+     "ja": "Rockfalls closed the Medeu / Shymbulak road; landslide on the Kok-Tobe slope blocked Omarova St",
+     "src": "KazAvtoZhol / Almaty DChS"
+    },
+    {
+     "t": 0.8,
+     "type": "airport",
+     "district": "turksib",
+     "sev": 3,
+     "where_ja": "Almaty International Airport",
+     "ja": "Airport closed for runway and terminal inspection; 9 inbound flights diverted to Astana and Shymkent",
+     "src": "Almaty International Airport (TAV)"
+    },
+    {
+     "t": 1,
+     "type": "health",
+     "district": "almaly",
+     "sev": 3,
+     "where_ja": "City Emergency Hospital (BSNP)",
+     "ja": "Mass casualties: 600+ trauma patients in the first hour; triage in the courtyard; blood and dialysis shortfall",
+     "src": "City Health Department"
+    },
+    {
+     "t": 1.5,
+     "type": "evac",
+     "district": "",
+     "sev": 2,
+     "where_ja": "City-wide",
+     "ja": "Hundreds of thousands in streets and parks; cars jam Al-Farabi and Raiymbek; reception points opening",
+     "src": "Almaty akimat"
+    },
+    {
+     "t": 2,
+     "type": "water",
+     "district": "zhetysu",
+     "sev": 3,
+     "where_ja": "Zhetysu and Turksib (north)",
+     "ja": "Main breaks on collapsible soils; pressure lost across the northern districts; Almaty Su ordering tankers",
+     "src": "Almaty Su"
+    },
+    {
+     "t": 2.5,
+     "type": "power",
+     "district": "",
+     "sev": 2,
+     "where_ja": "Mobile networks",
+     "ja": "Call congestion; Kcell and Beeline base stations on batteries; mass-alert SMS arriving 1-3 h late",
+     "src": "Mobile operators / Almaty DChS"
+    },
+    {
+     "t": 4,
+     "type": "landslide",
+     "district": "medeu",
+     "sev": 2,
+     "where_ja": "Kishi Almaty valley above the Medeu dam",
+     "ja": "Earthquake-triggered landslides dammed streams above the Medeu dam; outburst watch; dam itself intact",
+     "src": "Kazselezashchita"
+    },
+    {
+     "t": 7,
+     "type": "cold",
+     "district": "",
+     "sev": 3,
+     "where_ja": "Open-air assembly points city-wide",
+     "ja": "Temperature falling to 0 C after dark; thousands still outdoors; heated school points filling up",
+     "src": "Almaty DChS / Kazhydromet"
+    },
+    {
+     "t": 14,
+     "type": "evac",
+     "district": "alatau",
+     "sev": 3,
+     "where_ja": "Alatau district school points",
+     "ja": "Reception points over capacity; families sleeping in cars; Red Crescent tents and stoves requested",
+     "src": "Red Crescent Society of Kazakhstan"
+    },
+    {
+     "t": 20,
+     "type": "health",
+     "district": "",
+     "sev": 2,
+     "where_ja": "Reception points city-wide",
+     "ja": "First hypothermia cases and CO poisoning from braziers in tents; 112 warns against burning fuel indoors",
+     "src": "Ministry of Health / MES"
+    },
+    {
+     "t": 24,
+     "type": "supply",
+     "district": "zhetysu",
+     "sev": 2,
+     "where_ja": "Company warehouse (Zhetysu)",
+     "ja": "Racking collapsed in 2 of 5 bays; about 30% of stock lost; dispatch moved to the Khorgos hub",
+     "src": "Company"
+    },
+    {
+     "t": 36,
+     "type": "collapse",
+     "district": "almaly",
+     "sev": 3,
+     "where_ja": "Almaly and Alatau",
+     "ja": "M6.0 aftershock: cracked buildings collapse further; panic-egress injuries; search and rescue restarted",
+     "src": "Almaty DChS"
+    },
+    {
+     "t": 60,
+     "type": "airport",
+     "district": "turksib",
+     "sev": 1,
+     "where_ja": "Almaty International Airport",
+     "ja": "Commercial flights partly resumed; Terminal 2 operating with delays",
+     "src": "Almaty International Airport (TAV)"
+    },
+    {
+     "t": 72,
+     "type": "road",
+     "district": "karasay",
+     "sev": 1,
+     "where_ja": "A2 highway west of Kaskelen",
+     "ja": "Overpass inspections complete; A2 to Bishkek open to general traffic",
+     "src": "KazAvtoZhol"
+    },
+    {
+     "t": 96,
+     "type": "water",
+     "district": "bostandyk",
+     "sev": 1,
+     "where_ja": "Southern districts",
+     "ja": "Bulk water supply restored in Bostandyk and Medeu; boil-water advice remains in force",
+     "src": "Almaty Su"
+    }
+   ],
+   "sources": [
+    {
+     "name": "Wikipedia: 1887 Verny earthquake (Mw 7.3-7.8, MSK X, >=330 dead, 1,798 of 1,799 brick buildings destroyed)",
+     "url": "https://en.wikipedia.org/wiki/1887_Verny_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "USGS event page iscgem16958130: 1911 Kemin Mw 8.02, 37 km from Almaty",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem16958130",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS us7000lsze: 2024-01-22 Uqturpan M7.0 (aftershock sequence, DYFI Almaty CDI 4.6, PAGER exposure)",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000lsze",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard Almaty City area (37157): earthquake High, landslide Medium",
+     "url": "https://www.thinkhazard.org/en/report/37157-kazakhstan-almaty-city-area",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "informburo.kz: 2020-21 microzonation puts the whole city in the MSK 9-10 zone",
+     "url": "https://informburo.kz/novosti/v-almaty-sozdali-novye-seysmicheskie-karty-ves-gorod-otnesli-k-9-10-ballnoy-zone.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "inform.kz: soils north of Raiymbek Ave, Kok-Tobe foothills and river channels least favourable",
+     "url": "https://www.inform.kz/ru/kakie-rayoni-almati-podverzheni-910-ballnim-zemletryaseniyam-ab114f",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Amey et al. 2021 (Earth and Space Science): Mw 6.5 blind-thrust scenario, 4,100 +/- 3,500 deaths, 12,300 buildings, USD 4.7 bn",
+     "url": "https://eprints.whiterose.ac.uk/176368/7/2021EA001664.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "17WCEE / CroCEE: 2017-18 seismic certification, 19% of floor area needs strengthening, 12% demolition",
+     "url": "https://wcee.nicee.org/wcee/article/17WCEE/8c-0016.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "inform.kz: DChS Almaty - 384 reception points opened within 1-1.5 h on 2024-01-23 (MES audit later found some closed)",
+     "url": "https://www.inform.kz/ru/vse-punkti-sbora-naseleniya-otkrilis-v-techenie-chasa-polutora-dchs-almati-29d6cd",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "kapital.kz: Almaty metro closed 11:22-16:30 for inspection after the 2024-03-04 shock",
+     "url": "https://kapital.kz/gosudarstvo/123718/metro-almaty-vozobnovilo-rabotu.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "tengrinews.kz / bes.media: mass-alert SMS 1.5-3 h late in March 2024 (400-600 SMS/s platform)",
+     "url": "https://tengrinews.kz/kazakhstan_news/zemletryasenie-almatyi-pochemu-mnogie-poluchili-sms-528287/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "bizmedia.kz: MES - 55,000 personnel and 9,000 equipment units can be mobilized for Almaty; aftershocks 2-4 weeks",
+     "url": "https://bizmedia.kz/2024-01-24-treshhiny-na-19-obektah-v-almatinskoj-oblasti-obnaruzhili-sotrudniki-mchs-posle-zemletryaseniya/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "bes.media / gov.kz: Almaty water network 4,196 km, wear 52.7% (2024)",
+     "url": "https://bes.media/news/polovina-vodoprovodnyh-setey-almaty-iznoshena-zachem-povysili-tarif-na-vodu/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Wikipedia: Almaty climate normals 1991-2020 (November max 8.1 / min -1.0 C, 55 mm)",
+     "url": "https://en.wikipedia.org/wiki/Almaty",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Open-Meteo forecast 16-22 Nov 2026 (max 6.9 / min -0.8 C)",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=43.238&longitude=76.945&daily=temperature_2m_max,temperature_2m_min&past_days=92&timezone=auto",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "citypopulation.de: Almaty districts, 2021 census (via area research file); stat.gov.kz city total 2,280,296 on 2024-11-01",
+     "url": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Nominatim / OpenStreetMap: coordinates of hospitals, parks, stadium, Esentai Tower (ODbL)",
+     "url": "https://nominatim.openstreetmap.org/",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "WHO Europe: public health advice after an earthquake (hypothermia, CO poisoning, water contamination)",
+     "url": "https://www.who.int/europe/news-room/questions-and-answers/item/public-health-advice-in-the-aftermath-of-an-earthquake",
+     "confirmed_by": "search_snippet"
+    }
+   ]
+  },
+  {
+   "id": "wkz-flood-2024type",
+   "type": "flood",
+   "status": "active",
+   "country": "KAZ",
+   "region": "kz-aty",
+   "name_ja": "West Kazakhstan spring flood on the Zhem and Zhaiyk rivers (2024-type scenario)",
+   "short_ja": "ATY spring flood (2024 type)",
+   "desc_ja": "Two-river spring flood of the 2024 type. Snowmelt on frozen ground sends the Zhem (Emba) through Kulsary within hours, cutting the Atyrau-Tengiz road and displacing more than half the town, while a record release from the Iriklinskoye reservoir in Russia drives a slow Zhaiyk (Ural) wave past Uralsk, Inderbor and Makhambet towards Atyrau, where 252 km of dams defend a city 20 m below sea level. For the 7-day live window the Zhaiyk wave is compressed about 6-fold (2024: Uralsk peak 22 Apr, Inderbor 13 May, Atyrau 30 May to 3 Jun).",
+   "t0_ja": "t=0: Zhem floodwater enters Kulsary streets; state of emergency in Zhylyoi district (modelled on April 2024)",
+   "t0_iso": "2026-04-09T06:00:00+05:00",
+   "city_ja": "Atyrau and Kulsary, Atyrau Region",
+   "country_ja": "Kazakhstan",
+   "hazard_ja": "Spring snowmelt river flood",
+   "agency_ja": "Kazhydromet / Ministry of Emergency Situations (MES)",
+   "kpi_dead_note_ja": "2024 floods: 7 deaths nationally by 18 Apr, at least 4 in Atyrau Region by mid-May (official via IFRC/ACAPS); model is a demo",
+   "depth_max": 2.0,
+   "bbox": [
+    49.0,
+    45.8,
+    55.5,
+    51.6
+   ],
+   "map_adm1": [
+    "KAZ-3198",
+    "KAZ-3201",
+    "KAZ-3195"
+   ],
+   "area_id": "aty_center",
+   "area_district": "atyrau_city",
+   "area_site": "aty-branch",
+   "default_district": "atyrau_city",
+   "default_t": 120,
+   "districts": [
+    {
+     "id": "atyrau_city",
+     "name_ja": "Atyrau city",
+     "adm1": "KAZ-3198",
+     "lat": 47.117,
+     "lon": 51.883,
+     "pop": 404129,
+     "jp": 3000,
+     "exposure": 0.18,
+     "onset_h": 120,
+     "peak_h": 140,
+     "recede_h": 500,
+     "note_ja": "Zhaiyk flows through the centre; 252 km of dams; floodplain dachas (Kureni, Staritsa, Komintern) and Balykshi exposed. Pop 2024 (Wikipedia); expatriates and exposure assumed",
+     "local_ja": "Dams hold; dacha evacuations, substations and bridge restrictions are the issues; crest expected after day 7"
+    },
+    {
+     "id": "zhylyoi_kulsary",
+     "name_ja": "Zhylyoi district (Kulsary town)",
+     "adm1": "KAZ-3198",
+     "lat": 46.983,
+     "lon": 54.017,
+     "pop": 60000,
+     "jp": 400,
+     "exposure": 0.8,
+     "onset_h": 0,
+     "peak_h": 60,
+     "recede_h": 500,
+     "note_ja": "Oil town on the Zhem (Emba), 230 km east of Atyrau; 2024: 2,810 houses flooded, 33,641 evacuated, power cut to 10 microdistricts. Pop 2024 assumed (51,097 in 2009); rotational expatriates assumed",
+     "local_ja": "One third of the town under water; power and gas cut; evacuation by TCO bus and KTZ train"
+    },
+    {
+     "id": "makhambet",
+     "name_ja": "Makhambet district",
+     "adm1": "KAZ-3198",
+     "lat": 47.667,
+     "lon": 51.583,
+     "pop": 38000,
+     "jp": 20,
+     "exposure": 0.25,
+     "onset_h": 70,
+     "peak_h": 100,
+     "recede_h": 450,
+     "note_ja": "Riverside villages Makhambet, Zhalgansay, Taldykol, Sarayshyq; gauge critical 850 cm (2024 peak 1,023 cm). Pop = 2013 value +20% (assumed)"
+    },
+    {
+     "id": "inder",
+     "name_ja": "Inder district (Inderbor)",
+     "adm1": "KAZ-3198",
+     "lat": 48.31,
+     "lon": 51.44,
+     "pop": 37000,
+     "jp": 20,
+     "exposure": 0.3,
+     "onset_h": 50,
+     "peak_h": 90,
+     "recede_h": 450,
+     "note_ja": "Inderbor borate-mine town (13,254); gauge critical 845 cm, 2024 peak 1,041 cm; villages isolated by road erosion. Pop = 2013 value +20% (assumed)"
+    },
+    {
+     "id": "kurmangazy",
+     "name_ja": "Kurmangazy district (Ganyushkino)",
+     "adm1": "KAZ-3198",
+     "lat": 47.44,
+     "lon": 48.98,
+     "pop": 65000,
+     "jp": 10,
+     "exposure": 0.03,
+     "onset_h": 130,
+     "peak_h": 120,
+     "recede_h": 300,
+     "note_ja": "Volga-delta lowland on the A-27 Atyrau-Astrakhan corridor, -23 m; no 2024 impact found, low direct exposure (assumed). Pop = 2013 value +15% (assumed)"
+    },
+    {
+     "id": "isatay",
+     "name_ja": "Isatay district (Akkystau)",
+     "adm1": "KAZ-3198",
+     "lat": 47.222,
+     "lon": 51.006,
+     "pop": 30000,
+     "jp": 10,
+     "exposure": 0.08,
+     "onset_h": 120,
+     "peak_h": 130,
+     "recede_h": 400,
+     "note_ja": "Right-bank lowland west of Atyrau; Baksai canals drain flood water by gravity; exposure via canals (assumed). Pop = 2013 value +15% (assumed)"
+    },
+    {
+     "id": "oral_city",
+     "name_ja": "Uralsk (Oral) city",
+     "adm1": "KAZ-3201",
+     "lat": 51.2225,
+     "lon": 51.3725,
+     "pop": 330000,
+     "jp": 300,
+     "exposure": 0.04,
+     "onset_h": 0,
+     "peak_h": 30,
+     "recede_h": 300,
+     "note_ja": "Dacha cooperatives Venera, Umitker, Yagodka flooded via the Derkul and Chagan backwater; gauge critical 850 cm, 2024 peak 864 cm. Pop 2019 (Wikipedia); expatriates assumed",
+     "local_ja": "Peak passed; water receding 5-7 cm a day; dacha areas still flooded, 27 assembly points open"
+    },
+    {
+     "id": "terekti",
+     "name_ja": "Terekti district",
+     "adm1": "KAZ-3201",
+     "lat": 51.14,
+     "lon": 51.88,
+     "pop": 42000,
+     "jp": 10,
+     "exposure": 0.12,
+     "onset_h": 10,
+     "peak_h": 40,
+     "recede_h": 320,
+     "note_ja": "Ural valley below Uralsk; Duana village cut off; 37 evacuation points for 3,080 people. Pop = 2013 value +10% (assumed)"
+    }
+   ],
+   "sites": [
+    {
+     "id": "aty-branch",
+     "label": "B",
+     "name_ja": "Atyrau branch office and logistics base (Bayterek Plaza, west bank)",
+     "short_ja": "Atyrau branch",
+     "lat": 47.1021,
+     "lon": 51.9136,
+     "district": "atyrau_city",
+     "district_ja": "Atyrau city, west bank (Studenchesky Ave)",
+     "staff": 85,
+     "resp_tau": 5,
+     "exposure_mult": 0.5,
+     "need_warn_ja": "Diesel for the generator, bottled water, satellite phones; remote work if a bridge closes; relocation plan for 9 families"
+    },
+    {
+     "id": "kulsary-base",
+     "label": "K",
+     "name_ja": "Kulsary logistics base and yard (near Kulsary station; scenario-only)",
+     "short_ja": "Kulsary base",
+     "lat": 46.952,
+     "lon": 53.945,
+     "district": "zhylyoi_kulsary",
+     "district_ja": "Kulsary, station yard (location assumed)",
+     "staff": 40,
+     "resp_tau": 10,
+     "exposure_mult": 1.0,
+     "need_crit_ja": "Boats, pumps, fuel; move staff and families to the Tengiz camps or Atyrau; raise stock and vehicles above 1 m"
+    },
+    {
+     "id": "tengiz-camp",
+     "label": "T",
+     "name_ja": "Tengiz field site office and rotation camp (Shanyrak; scenario-only)",
+     "short_ja": "Tengiz camp",
+     "lat": 46.3002,
+     "lon": 53.4276,
+     "district": "zhylyoi_kulsary",
+     "district_ja": "Zhylyoi district, Tengiz field (80 km from Kulsary)",
+     "staff": 60,
+     "resp_tau": 8,
+     "exposure_mult": 0.15,
+     "need_warn_ja": "Road access from Atyrau cut at Dossor and Kulsary: 10 days of food and fuel by rail and air; rotation changes delayed"
+    }
+   ],
+   "shelters": [
+    {
+     "id": "sh1",
+     "name_ja": "Kulsary secondary schools (temporary accommodation centres)",
+     "district": "zhylyoi_kulsary",
+     "cap": 6000,
+     "share": 0.35,
+     "open_h": 4
+    },
+    {
+     "id": "sh2",
+     "name_ja": "TCO rotation camps near Tengiz (Shanyrak)",
+     "district": "zhylyoi_kulsary",
+     "cap": 7000,
+     "share": 0.4,
+     "open_h": 18
+    },
+    {
+     "id": "sh3",
+     "name_ja": "Uralsk assembly points (27 schools and social facilities)",
+     "district": "oral_city",
+     "cap": 8000,
+     "share": 0.4,
+     "open_h": 0
+    },
+    {
+     "id": "sh4",
+     "name_ja": "Terekti district evacuation points (37 points)",
+     "district": "terekti",
+     "cap": 3080,
+     "share": 0.4,
+     "open_h": 10
+    },
+    {
+     "id": "sh5",
+     "name_ja": "Inderbor school shelter",
+     "district": "inder",
+     "cap": 800,
+     "share": 0.3,
+     "open_h": 56
+    },
+    {
+     "id": "sh6",
+     "name_ja": "Makhambet village school and community buildings",
+     "district": "makhambet",
+     "cap": 400,
+     "share": 0.25,
+     "open_h": 72
+    },
+    {
+     "id": "sh7",
+     "name_ja": "Makat district reserve points (schools, sports hall, college)",
+     "district": "makhambet",
+     "cap": 560,
+     "share": 0.2,
+     "open_h": 84
+    },
+    {
+     "id": "sh8",
+     "name_ja": "Atyrau city schools and social facilities (regional reserve points)",
+     "district": "atyrau_city",
+     "cap": 5000,
+     "share": 0.3,
+     "open_h": 124
+    },
+    {
+     "id": "sh9",
+     "name_ja": "Renaissance Atyrau Hotel (company family refuge, west bank)",
+     "district": "atyrau_city",
+     "cap": 300,
+     "share": 0.04,
+     "open_h": 120,
+     "poi": "Renaissance Atyrau Hotel"
+    },
+    {
+     "id": "sh10",
+     "name_ja": "Akkystau school (reserve point)",
+     "district": "isatay",
+     "cap": 500,
+     "share": 0.3,
+     "open_h": 130
+    }
+   ],
+   "supplies": [
+    {
+     "key": "water",
+     "name_ja": "Drinking water",
+     "unit": "L/day",
+     "icon": "drop",
+     "per_person": 3,
+     "per_day": false,
+     "lead_h": 18,
+     "ramp_h": 18,
+     "cap": 1.1,
+     "stock": 6000
+    },
+    {
+     "key": "food",
+     "name_ja": "Food (ready meals)",
+     "unit": "meals/day",
+     "icon": "box",
+     "per_person": 3,
+     "per_day": false,
+     "lead_h": 24,
+     "ramp_h": 24,
+     "cap": 1.0,
+     "stock": 4500
+    },
+    {
+     "key": "med",
+     "name_ja": "Medical kits (incl. chronic medication)",
+     "unit": "kits",
+     "icon": "heart",
+     "per_person": 0.02,
+     "per_day": false,
+     "lead_h": 36,
+     "ramp_h": 30,
+     "cap": 1.0,
+     "stock": 60
+    },
+    {
+     "key": "hyg",
+     "name_ja": "Hygiene kits (soap, sanitary pads, diapers)",
+     "unit": "kits",
+     "icon": "box",
+     "per_person": 0.5,
+     "per_day": false,
+     "lead_h": 30,
+     "ramp_h": 30,
+     "cap": 0.9,
+     "stock": 800
+    },
+    {
+     "key": "baby",
+     "name_ja": "Infant supplies",
+     "unit": "kits",
+     "icon": "heart",
+     "per_person": 0.04,
+     "per_day": false,
+     "lead_h": 48,
+     "ramp_h": 36,
+     "cap": 0.8,
+     "stock": 40
+    },
+    {
+     "key": "boat",
+     "name_ja": "Boats and life jackets",
+     "unit": "boats / jackets",
+     "icon": "wave",
+     "per_person": 0.003,
+     "per_day": false,
+     "lead_h": 30,
+     "ramp_h": 36,
+     "cap": 0.7,
+     "stock": 8
+    },
+    {
+     "key": "gen",
+     "name_ja": "Generators, pumps and fuel",
+     "unit": "units",
+     "icon": "bolt",
+     "per_person": 0.001,
+     "per_day": false,
+     "lead_h": 48,
+     "ramp_h": 36,
+     "cap": 0.8,
+     "stock": 6
+    },
+    {
+     "key": "bed",
+     "name_ja": "Blankets, cots and warm clothing",
+     "unit": "sets",
+     "icon": "home",
+     "per_person": 1,
+     "per_day": false,
+     "lead_h": 36,
+     "ramp_h": 30,
+     "cap": 0.9,
+     "stock": 1200
+    },
+    {
+     "key": "comm",
+     "name_ja": "Satellite phones and mobile Wi-Fi",
+     "unit": "units",
+     "icon": "radio",
+     "per_person": 0.0003,
+     "per_day": false,
+     "lead_h": 30,
+     "ramp_h": 24,
+     "cap": 1.0,
+     "stock": 6
+    }
+   ],
+   "supply_note_ja": "Demand = evacuees x per-person quantity (drinking water 3 L/person/day, the Sphere drinking minimum; domestic water excluded). Supply = Atyrau branch stock plus an arrival curve. Lead times, caps and stock are assumptions; 2024 priority needs (bottled water, hygiene kits, bedding) from IFRC/ACAPS.",
+   "utilities": [
+    {
+     "key": "power",
+     "name_ja": "Electricity",
+     "icon": "bolt",
+     "th_m": 0.3,
+     "rest_h": 48,
+     "rest_tau": 48,
+     "eta_default_ja": "Reconnection after the water recedes and lines are checked",
+     "eta_ja": {
+      "zhylyoi_kulsary": "10 microdistricts de-energised; 2024: 500 houses back after 8 days, then 60-100 a day",
+      "atyrau_city": "Supply continuing behind the dams; 5 substations in red zones sandbagged, pre-emptive switching possible"
+     }
+    },
+    {
+     "key": "water",
+     "name_ja": "Water supply",
+     "icon": "drop",
+     "th_m": 0.6,
+     "rest_h": 72,
+     "rest_tau": 48,
+     "eta_default_ja": "Mains restored after pumping stations are checked; water trucks meanwhile",
+     "eta_ja": {
+      "zhylyoi_kulsary": "Mains reported working but wells and yards flooded: boil or use bottled water",
+      "atyrau_city": "Supply continuing; intake protected with barriers, boil if turbid"
+     }
+    },
+    {
+     "key": "gas",
+     "name_ja": "Gas",
+     "icon": "fire",
+     "th_m": 0.4,
+     "rest_h": 96,
+     "rest_tau": 72,
+     "eta_default_ja": "Restored only after pipeline checks (2024 Kulsary: 10 days, 3,084 houses reconnected)",
+     "eta_ja": {
+      "atyrau_city": "No outage expected; QazaqGaz Aimak network outside the flood zone (unverified)"
+     }
+    },
+    {
+     "key": "telecom",
+     "name_ja": "Mobile and internet",
+     "icon": "radio",
+     "th_m": 1.0,
+     "rest_h": 12,
+     "rest_tau": 18,
+     "eta_default_ja": "Base stations back once power or generators are restored; networks congested",
+     "eta_ja": {
+      "zhylyoi_kulsary": "Congestion and battery outages; use SMS and satellite phones"
+     }
+    },
+    {
+     "key": "heating",
+     "name_ja": "District heating",
+     "icon": "home",
+     "th_m": 0.8,
+     "rest_h": 48,
+     "rest_tau": 36,
+     "eta_default_ja": "Heating season ends mid-April; CHP depends on gas and power (limited relevance)"
+    },
+    {
+     "key": "roads",
+     "name_ja": "Roads and bridges",
+     "icon": "car",
+     "th_m": 0.25,
+     "rest_h": 36,
+     "rest_tau": 48,
+     "eta_default_ja": "Closed above 30 cm of water; reopen after washout inspection",
+     "eta_ja": {
+      "zhylyoi_kulsary": "Dossor-Kulsary road closed; access by KTZ rail and via the Tengiz camps",
+      "atyrau_city": "Both Zhaiyk bridges open; heavy-vehicle limits possible during dam works"
+     }
+    }
+   ],
+   "logistics": [
+    {
+     "name_ja": "Atyrau International Airport (GUW)",
+     "icon": "plane",
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Operating",
+       "note": "Lowest airport in the world (-22 m) but outside the flood zone"
+      },
+      {
+       "t": 24,
+       "cls": "ok",
+       "ja": "Operating, extra flights",
+       "note": "2024: 40 extra flights, fare cap KZT 40,000; relief cargo flown free"
+      }
+     ]
+    },
+    {
+     "name_ja": "Railway Atyrau-Dossor-Kulsary-Beyneu (KTZ)",
+     "icon": "train",
+     "states": [
+      {
+       "t": 0,
+       "cls": "warn",
+       "ja": "Emergency regime",
+       "note": "Fire and anti-washout trains sent to Kulsary station"
+      },
+      {
+       "t": 12,
+       "cls": "warn",
+       "ja": "Evacuation trains only",
+       "note": "Freight suspended Makat-Kulsary; free passenger trains to Atyrau and Beyneu"
+      },
+      {
+       "t": 144,
+       "cls": "ok",
+       "ja": "Schedule restored",
+       "note": "2024: infrastructure undamaged, 12,000 people carried free"
+      }
+     ]
+    },
+    {
+     "name_ja": "Dossor-Kulsary road (Atyrau-Tengiz corridor)",
+     "icon": "car",
+     "states": [
+      {
+       "t": 0,
+       "cls": "crit",
+       "ja": "Closed",
+       "note": "Zhem overflow at Dossor-Kulsary; paved access from Atyrau to Tengiz cut"
+      },
+      {
+       "t": 120,
+       "cls": "warn",
+       "ja": "Escorted convoys",
+       "note": "One lane open to convoys at low water (assumed)"
+      }
+     ]
+    },
+    {
+     "name_ja": "Highway A-27 Atyrau-Dossor-Aktobe",
+     "icon": "truck",
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Open",
+       "note": "Atyrau-Dossor 86 km section under reconstruction"
+      },
+      {
+       "t": 160,
+       "cls": "warn",
+       "ja": "Delays near Dossor",
+       "note": "Overflow at low sections; heavy vehicles delayed 2-4 h (assumed)"
+      }
+     ]
+    },
+    {
+     "name_ja": "Road Atyrau-Inderbor-Uralsk (left bank)",
+     "icon": "car",
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Open"
+      },
+      {
+       "t": 64,
+       "cls": "warn",
+       "ja": "Convoys only in Inder district",
+       "note": "Roadside erosion; boat service to isolated villages"
+      },
+      {
+       "t": 160,
+       "cls": "crit",
+       "ja": "Closed at the Atyrau end",
+       "note": "2024: closed at the city entrance near the Zhaiyk crest"
+      }
+     ]
+    },
+    {
+     "name_ja": "Central Bridge and Sultan Beibarys Bridge (Atyrau)",
+     "icon": "car",
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Both open"
+      },
+      {
+       "t": 150,
+       "cls": "warn",
+       "ja": "Heavy-vehicle limit",
+       "note": "Central Bridge restricted during embankment works (assumed)"
+      }
+     ]
+    },
+    {
+     "name_ja": "Kulsary logistics base",
+     "icon": "box",
+     "states": [
+      {
+       "t": 0,
+       "cls": "warn",
+       "ja": "Yard flooding",
+       "note": "Operations suspended; stock moved to the mezzanine"
+      },
+      {
+       "t": 8,
+       "cls": "crit",
+       "ja": "Closed",
+       "note": "Yard under 0.5 m; staff released to evacuate"
+      },
+      {
+       "t": 150,
+       "cls": "warn",
+       "ja": "Pump-out, outbound only",
+       "note": "Awaiting electrical inspection"
+      }
+     ]
+    },
+    {
+     "name_ja": "CPC pipeline Tengiz-Novorossiysk",
+     "icon": "box",
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Operating",
+       "note": "Main crude export route; no flood disruption found in 2024 sources"
+      }
+     ]
+    }
+   ],
+   "requests": [
+    {
+     "t": 3,
+     "from": "Kulsary logistics base",
+     "what": "2 boats, 3 pumps, 400 L of fuel",
+     "detail": "Yard under 0.5 m; forklift batteries, servers and documents moved to the mezzanine",
+     "cls": "crit",
+     "ack_t": 5,
+     "resolved_t": 30
+    },
+    {
+     "t": 10,
+     "from": "Kulsary staff families (12 households)",
+     "what": "Transport for 31 people to the Tengiz camps or Atyrau",
+     "detail": "Road to Atyrau cut at Dossor; seats requested on TCO buses or the KTZ evacuation train",
+     "cls": "crit",
+     "ack_t": 12,
+     "resolved_t": 26
+    },
+    {
+     "t": 30,
+     "from": "Tengiz camp site office",
+     "what": "Food and bottled water for 60 staff for 10 days",
+     "detail": "Road resupply from Atyrau cut; route via KTZ to Kulsary station and air to Teniz airfield",
+     "cls": "warn",
+     "ack_t": 33,
+     "resolved_t": 70
+    },
+    {
+     "t": 48,
+     "from": "Kulsary school No. 19 shelter (via district akimat)",
+     "what": "500 hygiene kits, 400 blankets, diapers",
+     "detail": "1,100 occupants, 37% children; nights at 5-8 C",
+     "cls": "warn",
+     "ack_t": 52,
+     "resolved_t": 90
+    },
+    {
+     "t": 84,
+     "from": "Atyrau branch",
+     "what": "30 kVA generator, 600 L of diesel, 2 satellite phones",
+     "detail": "Substations in red zones may be switched off pre-emptively as the Zhaiyk rises",
+     "cls": "warn",
+     "ack_t": 86,
+     "resolved_t": 130
+    },
+    {
+     "t": 128,
+     "from": "Expatriate families (Dostyk Village)",
+     "what": "Decision on temporary relocation of 9 families",
+     "detail": "Zhaiyk forecast to pass 550 cm within days; schools asking for contingency plans",
+     "cls": "warn",
+     "ack_t": 130,
+     "resolved_t": 150
+    },
+    {
+     "t": 140,
+     "from": "Inder district akimat (via regional HQ)",
+     "what": "Boat transfer of 2 contractor staff from Inderbor",
+     "detail": "Left-bank road cut by erosion; medication running low",
+     "cls": "warn",
+     "ack_t": 142,
+     "resolved_t": 160
+    }
+   ],
+   "actions": [
+    {
+     "t": 0,
+     "ja": "Activate the crisis team; suspend Kulsary base operations and move stock, vehicles and records above 1 m",
+     "why": "2024: water rose 0.5-1.5 m in Kulsary streets within hours and 10 microdistricts lost power"
+    },
+    {
+     "t": 0,
+     "ja": "Start the safety check of all staff and families; phone anyone who has not answered within 6 h",
+     "why": "Target 90% response within 24 h; Kulsary networks congested"
+    },
+    {
+     "t": 6,
+     "ja": "Move Kulsary staff families to the Tengiz camps by bus or to Atyrau by KTZ evacuation train",
+     "why": "Road to Atyrau cut at Dossor; TCO camps hosted more than 7,000 evacuees in 2024"
+    },
+    {
+     "t": 24,
+     "ja": "Re-route Tengiz resupply by rail to Kulsary station and air to Teniz; pre-position 10 days of food and fuel",
+     "why": "Paved access from Atyrau cut at Dossor and Kulsary"
+    },
+    {
+     "t": 48,
+     "ja": "Approve advance pay and relief for Kulsary employees whose homes are flooded",
+     "why": "2024: 2,674 houses affected, 1,476 unsafe; recovery took months"
+    },
+    {
+     "t": 96,
+     "ja": "Atyrau: fuel the generator, stock 7 days of water and food, agree remote-work and family-relocation triggers",
+     "why": "Zhaiyk at Atyrau forecast to approach the 550 cm critical mark; substations may be cut"
+    },
+    {
+     "t": 120,
+     "ja": "Brief expatriate families; book flexible tickets out of GUW; check embassy registrations",
+     "why": "Airport stays open but seats were scarce in 2024 despite 40 extra flights"
+    },
+    {
+     "t": 150,
+     "ja": "Prepare recovery: pump-out, drying, electrical and gas checks, insurance claims, hepatitis A vaccination offer",
+     "why": "Return to buildings only after utility inspection; 2024 Atyrau vaccinated 4,600 children"
+    }
+   ],
+   "timeline": [
+    {
+     "t": 0,
+     "who": "DES Atyrau Region",
+     "ja": "Zhem floodwater enters Kulsary streets; state of emergency in Zhylyoi district",
+     "detail": "Surge from Oiyl district (Aktobe) on frozen ground",
+     "cls": "crit"
+    },
+    {
+     "t": 2,
+     "who": "Kulsary base",
+     "ja": "Yard flooding 0.3 m; operations suspended",
+     "cls": "crit"
+    },
+    {
+     "t": 4,
+     "who": "Crisis team",
+     "ja": "Crisis team set up at the Atyrau branch; safety check launched",
+     "detail": "Branch manager leads; HR runs the safety check"
+    },
+    {
+     "t": 6,
+     "who": "Zhylyoi akimat",
+     "ja": "Mass evacuation ordered; 10 microdistricts de-energised",
+     "cls": "crit"
+    },
+    {
+     "t": 20,
+     "who": "TCO",
+     "ja": "First evacuee buses arrive at the Tengiz rotation camps",
+     "cls": "ok"
+    },
+    {
+     "t": 24,
+     "who": "HR",
+     "ja": "Safety check report 1: 58% responded",
+     "cls": "warn"
+    },
+    {
+     "t": 25,
+     "who": "Kazhydromet",
+     "ja": "Zhaiyk at Uralsk 852 cm, above the 850 cm critical mark",
+     "cls": "warn"
+    },
+    {
+     "t": 30,
+     "who": "Kazhydromet",
+     "ja": "Uralsk peak 864 cm, highest in 30 years; falling 5-7 cm a day",
+     "cls": "warn"
+    },
+    {
+     "t": 36,
+     "who": "Government",
+     "ja": "State of emergency in Atyrau and West Kazakhstan regions",
+     "detail": "10 of 17 regions under emergency; worst flood in 80 years",
+     "cls": "crit"
+    },
+    {
+     "t": 48,
+     "who": "KTZ",
+     "ja": "Free evacuation trains Kulsary-Atyrau and Kulsary-Beyneu; 5,000 carried",
+     "cls": "ok"
+    },
+    {
+     "t": 60,
+     "who": "Regional HQ",
+     "ja": "Kulsary: 2,810 houses flooded, 28,551 evacuated incl. 6,719 children",
+     "cls": "crit"
+    },
+    {
+     "t": 60,
+     "who": "HR",
+     "ja": "Safety check report 2: 93% responded",
+     "cls": "ok"
+    },
+    {
+     "t": 72,
+     "who": "Kazhydromet",
+     "ja": "Zhaiyk rising fast at Inderbor; crest expected at Atyrau in about 8 days",
+     "cls": "warn"
+    },
+    {
+     "t": 96,
+     "who": "Zhylyoi power company",
+     "ja": "500 houses re-energised in Kulsary; 60-100 a day",
+     "cls": "ok"
+    },
+    {
+     "t": 110,
+     "who": "Kulsary HQ",
+     "ja": "Zhem down 92 cm from the peak; one third of the town still under water",
+     "cls": "warn"
+    },
+    {
+     "t": 120,
+     "who": "Regional HQ",
+     "ja": "Atyrau: 203 of 238 km of protective dams complete; dacha areas evacuated",
+     "cls": "warn"
+    },
+    {
+     "t": 144,
+     "who": "ZhylyoiGaz",
+     "ja": "Gas supply resumed in Kulsary after network repairs",
+     "cls": "ok"
+    },
+    {
+     "t": 150,
+     "who": "Atyrau Zharyk",
+     "ja": "Five substations in red zones sandbagged",
+     "cls": "warn"
+    },
+    {
+     "t": 168,
+     "who": "Kazhydromet",
+     "ja": "Zhaiyk at Atyrau 546 cm, 4 cm below critical; crest expected in about 4 days",
+     "cls": "crit"
+    },
+    {
+     "t": 200,
+     "who": "Regional HQ",
+     "ja": "Inderbor past its 1,041 cm peak; Atyrau above 550 cm (expected)",
+     "cls": "crit"
+    },
+    {
+     "t": 260,
+     "who": "Kazhydromet",
+     "ja": "Atyrau crest about 600 cm; dams hold (expected)"
+    }
+   ],
+   "events": [
+    {
+     "t": 6,
+     "dur": 12,
+     "ja": "Evacuation buses to the Tengiz rotation camps",
+     "short_ja": "Evac bus",
+     "where_ja": "Kulsary station square",
+     "district": "zhylyoi_kulsary",
+     "for": [
+      "Staff families",
+      "Local staff"
+     ],
+     "by": "TCO / Atyrau branch",
+     "lat": 46.948,
+     "lon": 53.939
+    },
+    {
+     "t": 48,
+     "dur": 6,
+     "ja": "Water, food and hygiene kit distribution",
+     "short_ja": "Relief",
+     "where_ja": "Kulsary school No. 19 shelter",
+     "district": "zhylyoi_kulsary",
+     "for": [
+      "Everyone"
+     ],
+     "by": "District akimat / Red Crescent",
+     "lat": 46.962,
+     "lon": 54.013
+    },
+    {
+     "t": 120,
+     "dur": 8,
+     "ja": "Mobile medical team (chronic medication, children)",
+     "short_ja": "Medical",
+     "where_ja": "Kulsary modular hospital, Zhol Zhumysshylary",
+     "district": "zhylyoi_kulsary",
+     "for": [
+      "Children",
+      "Elderly"
+     ],
+     "by": "Regional health department",
+     "lat": 46.9672,
+     "lon": 53.9928
+    },
+    {
+     "t": 100,
+     "dur": 6,
+     "ja": "Bottled water and hygiene kits for registered families",
+     "short_ja": "Water",
+     "where_ja": "Atyrau branch, Bayterek Plaza lobby",
+     "district": "atyrau_city",
+     "for": [
+      "Staff families",
+      "Local staff"
+     ],
+     "by": "Atyrau branch",
+     "lat": 47.1021,
+     "lon": 51.9136
+    },
+    {
+     "t": 126,
+     "dur": 3,
+     "ja": "Family briefing: Zhaiyk forecast, relocation triggers, school plans (online too)",
+     "short_ja": "Briefing",
+     "where_ja": "Renaissance Atyrau Hotel, meeting room",
+     "district": "atyrau_city",
+     "for": [
+      "Staff families",
+      "Expatriates"
+     ],
+     "by": "Atyrau branch",
+     "lat": 47.1063,
+     "lon": 51.899
+    },
+    {
+     "t": 132,
+     "dur": 6,
+     "ja": "Hepatitis A vaccination and travel-medicine consultation",
+     "short_ja": "Vaccination",
+     "where_ja": "Prospekt Medical Caspian clinic, Abulkhair Khan Ave 82",
+     "district": "atyrau_city",
+     "for": [
+      "Children",
+      "Everyone"
+     ],
+     "by": "Clinic",
+     "lat": 47.106,
+     "lon": 51.8643
+    },
+    {
+     "t": 140,
+     "dur": 5,
+     "ja": "Volunteer sandbagging on the west-bank embankment",
+     "short_ja": "Sandbagging",
+     "where_ja": "Embankment at the regional akimat, Aiteke Bi St",
+     "district": "atyrau_city",
+     "for": [
+      "Everyone"
+     ],
+     "by": "City akimat",
+     "lat": 47.1068,
+     "lon": 51.9152
+    },
+    {
+     "t": 150,
+     "dur": 10,
+     "ja": "Ticket desk: flexible bookings out of GUW and rail options",
+     "short_ja": "Tickets",
+     "where_ja": "Atyrau branch, 4th floor",
+     "district": "atyrau_city",
+     "for": [
+      "Staff families",
+      "Expatriates"
+     ],
+     "by": "Atyrau branch",
+     "lat": 47.1021,
+     "lon": 51.9136
+    },
+    {
+     "t": 160,
+     "dur": 4,
+     "ja": "Embassy video consultation: registration check, evacuation options",
+     "short_ja": "Embassy",
+     "where_ja": "Atyrau branch meeting room (remote from Astana)",
+     "district": "atyrau_city",
+     "for": [
+      "Expatriates"
+     ],
+     "by": "Embassy (remote)",
+     "lat": 47.1021,
+     "lon": 51.9136
+    }
+   ],
+   "hospitals": [
+    {
+     "name_ja": "Prospekt Medical Caspian (British clinic)",
+     "district": "atyrau_city",
+     "district_ja": "Nursaya-3, Abulkhair Khan Ave 82",
+     "jp": true,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Normal service"
+      },
+      {
+       "t": 130,
+       "cls": "ok",
+       "ja": "Normal; vaccination clinic",
+       "note": "English-speaking; partner of International SOS"
+      }
+     ]
+    },
+    {
+     "name_ja": "Interteach Clinic",
+     "district": "atyrau_city",
+     "district_ja": "Vladimirsky St 103 (second unit Satpayev St 34)",
+     "jp": true,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Normal service"
+      }
+     ]
+    },
+    {
+     "name_ja": "Atyrau Regional Hospital",
+     "district": "atyrau_city",
+     "district_ja": "Vladimirsky St 98, Avangard",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Normal service"
+      },
+      {
+       "t": 40,
+       "cls": "warn",
+       "ja": "Emergency priority",
+       "note": "Receiving patients transferred from Kulsary"
+      }
+     ]
+    },
+    {
+     "name_ja": "Atyrau Regional Hospital No. 2",
+     "district": "atyrau_city",
+     "district_ja": "Sultan Beibarys Ave, Zheruiyk",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Normal service"
+      }
+     ]
+    },
+    {
+     "name_ja": "Zhylyoi Central District Hospital",
+     "district": "zhylyoi_kulsary",
+     "district_ja": "Kulsary centre",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Normal service"
+      },
+      {
+       "t": 20,
+       "cls": "crit",
+       "ja": "Closed, patients transferred",
+       "note": "Ground floor flooded; 2024: reopened after 2 weeks"
+      }
+     ]
+    },
+    {
+     "name_ja": "Kulsary modular hospital",
+     "district": "zhylyoi_kulsary",
+     "district_ja": "Zhol Zhumysshylary microdistrict",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Normal service"
+      },
+      {
+       "t": 6,
+       "cls": "warn",
+       "ja": "Emergency only, generator power"
+      },
+      {
+       "t": 100,
+       "cls": "ok",
+       "ja": "Normal; mobile teams to shelters"
+      }
+     ]
+    },
+    {
+     "name_ja": "West Kazakhstan Regional Clinical Hospital, Oral",
+     "district": "oral_city",
+     "district_ja": "Gumar Karash St",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Normal service"
+      }
+     ]
+    }
+   ],
+   "weather": {
+    "temp": 16,
+    "rh": 55,
+    "desc_ja": "Sunny and calm, about 3 C above the April normal (2024-type warm spell; day values assumed)",
+    "rain_ja": "Light rain or showers 20%; strong wind possible on embankments",
+    "advice_ja": [
+     "Do not enter or drive into floodwater: melt water is 4-10 C and can kill within an hour (2024 deaths were in a tractor)",
+     "Nights fall to 5-8 C: warm clothing, dry footwear and bedding for shelters",
+     "Drink bottled or boiled water; flooded wells and sewers raise hepatitis A and typhoid risk",
+     "Do not handle dead livestock; report carcasses (cattle burial grounds were flooded in 2024)",
+     "Re-enter houses only after electrical and gas checks"
+    ],
+    "src": "https://en.wikipedia.org/wiki/Atyrau",
+    "src_name": "Climate normals 1991-2020 (Wikipedia / Pogoda.ru.net)"
+   },
+   "forcing": [
+    {
+     "key": "level_atyrau",
+     "group": "River level",
+     "name_ja": "Zhaiyk/Ural level at Atyrau (Kazhydromet gauge)",
+     "unit": "cm",
+     "kind": "level",
+     "start": 430,
+     "peak": 600,
+     "peak_h": 270,
+     "hold_h": 72,
+     "fall_h": 600,
+     "thresholds": [
+      {
+       "v": 550,
+       "ja": "Critical level (Kazhydromet)"
+      },
+      {
+       "v": 600,
+       "ja": "2024 crest, 30 May to 3 Jun, held by 252 km of dams"
+      }
+     ],
+     "src": "Kazhydromet via regional HQ bulletins (Kazinform, Tengrinews, zakon.kz); start level and compressed timing assumed"
+    },
+    {
+     "key": "level_oral",
+     "group": "River level",
+     "name_ja": "Zhaiyk/Ural level at Uralsk (Kazhydromet gauge)",
+     "unit": "cm",
+     "kind": "level",
+     "start": 700,
+     "peak": 864,
+     "peak_h": 30,
+     "hold_h": 12,
+     "fall_h": 240,
+     "thresholds": [
+      {
+       "v": 850,
+       "ja": "Critical level: backflow into the Chagan floods dacha areas"
+      },
+      {
+       "v": 864,
+       "ja": "2024 peak (22 Apr), highest in 30 years"
+      }
+     ],
+     "src": "Kazhydromet post 2623 via Tengrinews / zakon.kz; compressed timing assumed"
+    },
+    {
+     "key": "level_inderbor",
+     "group": "River level",
+     "name_ja": "Zhaiyk/Ural level at Inderbor (Kazhydromet gauge)",
+     "unit": "cm",
+     "kind": "level",
+     "start": 420,
+     "peak": 1041,
+     "peak_h": 140,
+     "hold_h": 24,
+     "fall_h": 400,
+     "thresholds": [
+      {
+       "v": 845,
+       "ja": "Critical level"
+      },
+      {
+       "v": 1041,
+       "ja": "2024 peak (13-14 May)"
+      }
+     ],
+     "src": "Kazhydromet post 2614 / Ak Zhaiyk / Kazinform; start level and compressed timing assumed"
+    },
+    {
+     "key": "flow_irikla",
+     "group": "Reservoir release",
+     "name_ja": "Discharge from the Iriklinskoye reservoir, Ural headwaters (Orsk, Russia)",
+     "unit": "m³/s",
+     "kind": "flow",
+     "start": 450,
+     "peak": 2170,
+     "peak_h": -20,
+     "hold_h": 30,
+     "fall_h": 150,
+     "thresholds": [
+      {
+       "v": 390,
+       "ja": "Kazvodkhoz alert: emergency increase to 390 m³/s"
+      },
+      {
+       "v": 1650,
+       "ja": "Record release since 1994"
+      }
+     ],
+     "src": "Orsk.ru / Ural56 / RIA via Kazvodkhoz relays (values conflict: 1,672 vs 2,170); series starts at the reported maximum (negative peak_h), decline to 450 m³/s assumed"
+    },
+    {
+     "key": "temp_atyrau",
+     "group": "Temperature",
+     "name_ja": "Air temperature, Atyrau (snowmelt driver)",
+     "unit": "°C",
+     "kind": "temp",
+     "base": 14,
+     "amp": 5.5,
+     "peak": 20,
+     "peak_h": 60,
+     "width": 60,
+     "thresholds": [
+      {
+       "v": 0,
+       "ja": "Daily mean above 0 C: snowmelt over frozen ground"
+      },
+      {
+       "v": 10,
+       "ja": "Daily mean above 10 C: rapid melt phase (assumed)"
+      }
+     ],
+     "src": "Atyrau April normals 17.3/6.5 C (Wikipedia, Pogoda.ru.net 1991-2020); +3 C anomaly after April 2024 (1-6 C above normal) assumed"
+    },
+    {
+     "key": "rain_atyrau",
+     "group": "Rainfall",
+     "name_ja": "24-hour rainfall, Atyrau",
+     "unit": "mm",
+     "kind": "rain",
+     "base": 0.5,
+     "bursts": [
+      [
+       36,
+       10,
+       4
+      ],
+      [
+       100,
+       12,
+       6
+      ],
+      [
+       150,
+       8,
+       3
+      ]
+     ],
+     "thresholds": [
+      {
+       "v": 15,
+       "ja": "Heavy for Atyrau (April normal 16.6 mm for the whole month)"
+      }
+     ],
+     "src": "Climate normals (Wikipedia); showers assumed. Rain is a minor driver; snowmelt and reservoir release dominate"
+    }
+   ],
+   "incidents": [
+    {
+     "t": 0,
+     "type": "flood",
+     "district": "zhylyoi_kulsary",
+     "sev": 3,
+     "where_ja": "Kulsary, central stadium and market area",
+     "ja": "Zhem floodwater enters streets from the north-east; 0.3-0.5 m in low streets, akimat and market",
+     "src": "DES Atyrau Region"
+    },
+    {
+     "t": 1,
+     "type": "road",
+     "district": "zhylyoi_kulsary",
+     "sev": 3,
+     "where_ja": "Dossor-Kulsary road",
+     "ja": "Closed to all traffic by Zhem overflow; paved access from Atyrau to Tengiz cut",
+     "src": "KazAvtoZhol"
+    },
+    {
+     "t": 2,
+     "type": "flood",
+     "district": "zhylyoi_kulsary",
+     "sev": 3,
+     "where_ja": "Zhem earth embankment north of Kulsary",
+     "ja": "Embankment breached over about 30 m; water spreading into northern microdistricts",
+     "src": "DES Atyrau Region"
+    },
+    {
+     "t": 3,
+     "type": "power",
+     "district": "zhylyoi_kulsary",
+     "sev": 3,
+     "where_ja": "Kulsary, 10 microdistricts",
+     "ja": "Network de-energised for safety; about 2,900 houses without power",
+     "src": "Zhylyoi district power company"
+    },
+    {
+     "t": 5,
+     "type": "evac",
+     "district": "zhylyoi_kulsary",
+     "sev": 3,
+     "where_ja": "Kulsary",
+     "ja": "Mass evacuation ordered; 12,000 moved on day one, about 5,500 of them children",
+     "src": "MES / Zhylyoi akimat"
+    },
+    {
+     "t": 7,
+     "type": "evac",
+     "district": "zhylyoi_kulsary",
+     "sev": 2,
+     "where_ja": "Kulsary schools",
+     "ja": "School No. 19 and nine other points opened as temporary accommodation centres",
+     "src": "Zhylyoi akimat"
+    },
+    {
+     "t": 8,
+     "type": "supply",
+     "district": "zhylyoi_kulsary",
+     "sev": 3,
+     "where_ja": "Kulsary logistics base (station yard)",
+     "ja": "Yard under 0.5 m; operations suspended, stock moved to the mezzanine, staff released",
+     "src": "Company"
+    },
+    {
+     "t": 12,
+     "type": "rail",
+     "district": "zhylyoi_kulsary",
+     "sev": 2,
+     "where_ja": "Kulsary station, Makat-Beyneu line",
+     "ja": "Freight suspended Makat-Kulsary; anti-washout trains stationed; evacuation trains loading",
+     "src": "KTZ"
+    },
+    {
+     "t": 20,
+     "type": "health",
+     "district": "zhylyoi_kulsary",
+     "sev": 2,
+     "where_ja": "Zhylyoi Central District Hospital",
+     "ja": "Ground floor flooded; hospital closed, patients moved to the modular hospital",
+     "src": "Regional health department"
+    },
+    {
+     "t": 25,
+     "type": "flood",
+     "district": "oral_city",
+     "sev": 2,
+     "where_ja": "Uralsk, Chagan backwater and dacha cooperatives",
+     "ja": "Level 852 cm, above critical; backflow floods the Venera, Umitker and Yagodka dachas",
+     "src": "Kazhydromet / DES WKO"
+    },
+    {
+     "t": 34,
+     "type": "supply",
+     "district": "zhylyoi_kulsary",
+     "sev": 2,
+     "where_ja": "Tengiz field access",
+     "ja": "TCO convoys from Atyrau delayed 24-48 h; rerouted by rail to Kulsary and air to Teniz",
+     "src": "Company / TCO"
+    },
+    {
+     "t": 46,
+     "type": "health",
+     "district": "zhylyoi_kulsary",
+     "sev": 2,
+     "where_ja": "Kulsary school shelters",
+     "ja": "Shortage of hygiene kits, diapers and bedding; 37% of evacuees are children",
+     "src": "Red Crescent / IFRC"
+    },
+    {
+     "t": 56,
+     "type": "flood",
+     "district": "inder",
+     "sev": 2,
+     "where_ja": "Inderbor, riverside streets",
+     "ja": "Zhaiyk rising about 40 cm a day; low streets and the river road flooding",
+     "src": "DES Atyrau Region"
+    },
+    {
+     "t": 64,
+     "type": "road",
+     "district": "inder",
+     "sev": 2,
+     "where_ja": "Atyrau-Inderbor-Uralsk road, Inder district",
+     "ja": "Roadside erosion; escorted convoys only; boat service to isolated villages",
+     "src": "KazAvtoZhol / Caritas"
+    },
+    {
+     "t": 72,
+     "type": "flood",
+     "district": "makhambet",
+     "sev": 2,
+     "where_ja": "Makhambet district, Zhalgansay and Taldykol",
+     "ja": "Temporary dam at Zhalgansay breached; sirens; 129 residents of Taldykol evacuated",
+     "src": "MES"
+    },
+    {
+     "t": 88,
+     "type": "flood",
+     "district": "inder",
+     "sev": 3,
+     "where_ja": "Inderbor gauge",
+     "ja": "Zhaiyk passes the 845 cm critical mark; spill into Inderbor village",
+     "src": "Kazhydromet"
+    },
+    {
+     "t": 110,
+     "type": "health",
+     "district": "zhylyoi_kulsary",
+     "sev": 2,
+     "where_ja": "Kulsary outskirts, Zhem floodwater",
+     "ja": "Cold-water rescue: two people pulled from a tractor driven into floodwater; hypothermia",
+     "src": "MES"
+    },
+    {
+     "t": 124,
+     "type": "evac",
+     "district": "atyrau_city",
+     "sev": 2,
+     "where_ja": "Atyrau floodplain dachas (Kureni, Staritsa, Komintern)",
+     "ja": "Pre-emptive evacuation of dacha societies as the gauge passes 500 cm",
+     "src": "City akimat"
+    },
+    {
+     "t": 132,
+     "type": "flood",
+     "district": "atyrau_city",
+     "sev": 1,
+     "where_ja": "Atyrau embankments",
+     "ja": "Sandbagging on the 238 km dam system; volunteers requested at the Satpayev St embankment",
+     "src": "Regional HQ"
+    },
+    {
+     "t": 140,
+     "type": "water",
+     "district": "atyrau_city",
+     "sev": 1,
+     "where_ja": "Atyrau water treatment plant (Su Arnasy)",
+     "ja": "Intake protected with barriers; turbidity rising; supply continuing",
+     "src": "Su Arnasy"
+    },
+    {
+     "t": 150,
+     "type": "power",
+     "district": "atyrau_city",
+     "sev": 2,
+     "where_ja": "Atyrau Zharyk substations in red zones",
+     "ja": "Five substations sandbagged; pre-emptive switching planned if the gauge reaches 560 cm",
+     "src": "Atyrau Zharyk"
+    },
+    {
+     "t": 160,
+     "type": "road",
+     "district": "atyrau_city",
+     "sev": 1,
+     "where_ja": "Highway A-27, Atyrau-Dossor section",
+     "ja": "Overflow at low sections near Dossor; heavy vehicles delayed 2-4 h",
+     "src": "KazAvtoZhol"
+    }
+   ],
+   "supply_sites": [
+    "aty-branch"
+   ]
+  },
+  {
+   "id": "tas-heat-watch",
+   "type": "watch",
+   "status": "watch",
+   "country": "UZB",
+   "region": "uz-tas",
+   "city_ja": "Tashkent",
+   "country_ja": "Uzbekistan",
+   "hazard_ja": "Extreme heat warning",
+   "agency_ja": "Uzhydromet",
+   "name_ja": "Tashkent extreme-heat warning (orange level, mid-July)",
+   "short_ja": "TAS extreme heat warning",
+   "desc_ja": "Uzhydromet warns of 41-44 C daytime heat for about a week, modelled on the July 2025 and July 2026 heat waves (Tashkent 44.3 C on 2026-07-19, 0.3 C below the 1997 record). Risks are heat illness, rolling power outages as air-conditioning load peaks, and low water pressure; no damage model applies (watch-type scenario).",
+   "t0_ja": "t=0: Uzhydromet issues an orange heat warning for Tashkent (08:00 local)",
+   "t0_iso": "2026-07-13T08:00:00+05:00",
+   "default_t": 100,
+   "area_id": "tas_center",
+   "area_site": "tas-office",
+   "bbox": [
+    68.85,
+    41.05,
+    69.75,
+    41.6
+   ],
+   "map_adm1": [
+    "UZB-4828",
+    "UZB-372"
+   ],
+   "districts": [],
+   "sites": [],
+   "shelters": [],
+   "supplies": [],
+   "utilities": [],
+   "logistics": [],
+   "requests": [],
+   "actions": [
+    {
+     "t": 0,
+     "ja": "Shift office hours to 07:00-14:00, allow remote work, check the office cooling and stock drinking water (3 L per person per day)",
+     "why": "Labour inspectorate guidance during heat waves: avoid outdoor and heavy work 11:00-16:00"
+    },
+    {
+     "t": 0,
+     "ja": "Call staff and family members at risk (older adults, pregnant women, chronic conditions) every day; share WHO heat advice",
+     "why": "Heat deaths are mostly cardiovascular and respiratory exacerbations, not heatstroke"
+    },
+    {
+     "t": 48,
+     "ja": "Prepare for rolling outages: charge devices, fuel the generator for the server room, designate one cool room with backup power",
+     "why": "July 2025 and 2026 outages followed cable and transformer failures at peak load (1.7-1.8 GW in Tashkent)"
+    },
+    {
+     "t": 96,
+     "ja": "Ask suppliers in Chirchik, Angren and Asaka about heat-related production limits and transport delays",
+     "why": "Factories and power plants run at reduced margins at 42-44 C"
+    }
+   ],
+   "timeline": [
+    {
+     "t": 0,
+     "who": "Uzhydromet",
+     "ja": "Orange heat warning: 41-44 C daytime in Tashkent through the week",
+     "cls": "warn"
+    },
+    {
+     "t": 2,
+     "who": "Country office",
+     "ja": "Heat protocol activated: shifted hours, remote work, daily check on at-risk staff and families",
+     "cls": "ok"
+    },
+    {
+     "t": 48,
+     "who": "State Labour Inspectorate",
+     "ja": "Employers told to cut outdoor and heavy work between 11:00 and 16:00",
+     "cls": "warn"
+    },
+    {
+     "t": 120,
+     "who": "Ministry of Energy",
+     "ja": "Temporary outages reported in seven city districts; one fault cuts about 7,000 customers",
+     "cls": "warn"
+    },
+    {
+     "t": 151,
+     "who": "Uzhydromet",
+     "ja": "Tashkent observatory 44.3 C, the peak of the heat wave",
+     "cls": "crit"
+    },
+    {
+     "t": 192,
+     "who": "Uzhydromet",
+     "ja": "Warning expected to be downgraded as a cooler, windy air mass arrives",
+     "cls": "ok"
+    }
+   ],
+   "events": [],
+   "hospitals": [
+    {
+     "name_ja": "Republican Scientific Centre of Emergency Medical Care (RSCEMP)",
+     "district": "chilanzar",
+     "district_ja": "Chilanzar district",
+     "jp": false,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Open",
+       "note": "Heat-related admissions rising; ambulance 103 under heavy load"
+      }
+     ]
+    },
+    {
+     "name_ja": "Tashkent International Clinic",
+     "district": "mirabad",
+     "district_ja": "Mirabad district",
+     "jp": true,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Open (English-speaking)",
+       "note": "Appointments by phone; heat-illness triage"
+      }
+     ]
+    },
+    {
+     "name_ja": "Shox International Hospital",
+     "district": "yakkasaray",
+     "district_ja": "Yakkasaray district",
+     "jp": true,
+     "states": [
+      {
+       "t": 0,
+       "cls": "ok",
+       "ja": "Open (English-speaking)",
+       "note": "Private; emergency department 24 h"
+      }
+     ]
+    }
+   ],
+   "weather": {
+    "temp": 43,
+    "rh": 20,
+    "desc_ja": "Clear, hot, light dust haze",
+    "rain_ja": "No rain expected; gusty wind and dust likely when the heat breaks",
+    "advice_ja": [
+     "Drink water regularly (do not wait for thirst); avoid alcohol and heavy meals",
+     "Stay out of the sun 11:00-17:00; keep rooms shaded and ventilate at night",
+     "Check on older people, pregnant women and chronic patients daily; never leave children or pets in cars",
+     "Never run generators indoors (carbon monoxide); keep medicines below 25 C"
+    ],
+    "src": "https://en.wikipedia.org/wiki/Tashkent#Climate",
+    "src_name": "Normals: Wikipedia climate box (1991-2020); heat-wave values from the 2025-2026 Uzhydromet reports in the research dossier"
+   },
+   "forcing": [
+    {
+     "key": "tmax",
+     "group": "Air temperature",
+     "name_ja": "Air temperature, Tashkent observatory (WMO 38457)",
+     "unit": "°C",
+     "kind": "temp",
+     "base": 32,
+     "amp": 7,
+     "peak": 37,
+     "peak_h": 151,
+     "width": 80,
+     "thresholds": [
+      {
+       "v": 40,
+       "ja": "Heat warning level (assumed from Uzhydromet practice)"
+      },
+      {
+       "v": 42,
+       "ja": "Outdoor work suspended 11:00-16:00 (labour inspectorate, 2026-07-15 advisory)"
+      },
+      {
+       "v": 44.6,
+       "ja": "All-time record 44.6 C (1997-07-18)"
+      }
+     ],
+     "src": "July 1991-2020 normal max 35.9 C; 2026-07-19 44.3 C; shape of the diurnal cycle and the plateau assumed"
+    },
+    {
+     "key": "load",
+     "group": "Grid load",
+     "name_ja": "Electricity demand, Tashkent city",
+     "unit": "MW",
+     "kind": "wind",
+     "base": 1250,
+     "peak": 1811,
+     "peak_h": 150,
+     "width": 70,
+     "thresholds": [
+      {
+       "v": 1705,
+       "ja": "2024 Tashkent peak load (2024-07-27)"
+      },
+      {
+       "v": 1811,
+       "ja": "July 2025 record peak (outages followed)"
+      }
+     ],
+     "src": "Ministry of Energy peak-load statements 2023-2026 (search snippets); curve assumed"
+    },
+    {
+     "key": "wind",
+     "group": "Wind and dust",
+     "name_ja": "Wind gusts, Tashkent (end of the heat wave)",
+     "unit": "m/s",
+     "kind": "wind",
+     "base": 4,
+     "peak": 19,
+     "peak_h": 166,
+     "width": 12,
+     "thresholds": [
+      {
+       "v": 15,
+       "ja": "Strong-wind / dust-storm warning level (assumed from Uzhydromet warning texts)"
+      }
+     ],
+     "src": "Uzhydromet 2021 and 2025 wind/dust warnings (13-28 m/s); timing assumed"
+    }
+   ],
+   "incidents": [
+    {
+     "t": 50,
+     "type": "power",
+     "district": "",
+     "sev": 1,
+     "where_ja": "Chilanzar and Yunusabad",
+     "ja": "Short outages as 10 kV cables overheat at midday",
+     "src": "Tashkent City Power Grid"
+    },
+    {
+     "t": 96,
+     "type": "health",
+     "district": "",
+     "sev": 2,
+     "where_ja": "Nationwide (103 service)",
+     "ja": "Ambulance service reports about 41,700 calls per day during the heat (166,726 in four days)",
+     "src": "Emergency Medical Service"
+    },
+    {
+     "t": 120,
+     "type": "power",
+     "district": "",
+     "sev": 2,
+     "where_ja": "Almazar, Chilanzar, Mirzo-Ulugbek, Mirabad, Yunusabad, Uchtepa, Yashnabad",
+     "ja": "Temporary outages in seven districts; a separate fault cuts about 7,000 customers",
+     "src": "Ministry of Energy"
+    },
+    {
+     "t": 140,
+     "type": "water",
+     "district": "",
+     "sev": 1,
+     "where_ja": "Yunusabad and Sergeli upper floors",
+     "ja": "Low water pressure as pumping load peaks; tanker schedule published",
+     "src": "Suvsoz (assumed)"
+    },
+    {
+     "t": 151,
+     "type": "heat",
+     "district": "",
+     "sev": 2,
+     "where_ja": "Tashkent observatory",
+     "ja": "44.3 C measured, 0.3 C below the all-time record",
+     "src": "Uzhydromet"
+    },
+    {
+     "t": 166,
+     "type": "dust",
+     "district": "",
+     "sev": 1,
+     "where_ja": "City-wide",
+     "ja": "Gusts of 15-20 m/s with dust end the heat; branches down, air quality poor",
+     "src": "Uzhydromet (assumed timing)"
+    }
+   ],
+   "supply_sites": [
+    "tas-office"
+   ],
+   "kpi_dead_note_ja": "Watch scenario: no damage model. For scale, the World Bank (2025) estimates 19-21 heat-related excess deaths per 100,000 people per year in Tashkent-class cities.",
+   "supply_note_ja": "No supply model for the watch scenario.",
+   "sources": [
+    {
+     "name": "Research dossier scenario_tas-heat-watch.json (Uzhydromet, Ministry of Energy, Ministry of Health statements 2025-2026 via search snippets; Wikipedia climate normals; Open-Meteo)",
+     "url": "https://api.open-meteo.com/",
+     "confirmed_by": "search_snippet"
+    }
+   ]
+  }
+ ]
+}

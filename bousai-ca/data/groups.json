@@ -1,0 +1,940 @@
+{
+ "_note": "Fictional company groups for the demo: residence clusters (shares assumed, districts real), supply-chain nodes (real places, relationships assumed), residents (public figures with sources in regions.json) and responders/NGOs (real organizations, capacities assumed).",
+ "staff": {
+  "alm-hq": {
+   "summary_ja": "85 staff (9 expatriates, 14 with families). Residence shares across districts are assumed in proportion to district population; expatriates concentrated in Samal-2 / Dostyk Avenue high-rise apartments (Medeu district, diplomatic quarter).",
+   "headcount": 85,
+   "japanese": 9,
+   "families": 14,
+   "vulnerable": 7,
+   "commute_ja": "Car 45%, public transport 40%, taxi/walking 15% (assumed)",
+   "clusters": [
+    {
+     "id": "auezov",
+     "name_ja": "Auezov",
+     "lat": 43.2242,
+     "lon": 76.8503,
+     "n": 18,
+     "jp": 9,
+     "fam": 8,
+     "district": "auezov",
+     "home_ja": "Samal-2 / Dostyk Avenue high-rise apartments (Medeu district, diplomatic quarter)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kazakhstan/admin/16__almaty_qal)"
+    },
+    {
+     "id": "alatau",
+     "name_ja": "Alatau",
+     "lat": 43.3,
+     "lon": 76.87,
+     "n": 17,
+     "jp": 1,
+     "fam": 4,
+     "district": "alatau",
+     "home_ja": "Koktem-2 / Esentai (Al-Farabi) high-rise apartments (Bostandyk district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kazakhstan/admin/16__almaty_qal)"
+    },
+    {
+     "id": "bostandyk",
+     "name_ja": "Bostandyk",
+     "lat": 43.2,
+     "lon": 76.9,
+     "n": 16,
+     "jp": 0,
+     "fam": 1,
+     "district": "bostandyk",
+     "home_ja": "Gorny Gigant detached houses on the foothill slopes (Medeu district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kazakhstan/admin/16__almaty_qal)"
+    },
+    {
+     "id": "almaly",
+     "name_ja": "Almaly",
+     "lat": 43.25,
+     "lon": 76.9,
+     "n": 13,
+     "jp": 0,
+     "fam": 1,
+     "district": "almaly",
+     "home_ja": "Auezov district Soviet 9-storey panel blocks (Microdistrict 12 / Aksay)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kazakhstan/admin/16__almaty_qal)"
+    },
+    {
+     "id": "turksib",
+     "name_ja": "Turksib",
+     "lat": 43.35,
+     "lon": 76.9833,
+     "n": 13,
+     "jp": 0,
+     "fam": 1,
+     "district": "turksib",
+     "home_ja": "Apartment blocks",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://citypopulation.de/en/kazakhstan/admin/16__almaty_qal)"
+    }
+   ],
+   "schools_ja": "International school pickup rules to be agreed per family (assumed); public schools used as reception points in emergencies.",
+   "support_ja": [
+    "Family registration in the safety-confirmation system",
+    "Emergency card in English and local language",
+    "Stock guide (water 3 L/person/day, 3-7 days)",
+    "Heat and cold protocols for home"
+   ]
+  },
+  "aty-branch": {
+   "summary_ja": "85 staff (6 expatriates, 9 with families). Residence shares across districts are assumed in proportion to district population; expatriates concentrated in Dostyk Village / Dostyk microdistrict (west bank, Satpayev St) - compound houses.",
+   "headcount": 85,
+   "japanese": 6,
+   "families": 9,
+   "vulnerable": 7,
+   "commute_ja": "Car 45%, public transport 40%, taxi/walking 15% (assumed)",
+   "clusters": [
+    {
+     "id": "atyrau",
+     "name_ja": "Atyrau city",
+     "lat": 47.1067,
+     "lon": 51.9139,
+     "n": 42,
+     "jp": 6,
+     "fam": 5,
+     "district": "atyrau_city",
+     "home_ja": "Dostyk Village / Dostyk microdistrict (west bank, Satpayev St) - compound houses",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (Wikipedia 'Atyrau' infobox, population 2024 )"
+    },
+    {
+     "id": "west_bank",
+     "name_ja": "West-bank centre",
+     "lat": 47.1,
+     "lon": 51.888,
+     "n": 15,
+     "jp": 1,
+     "fam": 2,
+     "district": null,
+     "home_ja": "Nursaya microdistrict (NW, airport road) - new apartments and townhouses",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (assumed ~37% share of the city total )"
+    },
+    {
+     "id": "east_bank",
+     "name_ja": "East-bank centre",
+     "lat": 47.112,
+     "lon": 51.935,
+     "n": 12,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "East-bank centre (Azattyq Ave / Abay St / Almagul) - downtown apartments",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (assumed ~30% share of the city total - unverified)"
+    },
+    {
+     "id": "outer",
+     "name_ja": "Outer villages and delta",
+     "lat": 47.03,
+     "lon": 51.85,
+     "n": 4,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Balykshi / Zhumysker riverside houses (south-west, flood-exposed)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (unverified estimate; Erkinkala 47.0257,51.8028, Taskala 47.0)"
+    },
+    {
+     "id": "balykshi",
+     "name_ja": "Balykshi",
+     "lat": 47.0811,
+     "lon": 51.8774,
+     "n": 3,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Apartment blocks",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (unverified estimate; Balyqshy is a settlement within Atyrau )"
+    }
+   ],
+   "schools_ja": "International school pickup rules to be agreed per family (assumed); public schools used as reception points in emergencies.",
+   "support_ja": [
+    "Family registration in the safety-confirmation system",
+    "Emergency card in English and local language",
+    "Stock guide (water 3 L/person/day, 3-7 days)",
+    "Heat and cold protocols for home"
+   ]
+  },
+  "tas-office": {
+   "summary_ja": "45 staff (5 expatriates, 8 with families). Residence shares across districts are assumed in proportion to district population; expatriates concentrated in Tashkent City high-rise apartments (Nest One / Gardens Residence / Boulevard, Shaykhantakhur).",
+   "headcount": 45,
+   "japanese": 5,
+   "families": 8,
+   "vulnerable": 4,
+   "commute_ja": "Car 45%, public transport 40%, taxi/walking 15% (assumed)",
+   "clusters": [
+    {
+     "id": "olmazor",
+     "name_ja": "Olmazor",
+     "lat": 41.364,
+     "lon": 69.228,
+     "n": 9,
+     "jp": 5,
+     "fam": 5,
+     "district": null,
+     "home_ja": "Tashkent City high-rise apartments (Nest One / Gardens Residence / Boulevard, Shaykhantakhur)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Tashkent)"
+    },
+    {
+     "id": "yunusabad",
+     "name_ja": "Yunusabad",
+     "lat": 41.358,
+     "lon": 69.299,
+     "n": 9,
+     "jp": 1,
+     "fam": 2,
+     "district": null,
+     "home_ja": "C-1 / Buyuk Ipak Yoli quarter houses and low-rise flats (Mirzo-Ulugbek, embassy district)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Tashkent)"
+    },
+    {
+     "id": "shaykhantakhur",
+     "name_ja": "Shaykhantakhur",
+     "lat": 41.327,
+     "lon": 69.211,
+     "n": 9,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Yunusabad high-rise flats (Minor / C-5 Qiyot quarter, Amir Temur Avenue)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Tashkent)"
+    },
+    {
+     "id": "mirzo",
+     "name_ja": "Mirzo Ulugbek",
+     "lat": 41.3294,
+     "lon": 69.3475,
+     "n": 7,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Chilanzar Soviet panel blocks (kvartal 1-2 near Novza metro, local staff housing)",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Tashkent)"
+    },
+    {
+     "id": "uchtepa",
+     "name_ja": "Uchtepa",
+     "lat": 41.297,
+     "lon": 69.181,
+     "n": 7,
+     "jp": 0,
+     "fam": 0,
+     "district": null,
+     "home_ja": "Apartment blocks",
+     "note_ja": "Residence shares are assumptions; district population from the area research file (https://en.wikipedia.org/wiki/Tashkent)"
+    }
+   ],
+   "schools_ja": "International school pickup rules to be agreed per family (assumed); public schools used as reception points in emergencies.",
+   "support_ja": [
+    "Family registration in the safety-confirmation system",
+    "Emergency card in English and local language",
+    "Stock guide (water 3 L/person/day, 3-7 days)",
+    "Heat and cold protocols for home"
+   ]
+  }
+ },
+ "supply": {
+  "alm-hq": [
+   {
+    "id": "s-alm-1",
+    "kind": "logistics",
+    "name_ja": "Almaty International Airport cargo terminal",
+    "tier": "Logistics",
+    "lat": 43.3553,
+    "lon": 77.0447,
+    "region": "kz-alm",
+    "district": "turksib",
+    "share": 0.35,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "88,400 t cargo in 2022; largest cargo airport in Kazakhstan. (relationship assumed)"
+   },
+   {
+    "id": "s-alm-2",
+    "kind": "logistics",
+    "name_ja": "Almaty-1 freight/passenger station and Turksib yards",
+    "tier": "Logistics",
+    "lat": 43.3409,
+    "lon": 76.9488,
+    "region": "kz-alm",
+    "district": "turksib",
+    "share": 0.25,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Northern rail gateway; 3 tracks (passenger). (relationship assumed)"
+   },
+   {
+    "id": "s-alm-3",
+    "kind": "logistics",
+    "name_ja": "Zhetygen rail junction (Ile district) - start of the Khorgos line",
+    "tier": "Logistics",
+    "lat": 43.65,
+    "lon": 77.15,
+    "region": "kz-alm",
+    "district": null,
+    "share": 0.5,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Khorgos-Zhetygen railway (293 km) opened 2011-12; coordinates APPROXIMATE/UNVERIFIED. (relationship assumed)"
+   },
+   {
+    "id": "s-alm-4",
+    "kind": "logistics",
+    "name_ja": "Khorgos Gateway dry port / Altynkol",
+    "tier": "Logistics",
+    "lat": 44.2125,
+    "lon": 80.4097,
+    "region": "kz-alm",
+    "district": null,
+    "share": 0.3,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "372,000+ TEU in 2025; capacity 800,000 TEU/yr; coordinates are the Khorgos (CN) town coordinates from Wikipedia, the KZ dry port lies a few  (relationship assumed)"
+   },
+   {
+    "id": "s-alm-5",
+    "kind": "logistics",
+    "name_ja": "Dostyk rail border crossing",
+    "tier": "Logistics",
+    "lat": 45.2533,
+    "lon": 82.4844,
+    "region": "kz-alm",
+    "district": null,
+    "share": 0.2,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Alternative China gateway; bogie exchange. (relationship assumed)"
+   },
+   {
+    "id": "s-alm-6",
+    "kind": "logistics",
+    "name_ja": "Aktau seaport",
+    "tier": "Logistics",
+    "lat": 43.6525,
+    "lon": 51.1575,
+    "region": "kz-alm",
+    "district": null,
+    "share": 1.0,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Caspian / Middle Corridor outlet; ~3 days by rail from Almaty. (relationship assumed)"
+   }
+  ],
+  "aty-branch": [
+   {
+    "id": "s-aty-1",
+    "kind": "supplier",
+    "name_ja": "Tengiz field and TCO plant (Tengizchevroil)",
+    "tier": "Tier1",
+    "lat": 46.153,
+    "lon": 53.383,
+    "region": "kz-aty",
+    "district": null,
+    "share": 0.35,
+    "single": true,
+    "inventory_days": 10,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Chevron 50 / ExxonMobil 25 / KazMunayGas 20 / Lukoil 5 percent; capacity about 540,000 bbl/d crude plus 260,000 bbl/d from the Future Growth (relationship assumed)"
+   },
+   {
+    "id": "s-aty-2",
+    "kind": "logistics",
+    "name_ja": "TCO rotational camps and airfield (Shanyrak area)",
+    "tier": "Logistics",
+    "lat": 46.3,
+    "lon": 53.428,
+    "region": "kz-aty",
+    "district": null,
+    "share": 0.25,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Camps built for FGP contractors used as evacuation shelters 2024-04-06 to June; airfield at this point (OSM). (relationship assumed)"
+   },
+   {
+    "id": "s-aty-3",
+    "kind": "supplier",
+    "name_ja": "Kashagan field (NCOC, offshore) with Bolashak onshore plant at Karabat",
+    "tier": "Tier1",
+    "lat": 46.167,
+    "lon": 51.583,
+    "region": "kz-aty",
+    "district": null,
+    "share": 0.5,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Offshore facilities operated normally (NCOC, 2024-03-30); Bolashak plant near Karabatan about 47.277 N 52.317 E on the Atyrau-Dossor corrido (relationship assumed)"
+   },
+   {
+    "id": "s-aty-4",
+    "kind": "customer",
+    "name_ja": "Atyrau refinery (KazMunayGas)",
+    "tier": "Major customer",
+    "lat": 47.0718,
+    "lon": 51.9254,
+    "region": "kz-aty",
+    "district": "atyrau_city",
+    "share": 0.3,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "On the right bank in the south of the city; no 2024 flood impact reported; halted by regional power outages in 2023, so power loss is the re (relationship assumed)"
+   },
+   {
+    "id": "s-aty-5",
+    "kind": "utility",
+    "name_ja": "Atyrau CHP (TETs)",
+    "tier": "Utility",
+    "lat": 47.083,
+    "lon": 51.942,
+    "region": "kz-aty",
+    "district": "atyrau_city",
+    "share": 0.2,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "City heat and power plant; depends on TCO gas; outside the 2024 flood zone. (relationship assumed)"
+   },
+   {
+    "id": "s-aty-6",
+    "kind": "utility",
+    "name_ja": "Atyrau Zharyk JSC head office",
+    "tier": "Utility",
+    "lat": 47.1103,
+    "lon": 51.9295,
+    "region": "kz-aty",
+    "district": "atyrau_city",
+    "share": 1.0,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Regional electricity distributor; five substations in red zones sandbagged in May 2024. (relationship assumed)"
+   }
+  ],
+  "tas-office": [
+   {
+    "id": "s-tas-1",
+    "kind": "supplier",
+    "name_ja": "UzAuto Motors assembly plant, Asaka (Andijan Region)",
+    "tier": "Tier1",
+    "lat": 40.6462,
+    "lon": 72.2489,
+    "region": "uz-tas",
+    "district": null,
+    "share": 0.35,
+    "single": true,
+    "inventory_days": 10,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "327,000 vehicles (2022), 16,000 employees (Aug 2023), revenue USD 3.27 bn (2022); plants at Asaka and Pitnak, engine plant in Tashkent (225, (relationship assumed)"
+   },
+   {
+    "id": "s-tas-2",
+    "kind": "logistics",
+    "name_ja": "Navoi Free Industrial Economic Zone and Navoi airport cargo terminal",
+    "tier": "Logistics",
+    "lat": 40.1035,
+    "lon": 65.3734,
+    "region": "uz-tas",
+    "district": null,
+    "share": 0.25,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "FIEZ next to Navoi International Airport, highway E-40 and rail (Wikipedia); city population 171,496 (2026, Wikipedia). Coordinates = Navoi  (relationship assumed)"
+   },
+   {
+    "id": "s-tas-3",
+    "kind": "utility",
+    "name_ja": "Angren industrial town (coal basin, Angren TPP, construction materials",
+    "tier": "Utility",
+    "lat": 41.0182,
+    "lon": 70.0979,
+    "region": "uz-tas",
+    "district": null,
+    "share": 0.5,
+    "single": true,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Population 191,300 (2021), 961 m elevation, 70 mi east of Tashkent (Wikipedia). Coal-fired Angren/Novo-Angren TPPs supply the Tashkent node  (relationship assumed)"
+   },
+   {
+    "id": "s-tas-4",
+    "kind": "supplier",
+    "name_ja": "Chirchik industrial town (fertilizer/electrochemical works, ferroalloy",
+    "tier": "Tier1",
+    "lat": 41.4726,
+    "lon": 69.5812,
+    "region": "uz-tas",
+    "district": null,
+    "share": 0.3,
+    "single": false,
+    "inventory_days": 14,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Population 162,800 (2021); 32 km NE of Tashkent on the Chirchik river; water diversion just outside the city is the major drinking-water sou (relationship assumed)"
+   },
+   {
+    "id": "s-tas-5",
+    "kind": "logistics",
+    "name_ja": "Tashkent International Airport cargo terminal (My Freighter hub)",
+    "tier": "Logistics",
+    "lat": 41.2578,
+    "lon": 69.2811,
+    "region": "uz-tas",
+    "district": null,
+    "share": 0.2,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "9.99 M passengers 2025; cargo network to Shanghai, Dubai, Istanbul, Schiphol (Wikipedia). (relationship assumed)"
+   },
+   {
+    "id": "s-tas-6",
+    "kind": "logistics",
+    "name_ja": "Tashkent central railway station and freight yards (Uzbekistan Railway",
+    "tier": "Logistics",
+    "lat": 41.2933,
+    "lon": 69.2877,
+    "region": "uz-tas",
+    "district": null,
+    "share": 1.0,
+    "single": false,
+    "inventory_days": null,
+    "alt_ja": "Alternative route/supplier to be identified (assumed)",
+    "note_ja": "Afrosiyob high-speed and conventional freight; 40% of national freight by rail (Wikipedia). (relationship assumed)"
+   }
+  ]
+ },
+ "residents": {
+  "kz-alm": {
+   "summary_ja": "Almaty (city and region): about 3.9 million residents (Almaty city 2.35 M (1 Jan 2026 estimate) + Almaty Region 1,520,216 (2023, after the 2022 split of Jetisu) - Wikipedia infoboxes citing stat.gov.kz (third_party)). Largest city and business hub of Kazakhstan, built on the alluvial fans of the Trans-Ili Alatau (Tien Shan) at 700-1,000 m, with Almaty Region (Ili valley, Kaps",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "MES mass SMS alerts (sender '112'), Cell Broadcast emergency alerts, 'Mass Alert' earthquake warning system (Almaty + 9 regions), Kazhydromet storm warnings (kazhydromet.kz, 'storm warning' pages and daily flood bulletins)"
+  },
+  "kz-ast": {
+   "summary_ja": "Astana and Akmola Region: about 2.5 million residents (Astana 1,700,385 (1 Sep 2026) + Akmola Region 785,708 (2022-01-01) - Wikipedia infoboxes citing stat.gov.kz (third_party)). The capital (since 1997) on the Yesil/Ishim river in the flat northern steppe at 350 m, with the surrounding Akmola Region (Kokshetau, Atbasar, Stepnogorsk; gra",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "MES mass SMS alerts (sender '112'), Cell Broadcast emergency alerts, 'Mass Alert' earthquake warning system (Almaty + 9 regions), Kazhydromet storm warnings (kazhydromet.kz, 'storm warning' pages and daily flood bulletins)"
+  },
+  "kz-aty": {
+   "summary_ja": "Atyrau Region (lower Zhaiyk/Ural, Caspian coast): about 0.7 million residents (Atyrau Region 681,241 (2022; Atyrau city 404,129 in 2024) - Wikipedia infoboxes (third_party)). Oil region on the north-east Caspian shore (Tengiz, Kashagan, Atyrau refinery) in the Caspian Depression, 20-28 m below sea level, flat and semi-desert. Atyrau ",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "MES mass SMS alerts (sender '112'), Cell Broadcast emergency alerts, 'Mass Alert' earthquake warning system (Almaty + 9 regions), Kazhydromet storm warnings (kazhydromet.kz, 'storm warning' pages and daily flood bulletins)"
+  },
+  "kz-shy": {
+   "summary_ja": "Shymkent and Turkistan Region: about 3.4 million residents (Shymkent 1,274,296 (1 Jun 2025, Wikipedia infobox) + Turkistan Region about 2.1 M (assumed from Bureau of National Statistics 2024 figures; the Wikipedia infobox value 2,685,009 is a 2013 pre-split figure that includes Shymkent) - third_party / assumed). Kazakhstan's third city (city of republican significance since 2018) and the densely populated irrigated south along the Syr Darya, Arys, Keles and Badam rivers",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "MES mass SMS alerts (sender '112'), Cell Broadcast emergency alerts, 'Mass Alert' earthquake warning system (Almaty + 9 regions), Kazhydromet storm warnings (kazhydromet.kz, 'storm warning' pages and daily flood bulletins)"
+  },
+  "uz-tas": {
+   "summary_ja": "Tashkent (city and region): about 6.1 million residents (Tashkent city 3,164,030 (1 Oct 2025, Tashkent city statistics office, via Wikipedia) + Tashkent Region 2,975,900 (2021, via Wikipedia); third_party, rounded.). Capital city (about 3.2 M) on the Chirchik river fan at 450 m, with the surrounding Tashkent Region (Chirchik, Angren, Almalyk industrial towns, Charvak reservo",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "Uzhydromet storm, flood and mudflow warnings (official Telegram channel, meteo.uz, relayed by Kun.uz/UzDaily), Ministry of Emergency Situations press service (gov.uz/oz/fvv, Telegram), Sirens, mosque loudspeakers and outdoor screens (UNDP-MChS-Uzhydromet early-warning project), Unified 112 emergency number (Ministry of Digital Technologies)"
+  },
+  "uz-fer": {
+   "summary_ja": "Fergana Valley (Fergana, Andijan, Namangan): about 10.2 million residents (Fergana Region 4,014,895 (2023) + Andijan Region 3,253,528 (2022) + Namangan Region 2,931,056 (2022), regional statistics via Wikipedia; third_party, rounded.). The Uzbek part of the Fergana Valley holds about 10 M people (over a quarter of the country) in the densest farmland of Central Asia, ringed by the Tien Shan, A",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "Uzhydromet storm, flood and mudflow warnings (official Telegram channel, meteo.uz, relayed by Kun.uz/UzDaily), Ministry of Emergency Situations press service (gov.uz/oz/fvv, Telegram), Sirens, mosque loudspeakers and outdoor screens (UNDP-MChS-Uzhydromet early-warning project), Unified 112 emergency number (Ministry of Digital Technologies)"
+  },
+  "uz-sam": {
+   "summary_ja": "Samarkand and Bukhara: about 6.1 million residents (Samarkand Region 4,031,324 (2022) + Bukhara Region 2,107,035 (2026, stat.uz), via Wikipedia; third_party, rounded.). The Zarafshan oasis corridor: Samarkand Region (4.0 M, the most populous province, at 700 m in the Zarafshan valley between the Nurata and Hissar ranges) and Bu",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "Uzhydromet storm, flood and mudflow warnings (official Telegram channel, meteo.uz, relayed by Kun.uz/UzDaily), Ministry of Emergency Situations press service (gov.uz/oz/fvv, Telegram), Sirens, mosque loudspeakers and outdoor screens (UNDP-MChS-Uzhydromet early-warning project), Unified 112 emergency number (Ministry of Digital Technologies)"
+  },
+  "kg-bis": {
+   "summary_ja": "Bishkek and Chuy Region: about 2.35 million residents (Bishkek 1,362,900 (NSC, 2026-02-01, via 24.kg) + Chuy Region about 985,000 (NSC, 2026-02-01, via Akchabar) - search_snippet; Wikipedia infoboxes give Bishkek 1,120,827 (2025) and Chuy 1,068,702 (2023-01-01) before suburbs were transferred to the city (third_party)). Capital region on the alluvial fans and loess plain of the Chuy valley at 700-900 m, between the Kyrgyz Ala-Too range to the south and the Chu river and Kazakh ",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "'112 Kyrgyzstan' mobile app (MES), Mass SMS alerts through mobile operators (MES / Ministry of Digital Development), State Integrated Public Alert and Warning System (sirens, loudspeakers, broadcast interruption), Kyrgyzhydromet storm warnings (shtormovoye preduprezhdeniye)"
+  },
+  "kg-osh": {
+   "summary_ja": "Osh and southern Kyrgyzstan (Jalal-Abad, Batken): about 3.8 million residents (Osh city 454,858 (March 2024) + Osh Region 1,460,425 + Jalal-Abad Region 1,311,007 + Batken Region 570,898 (all 2023-01-01) = 3.80 M - Wikipedia infoboxes citing the National Statistical Committee (third_party)). Southern Kyrgyzstan on the mountainous rim of the Fergana Valley: Osh (second city, 455,000, at 963 m on the Ak-Buura river), the Jalal-Abad lowlands with the T",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "'112 Kyrgyzstan' mobile app (MES), Mass SMS alerts through mobile operators (MES / Ministry of Digital Development), State Integrated Public Alert and Warning System (sirens, loudspeakers, broadcast interruption), Kyrgyzhydromet storm warnings (shtormovoye preduprezhdeniye)"
+  },
+  "tj-dus": {
+   "summary_ja": "Dushanbe and Districts of Republican Subordination: about 3.4 million residents (Dushanbe city 1,228,400 (March 2024) + Districts of Republican Subordination 2,165,900 (2020), both Wikipedia infoboxes (third_party), rounded; 3.4-3.5 M is the working figure.). The capital (1.2 M, 820 m) sits in the Hisor valley on the Varzob and Kofarnihon rivers between the Hisor range and the loess hills of Rudaki; the surrounding D",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "CoES SMS weather and road warnings via mobile operators, Tajikhydromet (Agency for Hydrometeorology) storm warnings and forecasts, meteo.tj, Khovar state news agency, TV Tojikiston/Safina and radio bulletins, CoES duty-officer telephone lines"
+  },
+  "tj-khu": {
+   "summary_ja": "Khujand and Sughd Region: about 2.7 million residents (Sughd Region 2,707,300 (2020, Wikipedia infobox; about 2.9 M by 2024 assuming the national growth rate); Khujand city 191,000 (2019) with an urban area of about 770,000 (Wikipedia). third_party.). Sughd is the northern third of Tajikistan: the western Fergana Valley lowland on the Syr Darya around Khujand (300 m), Kayrakkum reservoir, Konibodom and Isfara",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Elderly and foreign shares are assumptions (Central Asian populations are young; national statistics not retrieved). District exposure follows the live scenario where one exists.",
+   "channels_ja": "CoES SMS weather and road warnings via mobile operators, Tajikhydromet (Agency for Hydrometeorology) storm warnings and forecasts, meteo.tj, Khovar state news agency, TV Tojikiston/Safina and radio bulletins, CoES duty-officer telephone lines"
+  },
+  "default": {
+   "summary_ja": "Residents of the selected region (see regions.json for population and sources).",
+   "elderly_share": 0.08,
+   "foreign_share": 0.02,
+   "note_ja": "Assumptions.",
+   "channels_ja": "TV/radio, SMS, emergency-ministry channels"
+  }
+ },
+ "ngos": {
+  "kz-alm": [
+   {
+    "name_ja": "Red Crescent Society of Kazakhstan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items, volunteers (capacity assumed: 10 teams)",
+    "url": "https://redcrescent.kz/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Center for Emergency Situations and Disaster Risk Reduction (CESDRR), Almaty",
+    "kind": "Regional centre",
+    "cap_ja": "Coordination, information exchange, training",
+    "url": "https://cesdrr.org/",
+    "coverage": "Central Asia"
+   },
+   {
+    "name_ja": "UNDP Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Recovery and DRR programmes",
+    "url": "https://www.undp.org/kazakhstan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "IOM Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Displacement tracking, shelter support",
+    "url": "https://kazakhstan.iom.int/",
+    "coverage": "National"
+   }
+  ],
+  "kz-ast": [
+   {
+    "name_ja": "Red Crescent Society of Kazakhstan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items, volunteers (capacity assumed: 10 teams)",
+    "url": "https://redcrescent.kz/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Center for Emergency Situations and Disaster Risk Reduction (CESDRR), Almaty",
+    "kind": "Regional centre",
+    "cap_ja": "Coordination, information exchange, training",
+    "url": "https://cesdrr.org/",
+    "coverage": "Central Asia"
+   },
+   {
+    "name_ja": "UNDP Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Recovery and DRR programmes",
+    "url": "https://www.undp.org/kazakhstan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "IOM Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Displacement tracking, shelter support",
+    "url": "https://kazakhstan.iom.int/",
+    "coverage": "National"
+   }
+  ],
+  "kz-aty": [
+   {
+    "name_ja": "Red Crescent Society of Kazakhstan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items, volunteers (capacity assumed: 10 teams)",
+    "url": "https://redcrescent.kz/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Center for Emergency Situations and Disaster Risk Reduction (CESDRR), Almaty",
+    "kind": "Regional centre",
+    "cap_ja": "Coordination, information exchange, training",
+    "url": "https://cesdrr.org/",
+    "coverage": "Central Asia"
+   },
+   {
+    "name_ja": "UNDP Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Recovery and DRR programmes",
+    "url": "https://www.undp.org/kazakhstan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "IOM Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Displacement tracking, shelter support",
+    "url": "https://kazakhstan.iom.int/",
+    "coverage": "National"
+   }
+  ],
+  "kz-shy": [
+   {
+    "name_ja": "Red Crescent Society of Kazakhstan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items, volunteers (capacity assumed: 10 teams)",
+    "url": "https://redcrescent.kz/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Center for Emergency Situations and Disaster Risk Reduction (CESDRR), Almaty",
+    "kind": "Regional centre",
+    "cap_ja": "Coordination, information exchange, training",
+    "url": "https://cesdrr.org/",
+    "coverage": "Central Asia"
+   },
+   {
+    "name_ja": "UNDP Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Recovery and DRR programmes",
+    "url": "https://www.undp.org/kazakhstan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "IOM Kazakhstan",
+    "kind": "UN agency",
+    "cap_ja": "Displacement tracking, shelter support",
+    "url": "https://kazakhstan.iom.int/",
+    "coverage": "National"
+   }
+  ],
+  "uz-tas": [
+   {
+    "name_ja": "Red Crescent Society of Uzbekistan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items, volunteers (capacity assumed)",
+    "url": "https://redcrescent.uz/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "DRR and climate programmes",
+    "url": "https://www.undp.org/uzbekistan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNICEF Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "Children, heat and water support",
+    "url": "https://www.unicef.org/uzbekistan/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "WHO Country Office Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "Health guidance (heat, water)",
+    "url": "https://www.who.int/uzbekistan",
+    "coverage": "National"
+   }
+  ],
+  "uz-fer": [
+   {
+    "name_ja": "Red Crescent Society of Uzbekistan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items, volunteers (capacity assumed)",
+    "url": "https://redcrescent.uz/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "DRR and climate programmes",
+    "url": "https://www.undp.org/uzbekistan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNICEF Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "Children, heat and water support",
+    "url": "https://www.unicef.org/uzbekistan/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "WHO Country Office Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "Health guidance (heat, water)",
+    "url": "https://www.who.int/uzbekistan",
+    "coverage": "National"
+   }
+  ],
+  "uz-sam": [
+   {
+    "name_ja": "Red Crescent Society of Uzbekistan",
+    "kind": "Red Crescent",
+    "cap_ja": "First aid, relief items, volunteers (capacity assumed)",
+    "url": "https://redcrescent.uz/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "DRR and climate programmes",
+    "url": "https://www.undp.org/uzbekistan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNICEF Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "Children, heat and water support",
+    "url": "https://www.unicef.org/uzbekistan/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "WHO Country Office Uzbekistan",
+    "kind": "UN agency",
+    "cap_ja": "Health guidance (heat, water)",
+    "url": "https://www.who.int/uzbekistan",
+    "coverage": "National"
+   }
+  ],
+  "kg-bis": [
+   {
+    "name_ja": "Red Crescent Society of Kyrgyzstan",
+    "kind": "Red Crescent",
+    "cap_ja": "Disaster response teams, relief stocks (capacity assumed)",
+    "url": "https://redcrescent.kg/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "ACTED Kyrgyzstan",
+    "kind": "NGO",
+    "cap_ja": "Emergency response and DRR",
+    "url": "https://www.acted.org/en/countries/kyrgyzstan/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Kyrgyzstan",
+    "kind": "UN agency",
+    "cap_ja": "DRR programmes with MES",
+    "url": "https://www.undp.org/kyrgyzstan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "WFP Kyrgyzstan",
+    "kind": "UN agency",
+    "cap_ja": "Food assistance",
+    "url": "https://www.wfp.org/countries/kyrgyzstan",
+    "coverage": "National"
+   }
+  ],
+  "kg-osh": [
+   {
+    "name_ja": "Red Crescent Society of Kyrgyzstan",
+    "kind": "Red Crescent",
+    "cap_ja": "Disaster response teams, relief stocks (capacity assumed)",
+    "url": "https://redcrescent.kg/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "ACTED Kyrgyzstan",
+    "kind": "NGO",
+    "cap_ja": "Emergency response and DRR",
+    "url": "https://www.acted.org/en/countries/kyrgyzstan/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Kyrgyzstan",
+    "kind": "UN agency",
+    "cap_ja": "DRR programmes with MES",
+    "url": "https://www.undp.org/kyrgyzstan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "WFP Kyrgyzstan",
+    "kind": "UN agency",
+    "cap_ja": "Food assistance",
+    "url": "https://www.wfp.org/countries/kyrgyzstan",
+    "coverage": "National"
+   }
+  ],
+  "tj-dus": [
+   {
+    "name_ja": "Red Crescent Society of Tajikistan",
+    "kind": "Red Crescent",
+    "cap_ja": "Disaster response teams, relief stocks (capacity assumed)",
+    "url": "https://redcrescent.tj/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Committee of Emergency Situations and Civil Defence (CoES)",
+    "kind": "Government",
+    "cap_ja": "Lead agency; search and rescue",
+    "url": "https://khf.tj/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Tajikistan",
+    "kind": "UN agency",
+    "cap_ja": "DRR and recovery",
+    "url": "https://www.undp.org/tajikistan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Aga Khan Agency for Habitat",
+    "kind": "NGO",
+    "cap_ja": "Community emergency response teams, hazard mapping",
+    "url": "https://www.akdn.org/our-agencies/aga-khan-agency-habitat",
+    "coverage": "Mountain regions"
+   }
+  ],
+  "tj-khu": [
+   {
+    "name_ja": "Red Crescent Society of Tajikistan",
+    "kind": "Red Crescent",
+    "cap_ja": "Disaster response teams, relief stocks (capacity assumed)",
+    "url": "https://redcrescent.tj/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Committee of Emergency Situations and Civil Defence (CoES)",
+    "kind": "Government",
+    "cap_ja": "Lead agency; search and rescue",
+    "url": "https://khf.tj/",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "UNDP Tajikistan",
+    "kind": "UN agency",
+    "cap_ja": "DRR and recovery",
+    "url": "https://www.undp.org/tajikistan",
+    "coverage": "National"
+   },
+   {
+    "name_ja": "Aga Khan Agency for Habitat",
+    "kind": "NGO",
+    "cap_ja": "Community emergency response teams, hazard mapping",
+    "url": "https://www.akdn.org/our-agencies/aga-khan-agency-habitat",
+    "coverage": "Mountain regions"
+   }
+  ]
+ },
+ "supply_lessons": {
+  "alm-hq": "Lesson from January 2024: the M7.0 border earthquake stopped the metro for five hours and sent people into the cold at night; a Verny-type event would also cut the Almaty-Khorgos corridor, so alternative routes via Dostyk and Aktau matter.",
+  "aty-branch": "Lesson from spring 2024: the Zhaiyk flood cut the Dossor-Kulsary road and delayed Tengiz convoys for weeks; stock 2-3 weeks of critical parts in Atyrau and agree an air-freight fallback.",
+  "tas-office": "Lesson from July 2025-2026: heat waves push the grid to record loads and cause district outages; suppliers in Chirchik and Angren run at reduced margins above 42 C.",
+  "bis-office": "Lesson from the 2018 CHP failure: a single plant outage left Bishkek without heating at -25 C; keep generator fuel and plan for winter power deficits.",
+  "dus-office": "Lesson from spring mudflows: access roads to the Vakhsh valley projects close for days; keep buffer stocks and schedule deliveries outside the April-May peak.",
+  "ash-office": "Lesson from Caspian logistics: ferry and port schedules slip with storms and low water; keep a rail alternative via Kazakhstan and 3 weeks of inventory."
+ }
+}

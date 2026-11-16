@@ -1,0 +1,702 @@
+{
+ "_note": "Emergency numbers, hotlines, embassies and alert channels compiled from public sources; confirmed_by marks what was read from a primary page. Verify before use.",
+ "mofa_services": [
+  {
+   "key": "embassy_reg",
+   "name_ja": "Embassy registration (Japan: ORRnet / Tabireg; US: STEP; UK: travel advice sign-up)",
+   "url": "https://www.ezairyu.mofa.go.jp/",
+   "what_ja": "Lets your embassy reach you with alerts and safety checks in an emergency; register every family member.",
+   "confirmed_by": "third_party"
+  },
+  {
+   "key": "consular_mail",
+   "name_ja": "Embassy emergency e-mail / SMS alerts",
+   "url": "https://www.anzen.mofa.go.jp/",
+   "what_ja": "Consular alerts by e-mail or SMS during disasters and unrest.",
+   "confirmed_by": "third_party"
+  },
+  {
+   "key": "embassy_app",
+   "name_ja": "Embassy / foreign-ministry safety app",
+   "url": "https://www.anzen.mofa.go.jp/",
+   "what_ja": "Push notifications with country-specific safety information.",
+   "confirmed_by": "unverified"
+  }
+ ],
+ "countries": [
+  {
+   "country": "Kazakhstan",
+   "iso3": "KAZ",
+   "jp_residents": null,
+   "jp_companies": null,
+   "emergency_numbers": [
+    {
+     "service_ja": "Unified emergency number (MES dispatch; all services)",
+     "number": "112",
+     "note_ja": "Free from any mobile/landline; matches the libphonenumber <emergency> pattern 1(0[1-3]|12) for KZ",
+     "source_url": "https://www.gov.kz/article/19305?lang=en ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet (gov.kz page) / page_read (libphonenumber local file)"
+    },
+    {
+     "service_ja": "Fire and rescue service",
+     "number": "101",
+     "note_ja": "libphonenumber emergency pattern confirms 101",
+     "source_url": "https://www.gov.kz/article/19305?lang=en ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Police",
+     "number": "102",
+     "note_ja": "libphonenumber emergency pattern confirms 102",
+     "source_url": "https://www.gov.kz/article/19305?lang=en ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Ambulance (emergency medical care)",
+     "number": "103",
+     "note_ja": "libphonenumber emergency pattern confirms 103",
+     "source_url": "https://www.gov.kz/article/19305?lang=en ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Gas emergency service",
+     "number": "104",
+     "note_ja": "Listed on gov.kz; in libphonenumber it is a short code (1(0[1-4]|12)) but not in the <emergency> class",
+     "source_url": "https://www.gov.kz/article/19305?lang=en ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Psychological assistance line",
+     "number": "150",
+     "note_ja": "Listed on the gov.kz 'About Kazakhstan' useful numbers page",
+     "source_url": "https://www.gov.kz/article/19305?lang=en",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "Ministry of Emergency Situations (MES) - 112 dispatch centres in every region",
+     "number": "112",
+     "note_ja": "Also the sender name of MES mass SMS alerts",
+     "source_url": "https://egov.kz/cms/en/articles/emergency_number_112",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "eGov unified contact centre (government services, incl. flood compensation hotlines in 2024)",
+     "number": "1414",
+     "note_ja": "From memory; not verified in this session",
+     "source_url": "https://egov.kz/",
+     "confirmed_by": "unverified"
+    },
+    {
+     "agency": "City call centres iKomek (Astana, Almaty)",
+     "number": "109",
+     "note_ja": "Municipal single-window line used for utility and emergency-related requests; from memory",
+     "source_url": "https://109.kz/",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "Embassy of Japan in Kazakhstan (Astana); Consular Office of Japan in Almaty (branch office of the Embassy)",
+     "address": "Embassy: 6th floor, 62 Kosmonavtov Street, Chubary micro-district, Astana 010000. Almaty office: 41 Kazybek bi Street, 3rd floor, Almaty 050010",
+     "phone": "Embassy +7-7172-97-78-43 (consular section +7-7172-97-78-72 per an embassy notice); Almaty office +7-727-298-06-00",
+     "url": "https://www.kz.emb-japan.go.jp/ (MOFA country page: https://www.mofa.go.jp/mofaj/area/kazakhstan/index.html)",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "national_dm_agency": {
+    "name": "Ministry of Emergency Situations of the Republic of Kazakhstan (MES RK; Kazakh: QR TJM, Russian: MChS RK) with regional Departments of Emergency Situations (DES)",
+    "name_ja": "Ministry of Emergency Situations of the Republic of Kazakhstan (MES RK; Kazakh: QR TJM, Russian: MChS RK) with regional Departments of Emergency Situations (DES)",
+    "url": "https://www.gov.kz/memleket/entities/emer",
+    "warning_channels_ja": "Mass SMS from sender '112' through all mobile operators (memoranda with operators, no cost to the state; delays of hours reported in 2024-2026); Cell Broadcast alerts being introduced (MES asked residents to enable smartphone emergency alerts); 'Mass Alert' earthquake warning system in Almaty and nine other regions; Kazhydromet storm warnings relayed by MES/DES to media and operators; MES/DES social-media channels; sirens and loudspeakers for local evacuation"
+   },
+   "alert_channels": [
+    {
+     "key": "sms_112",
+     "name_ja": "MES mass SMS alerts (sender '112')",
+     "note_ja": "Storm warnings, flood and earthquake notices pushed through mobile operators; delivery can lag by hours when networks are congested",
+     "source_url": "https://informburo.kz/novosti/v-mcs-priznali-problemu-s-opozdaniem-sms-opoveshhenii",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "cell_broadcast",
+     "name_ja": "Cell Broadcast emergency alerts",
+     "note_ja": "MES is rolling out Cell Broadcast; users must keep 'emergency alerts' enabled on the handset",
+     "source_url": "https://kazpravda.kz/n/mchs-napomnilo-o-neobhodimosti-nastroyki-funktsii-ekstrennogo-opoveshcheniya-na-smartfonah/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "mass_alert_eq",
+     "name_ja": "'Mass Alert' earthquake warning system (Almaty + 9 regions)",
+     "note_ja": "Minister stated it reaches the population within about one minute, independent of operator SMS",
+     "source_url": "https://www.nur.kz/society/2332281-pochemu-ne-vse-zhiteli-almaty-i-regionov-kazahstana-poluchayut-opoveshcheniya-o-zemletryaseniyah-poyasnili-v-mchs/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "kazhydromet_warnings",
+     "name_ja": "Kazhydromet storm warnings (kazhydromet.kz, 'storm warning' pages and daily flood bulletins)",
+     "note_ja": "National hydromet service; warnings are passed to MES under an interaction algorithm and published online",
+     "source_url": "https://kazhydromet.kz/en/post/2614",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "darmen_app",
+     "name_ja": "'Darmen' mobile app notifications",
+     "note_ja": "Named by the East Kazakhstan DES as a channel to receive test alerts alongside SMS from 112; national coverage not confirmed",
+     "source_url": "https://www.caravan.kz/?p=19149902",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "mes_social",
+     "name_ja": "MES RK and regional DES Telegram/Instagram channels",
+     "note_ja": "An official MES Telegram channel is quoted by press, but its handle could not be confirmed in this session",
+     "source_url": "https://www.gov.kz/memleket/entities/emer",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "tv_radio",
+     "name_ja": "National TV/radio (Qazaqstan, Khabar 24) and regional broadcasters",
+     "note_ja": "Used for evacuation announcements in 2024; from memory",
+     "source_url": "https://www.gov.kz/memleket/entities/emer",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "Embassy of Japan consular e-mails (Zairyu-todoke / Tabi-Regi registrants)",
+     "note_ja": "Standard MOFA channel; the embassy posts safety notices on www.kz.emb-japan.go.jp",
+     "source_url": "https://www.kz.emb-japan.go.jp/",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "alert_note_ja": "Mass SMS from sender '112' through all mobile operators (memoranda with operators, no cost to the state; delays of hours reported in 2024-2026); Cell Broadcast alerts being introduced (MES asked residents to enable smartphone emergency alerts); 'Mass Alert' earthquake warning system in Almaty and nine other regions; Kazhydromet storm warnings relayed by MES/DES to media and operators; MES/DES social-media channels; sirens and loudspeakers for local evacuation",
+   "alert_src": "https://www.gov.kz/memleket/entities/emer ; https://informburo.kz/novosti/v-mcs-priznali-problemu-s-opozdaniem-sms-opoveshhenii ; https://kazpravda.kz/n/mchs-napomnilo-o-neobhodimosti-nastroyki-funktsii-ekstrennogo-opoveshcheniya-na-smartfonah/ ; https://www.nur.kz/society/2332281-pochemu-ne-vse-zhiteli-almaty-i-regionov-kazahstana-poluchayut-opoveshcheniya-o-zemletryaseniyah-poyasnili-v-mchs/",
+   "alert_src_name": "Ministry of Emergency Situations of the Republic of Kazakhstan (MES RK; Kazakh: QR TJM, Russian: MChS RK) with regional Departments of Emergency Situations (DES)",
+   "other_missions_note_ja": "No Japanese honorary consulates elsewhere in Kazakhstan are known (unverified). The Almaty office serves the south (Almaty, Jetisu, Jambyl, Turkistan, Shymkent); Astana covers the rest. Atyrau and Aktau (oil hubs) have no Japanese mission; the nearest is Astana (about 1,800 km) - plan for consular help by phone/e-mail.",
+   "wri": 2.18,
+   "wri_rank": 155,
+   "wri_src": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
+   "wri_url": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
+   "wri_confirmed": "page_read (score) / derived (rank)",
+   "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
+   "inform": 2.7,
+   "inform_rank": 135,
+   "inform_src": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=482&Iso3=KAZ&IndicatorId=INFORM",
+   "aal_flood_m": null,
+   "aal_src": "",
+   "aal_url": "",
+   "aal_note": "Not retrieved"
+  },
+  {
+   "country": "Kyrgyzstan (Kyrgyz Republic)",
+   "iso3": "KGZ",
+   "jp_residents": null,
+   "jp_companies": null,
+   "emergency_numbers": [
+    {
+     "service_ja": "Unified emergency number (MES Unified Duty-Dispatch Service 112 at the Crisis Management Centre; fire, rescue, police, ambulance, gas)",
+     "number": "112",
+     "note_ja": "Free from fixed and mobile phones; does not replace 101/102/103. Note: 112 is NOT in the libphonenumber emergency pattern for KG (10[1-3]) in the local ShortNumberMetadata.xml, so handset-level emergency dialing may still route via 101-103; the MES contact page lists '101 or 112 - Unified Dispatch Service'.",
+     "source_url": "https://www.undp.org/kyrgyzstan/news/112-service-operator-my-first-work-day-i-felt-uncertainty-fear-and-worry-about-my-family-members ; https://www.mchs.gov.kg/en/zharandardy-kabyl-aluu-grafigi ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory KG)",
+     "confirmed_by": "search_snippet (UNDP, mchs.gov.kg) / page_read (libphonenumber local file)"
+    },
+    {
+     "service_ja": "Fire and rescue service (MES)",
+     "number": "101",
+     "note_ja": "Matches libphonenumber <emergency> pattern 10[1-3] for KG",
+     "source_url": "https://travel.gc.ca/assistance/embassies-consulates/kyrgyzstan ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory KG)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Police (Ministry of Internal Affairs)",
+     "number": "102",
+     "note_ja": "Matches libphonenumber <emergency> pattern 10[1-3] for KG",
+     "source_url": "https://travel.gc.ca/assistance/embassies-consulates/kyrgyzstan ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory KG)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Ambulance (Ministry of Health)",
+     "number": "103",
+     "note_ja": "Matches libphonenumber <emergency> pattern 10[1-3] for KG",
+     "source_url": "https://travel.gc.ca/assistance/embassies-consulates/kyrgyzstan ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml, territory KG)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Gas emergency service",
+     "number": "104",
+     "note_ja": "Conventional CIS gas-emergency number; not in the libphonenumber KG pattern and not verified in this session (the 112 service covers the gas network emergency service)",
+     "source_url": "https://www.undp.org/kyrgyzstan/news/112-service-operator-my-first-work-day-i-felt-uncertainty-fear-and-worry-about-my-family-members",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "Ministry of Emergency Situations - Unified Duty-Dispatch Service 112 (EDDS-112) at the Crisis Management Centre (CMC), Bishkek",
+     "number": "112",
+     "note_ja": "Created by Government Resolution No. 618 of 2011-10-06 ('Unified hotline' service); operators take emergency calls 24/7 and the '112 Kyrgyzstan' app sends reports with photo/video/audio to the CMC",
+     "source_url": "https://base.spinform.ru/show_doc.fwx?rgn=97744 ; https://24.kg/english/112570_Kyrgyzstan_develops_mobile_application_for_calls_to_emergency_services",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "MES reception / information (ministry contact page lists '101 or 112 - Unified Dispatch Service')",
+     "number": "101 / 112",
+     "note_ja": "No separate public hotline number for the CMC was found; mchs.gov.kg is not reachable through this session's proxy",
+     "source_url": "https://www.mchs.gov.kg/en/zharandardy-kabyl-aluu-grafigi",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "Kyrgyzhydromet (Agency for Hydrometeorology under MES) - weather, storm and mudflow warnings",
+     "number": null,
+     "note_ja": "Warnings published on meteo.kg and relayed by 24.kg / Kaktus.media; no public hotline verified",
+     "source_url": "https://kaktus.media/doc/525242_kyrgyzgidromet_obiavil_shtormovoe_predyprejdenie_na_7_8_iunia.html",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "Embassy of Japan in the Kyrgyz Republic (Bishkek)",
+     "address": "35/1 Tashkent Street, Bishkek 720014, Kyrgyz Republic",
+     "phone": "+996-312-37-55-15, +996-312-37-55-16",
+     "url": "https://www.kg.emb-japan.go.jp/ (MOFA list page: https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/kilgith.html)",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "national_dm_agency": {
+    "name": "Ministry of Emergency Situations of the Kyrgyz Republic (MES KR; Kyrgyz: Ozgocho kyrdaaldar ministrligi; Russian: MChS KR), including the Crisis Management Centre, the Unified Duty-Dispatch Service 112, the State Integrated Public Alert and Warning System and Kyrgyzhydromet",
+    "name_ja": "Ministry of Emergency Situations of the Kyrgyz Republic (MES KR; Kyrgyz: Ozgocho kyrdaaldar ministrligi; Russian: MChS KR), including the Crisis Management Centre, the Unified Duty-Dispatch Service 112, the State Integrated Public Alert and Warning System and Kyrgyzhydromet",
+    "url": "https://www.mchs.gov.kg/en/ (Wikipedia still lists mes.kg)",
+    "warning_channels_ja": "Storm, mudflow and avalanche warnings issued by MES/Kyrgyzhydromet and relayed by national media (24.kg, Kaktus.media, AKIpress, KTRK); SMS alerts and push alerts through the '112 Kyrgyzstan' app; radio and TV; sirens/loudspeakers of the State Integrated Public Alert and Warning System in Crisis Management Centres (EU/UNDP modernization launched June 2025, AI-supported pilots in Issyk-Kul to be extended to Osh)"
+   },
+   "alert_channels": [
+    {
+     "key": "app_112_kyrgyzstan",
+     "name_ja": "'112 Kyrgyzstan' mobile app (MES)",
+     "note_ja": "Free app: push alerts from the early-warning system and two-way reporting of emergencies with photo/video/audio to the Crisis Management Centre",
+     "source_url": "https://www.undp.org/kyrgyzstan/stories/early-warning-system-kyrgyz-republic-real-time-risk-monitoring",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "sms_alerts",
+     "name_ja": "Mass SMS alerts through mobile operators (MES / Ministry of Digital Development)",
+     "note_ja": "Early-warning alerts are pushed by SMS alongside the app, radio and TV; government mass SMS (sender GOSINFO) was used in 2022. No cell-broadcast system was found.",
+     "source_url": "https://www.undp.org/kyrgyzstan/stories/early-warning-system-kyrgyz-republic-real-time-risk-monitoring ; https://24.kg/obschestvo/222136_kyirgyizstantsyi_poluchayut_rassyilku_oTelegram_prezidenta_kommentariy_mintsifryi/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "public_alert_sirens",
+     "name_ja": "State Integrated Public Alert and Warning System (sirens, loudspeakers, broadcast interruption)",
+     "note_ja": "Operated from the Crisis Management Centres with the 112 dispatch service; being modernized with EU/UNDP support since June 2025",
+     "source_url": "https://www.undp.org/kyrgyzstan/press-releases/kyrgyzstan-continue-strengthening-its-national-early-warning-systems",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "hydromet_storm_warnings",
+     "name_ja": "Kyrgyzhydromet storm warnings (shtormovoye preduprezhdeniye)",
+     "note_ja": "Issued for heavy rain, wind to 15-24 m/s, mudflow risk, snow and cold snaps; published on meteo.kg and relayed within hours by 24.kg, Kaktus.media and MES press releases",
+     "source_url": "https://kaktus.media/doc/525242_kyrgyzgidromet_obiavil_shtormovoe_predyprejdenie_na_7_8_iunia.html ; https://24.kg/proisshestvija/380079_mchs_predupredilo_obugroze_seley_irezkom_podyeme_rek_povsemu_kyirgyizstanu/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "mes_press_social",
+     "name_ja": "MES press service: website news and social media (Telegram/Facebook/Instagram) relayed by national media",
+     "note_ja": "Official Telegram handle could not be verified in this session; follow via mchs.gov.kg and 24.kg/Kaktus.media/AKIpress",
+     "source_url": "https://www.mchs.gov.kg/en/",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "tv_radio",
+     "name_ja": "National TV and radio (KTRK) emergency broadcasts",
+     "note_ja": "Named by UNDP as an alert channel of the early-warning system; no detail verified",
+     "source_url": "https://www.undp.org/kyrgyzstan/stories/early-warning-system-kyrgyz-republic-real-time-risk-monitoring",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "embassy_japan_mail",
+     "name_ja": "Embassy of Japan in Kyrgyzstan consular e-mails (Tabi-Regi / ORRnet registrants) and safety guide",
+     "note_ja": "Embassy publishes a Japanese safety guide (anzen_tebiki.pdf) and sends consular notices; register travel (Tabi-Regi) or residence (ORRnet) to receive them",
+     "source_url": "https://www.kg.emb-japan.go.jp/information/anzen_tebiki.pdf",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "usgs_gdacs_feeds",
+     "name_ja": "International feeds: USGS earthquake notifications and GDACS alerts",
+     "note_ja": "USGS FDSN event service covers M4.5+ events in Kyrgyzstan in near real time; GDACS issues earthquake/flood alerts",
+     "source_url": "https://earthquake.usgs.gov/fdsnws/event/1/",
+     "confirmed_by": "page_read"
+    }
+   ],
+   "alert_note_ja": "Storm, mudflow and avalanche warnings issued by MES/Kyrgyzhydromet and relayed by national media (24.kg, Kaktus.media, AKIpress, KTRK); SMS alerts and push alerts through the '112 Kyrgyzstan' app; radio and TV; sirens/loudspeakers of the State Integrated Public Alert and Warning System in Crisis Management Centres (EU/UNDP modernization launched June 2025, AI-supported pilots in Issyk-Kul to be extended to Osh)",
+   "alert_src": "https://www.undp.org/kyrgyzstan/stories/early-warning-system-kyrgyz-republic-real-time-risk-monitoring ; https://www.undp.org/kyrgyzstan/press-releases/kyrgyzstan-continue-strengthening-its-national-early-warning-systems ; https://en.wikipedia.org/wiki/Ministry_of_Emergency_Situations_(Kyrgyzstan)",
+   "alert_src_name": "Ministry of Emergency Situations of the Kyrgyz Republic (MES KR; Kyrgyz: Ozgocho kyrdaaldar ministrligi; Russian: MChS KR), including the Crisis Management Centre, the Unified Duty-Dispatch Service 112, the State Integrated Public Alert and Warning System and Kyrgyzhydromet",
+   "other_missions_note_ja": "No Japanese honorary consulate outside Bishkek is known (unverified). The JICA Kyrgyz Republic Office and the Kyrgyz-Japan Center for Human Development (KRJC) in Bishkek are not consular missions. The third-party embassy contact file (scratchpad/dl/embassy_contacts.csv) has no Kyrgyzstan rows; other missions in Bishkek should be taken from their own sites (not reachable here).",
+   "wri": 2.96,
+   "wri_rank": 131,
+   "wri_src": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
+   "wri_url": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv, IFHV Ruhr University Bochum)",
+   "wri_confirmed": "page_read (score) / derived (rank)",
+   "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
+   "inform": 3.6,
+   "inform_rank": 89,
+   "inform_src": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=493&IndicatorId=INFORM",
+   "aal_flood_m": null,
+   "aal_src": "",
+   "aal_url": "",
+   "aal_note": "Not retrieved"
+  },
+  {
+   "country": "Tajikistan",
+   "iso3": "TJK",
+   "jp_residents": null,
+   "jp_companies": null,
+   "emergency_numbers": [
+    {
+     "service_ja": "Unified emergency number (all services, mobile networks)",
+     "number": "112",
+     "note_ja": "Listed as the general emergency number in travel directories and Wikipedia's list; matches the libphonenumber <emergency> pattern 1(0[1-3]|12) for TJ. The Committee of Emergency Situations' own dispatch number could not be verified (khf.tj not reachable).",
+     "source_url": "https://www.diplomatie.gouv.fr/fr/information-par-pays/tadjikistan/conseils-aux-voyageurs-contacts-utiles ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet (directories) / page_read (libphonenumber local file)"
+    },
+    {
+     "service_ja": "Fire and rescue",
+     "number": "101",
+     "note_ja": "From mobile phones; 01 from landlines (search snippets, French MFA travel advice). libphonenumber emergency class confirms 101.",
+     "source_url": "https://www.diplomatie.gouv.fr/fr/information-par-pays/tadjikistan/conseils-aux-voyageurs-contacts-utiles ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Police",
+     "number": "102",
+     "note_ja": "From mobile phones; 02 from landlines (search snippets). libphonenumber emergency class confirms 102.",
+     "source_url": "https://www.diplomatie.gouv.fr/fr/information-par-pays/tadjikistan/conseils-aux-voyageurs-contacts-utiles ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Ambulance (emergency medical care)",
+     "number": "103",
+     "note_ja": "From mobile phones; 03 from landlines (search snippets). libphonenumber emergency class confirms 103.",
+     "source_url": "https://www.diplomatie.gouv.fr/fr/information-par-pays/tadjikistan/conseils-aux-voyageurs-contacts-utiles ; https://raw.githubusercontent.com/google/libphonenumber/master/resources/ShortNumberMetadata.xml (local copy: scratchpad/dl/ShortNumberMetadata.xml)",
+     "confirmed_by": "search_snippet / page_read"
+    },
+    {
+     "service_ja": "Gas emergency service",
+     "number": "104",
+     "note_ja": "Listed in Wikipedia's list of emergency numbers for Tajikistan; NOT in the libphonenumber emergency class (pattern covers only 101-103 and 112), so treat as unverified.",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "Committee of Emergency Situations and Civil Defence (CoES/KChS) - duty officer lines (Dushanbe)",
+     "number": "+992 93 880 28 19; +992 37 221 91 19; +992 37 223 13 11",
+     "note_ja": "Published by Asia-Plus in January 2019 for road/avalanche emergencies; currency not verified in this session (khf.tj blocked). Country code +992; Dushanbe landline code 37/372.",
+     "source_url": "https://asiaplustj.info/en/news/tajikistan/security/20190109/tajikistans-emergency-management-authorities-warn-of-avalanche-risk-in-mountain-areas",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "Agency for Hydrometeorology (Tajikhydromet) - forecasts and storm warnings",
+     "number": null,
+     "note_ja": "No public hotline found; warnings are posted on meteo.tj and relayed by Khovar/Asia-Plus and by CoES SMS.",
+     "source_url": "https://www.meteo.tj/en/weather-forecast?city=1",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "Red Crescent Society of Tajikistan (RCST) - disaster response partner of CoES",
+     "number": null,
+     "note_ja": "RCST runs IFRC DREF operations after floods/earthquakes (e.g., MDRTJ036 for the April 2025 Rasht earthquake, MDRTJ038 for the July 2026 Ayni floods); no public hotline verified.",
+     "source_url": "https://reliefweb.int/disaster/eq-2025-000049-tjk",
+     "confirmed_by": "page_read"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "Embassy of Japan in Tajikistan (Dushanbe)",
+     "address": "80A Khabibullo Nazarov Street (Kuchai Kh. Nazarov 80A), Dushanbe 734000, Tajikistan",
+     "phone": "+992 (44) 600-54-77 to 600-54-80 (MOFA listing); older directories give +992 (37) 227-54-36 / 227-54-46 / 221-39-70",
+     "url": "https://www.tj.emb-japan.go.jp/ (MOFA listing: https://www.mofa.go.jp/mofaj/annai/zaigai/list/europe/taji.html)",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "national_dm_agency": {
+    "name": "Committee of Emergency Situations and Civil Defence under the Government of the Republic of Tajikistan (CoES; Tajik: Kumitai holathoi favqulodda va mudofiai grazhdani, KChS)",
+    "name_ja": "Committee of Emergency Situations and Civil Defence under the Government of the Republic of Tajikistan (CoES; Tajik: Kumitai holathoi favqulodda va mudofiai grazhdani, KChS)",
+    "url": "https://khf.tj/",
+    "warning_channels_ja": "Official statements and weather/avalanche/mudflow warnings released through the state news agency Khovar and national TV/radio and picked up by Asia-Plus; SMS alerts to mobile subscribers (Tcell, Beeline/ZET-Mobile, MegaFon) for bad weather and road/avalanche closures, which CoES said in 2018 it would expand nationwide; CoES duty-officer telephone lines; Tajikhydromet storm warnings (meteo.tj) feeding CoES; community-based early warning (sirens, observers) in GBAO run with the Aga Khan Agency for Habitat; a costed national Multi-Hazard Early Warning System roadmap endorsed in July 2024 (UNDRR) that includes cell-broadcast readiness; CoES situation reports via the REACT partnership (khf.tj PDFs)."
+   },
+   "alert_channels": [
+    {
+     "key": "coes_sms",
+     "name_ja": "CoES SMS weather and road warnings via mobile operators",
+     "note_ja": "Mass SMS for storms, mudflow and avalanche risk and road closures (Tcell, Beeline users cited); coverage was partial in 2018 and CoES announced an expansion; no delivery-time data found.",
+     "source_url": "https://asiaplustj.info/en/news/tajikistan/society/20180924/emergency-committee-of-tajikistan-intends-to-expand-the-coverage-of-sms-warnings-of-bad-weather",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "hydromet_warnings",
+     "name_ja": "Tajikhydromet (Agency for Hydrometeorology) storm warnings and forecasts, meteo.tj",
+     "note_ja": "Heat (e.g., +47 C warning of July 2025), mudflow/flood and avalanche warnings; published online and relayed by Khovar/Asia-Plus; English forecast page exists.",
+     "source_url": "https://www.meteo.tj/en/weather-forecast?city=1 ; https://asiaplus.news/en/2025/07/04/extreme-heatwave-expected-in-tajikistan-temperatures-to-reach-up-to-47c-in-some-regions/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "khovar_state_media",
+     "name_ja": "Khovar state news agency, TV Tojikiston/Safina and radio bulletins",
+     "note_ja": "Primary public channel for CoES warnings (e.g., April 2024 avalanche/landslide warning); Tajik and Russian, English section on eng.khovar.tj.",
+     "source_url": "https://eng.khovar.tj/2024/04/emergency-committee-warns-of-possible-avalanches-and-landslides-in-the-coming-days/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "coes_duty_lines",
+     "name_ja": "CoES duty-officer telephone lines",
+     "note_ja": "Three Dushanbe numbers published in 2019 for emergencies on mountain roads; see disaster_hotlines.",
+     "source_url": "https://asiaplustj.info/en/news/tajikistan/security/20190109/tajikistans-emergency-management-authorities-warn-of-avalanche-risk-in-mountain-areas",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "akah_community_ews",
+     "name_ja": "Aga Khan Agency for Habitat (AKAH/FOCUS) community early-warning and weather-monitoring posts, mainly GBAO and Rasht",
+     "note_ja": "Village-level monitoring, sirens and evacuation drills; produced the July 2015 Barsem debris-flow maps posted on ReliefWeb.",
+     "source_url": "https://the.akdn/en/where-we-work/central-asia/tajikistan/disaster-preparedness-and-response-tajikistan ; https://reliefweb.int/disaster/fl-2015-000055-tjk",
+     "confirmed_by": "search_snippet / page_read (ReliefWeb)"
+    },
+    {
+     "key": "cell_broadcast_planned",
+     "name_ja": "Cell Broadcast (planned under the national MHEWS roadmap)",
+     "note_ja": "GSMA/RCC discussions and a 2024 national roadmap mention cell-broadcast readiness; no evidence it is operational - do not rely on it.",
+     "source_url": "https://www.undrr.org/news/tajikistan-accelerates-implementation-national-early-warning-systems-roadmap ; https://www.gsma.com/about-us/regions/eurasia/?p=214",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "Embassy of Japan consular e-mails (MOFA 'Tabi-Regi' registration and Overseas Safety app)",
+     "note_ja": "Standard MOFA channel for Japanese nationals abroad; the Dushanbe embassy's own notices could not be fetched (www.mofa.go.jp and tj.emb-japan.go.jp blocked).",
+     "source_url": "https://www.tj.emb-japan.go.jp/ ; https://www.anzen.mofa.go.jp/",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "alert_note_ja": "Official statements and weather/avalanche/mudflow warnings released through the state news agency Khovar and national TV/radio and picked up by Asia-Plus; SMS alerts to mobile subscribers (Tcell, Beeline/ZET-Mobile, MegaFon) for bad weather and road/avalanche closures, which CoES said in 2018 it would expand nationwide; CoES duty-officer telephone lines; Tajikhydromet storm warnings (meteo.tj) feeding CoES; community-based early warning (sirens, observers) in GBAO run with the Aga Khan Agency for Habitat; a costed national Multi-Hazard Early Warning System roadmap endorsed in July 2024 (UNDRR) that includes cell-broadcast readiness; CoES situation reports via the REACT partnership (khf.tj PDFs).",
+   "alert_src": "https://khf.tj/ ; https://asiaplustj.info/en/news/tajikistan/society/20180924/emergency-committee-of-tajikistan-intends-to-expand-the-coverage-of-sms-warnings-of-bad-weather ; https://www.undrr.org/news/tajikistan-accelerates-implementation-national-early-warning-systems-roadmap ; https://eng.khovar.tj/2024/04/emergency-committee-warns-of-possible-avalanches-and-landslides-in-the-coming-days/",
+   "alert_src_name": "Committee of Emergency Situations and Civil Defence under the Government of the Republic of Tajikistan (CoES; Tajik: Kumitai holathoi favqulodda va mudofiai grazhdani, KChS)",
+   "other_missions_note_ja": "No Japanese consulates outside Dushanbe are known (unverified). For sites in Sughd (Khujand), the Dushanbe embassy is about 300 km away across the Anzob tunnel/Shahriston pass, a road that closes in winter storms; the Embassy of Japan in Uzbekistan (Tashkent, about 150 km from Khujand) is physically closer but requires a border crossing. JICA has an office in Dushanbe (unverified).",
+   "wri": 2.85,
+   "wri_rank": 135,
+   "wri_src": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv)",
+   "wri_url": "https://data.humdata.org/dataset/worldriskindex (worldriskindex-trend.csv)",
+   "wri_confirmed": "page_read (score) / derived (rank)",
+   "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
+   "inform": 4.0,
+   "inform_rank": 79,
+   "inform_src": "https://data.humdata.org/dataset/inform-risk-index (INFORM_Risk_2025_v070.xlsx); API: https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?Iso3=TJK&IndicatorId=INFORM",
+   "aal_flood_m": null,
+   "aal_src": "",
+   "aal_url": "",
+   "aal_note": "Not retrieved"
+  },
+  {
+   "country": "TKM",
+   "iso3": "TKM",
+   "jp_residents": null,
+   "jp_companies": null,
+   "emergency_numbers": [],
+   "disaster_hotlines": [],
+   "japanese_missions": [],
+   "national_dm_agency": {
+    "name": "",
+    "name_ja": "",
+    "url": "",
+    "warning_channels_ja": ""
+   },
+   "alert_channels": [],
+   "alert_note_ja": "",
+   "alert_src": "",
+   "alert_src_name": "",
+   "other_missions_note_ja": "",
+   "wri": null,
+   "wri_rank": null,
+   "wri_src": "",
+   "wri_url": "",
+   "wri_confirmed": "unverified",
+   "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
+   "inform": null,
+   "inform_rank": null,
+   "inform_src": "",
+   "aal_flood_m": null,
+   "aal_src": "",
+   "aal_url": "",
+   "aal_note": "Not retrieved"
+  },
+  {
+   "country": "Uzbekistan",
+   "iso3": "UZB",
+   "jp_residents": null,
+   "jp_companies": null,
+   "emergency_numbers": [
+    {
+     "service_ja": "Fire and rescue (Ministry of Emergency Situations)",
+     "number": "101",
+     "note_ja": "24/7; legacy short code 01 still listed in libphonenumber.",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "Police",
+     "number": "102",
+     "note_ja": "Tourist police line 1173 (search_snippet, my.gov.uz).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "Ambulance",
+     "number": "103",
+     "note_ja": "Also confirmed by UK FCDO travel advice (search_snippet).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "Gas emergency",
+     "number": "104",
+     "note_ja": "Gas leaks (Hududgaztaminot).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "Unified emergency number",
+     "number": "112",
+     "note_ja": "Introduced in Tashkent from 1 Jan 2024 and reported fully operational nationwide in March 2025 (Ministry of Digital Technologies, via Kun.uz); the legacy 101/102/103/104 numbers keep working. Works from mobile phones without SIM credit on GSM networks (general 112 behaviour; unverified for Uzbekistan).",
+     "source_url": "https://kun.uz/en/news/2025/03/25/uzbekistans-unified-112-emergency-system-now-fully-operational-nationwide",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "service_ja": "Emergency/rescue service (legacy)",
+     "number": "1050",
+     "note_ja": "Listed as 'Emergency service' in the Wikipedia table and as rescue service by mobile operator Ucell (search_snippet).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+     "confirmed_by": "third_party"
+    },
+    {
+     "service_ja": "libphonenumber cross-check",
+     "number": "01 / 02 / 03 (001-003, 050)",
+     "note_ja": "The local ShortNumberMetadata.xml (territory UZ) still encodes the Soviet-era emergency pattern 0(0[1-3]|[1-3]|50), i.e. 01 fire, 02 police, 03 ambulance; its cited sources (expat.uz, mts.uz) are dated. Current official numbers are the 3-digit 101/102/103/104 plus 112; treat the 2-digit codes as legacy aliases.",
+     "source_url": "/tmp/claude-0/-home-user-claude-test2/e1fdc55a-0330-57a5-a5b4-f3afd5d82091/scratchpad/dl/ShortNumberMetadata.xml",
+     "confirmed_by": "page_read"
+    }
+   ],
+   "disaster_hotlines": [
+    {
+     "agency": "Ministry of Emergency Situations (FVV/MChS) hotline",
+     "number": "1101",
+     "note_ja": "Hotline shown in the header of the ministry's gov.uz portal (gov.uz/oz/fvv) per a search summary; not opened in this session.",
+     "source_url": "https://gov.uz/oz/fvv",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "Rescue service",
+     "number": "1050",
+     "note_ja": "Legacy rescue/emergency short number (see emergency_numbers).",
+     "source_url": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+     "confirmed_by": "third_party"
+    },
+    {
+     "agency": "Unified emergency call centre",
+     "number": "112",
+     "note_ja": "Routes to fire, police, ambulance and gas services.",
+     "source_url": "https://kun.uz/en/news/2025/03/25/uzbekistans-unified-112-emergency-system-now-fully-operational-nationwide",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "agency": "Uzhydromet (hydromet service)",
+     "number": null,
+     "note_ja": "No public hotline found; warnings are published on meteo.uz / the official Telegram channel and relayed by media.",
+     "source_url": "https://kun.uz/en/news/2026/11/06/uzhydromet-issues-flood-warning-for-foothill-and-mountainous-areas-in-nine-regions-of-uzbekistan-59540",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "japanese_missions": [
+    {
+     "name_ja": "Embassy of Japan in Uzbekistan (Tashkent)",
+     "address": "1-28 Sadyk Azimov Street, Tashkent 100047, Uzbekistan",
+     "phone": "+998-78-120-80-60 (to 63)",
+     "url": "https://www.uz.emb-japan.go.jp/",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "national_dm_agency": {
+    "name": "Ministry of Emergency Situations of the Republic of Uzbekistan (O'zbekiston Respublikasi Favqulodda vaziyatlar vazirligi, FVV; Russian abbreviation MChS)",
+    "name_ja": "Ministry of Emergency Situations of the Republic of Uzbekistan (O'zbekiston Respublikasi Favqulodda vaziyatlar vazirligi, FVV; Russian abbreviation MChS)",
+    "url": "https://fvv.uz",
+    "warning_channels_ja": "Civil-defence sirens and public-address systems (extended in 2024-2025 to mosque loudspeakers and 28 outdoor LED screens under a UNDP-MChS-Uzhydromet project in eastern mountainous regions); ministry press service and Telegram/social media; national TV and radio; the unified 112 call centre; national early-warning standard O'zMSt 520:2025 'Civil protection - warning and informing the population' adopted 2025. Hydromet warnings come from Uzhydromet (Centre of Hydrometeorological Service under the Ministry of Ecology), the main provider of meteorological and hydrological warnings."
+   },
+   "alert_channels": [
+    {
+     "key": "uzhydromet_warnings",
+     "name_ja": "Uzhydromet storm, flood and mudflow warnings (official Telegram channel, meteo.uz, relayed by Kun.uz/UzDaily)",
+     "note_ja": "Uzhydromet issues flash-flood/mudflow warnings for foothill and mountain districts of up to nine regions each spring (e.g. 14-17 and 18-23 April 2024, May-June 2025/2026) and dust-storm and heat warnings; media relay them within hours.",
+     "source_url": "https://uzdaily.ru/en/uzbekistan-warns-of-heavy-rain-and-flood-risks/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "mchs_press_telegram",
+     "name_ja": "Ministry of Emergency Situations press service (gov.uz/oz/fvv, Telegram)",
+     "note_ja": "The ministry publishes incident reports, evacuation notices and seasonal advisories (carbon monoxide in cold snaps, mudflow season) via its portal and Telegram; the exact channel handle was not verified in this session.",
+     "source_url": "https://gov.uz/oz/fvv/news/news",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "sirens_mosque_loudspeakers",
+     "name_ja": "Sirens, mosque loudspeakers and outdoor screens (UNDP-MChS-Uzhydromet early-warning project)",
+     "note_ja": "Mosque public-address systems in eastern mountainous regions relay emergency alerts to everyone within earshot; 28 large outdoor screens installed on main roads and in crowded places.",
+     "source_url": "https://www.undp.org/node/575521",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "unified_112",
+     "name_ja": "Unified 112 emergency number (Ministry of Digital Technologies)",
+     "note_ja": "Nationwide since March 2025; inbound only (no public cell-broadcast alerts confirmed).",
+     "source_url": "https://kun.uz/en/news/2025/03/25/uzbekistans-unified-112-emergency-system-now-fully-operational-nationwide",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "cell_broadcast_sms",
+     "name_ja": "Cell broadcast / mass SMS",
+     "note_ja": "No evidence found of a nationwide cell-broadcast system; an FAO page lists SMS among Uzhydromet's delivery technologies (agro-advisories) and an IFAD/Adaptation Fund climate-services project (2025-2030) plans a portal and mobile app. Treat as not yet available for the public.",
+     "source_url": "https://agritechobservatory.review.fao.org/ru/hydrometuz",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "key": "tv_radio",
+     "name_ja": "National TV and radio (O'zbekiston 24 and regional channels)",
+     "note_ja": "Used for official announcements during the January 2023 energy crisis and seasonal warnings; Uzbek/Russian only.",
+     "source_url": "https://www.intellinews.com/uzbek-president-fires-tashkent-mayor-for-empty-words-as-energy-shortages-hit-city-amid-big-freeze-266985/",
+     "confirmed_by": "unverified"
+    },
+    {
+     "key": "embassy_mail",
+     "name_ja": "Embassy of Japan consular e-mails (residence registration / Tabi-Regi)",
+     "note_ja": "Standard MOFA practice: registered residents and travellers receive safety e-mails; the embassy site (uz.emb-japan.go.jp) and MOFA overseas-safety site publish notices. Not verified for specific past events.",
+     "source_url": "https://www.uz.emb-japan.go.jp/",
+     "confirmed_by": "unverified"
+    }
+   ],
+   "alert_note_ja": "Civil-defence sirens and public-address systems (extended in 2024-2025 to mosque loudspeakers and 28 outdoor LED screens under a UNDP-MChS-Uzhydromet project in eastern mountainous regions); ministry press service and Telegram/social media; national TV and radio; the unified 112 call centre; national early-warning standard O'zMSt 520:2025 'Civil protection - warning and informing the population' adopted 2025. Hydromet warnings come from Uzhydromet (Centre of Hydrometeorological Service under the Ministry of Ecology), the main provider of meteorological and hydrological warnings.",
+   "alert_src": "https://en.wikipedia.org/wiki/Ministry_of_Emergency_Situations_(Uzbekistan)",
+   "alert_src_name": "Ministry of Emergency Situations of the Republic of Uzbekistan (O'zbekiston Respublikasi Favqulodda vaziyatlar vazirligi, FVV; Russian abbreviation MChS)",
+   "other_missions_note_ja": "The local embassy_contacts.csv has no Uzbekistan (UZ) rows, so other missions were not compiled. For reference (unverified): the US Embassy is at 3 Moyqo'rg'on St, Tashkent; most EU and Asian missions are in central Tashkent (Yunusabad/Mirzo-Ulugbek districts); Samarkand and Bukhara have no resident foreign missions.",
+   "wri": null,
+   "wri_rank": null,
+   "wri_src": "https://weltrisikobericht.de/",
+   "wri_url": "https://weltrisikobericht.de/",
+   "wri_confirmed": "unverified",
+   "wri_rank_note": "WorldRiskIndex 2025 (Bündnis Entwicklung Hilft / IFHV); verify against the report",
+   "inform": 3.0,
+   "inform_rank": 109,
+   "inform_src": "https://drmkc.jrc.ec.europa.eu/inform-index/API/InformAPI/countries/Scores/?WorkflowId=482&Iso3=UZB",
+   "aal_flood_m": null,
+   "aal_src": "",
+   "aal_url": "",
+   "aal_note": "Not retrieved"
+  }
+ ],
+ "_contacts_gaps": [
+  "Expatriate resident and foreign-company counts not retrieved (shown as not retrieved)."
+ ]
+}

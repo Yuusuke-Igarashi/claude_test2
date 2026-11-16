@@ -1,0 +1,3760 @@
+{
+ "_note": "Street-grid sketch maps around the six fictional company sites. Roads/water/POIs use public coordinates (coord_src tells whether they were read from Nominatim/Overpass/Wikipedia); hazard zones are approximations of published maps and terrain logic (assumptions).",
+ "areas": [
+  {
+   "area_id": "alm_center",
+   "city_ja": "Almaty",
+   "area_ja": "Central Almaty (Esentai / Al-Farabi - Republic Square - Dostyk; Bostandyk-Medeu-Almaly districts)",
+   "center_lat": 43.231,
+   "center_lon": 76.937,
+   "extent_km": 7.0,
+   "rotation_deg": -6,
+   "grid_m": 200,
+   "rotation_note_ja": "Almaty's east-west avenues (Abai, Satbayev, Timiryazev, Tole Bi) bear about N84E (principal axis +5 to +6 deg counter-clockwise from east in the fetched OSM geometry); with the app's rotation (x=u*cos-v*sin, y down) a negative value tilts the grid up-right to match (derived)",
+   "flood_context_ja": "ThinkHazard rates river flood and urban flood for Almaty City area as Very low, but the real water hazard is mudflow (sel): the valleys of the Kishi (Malaya) and Ulken (Bolshaya) Almatinka rivers that cross the city saw five catastrophic debris flows in the 20th century, the worst in 1921 when about 10 million m3 of mud and rock at 900 m3/s killed about 500 of the then 45,000 inhabitants and destroyed much of the city (Wikipedia, Medeu Dam). The Medeu mudflow-control dam, created by blasting on 21 October 1966, stopped the 15 July 1973 flow that would otherwise have reached the city; 8 million m3 of sediment was trapped and the dam was later raised (reservoir capacity about 12.6 million m3 after 1980, search_snippet). Glacial-lake outbursts remain a live threat: on 23 July 2015 an outburst into the Kargalinka river sent a mudflow through Chapaevo, Kargaly and Kamenka in Nauryzbay district (western outskirts), with about 900 evacuated, five injured and a city state of emergency (ECHO Daily Flash via ReliefWeb). Within this frame the channelized Kishi Almaty (east of Dostyk), the Esentai/Vesnovka (past Esentai Tower) and the Ulken Almaty (western edge) are the corridors to avoid when KazSelezaschita or the Almaty DChS issue mudflow warnings (June-August).",
+   "earthquake_context_ja": "ThinkHazard rates earthquake hazard High for Almaty City area (page_read). The city (then Verny) was destroyed by the 1887 earthquake (about M7.3, intensity IX in Verny, at least 330 dead, 1,798 brick houses destroyed) and again on 3 January 1911 by the M8.0 Kemin (Kebin) earthquake 37 km to the south (USGS iscgem16958130; 452 killed, more than 770 brick buildings collapsed). USGS lists 23 M5+ events within 150 km since 1950 (the latest in 2014); the M7.0 Wushi (Uqturpan) earthquake of 22 January 2024, about 270 km away, produced 235 USGS 'Did You Feel It' reports from Almaty with community intensity 4.6 and a PAGER yellow fatality / red economic alert (USGS us7000lsze via the project's USGS dataset), and residents left high-rise apartments into the winter night (widely reported; unverified here). The design intensity is MSK-64 9 for most of the city; the Institute of Seismology names the zones north of Raiymbek Avenue with shallow groundwater and soft soils as the most unfavorable (up to 10), while the southern districts stand on coarser alluvial fans (search_snippet via Tengrinews). For a 36-storey tower this means long elevator outages, facade glass and partition damage, stairway evacuation of 14 office floors, and after-shock waiting in nearby open spaces (Esentai Park, KazNU campus, Botanical Garden). Landslide susceptibility is Medium (ThinkHazard) and concentrates on the Gorny Gigant / Kok Tobe slopes.",
+   "heat_cold_haze_context_ja": "Continental climate (Dfa) at 870 m: Open-Meteo daily data for 16 Aug - 22 Nov 2026 show a maximum of 36.8 C and a minimum of -5.9 C already in November (page_read); ThinkHazard rates extreme heat Medium and wildfire High. Winter smog is structural: coal and vehicle emissions trapped by temperature inversions in the heating season put Almaty among the world's most polluted major cities on single days (6th on 8 Jan 2026 and 2nd on 16 Sep 2025 in IQAir rankings; 2024 annual PM2.5 average 20.3 ug/m3), so N95/FFP2 masks and air purifiers belong in the office and home stock (search_snippet). Heavy snow and black ice on the sloping avenues (Al-Farabi, Dostyk) regularly disrupt commuting between the Esentai office and the Samal / Koktem housing (unverified, general knowledge).",
+   "zone_src_ja": "Demo zones assumed from published history and terrain logic: mudflow corridors drawn as +/-120-220 m buffers along the fetched OSM channels of the Kishi Almaty, Esentai and Ulken Almaty rivers (Medeu Dam and Esentai River Wikipedia pages; ECHO 2015 flash); seismic bands from the Institute of Seismology statements (MSK-64 9 city-wide, 9-10 north of Raiymbek; Tengrinews, search_snippet) and ThinkHazard 'High'; urban-flood patches are assumptions (ThinkHazard: Very low). No official microzonation or sel-hazard polygons were fetched.",
+   "sources": [
+    {
+     "name": "ThinkHazard! Almaty City area (GAUL 37157) - hazard levels",
+     "url": "https://www.thinkhazard.org/en/report/37157-kazakhstan-almaty-city-area",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! Almaty City area JSON (FL, UF, EQ, LS, EH, WF levels)",
+     "url": "https://www.thinkhazard.org/en/report/37157.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - Medeu Dam (1921 and 1973 mudflows, dam history)",
+     "url": "https://en.wikipedia.org/wiki/Medeu_Dam",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - 1887 Verny earthquake",
+     "url": "https://en.wikipedia.org/wiki/1887_Verny_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - 1911 Kebin earthquake",
+     "url": "https://en.wikipedia.org/wiki/1911_Kebin_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "USGS event page - 1911 Kemin earthquake M8.0 (iscgem16958130), 37 km from Almaty",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgem16958130",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS event page - 2024-01-22 M7.0 Wushi (Uqturpan) earthquake (us7000lsze), DYFI 235 reports from Almaty, CDI 4.6; read via the project's usgs.json",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000lsze",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ReliefWeb - ECHO Daily Flash 24 July 2015 (Kargalinka mudflow, Nauryzbay district)",
+     "url": "https://reliefweb.int/report/kazakhstan/kazakhstan-floodsmudflow-echo-daily-flash-24-july-2015",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - Almaty (history, districts, 2.35 million population as of 2026-01-01)",
+     "url": "https://en.wikipedia.org/wiki/Almaty",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Almaty Metro and station pages (coordinates)",
+     "url": "https://en.wikipedia.org/wiki/Almaty_Metro",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Esentai Tower (36 floors, 162 m, 2008, Al-Farabi 77/7)",
+     "url": "https://en.wikipedia.org/wiki/Esentai_Tower",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "OpenStreetMap via Nominatim (POI, road and river geometry; ODbL)",
+     "url": "https://nominatim.openstreetmap.org/",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Open-Meteo forecast API, Almaty, past 92 days (temperature extremes)",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=43.238&longitude=76.945&daily=temperature_2m_max,temperature_2m_min&past_days=92&timezone=auto",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Tengrinews - Institute of Seismology map of faults and unfavorable zones in Almaty",
+     "url": "https://tengrinews.kz/news/raspolojenyi-seysmicheskie-razlomyi-almatyi-podrobnaya-karta-491694/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "IQAir / Astana Times - Almaty winter PM2.5 rankings 2025-2026",
+     "url": "https://www.iqair.com/kazakhstan",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "MOFA Japan press release (2004) - opening of the Branch Office in Almaty, Kazybek Bi 41",
+     "url": "https://www.mofa.go.jp/mofaj/press/release/16/rls_1228i.html",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "City Population (citypopulation.de) - Almaty districts, 2021 census",
+     "url": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "roads": [
+    {
+     "name": "Al-Farabi Avenue (Al-Farabi dangyly)",
+     "major": true,
+     "label_offset": "55%",
+     "pts": [
+      [
+       43.1948,
+       76.8892
+      ],
+      [
+       43.1996,
+       76.903
+      ],
+      [
+       43.2038,
+       76.9131
+      ],
+      [
+       43.2098,
+       76.9168
+      ],
+      [
+       43.223,
+       76.9364
+      ],
+      [
+       43.228,
+       76.9452
+      ],
+      [
+       43.2294,
+       76.9665
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Al-Farabi%20Avenue%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM way geometry via Nominatim (50 segments, highway=primary), simplified to 7 vertices"
+    },
+    {
+     "name": "Abai Avenue (Abay dangyly)",
+     "major": true,
+     "label_offset": "45%",
+     "pts": [
+      [
+       43.238,
+       76.8825
+      ],
+      [
+       43.2384,
+       76.8904
+      ],
+      [
+       43.2394,
+       76.8992
+      ],
+      [
+       43.2397,
+       76.9086
+      ],
+      [
+       43.241,
+       76.9276
+      ],
+      [
+       43.2417,
+       76.9384
+      ],
+      [
+       43.2431,
+       76.9569
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Abai%20Avenue%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM geometry via Nominatim (highway=secondary), simplified; metro Line 1 runs under Abai between Baikonur and Alatau"
+    },
+    {
+     "name": "Dostyk Avenue (Dostyk dangyly, ex-Lenin Ave)",
+     "major": true,
+     "label_offset": "35%",
+     "pts": [
+      [
+       43.2572,
+       76.9551
+      ],
+      [
+       43.2505,
+       76.956
+      ],
+      [
+       43.2431,
+       76.9569
+      ],
+      [
+       43.233,
+       76.9591
+      ],
+      [
+       43.2257,
+       76.9619
+      ],
+      [
+       43.2106,
+       76.9672
+      ],
+      [
+       43.2024,
+       76.9799
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Dostyk%20Avenue%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM geometry via Nominatim (highway=secondary), simplified"
+    },
+    {
+     "name": "Seifullin Avenue (Seyfullin dangyly)",
+     "major": true,
+     "label_offset": "40%",
+     "pts": [
+      [
+       43.2571,
+       76.9325
+      ],
+      [
+       43.254,
+       76.9329
+      ],
+      [
+       43.2529,
+       76.933
+      ],
+      [
+       43.2421,
+       76.9343
+      ],
+      [
+       43.2384,
+       76.9347
+      ],
+      [
+       43.2328,
+       76.9369
+      ],
+      [
+       43.2238,
+       76.9434
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Seifullin%20Avenue%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM geometry via Nominatim, simplified; the north-south spine west of the Golden Square"
+    },
+    {
+     "name": "Nazarbayev Avenue (ex-Furmanov St)",
+     "major": true,
+     "label_offset": "50%",
+     "pts": [
+      [
+       43.2672,
+       76.9452
+      ],
+      [
+       43.254,
+       76.9468
+      ],
+      [
+       43.2499,
+       76.9474
+      ],
+      [
+       43.2423,
+       76.9484
+      ],
+      [
+       43.2359,
+       76.9492
+      ],
+      [
+       43.2272,
+       76.9503
+      ],
+      [
+       43.2246,
+       76.9531
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Nazarbayev%20Avenue%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM geometry via Nominatim (secondary/tertiary segments named Nazarbayev), simplified"
+    },
+    {
+     "name": "Satbayev Street",
+     "major": false,
+     "label_offset": "60%",
+     "pts": [
+      [
+       43.2339,
+       76.8814
+      ],
+      [
+       43.237,
+       76.9251
+      ],
+      [
+       43.2374,
+       76.9317
+      ],
+      [
+       43.2379,
+       76.9391
+      ],
+      [
+       43.2384,
+       76.9469
+      ],
+      [
+       43.2395,
+       76.9572
+      ],
+      [
+       43.2396,
+       76.9612
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Satbayev%20Street%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM geometry via Nominatim, simplified; passes Central Stadium, Satbayev University and Republic Square"
+    },
+    {
+     "name": "Timiryazev Street",
+     "major": false,
+     "label_offset": "35%",
+     "pts": [
+      [
+       43.2246,
+       76.8876
+      ],
+      [
+       43.2249,
+       76.8921
+      ],
+      [
+       43.2253,
+       76.8982
+      ],
+      [
+       43.2257,
+       76.9038
+      ],
+      [
+       43.2259,
+       76.907
+      ],
+      [
+       43.2262,
+       76.9115
+      ],
+      [
+       43.2293,
+       76.9317
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Timiryazev%20Street%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM geometry via Nominatim, simplified; passes just north of KazNU / Botanical Garden toward the Akimat"
+    },
+    {
+     "name": "Tole Bi Street",
+     "major": false,
+     "label_offset": "40%",
+     "pts": [
+      [
+       43.2503,
+       76.8818
+      ],
+      [
+       43.2508,
+       76.8881
+      ],
+      [
+       43.2513,
+       76.8955
+      ],
+      [
+       43.2521,
+       76.9064
+      ],
+      [
+       43.2526,
+       76.9116
+      ],
+      [
+       43.2553,
+       76.9431
+      ],
+      [
+       43.256,
+       76.956
+      ]
+     ],
+     "coord_src": "page_read+derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Tole%20Bi%20Street%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "West half from OSM geometry via Nominatim (50-segment limit); the two eastern vertices are derived from KBTU (Tole Bi 59, Nominatim) and the Dostyk alignment (+/-150 m)"
+    }
+   ],
+   "rails": [
+    {
+     "name": "Almaty Metro Line 1 (Raiymbek Batyr - Bauyrzhan Momyshuly; 11 stations, 13.4 km, opened 2011)",
+     "pts": [
+      [
+       43.2716,
+       76.9445
+      ],
+      [
+       43.2619,
+       76.9458
+      ],
+      [
+       43.2517,
+       76.9469
+      ],
+      [
+       43.2422,
+       76.9494
+      ],
+      [
+       43.2411,
+       76.9272
+      ],
+      [
+       43.2403,
+       76.9172
+      ],
+      [
+       43.2386,
+       76.8967
+      ],
+      [
+       43.2369,
+       76.8783
+      ],
+      [
+       43.2293,
+       76.8661
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Almaty_Metro",
+     "coord_note_ja": "Vertices are the station coordinates from the fetched Wikipedia station pages (Saryarka and B. Momyshuly lie west of the frame and are omitted); deep-level line, stations are not designated shelters"
+    }
+   ],
+   "water": [
+    {
+     "name": "Kishi Almaty (Malaya Almatinka) river - channelized mudflow corridor",
+     "kind": "river",
+     "width_m": 15,
+     "pts": [
+      [
+       43.1933,
+       76.9885
+      ],
+      [
+       43.2074,
+       76.9736
+      ],
+      [
+       43.2128,
+       76.9714
+      ],
+      [
+       43.2171,
+       76.9698
+      ],
+      [
+       43.2221,
+       76.9681
+      ],
+      [
+       43.2357,
+       76.9606
+      ],
+      [
+       43.2517,
+       76.9596
+      ],
+      [
+       43.2671,
+       76.968
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Kishi%20Almaty%20river%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM waterway geometry via Nominatim (relation Kishi Almaty), clipped to the frame and simplified to 8 vertices"
+    },
+    {
+     "name": "Esentai (Vesnovka) river",
+     "kind": "river",
+     "width_m": 8,
+     "pts": [
+      [
+       43.2,
+       76.9385
+      ],
+      [
+       43.21,
+       76.934
+      ],
+      [
+       43.2206,
+       76.9304
+      ],
+      [
+       43.229,
+       76.9262
+      ],
+      [
+       43.2367,
+       76.9217
+      ],
+      [
+       43.248,
+       76.9165
+      ],
+      [
+       43.263,
+       76.9105
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://en.wikipedia.org/wiki/Esentai_River",
+     "coord_note_ja": "No OSM geometry returned by Nominatim; line derived from two fetched points (Esentai Park centroid 43.2206,76.9304 and the 'Esentay River' stop on Satbayev St 43.2367,76.9217) and the known NNW course that splits the city in half (Wikipedia); +/-200 m"
+    },
+    {
+     "name": "Ulken Almaty (Bolshaya Almatinka) river",
+     "kind": "river",
+     "width_m": 15,
+     "pts": [
+      [
+       43.1888,
+       76.8905
+      ],
+      [
+       43.194,
+       76.8904
+      ],
+      [
+       43.1976,
+       76.8903
+      ],
+      [
+       43.203,
+       76.8893
+      ],
+      [
+       43.2076,
+       76.8863
+      ],
+      [
+       43.2132,
+       76.8849
+      ],
+      [
+       43.2185,
+       76.8844
+      ],
+      [
+       43.2243,
+       76.8811
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Bolshaya%20Almatinka&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "OSM waterway geometry via Nominatim, clipped (western frame edge) and simplified; continues north to Sairan lake outside the frame"
+    }
+   ],
+   "pois": [
+    {
+     "name": "Central City Clinical Hospital (Zhandosov St 6)",
+     "name_ja": "Central City Clinical Hospital (Zhandosov St 6)",
+     "kind": "hospital",
+     "lat": 43.2346,
+     "lon": 76.9114,
+     "why_ja": "Large public multi-profile hospital 2 km north-west of the office; nearest major emergency receiving hospital for the Esentai / Koktem area",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Central%20clinical%20hospital%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Central%20clinical%20hospital%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim relation 17032170 (building=hospital, 6 Zhandosov street, Bostandyk district)",
+     "shelter_for": [],
+     "floors": 7
+    },
+    {
+     "name": "City Emergency Hospital (BSNP, Kazybek Bi 96)",
+     "name_ja": "City Emergency Hospital (BSNP, Kazybek Bi 96)",
+     "kind": "hospital",
+     "lat": 43.2548,
+     "lon": 76.9287,
+     "why_ja": "City trauma / emergency hospital in the Golden Square; primary destination for earthquake casualties in the center",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Kazybek%20bi%2096%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Kazybek%20bi%2096%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 244842479 (building=hospital, 96 Kazybek Bi Street, Almaly district)",
+     "shelter_for": [],
+     "floors": 5
+    },
+    {
+     "name": "Interteach clinic (Nazarbayev Ave 275E)",
+     "name_ja": "Interteach clinic (Nazarbayev Ave 275E)",
+     "kind": "hospital",
+     "lat": 43.2251,
+     "lon": 76.9525,
+     "why_ja": "Private international clinic chain used by expatriates and corporate clients (English-speaking reception is claimed on the company site; not verified in this session); 24h ambulance",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Interteach%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Interteach%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim node 3191828663 (amenity=clinic, 275E Nazarbayev Avenue, Medeu district); second branch at Nazarbayev 111 (43.2562,76.9463)",
+     "shelter_for": [],
+     "floors": 3
+    },
+    {
+     "name": "Esentai Park",
+     "name_ja": "Esentai Park",
+     "kind": "park_open_space",
+     "lat": 43.2206,
+     "lon": 76.9304,
+     "why_ja": "Small riverside park directly behind Esentai Tower on the Esentai river; first assembly point for office staff after shaking stops (stay away from the river bank during mudflow warnings)",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Esentai%20Park%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Esentai%20Park%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 10,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 239666312 (leisure=park) centroid",
+     "radius_m": 130,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 3000,
+     "assembly": true
+    },
+    {
+     "name": "Republic Square (Respublika Alany)",
+     "name_ja": "Republic Square (Respublika Alany)",
+     "kind": "park_open_space",
+     "lat": 43.2389,
+     "lon": 76.9455,
+     "why_ja": "Large paved square in front of the City Akimat; official rally / assembly space in the center, 2.4 km from the office",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Republic%20Square%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Republic%20Square%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 10,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim way 597984193 (place=square)",
+     "radius_m": 160,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 20000,
+     "assembly": true
+    },
+    {
+     "name": "Central Stadium (Satbayev St 29/3)",
+     "name_ja": "Central Stadium (Satbayev St 29/3)",
+     "kind": "park_open_space",
+     "lat": 43.2384,
+     "lon": 76.924,
+     "why_ja": "23,804-seat stadium and surrounding sports grounds; large open area for post-earthquake assembly and relief staging",
+     "source_url": "https://en.wikipedia.org/wiki/Almaty_Central_Stadium",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Central%20Stadium%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim relation 9099497; Wikipedia coord 43.23833,76.92444",
+     "radius_m": 200,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 20000,
+     "assembly": true
+    },
+    {
+     "name": "Main Botanical Garden",
+     "name_ja": "Main Botanical Garden",
+     "kind": "park_open_space",
+     "lat": 43.2194,
+     "lon": 76.9144,
+     "why_ja": "100+ ha botanical garden (opened 1932) 1.2 km west of the office; largest open space near Esentai, above the river corridors",
+     "source_url": "https://en.wikipedia.org/wiki/Almaty_Botanical_Garden",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Botanical%20garden%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 307056816 (leisure=park) centroid; Wikipedia coord 43.225,76.915",
+     "radius_m": 450,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 30000,
+     "assembly": true
+    },
+    {
+     "name": "Al-Farabi Kazakh National University campus",
+     "name_ja": "Al-Farabi Kazakh National University campus",
+     "kind": "park_open_space",
+     "lat": 43.2206,
+     "lon": 76.9233,
+     "why_ja": "Open university campus (KazNU) between the office and the Botanical Garden; wide lawns and plazas suitable for assembly",
+     "source_url": "https://en.wikipedia.org/wiki/Al-Farabi_Kazakh_National_University",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=KazNU%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 9,
+     "label_dy": 14,
+     "coord_note_ja": "Nominatim way 360167896 (amenity=university); Wikipedia coord 43.225,76.92111",
+     "radius_m": 300,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 15000,
+     "assembly": true
+    },
+    {
+     "name": "Central Park of Culture and Recreation (Gorky Park)",
+     "name_ja": "Central Park of Culture and Recreation (Gorky Park)",
+     "kind": "park_open_space",
+     "lat": 43.2616,
+     "lon": 76.9693,
+     "why_ja": "Large historic park in the north-east of the frame near the Dostyk Avenue / Kishi Almaty area; assembly space for residents north of Abai (avoid the Kishi Almaty bank during mudflow warnings)",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Central%20Park%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Central%20Park%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": -9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim way 232715414 (leisure=park) centroid",
+     "radius_m": 400,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 30000,
+     "assembly": true
+    },
+    {
+     "name": "Branch Office in Almaty, Embassy of Japan (Kazybek Bi St 41, 3rd floor)",
+     "name_ja": "Branch Office in Almaty, Embassy of Japan (Kazybek Bi St 41, 3rd floor)",
+     "kind": "embassy",
+     "lat": 43.2575,
+     "lon": 76.9535,
+     "why_ja": "Consular window for Japanese nationals in southern Kazakhstan (the Embassy itself is in Astana); registration (ORR), emergency mail and evacuation information - not a shelter",
+     "source_url": "https://www.mofa.go.jp/mofaj/press/release/16/rls_1228i.html",
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Kazybek%20bi%2043%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Address Kazybek Bi 41, 050010 Almaty from the MOFA 2004 opening press release and directory sites (search_snippet; mofa.go.jp is blocked for fetching). Nominatim resolved the adjacent house Kazybek Bi 43 at 43.2575,76.9526 (Golden Square, Medeu district) but not number 41; coordinate placed one plot east (+/-60 m)",
+     "floors": 3
+    },
+    {
+     "name": "U.S. Consulate General Almaty (Zholdasbekov St 97, Samal-2)",
+     "name_ja": "U.S. Consulate General Almaty (Zholdasbekov St 97, Samal-2)",
+     "kind": "embassy",
+     "lat": 43.2335,
+     "lon": 76.9545,
+     "why_ja": "Largest Western consulate in the city, inside the Samal-2 expatriate housing area; reference point for the diplomatic quarter",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Zholdasbekov%2097%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Zholdasbekov%2097%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim node 6534413230 (office=diplomatic)"
+    },
+    {
+     "name": "Abai metro station",
+     "name_ja": "Abai metro station",
+     "kind": "station",
+     "lat": 43.2422,
+     "lon": 76.9494,
+     "why_ja": "Metro Line 1 station at Abai / Nazarbayev; deep station, not a shelter, but a landmark for family meeting points",
+     "source_url": "https://en.wikipedia.org/wiki/Abay_(Almaty_Metro)",
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Abay_(Almaty_Metro)",
+     "label_dx": 9,
+     "label_dy": 13,
+     "coord_note_ja": "Wikipedia coord 43 14 32 N 76 56 58 E"
+    },
+    {
+     "name": "Baikonur metro station",
+     "name_ja": "Baikonur metro station",
+     "kind": "station",
+     "lat": 43.2411,
+     "lon": 76.9272,
+     "why_ja": "Metro Line 1 station at Abai / Baitursynov next to Central Stadium",
+     "source_url": "https://en.wikipedia.org/wiki/Baikonur_(Almaty_Metro)",
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Baikonur_(Almaty_Metro)",
+     "label_dx": 9,
+     "label_dy": 13,
+     "coord_note_ja": "Wikipedia coord"
+    },
+    {
+     "name": "Haileybury Almaty (Al-Farabi Ave 112)",
+     "name_ja": "Haileybury Almaty (Al-Farabi Ave 112)",
+     "kind": "school",
+     "lat": 43.2175,
+     "lon": 76.933,
+     "why_ja": "British international school 300 m east of Esentai Tower (est. 2008); many staff children; school grounds double as a family reunification point",
+     "source_url": "https://en.wikipedia.org/wiki/Haileybury_Almaty",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Haileybury%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_note_ja": "Nominatim relation 18291464 (amenity=school); Wikipedia coord 43.217281,76.933651",
+     "shelter_for": [
+      "quake"
+     ],
+     "cap": 1500
+    },
+    {
+     "name": "Almaty City Akimat (Republic Square 4)",
+     "name_ja": "Almaty City Akimat (Republic Square 4)",
+     "kind": "government",
+     "lat": 43.2363,
+     "lon": 76.9457,
+     "why_ja": "City government headquarters; the city emergency commission convenes here and the Almaty Department for Emergency Situations (DChS) coordinates response (DChS building not geocoded)",
+     "source_url": "https://nominatim.openstreetmap.org/search?q=Almaty%20City%20Akimat&format=jsonv2&countrycodes=kz",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Almaty%20City%20Akimat&format=jsonv2&countrycodes=kz",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim relation 3244397 (amenity=townhall)",
+     "floors": 8
+    },
+    {
+     "name": "Kok Tobe hill (1,100 m) and Almaty TV Tower",
+     "name_ja": "Kok Tobe hill (1,100 m) and Almaty TV Tower",
+     "kind": "landmark",
+     "lat": 43.2331,
+     "lon": 76.9755,
+     "why_ja": "High ground east of the center above the Kishi Almaty corridor; the 372 m TV tower (1983) is visible city-wide and serves as an orientation landmark; access roads may be blocked by landslides after strong shaking",
+     "source_url": "https://en.wikipedia.org/wiki/Almaty_Tower",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Kok%20Tobe%20Almaty&format=jsonv2&countrycodes=kz",
+     "label_dx": -9,
+     "label_dy": -8,
+     "coord_note_ja": "Nominatim node 1826331904 (place=locality Kok Tobe); TV tower Wikipedia coord 43.22889,76.97611"
+    }
+   ],
+   "homes": [
+    {
+     "name_ja": "Samal-2 / Dostyk Avenue high-rise apartments (Medeu district, diplomatic quarter)",
+     "lat": 43.2313,
+     "lon": 76.9547,
+     "type": "highrise",
+     "floor": 12,
+     "keys": [
+      "samal",
+      "самал",
+      "самал-2",
+      "dostyk",
+      "достык",
+      "zholdasbekov",
+      "жолдасбеков",
+      "mendikulov",
+      "медеу",
+      "medeu"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Samal-2%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "Nominatim way 439077639 (place=neighbourhood Samal 2)"
+    },
+    {
+     "name_ja": "Koktem-2 / Esentai (Al-Farabi) high-rise apartments (Bostandyk district)",
+     "lat": 43.2273,
+     "lon": 76.9211,
+     "type": "highrise",
+     "floor": 14,
+     "keys": [
+      "koktem",
+      "коктем",
+      "көктем",
+      "esentai",
+      "есентай",
+      "al-farabi",
+      "аль-фараби",
+      "әл-фараби",
+      "bostandyk",
+      "бостандык"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Koktem-2%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "Nominatim way 51350336 (apartments, Koktem 2nd microdistrict)"
+    },
+    {
+     "name_ja": "Gorny Gigant detached houses on the foothill slopes (Medeu district)",
+     "lat": 43.2162,
+     "lon": 76.9497,
+     "type": "house",
+     "floor": 2,
+     "keys": [
+      "gorny gigant",
+      "горный гигант",
+      "gorniy gigant",
+      "kerey-zhanibek",
+      "керей-жанибек",
+      "dulati",
+      "дулати",
+      "omarova",
+      "омарова",
+      "medeu"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Gorny%20Gigant%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "Nominatim relation 3271912 (place=suburb Gornyj Gigant); steep streets, private coal/gas heating, slope-failure and debris-flow exposure near the Kishi Almaty and Butakovka valleys"
+    },
+    {
+     "name_ja": "Auezov district Soviet 9-storey panel blocks (Microdistrict 12 / Aksay)",
+     "lat": 43.2226,
+     "lon": 76.8665,
+     "type": "lowrise",
+     "floor": 7,
+     "keys": [
+      "auezov",
+      "ауэзов",
+      "әуезов",
+      "aksay",
+      "аксай",
+      "mikrorayon",
+      "микрорайон",
+      "mkr",
+      "12 микрорайон",
+      "taugul",
+      "таугуль"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?q=Akimat%20Auezov%20district%20Almaty&format=jsonv2&countrycodes=kz",
+     "coord_note_ja": "Nominatim way 27480049 (Auezov district akimat, Microdistrict 12) used as the centroid of the 1970s-80s panel-block belt; west of the 7 km frame"
+    }
+   ],
+   "zones": {
+    "flood": [
+     {
+      "depth_m": 2.0,
+      "note_ja": "mudflow / debris-flow corridor - Kishi (Malaya) Almatinka: the 1921 flow (about 10 million m3 at 900 m3/s) killed about 500 people; the Medeu dam (1966, raised after stopping the 15 July 1973 flow) now protects the valley. Corridor width +/-220 m is an assumption for the demo",
+      "pts": [
+       [
+        43.2005,
+        76.9827
+       ],
+       [
+        43.2128,
+        76.9741
+       ],
+       [
+        43.2357,
+        76.9633
+       ],
+       [
+        43.262,
+        76.9677
+       ],
+       [
+        43.262,
+        76.9623
+       ],
+       [
+        43.2357,
+        76.9579
+       ],
+       [
+        43.2128,
+        76.9687
+       ],
+       [
+        43.2005,
+        76.9773
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.8,
+      "note_ja": "mudflow / debris-flow corridor - Esentai (Vesnovka) river, a channelized left branch of the Kishi Almaty passing Esentai Tower; smaller catchment, assumed +/-120 m",
+      "pts": [
+       [
+        43.2,
+        76.94
+       ],
+       [
+        43.2206,
+        76.9319
+       ],
+       [
+        43.2367,
+        76.9232
+       ],
+       [
+        43.262,
+        76.9125
+       ],
+       [
+        43.262,
+        76.9095
+       ],
+       [
+        43.2367,
+        76.9202
+       ],
+       [
+        43.2206,
+        76.9289
+       ],
+       [
+        43.2,
+        76.937
+       ]
+      ]
+     },
+     {
+      "depth_m": 2.0,
+      "note_ja": "mudflow / debris-flow corridor - Ulken (Bolshaya) Almatinka at the western frame edge; one of the two valleys with five catastrophic 20th-century flows (Wikipedia, Medeu Dam); assumed +/-220 m",
+      "pts": [
+       [
+        43.2,
+        76.8932
+       ],
+       [
+        43.2076,
+        76.889
+       ],
+       [
+        43.2185,
+        76.8871
+       ],
+       [
+        43.2243,
+        76.8838
+       ],
+       [
+        43.2243,
+        76.8784
+       ],
+       [
+        43.2185,
+        76.8817
+       ],
+       [
+        43.2076,
+        76.8836
+       ],
+       [
+        43.2,
+        76.8878
+       ]
+      ]
+     }
+    ],
+    "urban_flood": [
+     {
+      "depth_m": 0.3,
+      "note_ja": "Snowmelt / stormwater ponding on the flatter northern slope between Tole Bi and Raiymbek, where groundwater is shallow (assumed; ThinkHazard rates urban flood Very low for Almaty City area)",
+      "pts": [
+       [
+        43.2624,
+        76.9
+       ],
+       [
+        43.2624,
+        76.962
+       ],
+       [
+        43.256,
+        76.964
+       ],
+       [
+        43.25,
+        76.956
+       ],
+       [
+        43.25,
+        76.9
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.4,
+      "note_ja": "Al-Farabi Avenue grade-separated interchanges (Seifullin, Nazarbayev) - underpass flooding during intense summer storms (assumed)",
+      "pts": [
+       [
+        43.229,
+        76.94
+       ],
+       [
+        43.23,
+        76.952
+       ],
+       [
+        43.225,
+        76.953
+       ],
+       [
+        43.224,
+        76.941
+       ]
+      ]
+     }
+    ],
+    "quake": [
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX",
+      "note_ja": "Design seismic intensity 9 (MSK-64) for the central and southern city on coarse alluvial-fan deposits; 1887 (intensity IX-X in Verny) and 1911 (M8.0 Kemin, 37 km away) destroyed the city. Band boundaries are assumed; the official microzonation map was not fetched",
+      "pts": [
+       [
+        43.252,
+        76.894
+       ],
+       [
+        43.252,
+        76.98
+       ],
+       [
+        43.1996,
+        76.98
+       ],
+       [
+        43.1996,
+        76.894
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX-X",
+      "note_ja": "Northern strip toward Raiymbek Avenue: the Institute of Seismology names the zones north of Raiymbek with shallow groundwater and soft (loess-like) soils as the most unfavorable, up to intensity 10 (search_snippet via Tengrinews); band assumed",
+      "pts": [
+       [
+        43.2624,
+        76.894
+       ],
+       [
+        43.2624,
+        76.98
+       ],
+       [
+        43.252,
+        76.98
+       ],
+       [
+        43.252,
+        76.894
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX + slope failure",
+      "note_ja": "Foothill slopes of Gorny Gigant and Kok Tobe: earthquake-triggered landslides / rockfall and road blockage (ThinkHazard landslide Medium; the 1887 and 1911 events produced large landslides in the Trans-Ili Alatau). Polygon assumed",
+      "pts": [
+       [
+        43.236,
+        76.965
+       ],
+       [
+        43.24,
+        76.98
+       ],
+       [
+        43.206,
+        76.98
+       ],
+       [
+        43.206,
+        76.96
+       ],
+       [
+        43.22,
+        76.944
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "area_id": "aty_center",
+   "city_ja": "Atyrau",
+   "area_ja": "Atyrau centre - both banks of the Zhaiyk (Satpayev / Azattyq / Baimukhanov)",
+   "center_lat": 47.105,
+   "center_lon": 51.92,
+   "extent_km": 8,
+   "rotation_deg": 5,
+   "grid_m": 200,
+   "flood_context_ja": "Atyrau lies about 20 m below sea level on the flat Zhaiyk (Ural) delta plain, split by the river into a European (west) and an Asian (east) bank, and ThinkHazard rates both river flood and urban flood hazard High for the Atyrau city area. The Ural is 60-70% snowmelt-fed and carries about 65% of its annual flow in the spring flood (March-April near the mouth): in the record 2024 flood the Atyrau gauge rose past its 550 cm critical mark to 553 cm in mid-May, more than 520 km of earth dikes were raised in the region, garden-plot (dacha) societies and houses in the floodplain were pre-emptively evacuated, a dike at Sokolok near the city was reported breached around 24 May (143 evacuees sheltered in a school) and the city's power plants were fenced against the water, while the city core behind the embankments stayed dry. Kazhydromet expected the crest at Uralsk (critical level 850 cm) on 18-20 April, whereas Atyrau's peak came only in mid-May (13 May: 'peak expected in 4-5 days'), so river floods here are forecastable weeks ahead; in 2024 the inflow also lifted the Caspian level near Atyrau by 119 cm (Ministry of Water Resources via bizmedia.kz). Spring thaw and rain additionally pond in low-lying panel-housing microdistricts with limited storm drainage (Avangard, Zhilgorodok, station area) - an assumption consistent with the urban-flood rating.",
+   "earthquake_context_ja": "ThinkHazard rates earthquake hazard Very low for the Atyrau city area, and the USGS catalog holds no M5+ event within 150 km since 1950; the largest nearby events are M4.5 (2023-04-25, ~250 km S near Shetpe) and M4.5 (2026-09-17, ~160 km SE near Karaton). A cluster of 11 M4.0-4.5 events since 2020 lies 130-160 km south-east around Karaton and the Tengiz field (USGS); whether it is induced by field operations is not established here (assumption). Soviet-era panel and brick housing predates seismic design, so the plausible risk is non-structural damage and panic at low intensities; mudflow/debris flow is not relevant on the flat delta.",
+   "heat_cold_context_ja": "Extreme heat is rated Medium by ThinkHazard: the record high is 44.6 C (August), July mean daily maximum 33.7 C, and Open-Meteo shows 37.1 C as recently as 2026-08-25 (Wikipedia climate table 1991-2020; Open-Meteo). Winters are severe for a city at sea level - record low -37.9 C (January), January mean -6.4 C with steppe winds and ice on the Zhaiyk - so power or heating outages in winter are a life-safety issue for staff housing. Water scarcity and wildfire (steppe and reed fires in the delta) are rated High, and the city has chronic hydrogen-sulfide air-pollution episodes from the oil and gas industry (Wikipedia); Caspian coastal flood is 'No data' in ThinkHazard and affects the delta villages (Damba, 46.96 N) rather than the city (assumption).",
+   "zone_src_ja": "Assumed polygons: Zhaiyk floodplain strips from the OSM river geometry (Nominatim relation 214415) within about 0.7 km of the channel; 2024 reports (gauge 553 cm vs 550 cm critical; dikes held in the core; floodplain dacha societies and houses evacuated; Sokolok dike breach NE of the city; power plant fenced); low-lying microdistricts for urban ponding; ThinkHazard river/urban flood High. No published inundation map for Atyrau city was accessible (none on ReliefWeb/HDX; Copernicus/UNOSAT not activated for Atyrau).",
+   "sources": [
+    {
+     "name": "ThinkHazard! - Kazakhstan, Atyrauskaya, Atyrau City area (code 37207): river flood High, urban flood High, earthquake Very low, landslide Very low, water scarcity High, extreme heat Medium, wildfire High, coastal flood/cyclone No data",
+     "url": "https://www.thinkhazard.org/en/report/37207-kazakhstan-atyrauskaya-atyrau-city-area",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - Atyrau (population 404,129 in 2024; elevation about 20 m below sea level; bridges 1965/2001/2009; climate normals 1991-2020, extremes since 1881; Dostyk village compound)",
+     "url": "https://en.wikipedia.org/wiki/Atyrau",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Ural (river): 60-70% snowmelt-fed, 65% of annual flow in the spring flood (March-April near the mouth), widens to tens of km near the mouth, max discharge 14,000 m3/s",
+     "url": "https://en.wikipedia.org/wiki/Ural_(river)",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - 2024 Central Asian floods (Kazakhstan: 96,472 evacuated by 10 April incl. Atyrau region; Orsk dam collapse 5 April)",
+     "url": "https://en.wikipedia.org/wiki/2024_Central_Asian_floods",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "ACAPS briefing note Kazakhstan floods, 23 April 2024 (state of emergency in 10 regions incl. Atyrau on 6 April; 118,200 evacuated and ~6,000 homes inundated nationally by 19 April)",
+     "url": "https://reliefweb.int/report/kazakhstan/acaps-briefing-note-kazakhstan-floods-23-april-2024",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "IFRC DREF final report Kazakhstan Flood 2024 (MDRKZ013)",
+     "url": "https://reliefweb.int/report/kazakhstan/kazakhstan-flood-2024-dref-final-report-mdrkz013",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "USGS ComCat FDSN query, M4+ 1900-2026 within 44.5-49.5N / 49-55E (12 events, none M5; Karaton/Tengiz cluster)",
+     "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=1900-01-01&minmagnitude=4&minlatitude=44.5&maxlatitude=49.5&minlongitude=49&maxlongitude=55&orderby=magnitude",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Nominatim / OpenStreetMap (all POI coordinates, street and river geometries; fetched 2026-11-16)",
+     "url": "https://nominatim.openstreetmap.org/",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Natural Earth 10m railroads (nvkelso/natural-earth-vector)",
+     "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_railroads.geojson",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Open-Meteo forecast API, Atyrau 2026-08-16..2026-11-22 daily: max 37.1 C (2026-08-25), min -1.7 C (2026-11-10); model elevation -28 m",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=47.105&longitude=51.92&daily=temperature_2m_max,temperature_2m_min&past_days=92&timezone=auto",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Bizmedia.kz 2024-05-11: Zhaiyk at Atyrau 553 cm vs critical 550 cm; dikes holding for a fourth day; >520 km of flood dikes in the region",
+     "url": "https://bizmedia.kz/2024-05-11-chetvyortye-sutki-damby-uderzhivayut-bolshuyu-vodu/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Bizmedia.kz 2024-05-13: flood peak in Atyrau expected in 4-5 days; Kazhydromet 11 May reading 533 cm (+5 cm/day)",
+     "url": "https://bizmedia.kz/2024-05-13-pik-pavodka-v-atyrau-ozhidaetsya-cherez-4-5-dnej/md/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Bizmedia.kz 2024-05-24: Sokolok dike near Atyrau breached; 143 evacuated residents returning",
+     "url": "https://bizmedia.kz/2024-05-24-okolo-atyrau-prorvalo-dambu-sokolok/md/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Bizmedia.kz 2024-05-14: Atyrau power plants fenced against floods; >120 evacuated in the region",
+     "url": "https://bizmedia.kz/2024-05-14-v-aytrau-dlya-zashhity-ot-pavodkov-ogradili-elektrostanczii/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Bizmedia.kz 2024-07-01 / 2024-11-04: Caspian level near Atyrau rose 119 cm in 2024 from Zhaiyk floodwater (Ministry of Water Resources)",
+     "url": "https://bizmedia.kz/2024-07-01-uroven-kaspijskogo-morya-vyros-na-119-sm/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Government of Kazakhstan (oq.gov.kz) flood situation information: pre-emptive evacuation of garden-society and floodplain houses on the Zhaiyk; 'about 100 cm to critical' at Atyrau around 30 April",
+     "url": "https://oq.gov.kz/en/qazalemnews/578",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Kazhydromet: Zhaiyk peak at Uralsk expected 18-20 April 2024; critical level at Uralsk 850 cm (dachas flood above it)",
+     "url": "https://kazhydromet.kz/en/post/2614",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Prime Minister's office, 24 April 2024: bank reinforcement of Atyrau residential areas ahead of the second flood peak",
+     "url": "https://pm.kz/en/news/olzhas-bektenov-inspects-bank-reinforcement-of-atyraus-residential-areas-in-anticipation-of-second-flood-peak-28088",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "KazNU Bulletin of Geography: Geographical analysis of the flooding situation near Atyrau during the spring flood (2024)",
+     "url": "https://bulletin-geography.kaznu.kz/index.php/1-geo/en/article/view/1491",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Kazinform / TCO: Kulsary flood April 2024 - water arrived 5 April, 2,810 buildings flooded, 33,641 evacuated; evacuees housed in Tengiz rotation camps (7,000 on the Tengiz field) and Atyrau",
+     "url": "https://en.inform.kz/news/above-33000-evacuated-from-flood-stricken-kulsary-in-atyrau-region-e1a48e/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Tengizchevroil news 2024-04-30: TCO volunteers aid Kulsary evacuees arriving at Tengiz rotational camps on 6 April",
+     "url": "https://tengizchevroil.com/tco-news/detail/2024/04/30/tco-volunteers-had-provided-humanitarian-aid-for-zhyloi-district-during-the-flood",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "gov.kz - Department for Emergency Situations of Atyrau Region: 53A Auezov St, +7 7122 45 01 56, dchs_atyr@emer.kz",
+     "url": "https://www.gov.kz/memleket/entities/emer-atyrau?lang=en",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "UK government list of medical facilities in Kazakhstan (Interteach Atyrau: English-speaking staff; Open Clinic: some English; Prospekt Medical 82 Abulkhair Khan Ave)",
+     "url": "https://www.gov.uk/government/publications/kazakhstan-list-of-medical-facilities/list-of-medical-facilitiespractitioners-in-kazakhstan--2",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Bupa Global facility listing - Prospekt Medical, 82 Abulkhair Khan Avenue, Atyrau 060011",
+     "url": "https://www.bupaglobal.com/en/facilities/1002239/prospekt-medical",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Tengizchevroil contact page - headquarters 3 Satpayev Street, Atyrau 060011",
+     "url": "https://tcoext.azure.chevron.com/contact-us",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Netherlands honorary consul in Atyrau (Abylkhair Khan Ave); EEAS 2025 table of EU missions in Kazakhstan (honorary consulates in Atyrau: France, Lithuania, Hungary, Italy (vacant), Spain approved)",
+     "url": "https://netherlandsandyou.nl/web/kazakhstan/about-us/honorary-consul-atyrau",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "EEAS table of EU member-state missions in Kazakhstan 2025",
+     "url": "https://www.eeas.europa.eu/sites/default/files/documents/2025/Table%20of%20EU%20Member%20States%20Diplomatic%20and%20Consular%20Missions%20in%20Kazakhstan%202025_0.pdf",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "roads": [
+    {
+     "name": "Satpayev St (Kanysh Satpayev St)",
+     "major": true,
+     "label_offset": "40%",
+     "pts": [
+      [
+       47.1038,
+       51.881
+      ],
+      [
+       47.1046,
+       51.8908
+      ],
+      [
+       47.1051,
+       51.8992
+      ],
+      [
+       47.1053,
+       51.9063
+      ],
+      [
+       47.1052,
+       51.9098
+      ],
+      [
+       47.1049,
+       51.9158
+      ],
+      [
+       47.1049,
+       51.9191
+      ]
+     ]
+    },
+    {
+     "name": "Azattyq Ave",
+     "major": true,
+     "label_offset": "45%",
+     "pts": [
+      [
+       47.0775,
+       51.8893
+      ],
+      [
+       47.0813,
+       51.8975
+      ],
+      [
+       47.0855,
+       51.9059
+      ],
+      [
+       47.0904,
+       51.9158
+      ],
+      [
+       47.0947,
+       51.9228
+      ],
+      [
+       47.0993,
+       51.9236
+      ],
+      [
+       47.1042,
+       51.9242
+      ],
+      [
+       47.112,
+       51.923
+      ]
+     ]
+    },
+    {
+     "name": "Abay St",
+     "major": true,
+     "label_offset": "60%",
+     "pts": [
+      [
+       47.1049,
+       51.9191
+      ],
+      [
+       47.105,
+       51.9224
+      ],
+      [
+       47.1048,
+       51.9245
+      ],
+      [
+       47.1042,
+       51.929
+      ],
+      [
+       47.1037,
+       51.9328
+      ]
+     ]
+    },
+    {
+     "name": "Musa Baimukhanov St",
+     "major": true,
+     "label_offset": "40%",
+     "pts": [
+      [
+       47.125,
+       51.9283
+      ],
+      [
+       47.1291,
+       51.9385
+      ],
+      [
+       47.1301,
+       51.95
+      ],
+      [
+       47.1298,
+       51.9535
+      ],
+      [
+       47.1274,
+       51.9577
+      ]
+     ]
+    },
+    {
+     "name": "Sultan Beibarys Ave (incl. Beibarys bridge)",
+     "major": true,
+     "label_offset": "30%",
+     "pts": [
+      [
+       47.1192,
+       51.8371
+      ],
+      [
+       47.1191,
+       51.8676
+      ],
+      [
+       47.1191,
+       51.8877
+      ],
+      [
+       47.1172,
+       51.919
+      ],
+      [
+       47.1184,
+       51.939
+      ],
+      [
+       47.1193,
+       51.9481
+      ],
+      [
+       47.1285,
+       51.9561
+      ]
+     ]
+    },
+    {
+     "name": "Makhambet Utemisov St",
+     "major": false,
+     "label_offset": "50%",
+     "pts": [
+      [
+       47.1264,
+       51.9262
+      ],
+      [
+       47.1242,
+       51.928
+      ],
+      [
+       47.1195,
+       51.9282
+      ],
+      [
+       47.1168,
+       51.9284
+      ],
+      [
+       47.1104,
+       51.9286
+      ]
+     ]
+    },
+    {
+     "name": "Kurmangazy St",
+     "major": true,
+     "label_offset": "55%",
+     "pts": [
+      [
+       47.0937,
+       51.8763
+      ],
+      [
+       47.0962,
+       51.8733
+      ],
+      [
+       47.1009,
+       51.8791
+      ],
+      [
+       47.1075,
+       51.8852
+      ],
+      [
+       47.1193,
+       51.8877
+      ]
+     ]
+    },
+    {
+     "name": "Abulkhair Khan Ave (airport road)",
+     "major": true,
+     "label_offset": "35%",
+     "pts": [
+      [
+       47.1239,
+       51.8332
+      ],
+      [
+       47.1144,
+       51.8419
+      ],
+      [
+       47.1101,
+       51.8492
+      ],
+      [
+       47.1081,
+       51.8577
+      ],
+      [
+       47.1065,
+       51.8656
+      ],
+      [
+       47.105,
+       51.8726
+      ],
+      [
+       47.1036,
+       51.881
+      ]
+     ]
+    },
+    {
+     "name": "Vladimirsky St",
+     "major": false,
+     "label_offset": "45%",
+     "pts": [
+      [
+       47.0917,
+       51.8696
+      ],
+      [
+       47.094,
+       51.8774
+      ],
+      [
+       47.0955,
+       51.8817
+      ],
+      [
+       47.099,
+       51.8869
+      ],
+      [
+       47.1017,
+       51.8914
+      ],
+      [
+       47.1051,
+       51.8988
+      ]
+     ]
+    }
+   ],
+   "rails": [
+    {
+     "name": "Astrakhan - Atyrau - Makat railway (through Atyrau station)",
+     "pts": [
+      [
+       47.0528,
+       51.8753
+      ],
+      [
+       47.0656,
+       51.8797
+      ],
+      [
+       47.0767,
+       51.8858
+      ],
+      [
+       47.0839,
+       51.8958
+      ],
+      [
+       47.0883,
+       51.9083
+      ],
+      [
+       47.0931,
+       51.9208
+      ],
+      [
+       47.0978,
+       51.9336
+      ],
+      [
+       47.105,
+       51.9436
+      ],
+      [
+       47.1129,
+       51.9501
+      ],
+      [
+       47.1239,
+       51.9592
+      ],
+      [
+       47.1406,
+       51.9733
+      ]
+     ],
+     "note_ja": "Natural Earth 10m railroad centreline (±0.5 km); crosses the Zhaiyk by rail bridge near 47.087, 51.899 and passes 0.6 km south of the station polygon (47.1293, 51.9568).",
+     "src": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_railroads.geojson",
+     "confirmed_by": "page_read"
+    }
+   ],
+   "water": [
+    {
+     "name": "Zhaiyk (Ural) river",
+     "kind": "river",
+     "width_m": 200,
+     "pts": [
+      [
+       47.175,
+       51.9371
+      ],
+      [
+       47.1654,
+       51.9433
+      ],
+      [
+       47.1637,
+       51.9416
+      ],
+      [
+       47.1646,
+       51.9294
+      ],
+      [
+       47.1621,
+       51.9266
+      ],
+      [
+       47.1536,
+       51.9259
+      ],
+      [
+       47.1461,
+       51.9309
+      ],
+      [
+       47.1417,
+       51.9227
+      ],
+      [
+       47.1386,
+       51.921
+      ],
+      [
+       47.1311,
+       51.9293
+      ],
+      [
+       47.1228,
+       51.9148
+      ],
+      [
+       47.1159,
+       51.9216
+      ],
+      [
+       47.1113,
+       51.9176
+      ],
+      [
+       47.1028,
+       51.9195
+      ],
+      [
+       47.0971,
+       51.9176
+      ],
+      [
+       47.0955,
+       51.9121
+      ],
+      [
+       47.1013,
+       51.9027
+      ],
+      [
+       47.1017,
+       51.8966
+      ],
+      [
+       47.0973,
+       51.893
+      ],
+      [
+       47.0916,
+       51.9002
+      ],
+      [
+       47.0868,
+       51.8973
+      ],
+      [
+       47.0851,
+       51.8907
+      ],
+      [
+       47.0884,
+       51.8785
+      ],
+      [
+       47.0865,
+       51.8716
+      ],
+      [
+       47.0747,
+       51.8694
+      ],
+      [
+       47.0585,
+       51.8538
+      ],
+      [
+       47.0484,
+       51.8551
+      ]
+     ],
+     "note_ja": "Geometry from OSM relation 214415 via Nominatim (polygon_geojson), clipped to the map and simplified; width assumed (~150-250 m in the city). Flows north to south; west bank = Europe, east bank = Asia.",
+     "src": "https://nominatim.openstreetmap.org/search?format=json&q=Ural%20River",
+     "confirmed_by": "page_read"
+    }
+   ],
+   "pois": [
+    {
+     "name": "Atyrau Regional Hospital",
+     "name_ja": "Atyrau Regional Hospital",
+     "kind": "hospital",
+     "lat": 47.0917,
+     "lon": 51.8724,
+     "why_ja": "Main public multi-profile hospital of the region (98 Vladimirsky St, Avangard/Rembaza, west bank); emergency and trauma receiving hospital, Russian/Kazakh-speaking.",
+     "source_url": "https://en.wikipedia.org/wiki/Atyrau",
+     "label_dx": -9,
+     "label_dy": 14,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Атырауская%20областная%20больница",
+     "coord_note_ja": "Nominatim/OSM amenity=hospital 'Атырауская областная больница', 98 улица Владимирского (fetched 2026-11-16).",
+     "shelter_for": [],
+     "floors": 5
+    },
+    {
+     "name": "Atyrau Regional Cardiology Center",
+     "name_ja": "Atyrau Regional Cardiology Center",
+     "kind": "hospital",
+     "lat": 47.1041,
+     "lon": 51.9215,
+     "why_ja": "Public cardiology centre at 14 Smagulov St, 250 m east of the Central Bridge; nearest hospital to the east-bank centre.",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=json&q=Atyrau%20Regional%20Hospital,%20Atyrau",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Atyrau%20Regional%20Hospital,%20Atyrau",
+     "coord_note_ja": "Nominatim/OSM amenity=hospital 'Atyrau regional cardiology center', 14 Kaiyrgali Smagulov St.",
+     "shelter_for": []
+    },
+    {
+     "name": "Prospekt Medical Caspian (British clinic)",
+     "name_ja": "Prospekt Medical Caspian (British clinic)",
+     "kind": "hospital",
+     "lat": 47.106,
+     "lon": 51.8643,
+     "why_ja": "Private British-run clinic at 82 Abulkhair Khan Ave (airport road, Nursaya-3): English is the working language, resident British doctors/paramedics, partner of International SOS and used by oil-company expatriates (search snippets: Bupa facility listing, UK FCDO medical list, clinic job listing).",
+     "source_url": "https://www.bupaglobal.com/en/facilities/1002239/prospekt-medical",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Abulkhair%20Khan%20avenue%2082,%20Atyrau",
+     "coord_note_ja": "Nominatim/OSM healthcare=clinic at '82, Abulkhair Khan Avenue, Nursaya-3' matches the address given by Bupa Global and the UK government list (search_snippet).",
+     "shelter_for": []
+    },
+    {
+     "name": "Interteach Clinic (Vladimirsky St)",
+     "name_ja": "Interteach Clinic (Vladimirsky St)",
+     "kind": "hospital",
+     "lat": 47.0914,
+     "lon": 51.8701,
+     "why_ja": "Private clinic with English-speaking staff (UK government list of medical facilities in Kazakhstan, search_snippet), 103 Vladimirsky St next to the regional hospital; a second Interteach unit is at 34 Satpayev St (47.1049, 51.9022).",
+     "source_url": "https://www.gov.uk/government/publications/kazakhstan-list-of-medical-facilities/list-of-medical-facilitiespractitioners-in-kazakhstan--2",
+     "label_dx": -9,
+     "label_dy": -10,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Интертич,%20Атырау",
+     "coord_note_ja": "Nominatim/OSM amenity=clinic 'Interteach', 103 улица Владимирского.",
+     "shelter_for": []
+    },
+    {
+     "name": "Victory Park (Park Pobedy)",
+     "name_ja": "Victory Park (Park Pobedy)",
+     "kind": "park_open_space",
+     "lat": 47.0925,
+     "lon": 51.8879,
+     "why_ja": "Open park in Zhilgorodok/Avangard on the west bank: earthquake and fire assembly point for staff living in Avangard; low ground, not usable in a river flood.",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=json&q=Парк%20Победы,%20Атырау",
+     "label_dx": 10,
+     "label_dy": 14,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Парк%20Победы,%20Атырау",
+     "coord_note_ja": "Nominatim/OSM leisure=park 'Парк Победы'; radius assumed from map extent (±100 m).",
+     "radius_m": 150,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 3000,
+     "assembly": true
+    },
+    {
+     "name": "Almagul Park",
+     "name_ja": "Almagul Park",
+     "kind": "park_open_space",
+     "lat": 47.1196,
+     "lon": 51.9416,
+     "why_ja": "Park in the Almagul microdistrict (east bank, north of the centre, off Sultan Beibarys Ave): assembly point for the Almagul/Privokzalny apartment blocks.",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=json&q=park%20in%20Atyrau",
+     "label_dx": 10,
+     "label_dy": -8,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=park%20in%20Atyrau",
+     "coord_note_ja": "Nominatim/OSM leisure=park 'парк Алмагуль'; radius assumed.",
+     "radius_m": 150,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 3000,
+     "assembly": true
+    },
+    {
+     "name": "Central park on Azattyq Ave (east bank)",
+     "name_ja": "Central park on Azattyq Ave (east bank)",
+     "kind": "park_open_space",
+     "lat": 47.1041,
+     "lon": 51.9244,
+     "why_ja": "Park by the Ak-Zhaiyk hotel and Azattyq Ave in the east-bank centre (OSM park without name tag): assembly point for the downtown apartments; the river embankment promenade is 400 m west.",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=json&q=park%20in%20Atyrau",
+     "label_dx": 10,
+     "label_dy": 14,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=park%20in%20Atyrau",
+     "coord_note_ja": "Nominatim/OSM leisure=park (unnamed) at 47.1041, 51.9244; identification as the central square park is an assumption.",
+     "radius_m": 120,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 2500,
+     "assembly": true
+    },
+    {
+     "name": "Munaishy Stadium",
+     "name_ja": "Munaishy Stadium",
+     "kind": "park_open_space",
+     "lat": 47.0939,
+     "lon": 51.9084,
+     "why_ja": "Stadium field on Auezov St (Zhilgorodok): large open space for assembly and relief staging; inside the river meander, so not for flood.",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=json&q=Munaishy%20Stadium,%20Atyrau",
+     "label_dx": 10,
+     "label_dy": 14,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Munaishy%20Stadium,%20Atyrau",
+     "coord_note_ja": "Nominatim/OSM leisure=stadium 'Munaishy stadium', Auezov street.",
+     "radius_m": 120,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 5000,
+     "assembly": true
+    },
+    {
+     "name": "Akimat of Atyrau Region",
+     "name_ja": "Akimat of Atyrau Region",
+     "kind": "government",
+     "lat": 47.1068,
+     "lon": 51.9152,
+     "why_ja": "Regional government headquarters (77 Aiteke Bi St) beside the Central Bridge on the west bank; the regional flood operations staff (opershtab) is run from here; city akimat is 350 m south (77A Aiteke Bi, 47.1035, 51.9167).",
+     "source_url": "https://en.wikipedia.org/wiki/Atyrau",
+     "label_dx": -9,
+     "label_dy": -10,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Atyrau%20Region%20Akimat",
+     "coord_note_ja": "Nominatim/OSM office=government 'Akimat of Atyrau region', 77 Aiteke Bi Street.",
+     "shelter_for": []
+    },
+    {
+     "name": "Department for Emergency Situations of Atyrau Region (MES)",
+     "name_ja": "Department for Emergency Situations of Atyrau Region (MES)",
+     "kind": "government",
+     "lat": 47.0949,
+     "lon": 51.9055,
+     "why_ja": "Regional department of the Ministry of Emergency Situations (civil protection, 112 dispatch, evacuation orders), 53A Auezov St, Zhilgorodok; phone +7 7122 45 01 56 / 30 52 32, dchs_atyr@emer.kz (gov.kz, search_snippet).",
+     "source_url": "https://www.gov.kz/memleket/entities/emer-atyrau?lang=en",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_src": "unverified",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Auezov%20street%2053A,%20Atyrau",
+     "coord_note_ja": "Street-level only: Nominatim resolved Auezov St (Zhilgorodok) but not house 53A; point placed on Auezov St (±300 m).",
+     "shelter_for": []
+    },
+    {
+     "name": "Atyrau railway station",
+     "name_ja": "Atyrau railway station",
+     "kind": "station",
+     "lat": 47.1293,
+     "lon": 51.9568,
+     "why_ja": "Main-line station (Astrakhan-Atyrau-Makat line; trains to Aktobe, Astana, Almaty, Mangystau, Russia) 3.5 km NE of the centre; rail evacuation option and landmark for the Privokzalny microdistricts.",
+     "source_url": "https://en.wikipedia.org/wiki/Atyrau",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Atyrau%20railway%20station",
+     "coord_note_ja": "Nominatim/OSM building=train_station 'Атырау (Гурьев)', Musa Baimukhanov street.",
+     "shelter_for": []
+    },
+    {
+     "name": "Atyrau International Airport (GUW) terminal",
+     "name_ja": "Atyrau International Airport (GUW) terminal",
+     "kind": "other",
+     "lat": 47.1224,
+     "lon": 51.8298,
+     "why_ja": "Airport 8 km NW of the centre (IATA GUW), the lowest international airport in the world at 22 m below sea level (Wikipedia); air evacuation hub (Air Astana focus city; flights to Almaty, Astana, Istanbul, Amsterdam).",
+     "source_url": "https://en.wikipedia.org/wiki/Atyrau_Airport",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Atyrau%20Airport",
+     "coord_note_ja": "Nominatim/OSM aeroway=terminal 'Atyrau International Airport', 2 Abulkhair Khan avenue; outside the 8 km map extent (west edge).",
+     "shelter_for": []
+    },
+    {
+     "name": "QSI International School of Atyrau",
+     "name_ja": "QSI International School of Atyrau",
+     "kind": "school",
+     "lat": 47.1177,
+     "lon": 51.8488,
+     "why_ja": "US-curriculum international school (QSI) in the Nursaya microdistrict, NW of the centre on the airport road: family pick-up point in a crisis.",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=json&q=QSI%20International%20School%20of%20Atyrau",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=International%20School,%20Atyrau",
+     "coord_note_ja": "Nominatim/OSM amenity=school 'QSI International School Atyrau', Tuyakberdi Shamelov Street, Nursaya; Kazakhstan International School is on the east bank (47.1129, 51.9224).",
+     "shelter_for": []
+    },
+    {
+     "name": "Tengizchevroil headquarters (3 Satpayev St)",
+     "name_ja": "Tengizchevroil headquarters (3 Satpayev St)",
+     "kind": "landmark",
+     "lat": 47.1058,
+     "lon": 51.9118,
+     "why_ja": "Head office of the Tengiz operator TCO (3 Satpayev St, 060011) 300 m from the river on the west bank; reference landmark for the oil-services cluster (contractor offices, Marriott Executive Apartments at 2 Satpayev St).",
+     "source_url": "https://tcoext.azure.chevron.com/contact-us",
+     "label_dx": -9,
+     "label_dy": -10,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Satpayev%20street%203,%20Atyrau",
+     "coord_note_ja": "Nominatim/OSM office 'Tengichevroil', 3 Kanysh Satpayev street; address confirmed by TCO contact page (search_snippet).",
+     "shelter_for": []
+    },
+    {
+     "name": "Central Bridge (Satpayev St - Abay St)",
+     "name_ja": "Central Bridge (Satpayev St - Abay St)",
+     "kind": "landmark",
+     "lat": 47.1049,
+     "lon": 51.9191,
+     "why_ja": "The 1965 reinforced-concrete road bridge (259 m) linking the European (west) and Asian (east) banks; with the Sultan Beibarys bridge (2009, 4 lanes, ~1.3 km north) one of only two central road crossings - closure splits the city; the 551 m pedestrian suspension bridge is nearby.",
+     "source_url": "https://en.wikipedia.org/wiki/Atyrau",
+     "label_dx": 9,
+     "label_dy": 12,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Центральный%20мост,%20Атырау",
+     "coord_note_ja": "Nominatim/OSM man_made=bridge 'Центральный мост', улица Кайыргали Смагулова.",
+     "shelter_for": []
+    },
+    {
+     "name": "Renaissance Atyrau Hotel",
+     "name_ja": "Renaissance Atyrau Hotel",
+     "kind": "hotel",
+     "lat": 47.1063,
+     "lon": 51.899,
+     "why_ja": "International-chain hotel at 15B Kulmanov St beside Dostyk Village: backup accommodation, meeting point and vertical refuge for the west-bank expatriate housing; floors not verified (assumed 7).",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=json&q=Renaissance%20Atyrau%20Hotel",
+     "label_dx": 9,
+     "label_dy": -8,
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=json&q=Renaissance%20Atyrau%20Hotel",
+     "coord_note_ja": "Nominatim/OSM tourism=hotel 'Renaissance Atyrau Hotel', 15B Baktykerey Kulmanova Street.",
+     "floors": 7,
+     "shelter_for": [
+      "flood",
+      "fire"
+     ],
+     "cap": 300
+    }
+   ],
+   "homes": [
+    {
+     "name_ja": "Dostyk Village / Dostyk microdistrict (west bank, Satpayev St) - compound houses",
+     "lat": 47.1034,
+     "lon": 51.8981,
+     "type": "house",
+     "floor": 2,
+     "keys": [
+      "dostyk",
+      "достык",
+      "достық",
+      "dostyk village",
+      "satpayev",
+      "сатпаева",
+      "kulmanov",
+      "кулманова",
+      "renaissance",
+      "ренессанс"
+     ],
+     "note_ja": "Chevron/TCO family compound with housing and recreation (Wikipedia 'Atyrau'); coordinates = OSM quarter 'микрорайон Достык' (Nominatim)."
+    },
+    {
+     "name_ja": "Nursaya microdistrict (NW, airport road) - new apartments and townhouses",
+     "lat": 47.1121,
+     "lon": 51.8599,
+     "type": "lowrise",
+     "floor": 4,
+     "keys": [
+      "nursaya",
+      "нурсая",
+      "нұрсая",
+      "yelorda",
+      "елорда",
+      "abulkhair khan",
+      "абулхаир хана",
+      "airport road",
+      "nursaya-3",
+      "qsi"
+     ],
+     "note_ja": "Growing residential district around QSI school and APEC Petrotechnic; coordinates = OSM quarter 'Nursaya microdistrict' (Nominatim)."
+    },
+    {
+     "name_ja": "East-bank centre (Azattyq Ave / Abay St / Almagul) - downtown apartments",
+     "lat": 47.1058,
+     "lon": 51.9243,
+     "type": "highrise",
+     "floor": 6,
+     "keys": [
+      "azattyk",
+      "azattyq",
+      "азаттык",
+      "азаттық",
+      "abay",
+      "абая",
+      "smagulov",
+      "смагулова",
+      "almagul",
+      "алмагул"
+     ],
+     "note_ja": "Soviet-era and newer apartment blocks around Azattyq Ave; coordinates = Ak-Zhaiyk hotel block, 10A Azattyq Ave (Nominatim)."
+    },
+    {
+     "name_ja": "Balykshi / Zhumysker riverside houses (south-west, flood-exposed)",
+     "lat": 47.0811,
+     "lon": 51.8774,
+     "type": "house",
+     "floor": 1,
+     "keys": [
+      "balykshi",
+      "балыкши",
+      "балықшы",
+      "balyqshy",
+      "zhumysker",
+      "жумыскер",
+      "жұмыскер",
+      "rembaza",
+      "рембаза",
+      "aqjaiyq"
+     ],
+     "note_ja": "Single-storey private houses in the lower floodplain settlements (Balykshi 47.0811,51.8774; Zhumysker 47.0786,51.8625 - Nominatim); floodplain houses and garden plots were evacuated in spring 2024 (oq.gov.kz, search_snippet)."
+    }
+   ],
+   "zones": {
+    "flood": [
+     {
+      "depth_m": 1.5,
+      "note_ja": "Zhaiyk floodplain, northern reach (Tomarly - Almagul - Beibarys bridge), both banks within ~0.7 km of the channel: dacha/garden societies and riverside houses; overbank flooding if the earth dikes overtop or breach (assumption; 2024 crest 553 cm vs 550 cm critical; a dike breach was reported at Sokolok NE of the city on 24 May 2024).",
+      "pts": [
+       [
+        47.152,
+        51.919
+       ],
+       [
+        47.152,
+        51.936
+       ],
+       [
+        47.138,
+        51.932
+       ],
+       [
+        47.124,
+        51.924
+       ],
+       [
+        47.112,
+        51.925
+       ],
+       [
+        47.112,
+        51.909
+       ],
+       [
+        47.124,
+        51.906
+       ],
+       [
+        47.138,
+        51.914
+       ]
+      ]
+     },
+     {
+      "depth_m": 1.5,
+      "note_ja": "Central meander (Central Bridge - Zhilgorodok peninsula - Aiteke Bi embankment): low riverside strip on both banks; the core stayed dry behind the embankments in 2024 - depth applies only if the dikes fail (assumption).",
+      "pts": [
+       [
+        47.112,
+        51.91
+       ],
+       [
+        47.112,
+        51.926
+       ],
+       [
+        47.1,
+        51.927
+       ],
+       [
+        47.092,
+        51.917
+       ],
+       [
+        47.084,
+        51.902
+       ],
+       [
+        47.086,
+        51.89
+       ],
+       [
+        47.095,
+        51.889
+       ],
+       [
+        47.104,
+        51.896
+       ]
+      ]
+     },
+     {
+      "depth_m": 1.2,
+      "note_ja": "Lower floodplain and delta head: Balykshi, Zhumysker, Aqjaiyq riverside settlements (−20 to −25 m elevation); floodplain houses and garden plots were pre-emptively evacuated in 2024 (oq.gov.kz, search_snippet); extent assumed.",
+      "pts": [
+       [
+        47.09,
+        51.868
+       ],
+       [
+        47.09,
+        51.884
+       ],
+       [
+        47.08,
+        51.885
+       ],
+       [
+        47.07,
+        51.878
+       ],
+       [
+        47.058,
+        51.862
+       ],
+       [
+        47.058,
+        51.848
+       ],
+       [
+        47.07,
+        51.858
+       ],
+       [
+        47.082,
+        51.866
+       ]
+      ]
+     }
+    ],
+    "urban_flood": [
+     {
+      "depth_m": 0.3,
+      "note_ja": "Avangard 2-4 / Rembaza microdistricts (west bank): snowmelt and rain ponding in flat panel-housing estates with limited storm drainage (assumption; ThinkHazard urban flood High).",
+      "pts": [
+       [
+        47.1005,
+        51.874
+       ],
+       [
+        47.1005,
+        51.892
+       ],
+       [
+        47.091,
+        51.892
+       ],
+       [
+        47.088,
+        51.878
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.3,
+      "note_ja": "Station area (Privokzalny microdistricts 3-5, Baimukhanov St): ponding at underpasses and courtyards during spring thaw (assumption).",
+      "pts": [
+       [
+        47.131,
+        51.94
+       ],
+       [
+        47.133,
+        51.958
+       ],
+       [
+        47.122,
+        51.959
+       ],
+       [
+        47.121,
+        51.943
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.3,
+      "note_ja": "East-bank centre south of Abay St along Azattyq Ave: low ground between the embankment and the TETs power plant, which was ringed with flood barriers in May 2024 (bizmedia.kz, search_snippet); extent assumed.",
+      "pts": [
+       [
+        47.1,
+        51.914
+       ],
+       [
+        47.1,
+        51.928
+       ],
+       [
+        47.086,
+        51.924
+       ],
+       [
+        47.083,
+        51.908
+       ]
+      ]
+     }
+    ],
+    "quake": [
+     {
+      "depth_m": 1,
+      "intensity": "<= MSK 5 (ThinkHazard Very low; assumption)",
+      "note_ja": "Dense Soviet-era panel/brick apartment blocks of the east-bank centre: non-structural damage (facade panels, glass, parapets) at low shaking; buildings predate seismic design requirements (assumption). No M5+ event within 150 km since 1950 (USGS).",
+      "pts": [
+       [
+        47.112,
+        51.915
+       ],
+       [
+        47.112,
+        51.935
+       ],
+       [
+        47.098,
+        51.935
+       ],
+       [
+        47.092,
+        51.925
+       ],
+       [
+        47.095,
+        51.912
+       ]
+      ]
+     }
+    ]
+   },
+   "distant_refs": [
+    {
+     "name": "Tengiz field (TCO) - rotation camps / Shanyrak village, Teniz airport",
+     "lat": 46.3002,
+     "lon": 53.4276,
+     "note_ja": "Tengiz oil field centre at 46.153, 53.383 (Wikipedia); Teniz aerodrome / Shanyrak Village 46.300, 53.428 (Nominatim). Rotation camps housed ~7,000 Kulsary evacuees in April 2024 (search_snippet). USGS M4.0-4.5 cluster 2020-2026 lies 20-40 km SW of Karaton.",
+     "src": "https://en.wikipedia.org/wiki/Tengiz_Field",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Kulsary (Zhylyoi district centre)",
+     "lat": 46.9621,
+     "lon": 54.0129,
+     "note_ja": "Town of 51,097 (2009 census, Wikipedia) 230 km east of Atyrau; Zhem (Emba) river flood reached the town 5 April 2024, 2,810 buildings flooded and 33,641 evacuated (Kazinform, search_snippet). Coordinates from Nominatim.",
+     "src": "https://en.wikipedia.org/wiki/Kulsary",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Embassy of Japan in Kazakhstan (Astana, 62 Kosmonavtov St)",
+     "lat": 51.1422,
+     "lon": 71.4538,
+     "note_ja": "No Japanese mission exists in Atyrau; consular protection is from Astana (~1,200 km). Honorary consulates in Atyrau: Netherlands (Abylkhair Khan Ave), France, Lithuania, Hungary, Spain (approved), Italy (vacant) - search_snippet. Coordinates from Nominatim.",
+     "src": "https://netherlandsandyou.nl/web/kazakhstan/about-us/honorary-consul-atyrau",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Saraishyk (Saraichik) - Zhaiyk dikes reinforced May 2024",
+     "lat": 47.5008,
+     "lon": 51.7159,
+     "note_ja": "Historic site 45 km upstream where dikes were reinforced by the army in May 2024 (bizmedia.kz, search_snippet). Coordinates from Nominatim.",
+     "src": "https://bizmedia.kz/2024-05-11-chetvyortye-sutki-damby-uderzhivayut-bolshuyu-vodu/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Taldykol village (Makhambet district) - evacuated 13 May 2024",
+     "lat": 47.3421,
+     "lon": 51.8775,
+     "note_ja": "Evacuation points for residents were the APEC college and Dana hotel in Atyrau (bizmedia.kz, search_snippet). Coordinates from Nominatim.",
+     "src": "https://bizmedia.kz/2024-05-13-evakuacziya-sela-taldykol-nachalas-v-atyrauskoj-oblasti/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "Sokolok quarries / dike breach area (NE outskirts)",
+     "lat": 47.1554,
+     "lon": 52.0536,
+     "note_ja": "The 'Sokolok' dike breached around 24 May 2024 (bizmedia.kz, search_snippet); Nominatim only resolves the Sokolok-1/-2 quarries NE of the city, so the breach location is approximate (unverified).",
+     "src": "https://bizmedia.kz/2024-05-24-okolo-atyrau-prorvalo-dambu-sokolok/md/",
+     "confirmed_by": "unverified"
+    }
+   ]
+  },
+  {
+   "area_id": "tas_center",
+   "city_ja": "Tashkent",
+   "area_ja": "Central Tashkent (Tashkent City - Amir Temur Square - Mirabad / C-1 embassy quarter; Shaykhantakhur, Yunusabad, Mirzo-Ulugbek, Mirabad and Yakkasaray districts)",
+   "center_lat": 41.306,
+   "center_lon": 69.278,
+   "extent_km": 8.0,
+   "rotation_deg": 9,
+   "grid_m": 200,
+   "rotation_note_ja": "The central street grid (Navoi Street N99E, Amir Temur Avenue N9E in the fetched OSM segments) is rotated about 9 degrees clockwise from the cardinal axes; with the app's rotation convention (x=u*cos-v*sin, y down) a positive value tilts the east-west grid lines down-right to match (derived). Mustaqillik Avenue (N68E) and the Chilanzar grid (N45E) deviate from this and are drawn as real polylines",
+   "frame_note_ja": "The app draws 960x640 px for extent_km 8, i.e. 8.0 km east-west by 5.3 km north-south: lat 41.282-41.330, lon 69.230-69.326. RSCEMP, Akfa Medline, Tashkent International Clinic/School, the MES HQ, the US Embassy and the TV tower lie outside the frame; they are kept in pois (with true coordinates) or in _meta.facts so that distance tables still work",
+   "flood_context_ja": "ThinkHazard rates river flood and urban flood Low for Tashkent city (report 39698, page_read), while the surrounding Tashkent Region is High for both (report 3295): the city sits on the Chirchik alluvial fan at about 455 m, drained by the Soviet-era canal network (Bozsu, Anhor, Salar, Oqtepa; OSM relations via Nominatim) fed from the Chirchik below the Charvak reservoir, and the river itself passes 10 km south-east of the centre. No river flood has reached the central districts in the modern record; the regional reference event is the May 2020 Sardoba reservoir failure in neighbouring Sirdaryo Region (about 70,000 evacuated; ECHO via ReliefWeb). The practical water hazard in the centre is pluvial: spring thunderstorms (March-June) flood underpasses, basements and the low Mirabad / railway-station ground for hours (assumption; no public pluvial map was found). Mudflow and debris-flow corridors do not reach the city frame - they lie in the Bostanliq, Parkent and Akhangaran foothills 40-70 km to the north-east and east (Tashkent Region landslide High).",
+   "earthquake_context_ja": "ThinkHazard rates earthquake High for Tashkent city (page_read). At 05:23 on 26 April 1966 a shallow M5.2 earthquake (USGS ISC-GEM M5.3, 10 km, 41.345N 69.184E; Wikipedia: 3-8 km deep with the epicentre in the centre) destroyed most of the old adobe city, left 200,000-300,000 of about 1.5 million residents homeless and killed between 15 and 200; the Monument of Courage on Sharof Rashidov Street marks the epicentral zone and the city was rebuilt with wide boulevards and panel housing over three and a half years (Wikipedia; UNDP/ReliefWeb 2016). USGS lists M5.2 in 1970 (5 km SSE of the city) and M5.1 in 1980 (4 km W) as well as the 1959 Gazalkent M6.0 (62 km NE) and the 1946 Chatkal M7.5 (190 km) as regional references (page_read, sibling usgs.json). Tashkent is in zone 8-9 (MSK-64) of the national seismic building code on up to 15 m of loess and alluvium that amplify shaking (search_snippet; Wikipedia for the deposits); self-built mahalla houses remain the most vulnerable stock (UNDP/ReliefWeb 2014). For a high-rise office the governing issues are elevator entrapment, facade and glass fall, gas shut-off and assembly in open parks rather than collapse.",
+   "heat_cold_haze_context_ja": "Hot-summer continental climate at 455 m: July mean 28.3 C with an all-time record of 44.6 C (18 July 1997, Wikipedia) and 44.3 C on 19 July 2026 (kun.uz, search_snippet); Open-Meteo daily data for 16 August - 22 November 2026 near the city show a maximum of 37.7 C (19 August), 12 days at or above 35 C and a minimum of 0.6 C (page_read); ThinkHazard rates extreme heat Medium and water scarcity Medium. Winters are cold (January mean 2.3 C, record low -29.5 C, Wikipedia): the January 2023 cold wave (about -20 C) coincided with the halt of Turkmen gas imports and power rationing, leaving apartment blocks unheated and prompting protests and the mayor's dismissal (bne IntelliNews, search_snippet). Air quality: the 4 November 2021 dust storm (dust 30 times the limit, about 4,000 ambulance calls; UNCCD, search_snippet) and winter inversion smog recur; ThinkHazard wildfire High refers to steppe and grass fires outside the built-up area.",
+   "zone_src_ja": "Demo zones are assumptions: canal corridors drawn as +/-130 m buffers along the fetched OSM geometry of the Anhor and Salar canals (ThinkHazard river/urban flood Low, so illustrative only); pluvial ponding polygons at known low spots and underpasses (no public pluvial map); seismic bands from the 1966 epicentral / old-city damage area (Wikipedia, UNDP via ReliefWeb) and the national seismic zoning 8-9 MSK (search_snippet), plus a high-rise cluster band around Tashkent City.",
+   "sources": [
+    {
+     "name": "ThinkHazard! Tashkent city (39698) - hazard levels",
+     "url": "https://www.thinkhazard.org/en/report/39698-uzbekistan-tashkent-city",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! Tashkent city JSON (FL/UF Low, EQ High, LS Low, DG Medium, EH Medium, WF High)",
+     "url": "https://www.thinkhazard.org/en/report/39698.json",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "ThinkHazard! Tashkent (region, 3295) - river/urban flood, earthquake, landslide High",
+     "url": "https://www.thinkhazard.org/en/report/3295-uzbekistan-tashkent",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - 1966 Tashkent earthquake",
+     "url": "https://en.wikipedia.org/wiki/1966_Tashkent_earthquake",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "USGS ComCat iscgemsup848721 (M5.3, 25 Apr 1966 UTC, 9 km NNW of Tashkent, 10 km)",
+     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/iscgemsup848721",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "UNDP via ReliefWeb - 1966-2016: 50 years since the Tashkent earthquake",
+     "url": "https://reliefweb.int/report/uzbekistan/1966-2016-50-years-tashkent-earthquake",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "UNDP via ReliefWeb - Seismic safety assessment of a makhalla in Tashkent (2014)",
+     "url": "https://reliefweb.int/report/uzbekistan/seismic-safety-assessment-makhalla-tashkent",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Wikipedia - Tashkent (districts 2021, climate records, deposits)",
+     "url": "https://en.wikipedia.org/wiki/Tashkent",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Wikipedia - Tashkent Metro and station articles (coordinates)",
+     "url": "https://en.wikipedia.org/wiki/Tashkent_Metro",
+     "confirmed_by": "third_party"
+    },
+    {
+     "name": "Nominatim / OpenStreetMap (roads, canals, POIs, neighbourhoods)",
+     "url": "https://nominatim.openstreetmap.org/",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "Open-Meteo forecast API (daily max/min, 92 past days)",
+     "url": "https://api.open-meteo.com/v1/forecast?latitude=41.3005&longitude=69.34&daily=temperature_2m_max,temperature_2m_min&past_days=92&timezone=auto",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "GEM Country Seismic Risk Profile - Uzbekistan v2026.0.0",
+     "url": "https://raw.githubusercontent.com/gem/risk-profiles/master/Central_Asia/Uzbekistan/seismic_risk_profile_Uzbekistan.png",
+     "confirmed_by": "page_read"
+    },
+    {
+     "name": "UNCCD - worst dust storm in Uzbekistan's recorded history (Nov 2021)",
+     "url": "https://www.unccd.int/resources/unccd-library/worst-dust-storm-uzbekistans-recorded-history",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "bne IntelliNews - January 2023 cold wave and energy shortages",
+     "url": "https://www.intellinews.com/uzbek-president-fires-tashkent-mayor-for-empty-words-as-energy-shortages-hit-city-amid-big-freeze-266985/",
+     "confirmed_by": "search_snippet"
+    },
+    {
+     "name": "kun.uz - July 2026 heat records",
+     "url": "https://kun.uz/en/news/2026/07/20/mid-july-heatwave-breaks-temperature-records-in-several-regions-of-uzbekistan",
+     "confirmed_by": "search_snippet"
+    }
+   ],
+   "roads": [
+    {
+     "name": "Amir Temur Avenue (Amir Temur shoh ko'chasi)",
+     "major": true,
+     "label_offset": "55%",
+     "pts": [
+      [
+       41.3097,
+       69.2794
+      ],
+      [
+       41.3122,
+       69.2815
+      ],
+      [
+       41.3194,
+       69.2822
+      ],
+      [
+       41.3281,
+       69.2839
+      ],
+      [
+       41.3329,
+       69.2844
+      ],
+      [
+       41.3397,
+       69.2855
+      ],
+      [
+       41.3462,
+       69.2862
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Amir%20Temur%20shoh%20ko%27chasi%2C%20Toshkent",
+     "coord_note_ja": "OSM primary-road segments (ways 426060206, 176132087, 849576720, 22813391) joined through the Wikipedia coordinates of the metro stations beneath the avenue (Amir Temur Xiyoboni 41.3122,69.2815; Abdulla Qodiriy 41.3194,69.2825; Minor 41.3281,69.2837; Bodomzor 41.3462,69.2860)"
+    },
+    {
+     "name": "Navoi Street (Navoiy ko'chasi)",
+     "major": true,
+     "label_offset": "30%",
+     "pts": [
+      [
+       41.3219,
+       69.2431
+      ],
+      [
+       41.3214,
+       69.253
+      ],
+      [
+       41.3208,
+       69.2609
+      ],
+      [
+       41.3199,
+       69.2676
+      ],
+      [
+       41.319,
+       69.2717
+      ],
+      [
+       41.3178,
+       69.2765
+      ],
+      [
+       41.3172,
+       69.2812
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Navoiy%20ko%27chasi%2C%20Toshkent",
+     "coord_note_ja": "OSM primary-road segments (ways 1075854241, 1075854201, 1075854221, 849495344, 1441492399); Alisher Navoiy (41.3211,69.2547) and Mustaqillik Maydoni (41.3189,69.2713) metro stations lie on the line; the last 450 m to Amir Temur Avenue are interpolated"
+    },
+    {
+     "name": "Mustaqillik Avenue (Mustaqillik shoh ko'chasi)",
+     "major": true,
+     "label_offset": "40%",
+     "pts": [
+      [
+       41.3118,
+       69.2805
+      ],
+      [
+       41.3131,
+       69.2841
+      ],
+      [
+       41.3148,
+       69.2882
+      ],
+      [
+       41.3166,
+       69.292
+      ],
+      [
+       41.3194,
+       69.2984
+      ],
+      [
+       41.3225,
+       69.3139
+      ],
+      [
+       41.3255,
+       69.3245
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Mustaqillik%20shoh%20ko%27chasi%2C%20Toshkent",
+     "coord_note_ja": "OSM primary-road segments (ways 111592902, 846970024, 22795396, 536445168, 22795398, 179738748, 234163980); Hamid Olimjon (41.3178,69.2949), Pushkin (41.3217,69.3112) and Buyuk Ipak Yoli (41.3263,69.3278) stations lie beneath it"
+    },
+    {
+     "name": "Islam Karimov Street (Islom Karimov ko'chasi)",
+     "major": true,
+     "label_offset": "35%",
+     "pts": [
+      [
+       41.3113,
+       69.2535
+      ],
+      [
+       41.3111,
+       69.2584
+      ],
+      [
+       41.3109,
+       69.2625
+      ],
+      [
+       41.3106,
+       69.2644
+      ],
+      [
+       41.3088,
+       69.27
+      ],
+      [
+       41.3078,
+       69.2743
+      ],
+      [
+       41.3076,
+       69.2749
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Islam%20Karimov%20Street%2C%20Tashkent",
+     "coord_note_ja": "OSM primary/secondary segments (ways 507756006, 31742680, 390002013, 31855016, 183544253, 542466796) from the Tashkent City / Hokimiyat corner to Sharof Rashidov Avenue south of Amir Temur Square"
+    },
+    {
+     "name": "Bunyodkor Avenue / Furqat Street (Chilonzor axis)",
+     "major": true,
+     "label_offset": "45%",
+     "pts": [
+      [
+       41.3214,
+       69.2428
+      ],
+      [
+       41.3159,
+       69.242
+      ],
+      [
+       41.3121,
+       69.2416
+      ],
+      [
+       41.307,
+       69.2374
+      ],
+      [
+       41.3043,
+       69.2354
+      ],
+      [
+       41.292,
+       69.2233
+      ],
+      [
+       41.2821,
+       69.2125
+      ],
+      [
+       41.2745,
+       69.2047
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Bunyodkor%20shoh%20ko%27chasi%2C%20Toshkent",
+     "coord_note_ja": "Furqat ko'chasi (ways 462695992, 32055153) and Bunyodkor shoh ko'chasi (ways 32034549, 31742450, 594550875, 589840012) segments joined through the Chilonzor-line stations Xalqlar Do'stligi (41.3119,69.2414), Milliy Bog (41.3043,69.2354), Novza (41.2920,69.2233), Mirzo Ulugbek (41.2821,69.2125) and Chilonzor (41.2745,69.2047); the south-western part lies outside the drawn frame"
+    },
+    {
+     "name": "Sharof Rashidov Avenue / Shota Rustaveli Street",
+     "major": true,
+     "label_offset": "35%",
+     "pts": [
+      [
+       41.3097,
+       69.2794
+      ],
+      [
+       41.3045,
+       69.2765
+      ],
+      [
+       41.2987,
+       69.2733
+      ],
+      [
+       41.2945,
+       69.2648
+      ],
+      [
+       41.2915,
+       69.2607
+      ],
+      [
+       41.2853,
+       69.2533
+      ],
+      [
+       41.2702,
+       69.2369
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Shota%20Rustaveli%20Street%2C%20Tashkent",
+     "coord_note_ja": "Shota Rustaveli ko'chasi OSM segments (ways 880319170, 1561127320, 1463525674) south-west of 41.2915,69.2607; the Sharof Rashidov section between Amir Temur Square and Oybek station (41.2987,69.2733, Wikipedia) is interpolated between those verified points (+/-150 m)"
+    },
+    {
+     "name": "Nukus Street (Nukus ko'chasi)",
+     "major": false,
+     "label_offset": "40%",
+     "pts": [
+      [
+       41.2817,
+       69.2595
+      ],
+      [
+       41.2844,
+       69.2659
+      ],
+      [
+       41.2867,
+       69.2711
+      ],
+      [
+       41.2905,
+       69.2765
+      ],
+      [
+       41.295,
+       69.2833
+      ],
+      [
+       41.2967,
+       69.286
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Nukus%20Street%2C%20Tashkent",
+     "coord_note_ja": "OSM primary segments (ways 180918804, 509368118, 390181129, 182143369) from Yakkasaray to the Tashkent railway station; one 600 m gap interpolated"
+    },
+    {
+     "name": "Osiyo Street (Yunusabad C-5/C-6)",
+     "major": false,
+     "label_offset": "30%",
+     "pts": [
+      [
+       41.3287,
+       69.2745
+      ],
+      [
+       41.3278,
+       69.2832
+      ],
+      [
+       41.3269,
+       69.2909
+      ],
+      [
+       41.3249,
+       69.2986
+      ],
+      [
+       41.325,
+       69.3041
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Osiyo%20Street%2C%20Tashkent",
+     "coord_note_ja": "OSM secondary segments (ways 116064784, 33074431, 181748296, 385228866) across the Yunusabad quarters to the Cardiology Centre"
+    }
+   ],
+   "rails": [
+    {
+     "name": "Tashkent Metro Chilonzor Line (1977-1980; Buyuk Ipak Yoli - Olmazor)",
+     "pts": [
+      [
+       41.3263,
+       69.3278
+      ],
+      [
+       41.3217,
+       69.3112
+      ],
+      [
+       41.3178,
+       69.2949
+      ],
+      [
+       41.3122,
+       69.2815
+      ],
+      [
+       41.3189,
+       69.2713
+      ],
+      [
+       41.3213,
+       69.2543
+      ],
+      [
+       41.3119,
+       69.2414
+      ],
+      [
+       41.3043,
+       69.2354
+      ],
+      [
+       41.292,
+       69.2233
+      ],
+      [
+       41.2821,
+       69.2125
+      ],
+      [
+       41.2745,
+       69.2047
+      ],
+      [
+       41.2556,
+       69.196
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Chilonzor_Line",
+     "coord_note_ja": "Station coordinates from the English Wikipedia station articles (Buyuk Ipak Yoli, Pushkin, Hamid Olimjon, Amir Temur Xiyoboni, Mustaqillik Maydoni, Paxtakor, Xalqlar Do'stligi, Milliy Bog, Novza, Mirzo Ulugbek, Chilonzor, Olmazor); straight lines between stations"
+    },
+    {
+     "name": "Tashkent Metro O'zbekiston Line (1984-1991; Chorsu - Do'stlik section)",
+     "pts": [
+      [
+       41.3252,
+       69.2321
+      ],
+      [
+       41.3278,
+       69.247
+      ],
+      [
+       41.3211,
+       69.2547
+      ],
+      [
+       41.3114,
+       69.2534
+      ],
+      [
+       41.305,
+       69.2653
+      ],
+      [
+       41.2987,
+       69.2733
+      ],
+      [
+       41.2921,
+       69.2862
+      ],
+      [
+       41.2994,
+       69.304
+      ],
+      [
+       41.2935,
+       69.3227
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/O%CA%BBzbekiston_Line",
+     "coord_note_ja": "Station coordinates from Wikipedia (Chorsu, Gafur Gulom, Alisher Navoiy, O'zbekiston, Kosmonavtlar, Oybek, Toshkent, Mashinasozlar, Do'stlik); Beruniy and Tinchlik lie outside the frame and are omitted"
+    },
+    {
+     "name": "Tashkent Metro Yunusobod Line (2001/2020; Turkiston - Ming O'rik)",
+     "pts": [
+      [
+       41.3775,
+       69.296
+      ],
+      [
+       41.3666,
+       69.2921
+      ],
+      [
+       41.3538,
+       69.2882
+      ],
+      [
+       41.3462,
+       69.286
+      ],
+      [
+       41.3281,
+       69.2837
+      ],
+      [
+       41.3194,
+       69.2825
+      ],
+      [
+       41.3123,
+       69.281
+      ],
+      [
+       41.3005,
+       69.2775
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Yunusobod_Line",
+     "coord_note_ja": "Station coordinates from Wikipedia (Turkiston, Yunusobod, Shahriston, Bodomzor, Minor, Abdulla Qodiriy, Yunus Rajabiy); the Ming O'rik terminus has no coordinate on Wikipedia or Nominatim and is placed 300 m north-east of its Oybek interchange (unverified, +/-250 m)"
+    }
+   ],
+   "water": [
+    {
+     "name": "Anhor canal",
+     "kind": "canal",
+     "width_m": 20,
+     "pts": [
+      [
+       41.3359,
+       69.2741
+      ],
+      [
+       41.3124,
+       69.2632
+      ],
+      [
+       41.3047,
+       69.2458
+      ],
+      [
+       41.3047,
+       69.2401
+      ],
+      [
+       41.2975,
+       69.2383
+      ],
+      [
+       41.2867,
+       69.2198
+      ],
+      [
+       41.2802,
+       69.2181
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Anhor%20canal%2C%20Tashkent",
+     "coord_note_ja": "OSM relation 3028190 (waterway=canal) clipped to the frame and simplified from 382 to 7 vertices; branches off the Bozsu north of Yunusabad, passes Mustaqillik Square and the Navoi park lake, then runs south-west through Chilanzar"
+    },
+    {
+     "name": "Salar canal",
+     "kind": "canal",
+     "width_m": 15,
+     "pts": [
+      [
+       41.3528,
+       69.3281
+      ],
+      [
+       41.3221,
+       69.3057
+      ],
+      [
+       41.3126,
+       69.3057
+      ],
+      [
+       41.3103,
+       69.296
+      ],
+      [
+       41.296,
+       69.2913
+      ],
+      [
+       41.2732,
+       69.2666
+      ],
+      [
+       41.2689,
+       69.2385
+      ],
+      [
+       41.263,
+       69.2365
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Salar%20canal%2C%20Tashkent",
+     "coord_note_ja": "OSM relation 3027966 clipped to the frame and simplified from 532 to 8 vertices; passes the C-1 quarter, the railway-station area and Mirabad"
+    },
+    {
+     "name": "Bozsu canal",
+     "kind": "canal",
+     "width_m": 25,
+     "pts": [
+      [
+       41.353,
+       69.3152
+      ],
+      [
+       41.3451,
+       69.3063
+      ],
+      [
+       41.349,
+       69.2915
+      ],
+      [
+       41.3359,
+       69.2741
+      ],
+      [
+       41.3378,
+       69.2583
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Bo%27zsuv%2C%20Toshkent",
+     "coord_note_ja": "OSM relation 3031369 (Bo'zsuv, 2,365 vertices) clipped to the frame margin; main Chirchik distributary that feeds the Anhor; mostly north of the drawn frame"
+    },
+    {
+     "name": "Oqtepa (Aktepa) canal",
+     "kind": "canal",
+     "width_m": 8,
+     "pts": [
+      [
+       41.301,
+       69.219
+      ],
+      [
+       41.3023,
+       69.2233
+      ],
+      [
+       41.2974,
+       69.242
+      ]
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Oqtepa%20canal%2C%20Tashkent",
+     "coord_note_ja": "OSM relation 3029362; small Chilanzar irrigation canal joining the Anhor near Navoi park (south-west corner of the frame)"
+    },
+    {
+     "name": "Navoi park lake (former Komsomol lake)",
+     "kind": "lake",
+     "pts": [
+      [
+       41.3035,
+       69.2388
+      ],
+      [
+       41.3036,
+       69.2443
+      ],
+      [
+       41.2996,
+       69.2452
+      ],
+      [
+       41.2986,
+       69.2396
+      ]
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://en.wikipedia.org/wiki/Alisher_Navoi_National_Park",
+     "coord_note_ja": "Artificial lake inside the park, dug on a former clay quarry (Wikipedia); outline estimated around the park's Nominatim centroid (way 32003705, 41.3014,69.2417) and south of the Anhor (+/-150 m)"
+    }
+   ],
+   "pois": [
+    {
+     "name": "Tashkent International Clinic (38 Sarikul St)",
+     "name_ja": "Tashkent International Clinic (38 Sarikul St)",
+     "kind": "hospital",
+     "lat": 41.2719,
+     "lon": 69.2941,
+     "why_ja": "Private clinic next to Tashkent International School used by the diplomatic and expatriate community; English-speaking staff and 24-hour on-call service are claimed on the clinic's own pages (search_snippet, not verified in this session). 4.4 km south-east of the office, outside the drawn frame",
+     "source_url": "https://www.tashclinic.org/",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Tashkent%20International%20Clinic",
+     "coord_note_ja": "Nominatim way 98680387 (amenity=hospital, 38 Sariko'l ko'chasi, A. Fitrat mahalla); Wikipedia has no article",
+     "label_dx": 9,
+     "label_dy": 12,
+     "shelter_for": [],
+     "cap": 0,
+     "floors": 2
+    },
+    {
+     "name": "Republican Research Centre of Emergency Medicine (RSCEMP, Farkhad St)",
+     "name_ja": "Republican Research Centre of Emergency Medicine (RSCEMP, Farkhad St)",
+     "kind": "hospital",
+     "lat": 41.269,
+     "lon": 69.2175,
+     "why_ja": "National trauma and emergency hospital (the city's main mass-casualty receiving centre, with a helipad); 6.6 km south-west of the office in Chilanzar, outside the drawn frame but the primary destination for serious earthquake casualties",
+     "source_url": "https://www.uzmed.uz/",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Respublika%20shoshilinch%20tibbiy%20yordam%20ilmiy%20markazi%2C%20Toshkent",
+     "coord_note_ja": "Nominatim result 'Respublika shoshilinch tibbiy yordam ilmiy markazi (No.16), Katta Qo'zir...' at 41.26896,69.21748 (Chilonzor district); building footprint not fetched",
+     "label_dx": -9,
+     "label_dy": 12,
+     "shelter_for": [],
+     "cap": 0,
+     "floors": 6
+    },
+    {
+     "name": "Republican Specialized Cardiology Centre (Osiyo St 4)",
+     "name_ja": "Republican Specialized Cardiology Centre (Osiyo St 4)",
+     "kind": "hospital",
+     "lat": 41.325,
+     "lon": 69.2993,
+     "why_ja": "Large public specialised hospital at the eastern end of Osiyo Street (Mirzo-Ulugbek/Yunusabad border), 1.6 km from the C-1 expatriate quarter; emergency cardiology and ICU capacity",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Kardiologiya%20markazi%2C%20Toshkent",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Kardiologiya%20markazi%2C%20Toshkent",
+     "coord_note_ja": "Nominatim node 4315261389 'Kardiologiya markazi, Osiyo ko'chasi, Mirzo Ulug'bek Tumani'",
+     "label_dx": 9,
+     "label_dy": -8,
+     "shelter_for": [],
+     "cap": 0,
+     "floors": 9
+    },
+    {
+     "name": "Alisher Navoi National Park (Milliy Bog)",
+     "name_ja": "Alisher Navoi National Park (Milliy Bog)",
+     "kind": "park_open_space",
+     "lat": 41.3014,
+     "lon": 69.2417,
+     "why_ja": "Largest park of the centre (lake, lawns) 1.2 km south-west of the office next to the Oliy Majlis; primary earthquake assembly and tented-camp site for the Tashkent City / Chilanzar side (open ground, no tall structures; avoid the lake shore after shaking)",
+     "source_url": "https://en.wikipedia.org/wiki/Alisher_Navoi_National_Park",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Alisher%20Navoi%20National%20Park%2C%20Tashkent",
+     "coord_note_ja": "Nominatim way 32003705 'O'zbekiston milliy bog'i' (leisure=park) centroid; Wikipedia article fetched for history (lake on a former clay quarry, three entrances incl. Milliy Bog metro)",
+     "label_dx": 10,
+     "label_dy": 14,
+     "radius_m": 450,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 40000,
+     "assembly": true
+    },
+    {
+     "name": "Tashkent City Park",
+     "name_ja": "Tashkent City Park",
+     "kind": "park_open_space",
+     "lat": 41.3165,
+     "lon": 69.2484,
+     "why_ja": "Landscaped park with fountains opened 13 Oct 2019 at the heart of the Tashkent City business district, 450 m north of the Nest One office: nearest open assembly point for the office (hard-paved, lit, fenced; large crowds expected)",
+     "source_url": "https://en.wikipedia.org/wiki/Tashkent_City_Park",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Tashkent%20City%20Park",
+     "coord_note_ja": "Nominatim way 749136173 (leisure=park) 41.31645,69.24840; Wikipedia coord 41.3167,69.2486 and opening date 13 October 2019",
+     "label_dx": 10,
+     "label_dy": -10,
+     "radius_m": 230,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 15000,
+     "assembly": true
+    },
+    {
+     "name": "Pakhtakor Central Stadium",
+     "name_ja": "Pakhtakor Central Stadium",
+     "kind": "park_open_space",
+     "lat": 41.3155,
+     "lon": 69.2603,
+     "why_ja": "35,000-seat national stadium (built 1954-56, Shaykhantakhur district) with open pitch and surrounding car parks; candidate staging/assembly area for the Mustaqillik - Navoi quarter and for relief logistics (requires agreement with the club/city)",
+     "source_url": "https://en.wikipedia.org/wiki/Pakhtakor_Central_Stadium",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Pakhtakor%20Stadium%2C%20Tashkent",
+     "coord_note_ja": "Nominatim way 199296733 (leisure=stadium) 41.31546,69.26028; Wikipedia coord 41.3155,69.2602",
+     "label_dx": 10,
+     "label_dy": 14,
+     "radius_m": 160,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 10000,
+     "assembly": true
+    },
+    {
+     "name": "Mustaqillik (Independence) Square",
+     "name_ja": "Mustaqillik (Independence) Square",
+     "kind": "park_open_space",
+     "lat": 41.3164,
+     "lon": 69.2668,
+     "why_ja": "Large government square and park (Senate, Cabinet of Ministers) along the Anhor canal; open space for assembly but access can be closed by security services during emergencies; 1.6 km east of the office",
+     "source_url": "https://en.wikipedia.org/wiki/Mustaqillik_Maydoni",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Mustaqillik%20Square%2C%20Tashkent",
+     "coord_note_ja": "Wikipedia coord 41.31641,69.26680; Nominatim node 1857704645 (place=square) 41.31539,69.26744",
+     "label_dx": 10,
+     "label_dy": -10,
+     "radius_m": 200,
+     "shelter_for": [
+      "quake",
+      "fire"
+     ],
+     "cap": 15000,
+     "assembly": true
+    },
+    {
+     "name": "Amir Temur Square and Amir Temur Xiyoboni / Yunus Rajabiy metro",
+     "name_ja": "Amir Temur Square and Amir Temur Xiyoboni / Yunus Rajabiy metro",
+     "kind": "station",
+     "lat": 41.3118,
+     "lon": 69.2812,
+     "why_ja": "Central square (Hotel Uzbekistan, Forums Palace) and the interchange of the Chilonzor and Yunusobod metro lines; family meeting point and transport hub; the metro is closed during strong earthquakes and after power loss",
+     "source_url": "https://en.wikipedia.org/wiki/Amir_Temur_Xiyoboni_(Tashkent_Metro)",
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Amir_Temur_Xiyoboni_(Tashkent_Metro)",
+     "coord_note_ja": "Wikipedia coord 41.312164,69.28145 (Amir Temur Xiyoboni, opened 1977) and 41.312311,69.281042 (Yunus Rajabiy, 2001); square centre 41.31139,69.27972 (Wikipedia Amir Timur Square)",
+     "label_dx": 9,
+     "label_dy": 13,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Xalqlar Do'stligi metro (Chilonzor Line) / Bunyodkor Avenue",
+     "name_ja": "Xalqlar Do'stligi metro (Chilonzor Line) / Bunyodkor Avenue",
+     "kind": "station",
+     "lat": 41.3119,
+     "lon": 69.2414,
+     "why_ja": "Nearest metro station to the Tashkent City office (750 m west), on Bunyodkor Avenue next to the Friendship of Peoples Palace; opened 1977",
+     "source_url": "https://en.wikipedia.org/wiki/Xalqlar_Do%CA%BBstligi_(Tashkent_Metro)",
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Xalqlar_Do%CA%BBstligi_(Tashkent_Metro)",
+     "coord_note_ja": "Wikipedia coord 41.311881,69.241392",
+     "label_dx": -9,
+     "label_dy": 13,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Tashkent Central railway station (Toshkent Markaziy) and Toshkent metro",
+     "name_ja": "Tashkent Central railway station (Toshkent Markaziy) and Toshkent metro",
+     "kind": "station",
+     "lat": 41.2929,
+     "lon": 69.2882,
+     "why_ja": "Main railway station (Afrosiyob high-speed trains to Samarkand/Bukhara, Almaty and Moscow services) and O'zbekiston-line metro; evacuation hub out of the city by rail; low-lying area near the Salar canal",
+     "source_url": "https://en.wikipedia.org/wiki/Toshkent_(Tashkent_Metro)",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Tashkent%20railway%20station",
+     "coord_note_ja": "Nominatim node 1582352956 (railway=station 'Toshkent', Turkiston ko'chasi, Mirobod) 41.29329,69.28772; metro Toshkent station Wikipedia coord 41.292136,69.28615",
+     "label_dx": 9,
+     "label_dy": 13,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Hamid Olimjon metro (Chilonzor Line) / Mustaqillik Avenue",
+     "name_ja": "Hamid Olimjon metro (Chilonzor Line) / Mustaqillik Avenue",
+     "kind": "station",
+     "lat": 41.3178,
+     "lon": 69.2949,
+     "why_ja": "Metro station serving the C-1/C-2 embassy and expatriate quarter (Mustaqillik Avenue); 500 m from the Japan Embassy",
+     "source_url": "https://en.wikipedia.org/wiki/Hamid_Olimjon_(Tashkent_Metro)",
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Hamid_Olimjon_(Tashkent_Metro)",
+     "coord_note_ja": "Wikipedia coord 41.317769,69.294878 (opened 18 Aug 1980)",
+     "label_dx": 9,
+     "label_dy": -8,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Embassy of Japan (28 Sodiq Azimov St)",
+     "name_ja": "Embassy of Japan (28 Sodiq Azimov St)",
+     "kind": "embassy",
+     "lat": 41.3057,
+     "lon": 69.2919,
+     "why_ja": "Consular section: protection and information for Japanese nationals in an emergency (not a shelter); MOFA lists the address as 1-28 Sadyk Azimov Street, Tashkent 100047 (search_snippet; www.mofa.go.jp returns 403 in this session). 3.4 km east of the office",
+     "source_url": "https://www.uz.emb-japan.go.jp/",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Japan%20Embassy%2C%20Tashkent",
+     "coord_note_ja": "Nominatim way 454216801 (office=diplomatic 'Japan Embassy', 28 Sodiq Azimov ko'chasi, Yashnobod district boundary) 41.30567,69.29187",
+     "label_dx": 9,
+     "label_dy": -8,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "British Embassy (67 Yahyo Gulomov St)",
+     "name_ja": "British Embassy (67 Yahyo Gulomov St)",
+     "kind": "embassy",
+     "lat": 41.3093,
+     "lon": 69.2896,
+     "why_ja": "Major Western embassy in the same quarter as the Japan Embassy (400 m north); the Chinese Embassy (79 Yahyo Gulomov St, 41.3066,69.2878) and the German Embassy (15 Sharof Rashidov St, 41.3257,69.2723) are nearby; useful for consular coordination, not shelters",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Buyuk%20Britaniya%20elchixonasi%2C%20Toshkent",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Buyuk%20Britaniya%20elchixonasi%2C%20Toshkent",
+     "coord_note_ja": "Nominatim way 630988839 (office=diplomatic 'Great Britain Embassy', 67 Yaxyo Gulomov ko'chasi) 41.30926,69.28963; China: way 32003120; Germany: way 108197610",
+     "label_dx": 9,
+     "label_dy": -8,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Tashkent International School (38 Sarakulskaya St)",
+     "name_ja": "Tashkent International School (38 Sarakulskaya St)",
+     "kind": "school",
+     "lat": 41.2697,
+     "lon": 69.2948,
+     "why_ja": "IB international school (founded 1994, about 500 pupils, early childhood to grade 12) attended by many expatriate children; adjacent to Tashkent International Clinic; family pick-up point in the school emergency plan. 4.7 km south-east of the office, outside the drawn frame",
+     "source_url": "https://en.wikipedia.org/wiki/Tashkent_International_School",
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Tashkent_International_School",
+     "coord_note_ja": "Wikipedia infobox coord 41.2697148,69.294768 (address 38 Sarakulskaya Street, 100005); Nominatim way 98666999 41.27046,69.29434",
+     "label_dx": 9,
+     "label_dy": 14,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Ministry of Emergency Situations HQ (4 Kichik Halqa Yo'li)",
+     "name_ja": "Ministry of Emergency Situations HQ (4 Kichik Halqa Yo'li)",
+     "kind": "government",
+     "lat": 41.3341,
+     "lon": 69.2827,
+     "why_ja": "Central apparatus of the Ministry of Emergency Situations (FVV), which runs the national warning system, the Institute of Civil Protection and the city's earthquake simulation complex; source of official warnings (1050 hotline). 3.9 km north-east of the office, just outside the frame",
+     "source_url": "https://reliefweb.int/report/uzbekistan/1966-2016-50-years-tashkent-earthquake",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Ministry%20of%20Emergency%20Situations%2C%20Tashkent",
+     "coord_note_ja": "Nominatim way 32808545 (office=government 'O'zbekiston Respublikasi FVV markaziy apparati', 4 Kichik Halqa yo'li, Yunusabad) 41.33413,69.28269",
+     "label_dx": 9,
+     "label_dy": -8,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Monument of Courage (1966 earthquake memorial, Sharof Rashidov St)",
+     "name_ja": "Monument of Courage (1966 earthquake memorial, Sharof Rashidov St)",
+     "kind": "landmark",
+     "lat": 41.3228,
+     "lon": 69.2733,
+     "why_ja": "Memorial (1976) above the epicentral zone of the 26 April 1966 M5.2 earthquake that destroyed the old city; reminder that the 1966 rupture lies directly under the centre, 2 km north-east of the office; small open square",
+     "source_url": "https://en.wikipedia.org/wiki/1966_Tashkent_earthquake",
+     "coord_src": "derived",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Monument%20of%20Courage%2C%20Tashkent",
+     "coord_note_ja": "Nominatim returns only the 'Monument Muzhestva' bus stop (node 1773345966, 41.32344,69.27305) on Sharof Rashidov street; the monument is placed 70 m south of it (+/-100 m)",
+     "label_dx": 9,
+     "label_dy": -8,
+     "shelter_for": [],
+     "cap": 0
+    },
+    {
+     "name": "Tashkent City Mall / Hilton Tashkent City",
+     "name_ja": "Tashkent City Mall / Hilton Tashkent City",
+     "kind": "mall_highrise",
+     "lat": 41.3163,
+     "lon": 69.2524,
+     "why_ja": "Large modern mall (7 Botir Zokirov St) with the Hilton hotel next to the office tower: air-conditioned refuge during heat waves and dust storms, and upper-floor refuge for the (low) pluvial flood case; generator-backed public areas (assumption)",
+     "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Tashkent%20City%20Mall",
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Tashkent%20City%20Mall",
+     "coord_note_ja": "Nominatim way 1056268200 (shop=mall) 41.31626,69.25241; Hilton Tashkent City way 663102409 at 41.31402,69.24910",
+     "label_dx": 9,
+     "label_dy": -8,
+     "floors": 5,
+     "shelter_for": [
+      "flood",
+      "fire"
+     ],
+     "cap": 5000
+    }
+   ],
+   "homes": [
+    {
+     "name_ja": "Tashkent City high-rise apartments (Nest One / Gardens Residence / Boulevard, Shaykhantakhur)",
+     "lat": 41.3148,
+     "lon": 69.2497,
+     "type": "highrise",
+     "floor": 20,
+     "keys": [
+      "tashkent city",
+      "ташкент сити",
+      "toshkent siti",
+      "nest one",
+      "нест ван",
+      "gardens residence",
+      "boulevard",
+      "shayxontohur",
+      "shaykhantakhur",
+      "шайхантахур",
+      "uqchi",
+      "beshyogoch",
+      "бешагач"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Tashkent%20City%2C%20Tashkent",
+     "coord_note_ja": "Nominatim way 547234535 'Tashkent City xalqaro ishbilarmonlik markazi' (place=neighbourhood) 41.31541,69.24816; residential towers assumed at the centre of the district (+/-200 m)"
+    },
+    {
+     "name_ja": "C-1 / Buyuk Ipak Yoli quarter houses and low-rise flats (Mirzo-Ulugbek, embassy district)",
+     "lat": 41.3122,
+     "lon": 69.2901,
+     "type": "house",
+     "floor": 2,
+     "keys": [
+      "c-1",
+      "ц-1",
+      "c1",
+      "mirzo ulugbek",
+      "mirzo-ulugbek",
+      "мирзо-улугбек",
+      "мирзо улугбек",
+      "buyuk ipak yoli",
+      "великий шелковый путь",
+      "sodiq azimov",
+      "садык азимов",
+      "yahyo gulomov",
+      "яхъё гулямов",
+      "c-2",
+      "ц-2",
+      "oloy",
+      "алайский"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=%D0%A6-1%2C%20%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82",
+     "coord_note_ja": "Nominatim node 1866932728 'Buyuk Ipak Yo'li (C-1) dahasi' (place=neighbourhood) 41.31224,69.29015; relation 1752949 outlines the quarter (lat 41.307-41.317, lon 69.286-69.298)"
+    },
+    {
+     "name_ja": "Yunusabad high-rise flats (Minor / C-5 Qiyot quarter, Amir Temur Avenue)",
+     "lat": 41.3254,
+     "lon": 69.2779,
+     "type": "highrise",
+     "floor": 12,
+     "keys": [
+      "yunusabad",
+      "yunusobod",
+      "юнусабад",
+      "юнусобод",
+      "minor",
+      "минор",
+      "c-5",
+      "ц-5",
+      "c-6",
+      "ц-6",
+      "qiyot",
+      "кият",
+      "bodomzor",
+      "бадамзар",
+      "amir temur",
+      "амир темур"
+     ],
+     "coord_src": "page_read",
+     "coord_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=uz&q=Qiyot%20%28C-5%29%20dahasi%2C%20Toshkent",
+     "coord_note_ja": "Nominatim relation 2351549 'Qiyot (C-5) dahasi' (place=neighbourhood) 41.32538,69.27791; Minor metro 41.3281,69.2837 (Wikipedia) 500 m east"
+    },
+    {
+     "name_ja": "Chilanzar Soviet panel blocks (kvartal 1-2 near Novza metro, local staff housing)",
+     "lat": 41.2935,
+     "lon": 69.2245,
+     "type": "lowrise",
+     "floor": 4,
+     "keys": [
+      "chilanzar",
+      "chilonzor",
+      "чиланзар",
+      "чилонзор",
+      "kvartal",
+      "квартал",
+      "novza",
+      "новза",
+      "bunyodkor",
+      "бунёдкор",
+      "qatortol",
+      "катартал",
+      "mukimi",
+      "мукими"
+     ],
+     "coord_src": "derived",
+     "coord_url": "https://en.wikipedia.org/wiki/Novza_(Tashkent_Metro)",
+     "coord_note_ja": "Placed 180 m north-east of Novza station (Wikipedia 41.292028,69.223342) among the 1960s-70s four- to nine-storey blocks of Chilanzar kvartal 1-2; Nominatim gives kvartal 9 at 41.2852,69.2037 and kvartal 17 at 41.2721,69.1967 further south-west (outside the routing grid)"
+    }
+   ],
+   "zones": {
+    "flood": [
+     {
+      "depth_m": 0.5,
+      "note_ja": "Anhor canal corridor: overtopping or embankment failure of the Bozsu-fed canal at high spring flow (+/-130 m buffer along the OSM channel; ThinkHazard river flood Low - illustrative assumption)",
+      "pts": [
+       [
+        41.3355,
+        69.2756
+       ],
+       [
+        41.3117,
+        69.2644
+       ],
+       [
+        41.3038,
+        69.2411
+       ],
+       [
+        41.2859,
+        69.221
+       ],
+       [
+        41.2875,
+        69.2186
+       ],
+       [
+        41.3056,
+        69.2391
+       ],
+       [
+        41.3131,
+        69.262
+       ],
+       [
+        41.3363,
+        69.2726
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.5,
+      "note_ja": "Salar canal corridor through C-1, the railway-station area and Mirabad (+/-130 m buffer along the OSM channel; assumption - no public inundation map for Tashkent city)",
+      "pts": [
+       [
+        41.3215,
+        69.307
+       ],
+       [
+        41.3099,
+        69.2974
+       ],
+       [
+        41.2954,
+        69.2926
+       ],
+       [
+        41.2725,
+        69.2678
+       ],
+       [
+        41.2739,
+        69.2654
+       ],
+       [
+        41.2966,
+        69.29
+       ],
+       [
+        41.3107,
+        69.2946
+       ],
+       [
+        41.3227,
+        69.3044
+       ]
+      ]
+     }
+    ],
+    "urban_flood": [
+     {
+      "depth_m": 0.4,
+      "note_ja": "Mirabad / railway-station low ground between the Salar canal and Nukus Street: underpasses and basements pond for hours in spring thunderstorms (assumed)",
+      "pts": [
+       [
+        41.3005,
+        69.2795
+       ],
+       [
+        41.2995,
+        69.2905
+       ],
+       [
+        41.2905,
+        69.2905
+       ],
+       [
+        41.2885,
+        69.2795
+       ],
+       [
+        41.2935,
+        69.2745
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.3,
+      "note_ja": "Old-city low-rise quarter Chorsu - Navoi Street - Gafur Gulom: narrow streets and courtyards with poor storm drainage (assumed)",
+      "pts": [
+       [
+        41.3305,
+        69.2335
+       ],
+       [
+        41.3305,
+        69.2525
+       ],
+       [
+        41.3235,
+        69.2545
+       ],
+       [
+        41.3215,
+        69.2335
+       ]
+      ]
+     },
+     {
+      "depth_m": 0.3,
+      "note_ja": "Amir Temur Avenue underpasses at Minor / Abdulla Qodiriy and the Bozsu-Anhor offtake (assumed)",
+      "pts": [
+       [
+        41.3345,
+        69.2765
+       ],
+       [
+        41.3335,
+        69.2875
+       ],
+       [
+        41.3185,
+        69.2855
+       ],
+       [
+        41.3195,
+        69.2745
+       ]
+      ]
+     }
+    ],
+    "quake": [
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 IX (1966 epicentral / old-city zone, assumed)",
+      "note_ja": "Epicentral zone of the 26 April 1966 M5.2 earthquake (3-8 km deep under the centre; Monument of Courage) and the old city of adobe courtyard houses (Shaykhantakhur, Kashgar, Chorsu) that was largely destroyed; today's mahalla houses here are still mostly self-built without seismic design (UNDP/ReliefWeb 2014). Boundary assumed from the 1966 damage descriptions",
+      "pts": [
+       [
+        41.3335,
+        69.2345
+       ],
+       [
+        41.3345,
+        69.2765
+       ],
+       [
+        41.3285,
+        69.2905
+       ],
+       [
+        41.3125,
+        69.2865
+       ],
+       [
+        41.3115,
+        69.2605
+       ],
+       [
+        41.3185,
+        69.2345
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "MSK-64 VIII-IX (national seismic zoning, search_snippet)",
+      "note_ja": "Tashkent lies in zone 8-9 of the Uzbek seismic building code (KMK 2.01.03) on up to 15 m of loess and alluvium that amplify shaking; Soviet panel housing (1966-1990) generally performs adequately, but pre-1966 brick and self-built houses are vulnerable. Band boundary = drawn frame (assumption)",
+      "pts": [
+       [
+        41.335,
+        69.228
+       ],
+       [
+        41.335,
+        69.328
+       ],
+       [
+        41.277,
+        69.328
+       ],
+       [
+        41.277,
+        69.228
+       ]
+      ]
+     },
+     {
+      "depth_m": 1,
+      "intensity": "High-rise cluster (facade / glass fall, elevator entrapment)",
+      "note_ja": "Tashkent City (Nest One 51 floors, Gardens Residence, Hilton) and the Amir Temur Avenue / Yunusabad towers: long-period shaking, elevator stoppage, falling glass and cladding; stairwell evacuation and open assembly in Tashkent City Park (assumption)",
+      "pts": [
+       [
+        41.3195,
+        69.2435
+       ],
+       [
+        41.3195,
+        69.2565
+       ],
+       [
+        41.3085,
+        69.2565
+       ],
+       [
+        41.3085,
+        69.2435
+       ]
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

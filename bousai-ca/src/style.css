@@ -697,3 +697,9 @@ html[data-persona="staff"] .admin-only{display:none!important}
 .inc-list{max-height:76vh;overflow-y:auto;padding-right:4px}
 @media (max-width:520px){.top-in{gap:8px}.demo{display:none}.seg.ctx button{padding:3px 6px;font-size:11px}.top-r{gap:5px}.icon-btn{width:28px;height:28px}}
 @media (max-width:400px){.logo .name{display:none}}
+/* Central Asia edition: long source labels and return-period tables */
+.kpi .s,.kpi .s a{overflow-wrap:anywhere;word-break:break-word}
+.rp-table td:last-child{white-space:normal;min-width:220px}
+.rp-table th,.rp-table td{white-space:normal}
+.rp-table td.n,.rp-table th.n{white-space:nowrap}
+.status-grid .st .tag{white-space:normal;text-align:left;line-height:1.4}

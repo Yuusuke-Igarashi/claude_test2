@@ -1,0 +1,1031 @@
+{
+ "_note": "Six fictional company sites in real buildings and districts (coordinates from public sources, see area files). Headcounts, preparedness status (s: 1 done / 0.5 partial / 0 not done), alert registrations and families are assumptions for the demo.",
+ "sites": [
+  {
+   "id": "alm-hq",
+   "label": "A",
+   "name_ja": "Almaty regional HQ (Esentai Tower, Al-Farabi Avenue)",
+   "short_ja": "Almaty HQ",
+   "type_ja": "Regional HQ office (Kazakhstan / Central Asia)",
+   "region": "kz-alm",
+   "country": "KAZ",
+   "area": "alm_center",
+   "lat": 43.2192,
+   "lon": 76.9293,
+   "coord_src": "page_read",
+   "coord_url": "https://nominatim.openstreetmap.org/search?q=Esentai%20Tower%20Almaty&format=jsonv2&countrycodes=kz",
+   "coord_note_ja": "Nominatim way 1458250144 'Esentai Tower Business Center, 77/7 Al-Farabi Avenue' (43.2193,76.9293); Wikipedia 43.21905,76.92937",
+   "staff": 85,
+   "jp_staff": 9,
+   "families": 14,
+   "staff_assumed": true,
+   "building_ja": "Esentai Tower, Al-Farabi Avenue 77/7: 36-storey, 162 m reinforced-concrete office/hotel tower completed 2008 (offices on floors 1-14, Ritz-Carlton above, LEED Silver 2016; Wikipedia). Office assumed on the 12th floor; standby generator serves common areas only (assumption)",
+   "desc_ja": "On Al-Farabi Avenue at the southern, upslope edge of the city center (Bostandyk district, about 870 m), next to the channelized Esentai river and 1.5 km west of the Kishi Almaty mudflow corridor. Almaty was destroyed by earthquakes in 1887 and 1911 (M8.0 Kemin, 37 km away) and lost about 500 people to the 1921 Kishi Almaty mudflow; the Medeu dam stopped the 1973 flow, and on 23 July 2015 a glacial-lake outburst mudflow hit the western outskirts (900 evacuated). The M7.0 Wushi earthquake of 22 January 2024 (270 km away) was felt in the city's high-rises with USGS community intensity 4.6 from 235 Almaty reports (USGS us7000lsze).",
+   "risk_note_ja": "ThinkHazard: earthquake High, landslide Medium, extreme heat Medium, wildfire High, river/urban flood Very low. For this tower the governing risks are strong shaking (design intensity MSK-64 9) with long elevator outages and facade/glass damage, winter smog and heavy snow, and mudflow risk confined to the river corridors east and west of the site rather than the building itself.",
+   "home": {
+    "name_ja": "Expatriate housing (Samal-2 / Dostyk Avenue high-rise apartments)",
+    "lat": 43.2313,
+    "lon": 76.9547
+   },
+   "city_keys": [
+    "almaty",
+    "алматы",
+    "алма-ата",
+    "alma-ata",
+    "almaty city",
+    "алматы қаласы",
+    "ala",
+    "almaty kz",
+    "алмата",
+    "esentai"
+   ],
+   "addr_example": "Al-Farabi Avenue 77/7, Esentai Tower, Bostandyk District, Almaty 050040",
+   "districts": [
+    {
+     "name": "Alatau",
+     "pop": 328341,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.3,
+     "lon": 76.87,
+     "coord_src": "unverified",
+     "adm1": "KAZ-4829",
+     "note_ja": "North-western district (Shanyrak, Aynabulak); loess plain, shallow groundwater, affected by the 2015 Kargalinka mudflow tail"
+    },
+    {
+     "name": "Almaly",
+     "pop": 244941,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.25,
+     "lon": 76.9,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Almaly_District",
+     "adm1": "KAZ-4829",
+     "note_ja": "Historic center / Golden Square west; dense 1950s-70s masonry and panel housing"
+    },
+    {
+     "name": "Auezov",
+     "pop": 346657,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.2242,
+     "lon": 76.8503,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Auezov_District",
+     "adm1": "KAZ-4829",
+     "note_ja": "Soviet 9-storey microdistricts west of Sain St; crossed by the Ulken Almaty river"
+    },
+    {
+     "name": "Bostandyk",
+     "pop": 302088,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.2,
+     "lon": 76.9,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Bostandyq_District",
+     "adm1": "KAZ-4829",
+     "note_ja": "South-central foothills incl. Esentai / Koktem / Orbita; location of the HQ office"
+    },
+    {
+     "name": "Zhetysu (Jetisu)",
+     "pop": 185878,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.3116,
+     "lon": 76.9288,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Jetysu_District",
+     "adm1": "KAZ-4829",
+     "note_ja": "North of Raiymbek around Almaty-2 station; most unfavorable seismic soils"
+    },
+    {
+     "name": "Medeu",
+     "pop": 217773,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.25,
+     "lon": 76.95,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Medeu_District",
+     "adm1": "KAZ-4829",
+     "note_ja": "East center (Dostyk, Samal, Gorny Gigant) up to the Medeu valley; Kishi Almaty mudflow corridor and foothill slopes"
+    },
+    {
+     "name": "Nauryzbay",
+     "pop": 161533,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.1667,
+     "lon": 76.8333,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Nauryzbai_District",
+     "adm1": "KAZ-4829",
+     "note_ja": "South-western foothills (Kalkaman, Kargaly); hit by the 23 July 2015 glacial-lake mudflow"
+    },
+    {
+     "name": "Turksib",
+     "pop": 243074,
+     "pop_src": "https://citypopulation.de/en/kazakhstan/admin/16__almaty_qalasy/",
+     "pop_confirmed_by": "search_snippet",
+     "pop_year": 2021,
+     "lat": 43.35,
+     "lon": 76.9833,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Turksib_District",
+     "adm1": "KAZ-4829",
+     "note_ja": "Northern industrial / airport district; lowest ground, flat loess plain"
+    }
+   ],
+   "districts_note_ja": "Populations are 2021 census counts per citypopulation.de (search_snippet; sum 2,030,285 matches the 2021 census total on Wikipedia). The city estimate for 2026-01-01 is about 2.35 million (Wikipedia infobox, third_party). stat.gov.kz and citypopulation.de are blocked for fetching in this session.",
+   "flood_trigger_ja": "Mudflow (sel) is a warning-led hazard: when KazSelezaschita / the Almaty Department for Emergency Situations issue a mudflow warning for the Kishi or Ulken Almaty basins or a Medeu dam alert (typically June-August after heat waves or heavy rain), staff living in Gorny Gigant and within 300 m of the Kishi Almaty, Esentai or Ulken Almaty channels move to pre-agreed high ground away from the rivers (Republic Square, KazNU campus) by car or on foot without crossing river bridges; the Esentai office itself lies outside the corridors and switches to remote work. Procedure is an assumption for the demo.",
+   "alerts": {
+    "sms_112": true,
+    "cell_broadcast": true,
+    "mass_alert_eq": false,
+    "kazhydromet_warnings": true,
+    "darmen_app": false,
+    "embassy_reg": true,
+    "consular_mail": true,
+    "embassy_app": false
+   },
+   "prep": {
+    "info": [
+     {
+      "id": "i1",
+      "label": "Mass alerts (SMS / cell broadcast / 112 app) enabled on every staff phone",
+      "s": 1,
+      "pri": 1,
+      "ref": "cb_alert"
+     },
+     {
+      "id": "i2",
+      "label": "Duty roster monitoring Ministry of Emergency Situations of the Republic of Kazakhstan (MES RK; Kazakh: QR TJM, Russian: MChS RK) with regional Departments of Emergency Situations (DES) and hydromet warnings (two people, 24 h during warnings)",
+      "s": 0.5,
+      "pri": 2,
+      "note": "Single point of failure today",
+      "ref": "kz_112"
+     },
+     {
+      "id": "i3",
+      "label": "Embassy emergency mail received at a shared mailbox and forwarded to all expatriate staff",
+      "s": 0,
+      "pri": 2,
+      "ref": "consular_mail"
+     }
+    ],
+    "evac": [
+     {
+      "id": "e1",
+      "label": "Scenario-specific evacuation plan documented (earthquake, mudflow, fire)",
+      "s": 1,
+      "pri": 1,
+      "ref": "evac_drill"
+     },
+     {
+      "id": "e2",
+      "label": "Assembly point and secondary shelter agreed with the building manager; signage in English and local language",
+      "s": 0.5,
+      "pri": 1
+     },
+     {
+      "id": "e3",
+      "label": "Annual drill including families and remote staff",
+      "s": 1,
+      "pri": 2,
+      "ref": "evac_drill"
+     }
+    ],
+    "safety": [
+     {
+      "id": "s1",
+      "label": "Safety-confirmation system with all staff and accompanying family members registered",
+      "s": 0,
+      "pri": 1,
+      "ref": "safety_check_system"
+     },
+     {
+      "id": "s2",
+      "label": "Contact tree with two channels (SMS and messenger) plus one out-of-country contact",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "ifrc_family_plan"
+     },
+     {
+      "id": "s3",
+      "label": "Embassy registration checked for every expatriate once a year",
+      "s": 1,
+      "pri": 1,
+      "ref": "embassy_reg"
+     }
+    ],
+    "stock": [
+     {
+      "id": "k1",
+      "label": "Drinking water 3 L per person per day for 3 days at the office",
+      "s": 1,
+      "pri": 1,
+      "ref": "sphere_water"
+     },
+     {
+      "id": "k2",
+      "label": "Food, first-aid kit, chronic medicines list and blankets for an overnight stay",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "readygov_kit"
+     },
+     {
+      "id": "k3",
+      "label": "N95 masks for smog and dust",
+      "s": 0,
+      "pri": 3,
+      "ref": "air_quality_n95"
+     }
+    ],
+    "power": [
+     {
+      "id": "p1",
+      "label": "Backup power for the server room and one cool/warm room (generator or battery, 48 h fuel)",
+      "s": 1,
+      "pri": 1,
+      "ref": "heating_backup"
+     },
+     {
+      "id": "p2",
+      "label": "Satellite phone or messenger with roaming SIM tested quarterly",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "satellite_comm"
+     },
+     {
+      "id": "p3",
+      "label": "Power banks and car chargers for duty staff",
+      "s": 0,
+      "pri": 3
+     }
+    ],
+    "bcp": [
+     {
+      "id": "b1",
+      "label": "Critical processes with recovery targets (RTO) and an alternate site in another city",
+      "s": 1,
+      "pri": 1,
+      "ref": "iso22301_bcp"
+     },
+     {
+      "id": "b2",
+      "label": "Supplier and logistics alternatives agreed for the main routes (see Supply chain)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "undrr_sme_bcp"
+     },
+     {
+      "id": "b3",
+      "label": "Data backed up outside the country; remote-work setup for all staff",
+      "s": 1,
+      "pri": 2
+     }
+    ],
+    "people": [
+     {
+      "id": "h1",
+      "label": "List of staff and family members needing support (pregnancy, chronic conditions, mobility, small children)",
+      "s": 0,
+      "pri": 1
+     },
+     {
+      "id": "h2",
+      "label": "Heat and cold protocols (shifted hours, cool/warm rooms, check calls)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "who_heat"
+     },
+     {
+      "id": "h3",
+      "label": "School and nursery pickup rules agreed with families",
+      "s": 1,
+      "pri": 2
+     }
+    ],
+    "facility": [
+     {
+      "id": "f1",
+      "label": "Non-structural seismic fixing: shelves, servers, glass film, suspended ceilings",
+      "s": 1,
+      "pri": 1,
+      "ref": "readygov_quake"
+     },
+     {
+      "id": "f2",
+      "label": "Roof, drainage and glazing checked before the storm season",
+      "s": 0.5,
+      "pri": 3
+     },
+     {
+      "id": "f3",
+      "label": "Mudflow siren awareness and river-valley avoidance briefing",
+      "s": 0,
+      "pri": 2,
+      "ref": "mudflow_kz"
+     }
+    ]
+   }
+  },
+  {
+   "id": "aty-branch",
+   "label": "B",
+   "name_ja": "Atyrau branch office and logistics base (Bayterek Plaza, west bank)",
+   "short_ja": "Atyrau branch",
+   "type_ja": "Oil & gas services branch office and logistics base",
+   "region": "kz-aty",
+   "country": "KAZ",
+   "area": "aty_center",
+   "lat": 47.1021,
+   "lon": 51.9136,
+   "building_ja": "Bayterek Plaza business centre, 25 Student (Studenchesky) Ave, west bank, about 450 m from the Zhaiyk embankment and 500 m south-west of the Central Bridge (OSM office building, Nominatim page_read). Floors, structure and year not verified - assumed 6-storey reinforced-concrete frame, 2010s; office on the 4th floor, yard and warehouse assumed in the Nursaya-3 industrial strip on the airport road.",
+   "staff": 85,
+   "jp_staff": 6,
+   "families": 9,
+   "desc_ja": "West-bank business district between Satpayev Street and the river, 450 m south of Tengizchevroil's head office (3 Satpayev St), 500 m from the regional akimat (seat of the regional flood operations staff) and 200 m from the Marriott Executive Apartments. In the record spring flood of 2024 the Atyrau gauge exceeded its critical level (553 cm vs 550 cm, mid-May) but the embankments held and the centre stayed dry; the site's exposure was indirect - staff whose families lived in flooded Kulsary (33,641 evacuated, April 2024), floodplain dacha evacuations, bridge and road restrictions and the use of the Tengiz rotation camps for evacuees.",
+   "risk_note_ja": "River flood High (ThinkHazard) but with weeks of lead time from the upstream gauges (Uralsk critical 850 cm, Atyrau 550 cm); urban ponding during the spring thaw; earthquake Very low. Extreme heat Medium (record 44.6 C) and severe winter cold (record -37.9 C) make power and heating continuity critical; hydrogen-sulfide air-pollution episodes; dependence on two road bridges, one airport (GUW) and the Atyrau-Kulsary-Tengiz road for the logistics chain.",
+   "home": {
+    "name_ja": "Expatriate housing (Dostyk Village compound / Dostyk microdistrict, Satpayev St)",
+    "lat": 47.1034,
+    "lon": 51.8981
+   },
+   "city_keys": [
+    "atyrau",
+    "атырау",
+    "атырау қаласы",
+    "guryev",
+    "гурьев",
+    "guw",
+    "zhaiyk",
+    "жайық",
+    "ural",
+    "atyrau region"
+   ],
+   "addr_example": "Bayterek Plaza, 25 Studenchesky Ave (Student Ave), Atyrau 060011, Kazakhstan",
+   "districts": [
+    {
+     "name": "Atyrau city (whole city, 2024)",
+     "pop": 404129,
+     "pop_src": "Wikipedia 'Atyrau' infobox, population 2024 (metro 501,467) - third_party; https://en.wikipedia.org/wiki/Atyrau",
+     "lat": 47.1067,
+     "lon": 51.9139
+    },
+    {
+     "name": "West-bank centre (Satpayev / Dostyk / Zhilgorodok / Avangard / Nursaya)",
+     "pop": 150000,
+     "pop_src": "assumed ~37% share of the city total (no sub-city census tables accessible: stat.gov.kz blocked) - unverified",
+     "lat": 47.1,
+     "lon": 51.888
+    },
+    {
+     "name": "East-bank centre (Azattyq / Abay / Almagul / Privokzalny)",
+     "pop": 120000,
+     "pop_src": "assumed ~30% share of the city total - unverified",
+     "lat": 47.112,
+     "lon": 51.935
+    },
+    {
+     "name": "Balykshi (Balyqshy) settlement",
+     "pop": 30000,
+     "pop_src": "unverified estimate; Balyqshy is a settlement within Atyrau city at about 17 m below sea level (Wikipedia 'Balyqshy', search_snippet); coordinates Nominatim",
+     "lat": 47.0811,
+     "lon": 51.8774
+    },
+    {
+     "name": "Zhumysker settlement",
+     "pop": 12000,
+     "pop_src": "unverified estimate; coordinates Nominatim (OSM quarter 'Jūmysker')",
+     "lat": 47.0786,
+     "lon": 51.8625
+    },
+    {
+     "name": "Northern riverside settlements (Geolog, Tomarly, dacha societies)",
+     "pop": 25000,
+     "pop_src": "unverified estimate; Geolog 47.1521,51.9424 and Tomarly 47.1635,51.954 from Nominatim; floodplain dachas evacuated in 2024 (oq.gov.kz, search_snippet)",
+     "lat": 47.152,
+     "lon": 51.942
+    },
+    {
+     "name": "Outer villages and delta (Erkinkala, Taskala, Damba, Kenozek, Akzhar)",
+     "pop": 40000,
+     "pop_src": "unverified estimate; Erkinkala 47.0257,51.8028, Taskala 47.0276,51.8995, Damba 46.9578,51.7511 from Nominatim",
+     "lat": 47.03,
+     "lon": 51.85
+    }
+   ],
+   "flood_trigger_ja": "Zhaiyk floods are forecast weeks ahead. Triggers: Kazhydromet forecast of the Atyrau gauge approaching its 550 cm critical level (2024 peak 553 cm) or the Uralsk gauge passing 850 cm; MES/akimat evacuation orders for floodplain dachas, Balykshi or Zhumysker; a dike-breach report (as at Sokolok on 24 May 2024); or closure of the Central or Sultan Beibarys bridge. On trigger, move staff and families by vehicle to the west-bank office/hotel cluster or out by air (GUW) before roads are cut; walking routes are a last resort.",
+   "distant_refs": [
+    {
+     "name": "Tengiz rotation camps / Teniz airport (TCO)",
+     "lat": 46.3002,
+     "lon": 53.4276,
+     "note_ja": "270 km SE by road via Kulsary; housed ~7,000 Kulsary evacuees in April 2024 (search_snippet)"
+    },
+    {
+     "name": "Kulsary",
+     "lat": 46.9621,
+     "lon": 54.0129,
+     "note_ja": "230 km E; 33,641 evacuated in the April 2024 Zhem river flood (search_snippet)"
+    },
+    {
+     "name": "Embassy of Japan, Astana",
+     "lat": 51.1422,
+     "lon": 71.4538,
+     "note_ja": "No Japanese mission in Atyrau (Nominatim coordinates)"
+    }
+   ],
+   "alerts": {
+    "sms_112": true,
+    "cell_broadcast": false,
+    "mass_alert_eq": true,
+    "kazhydromet_warnings": false,
+    "darmen_app": true,
+    "embassy_reg": true,
+    "consular_mail": false,
+    "embassy_app": true
+   },
+   "prep": {
+    "info": [
+     {
+      "id": "i1",
+      "label": "Mass alerts (SMS / cell broadcast / 112 app) enabled on every staff phone",
+      "s": 1,
+      "pri": 1,
+      "ref": "cb_alert"
+     },
+     {
+      "id": "i2",
+      "label": "Duty roster monitoring Ministry of Emergency Situations of the Republic of Kazakhstan (MES RK; Kazakh: QR TJM, Russian: MChS RK) with regional Departments of Emergency Situations (DES) and hydromet warnings (two people, 24 h during warnings)",
+      "s": 0.5,
+      "pri": 2,
+      "note": "Single point of failure today",
+      "ref": "kz_112"
+     },
+     {
+      "id": "i3",
+      "label": "Embassy emergency mail received at a shared mailbox and forwarded to all expatriate staff",
+      "s": 1,
+      "pri": 2,
+      "ref": "consular_mail"
+     }
+    ],
+    "evac": [
+     {
+      "id": "e1",
+      "label": "Scenario-specific evacuation plan documented (flood, fire)",
+      "s": 0,
+      "pri": 1,
+      "ref": "evac_drill"
+     },
+     {
+      "id": "e2",
+      "label": "Assembly point and secondary shelter agreed with the building manager; signage in English and local language",
+      "s": 0.5,
+      "pri": 1
+     },
+     {
+      "id": "e3",
+      "label": "Annual drill including families and remote staff",
+      "s": 1,
+      "pri": 2,
+      "ref": "evac_drill"
+     }
+    ],
+    "safety": [
+     {
+      "id": "s1",
+      "label": "Safety-confirmation system with all staff and accompanying family members registered",
+      "s": 1,
+      "pri": 1,
+      "ref": "safety_check_system"
+     },
+     {
+      "id": "s2",
+      "label": "Contact tree with two channels (SMS and messenger) plus one out-of-country contact",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "ifrc_family_plan"
+     },
+     {
+      "id": "s3",
+      "label": "Embassy registration checked for every expatriate once a year",
+      "s": 0,
+      "pri": 1,
+      "ref": "embassy_reg"
+     }
+    ],
+    "stock": [
+     {
+      "id": "k1",
+      "label": "Drinking water 3 L per person per day for 3 days at the office",
+      "s": 1,
+      "pri": 1,
+      "ref": "sphere_water"
+     },
+     {
+      "id": "k2",
+      "label": "Food, first-aid kit, chronic medicines list and blankets for an overnight stay",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "readygov_kit"
+     },
+     {
+      "id": "k3",
+      "label": "N95 masks for smog and dust",
+      "s": 0,
+      "pri": 3,
+      "ref": "air_quality_n95"
+     }
+    ],
+    "power": [
+     {
+      "id": "p1",
+      "label": "Backup power for the server room and one cool/warm room (generator or battery, 48 h fuel)",
+      "s": 1,
+      "pri": 1,
+      "ref": "heating_backup"
+     },
+     {
+      "id": "p2",
+      "label": "Satellite phone or messenger with roaming SIM tested quarterly",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "satellite_comm"
+     },
+     {
+      "id": "p3",
+      "label": "Power banks and car chargers for duty staff",
+      "s": 1,
+      "pri": 3
+     }
+    ],
+    "bcp": [
+     {
+      "id": "b1",
+      "label": "Critical processes with recovery targets (RTO) and an alternate site in another city",
+      "s": 0,
+      "pri": 1,
+      "ref": "iso22301_bcp"
+     },
+     {
+      "id": "b2",
+      "label": "Supplier and logistics alternatives agreed for the main routes (see Supply chain)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "undrr_sme_bcp"
+     },
+     {
+      "id": "b3",
+      "label": "Data backed up outside the country; remote-work setup for all staff",
+      "s": 1,
+      "pri": 2
+     }
+    ],
+    "people": [
+     {
+      "id": "h1",
+      "label": "List of staff and family members needing support (pregnancy, chronic conditions, mobility, small children)",
+      "s": 1,
+      "pri": 1
+     },
+     {
+      "id": "h2",
+      "label": "Heat and cold protocols (shifted hours, cool/warm rooms, check calls)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "who_heat"
+     },
+     {
+      "id": "h3",
+      "label": "School and nursery pickup rules agreed with families",
+      "s": 0,
+      "pri": 2
+     }
+    ],
+    "facility": [
+     {
+      "id": "f1",
+      "label": "Furniture and equipment fixing",
+      "s": 1,
+      "pri": 3,
+      "ref": "readygov_quake"
+     },
+     {
+      "id": "f2",
+      "label": "Flood trigger levels, vehicle relocation and sandbag plan",
+      "s": 0.5,
+      "pri": 1,
+      "ref": "vertical_evac"
+     },
+     {
+      "id": "f3",
+      "label": "Gas shut-off valve and extinguishers checked; hazardous materials inventory",
+      "s": 0,
+      "pri": 2
+     }
+    ]
+   }
+  },
+  {
+   "id": "tas-office",
+   "label": "C",
+   "name_ja": "Tashkent country office (Nest One, Tashkent City)",
+   "short_ja": "Tashkent office",
+   "type_ja": "Country office and sales (Uzbekistan)",
+   "region": "uz-tas",
+   "country": "UZB",
+   "area": "tas_center",
+   "lat": 41.3121,
+   "lon": 69.2519,
+   "coord_src": "page_read",
+   "coord_url": "https://en.wikipedia.org/wiki/Nest_One",
+   "coord_note_ja": "Wikipedia infobox coord 41.3121,69.2519; Nominatim way 878651866 'Nest One, 1A/1 Yangi Toshkent ko'chasi, Tashkent City' 41.31208,69.25195",
+   "staff": 45,
+   "jp_staff": 5,
+   "families": 8,
+   "staff_assumed": true,
+   "building_ja": "Nest One, 1A/1 Yangi Toshkent Street, Tashkent City International Business Center: 51-storey, 266.5 m mixed-use tower (offices, apartments, hotel, retail; 34 elevators), completed 2022 and opened 2023, the tallest building in Uzbekistan (Wikipedia). Office assumed on the 15th floor; standby generator serves common areas only (assumption)",
+   "desc_ja": "In the Tashkent City business district on the former Olmazor mahalla site, 600 m north of the Anhor canal and 2 km south-west of the Monument of Courage that marks the epicentre of the 26 April 1966 earthquake, which destroyed the adobe old city just north of here and left 200,000-300,000 people homeless. The district was built 2018-2023 to current seismic codes; recent stresses were the January 2023 cold wave with gas and power shortages, the record-level heat of July 2026 (44.3 C) and the November 2021 dust storm.",
+   "risk_note_ja": "ThinkHazard (Tashkent city): earthquake High, wildfire High, extreme heat Medium, water scarcity Medium, river/urban flood Low, landslide Low. For this tower the governing risks are strong shaking in seismic zone 8-9 with elevator entrapment and facade damage, summer heat with grid failures and winter gas/power shortages; flood exposure is limited to canal corridors and underpasses away from the site.",
+   "home": {
+    "name_ja": "Expatriate housing (C-1 / Buyuk Ipak Yoli quarter, Mirzo-Ulugbek, near the embassies)",
+    "lat": 41.3122,
+    "lon": 69.2901
+   },
+   "city_keys": [
+    "tashkent",
+    "toshkent",
+    "ташкент",
+    "тошкент",
+    "tashkent city",
+    "toshkent shahri",
+    "tas",
+    "uzbekistan",
+    "узбекистан",
+    "o'zbekiston"
+   ],
+   "addr_example": "Yangi Toshkent Street 1A/1, Nest One, Tashkent City, Shaykhantakhur District, Tashkent 100000",
+   "districts": [
+    {
+     "name": "Bektemir",
+     "pop": 31400,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.2303,
+     "lon": 69.3367,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Bektemir",
+     "adm1": "UZB-4828",
+     "note_ja": "South-eastern industrial district on the Chirchik"
+    },
+    {
+     "name": "Chilanzar",
+     "pop": 260700,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.2722,
+     "lon": 69.2017,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Chilanzar",
+     "adm1": "UZB-4828",
+     "note_ja": "1960s-70s panel-housing district south-west of the centre (local staff housing)"
+    },
+    {
+     "name": "Yashnobod",
+     "pop": 258800,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.2862,
+     "lon": 69.3236,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Yashnobod",
+     "adm1": "UZB-4828",
+     "note_ja": "Eastern district (airport approach, Salar canal, Japan Embassy at its north-western edge)"
+    },
+    {
+     "name": "Mirabad",
+     "pop": 142800,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.276,
+     "lon": 69.2936,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Mirobod",
+     "adm1": "UZB-4828",
+     "note_ja": "Central-south district: railway station, TIS/TIC, Mirabad bazaar"
+    },
+    {
+     "name": "Mirzo Ulugbek",
+     "pop": 285000,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.3294,
+     "lon": 69.3475,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Mirzo_Ulugbek",
+     "adm1": "UZB-4828",
+     "note_ja": "Eastern district with the C-1/C-2 embassy quarter and Buyuk Ipak Yoli"
+    },
+    {
+     "name": "Sergeli",
+     "pop": 105700,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.2102,
+     "lon": 69.2318,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Sergeli",
+     "adm1": "UZB-4828",
+     "note_ja": "Southern district beyond the ring road"
+    },
+    {
+     "name": "Shaykhantakhur",
+     "pop": 348300,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.327,
+     "lon": 69.211,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Shayxontoxur",
+     "adm1": "UZB-4828",
+     "note_ja": "Old city (Chorsu) and Tashkent City; 1966 epicentral zone"
+    },
+    {
+     "name": "Olmazor",
+     "pop": 377100,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.364,
+     "lon": 69.228,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Olmazor",
+     "adm1": "UZB-4828",
+     "note_ja": "North-western district (Akfa Medline, medical academy)"
+    },
+    {
+     "name": "Uchtepa",
+     "pop": 278200,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.297,
+     "lon": 69.181,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Uchtepa",
+     "adm1": "UZB-4828",
+     "note_ja": "Western district"
+    },
+    {
+     "name": "Yakkasaray",
+     "pop": 121600,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.276,
+     "lon": 69.247,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Yakkasaray",
+     "adm1": "UZB-4828",
+     "note_ja": "Southern inner district (Shota Rustaveli, Nukus St)"
+    },
+    {
+     "name": "Yunusabad",
+     "pop": 352000,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.358,
+     "lon": 69.299,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Yunusabad",
+     "adm1": "UZB-4828",
+     "note_ja": "Northern district: Minor/C-5 high-rises, MES HQ, TV tower, US Embassy"
+    },
+    {
+     "name": "Yangihayot",
+     "pop": 132800,
+     "pop_src": "https://en.wikipedia.org/wiki/Tashkent",
+     "pop_confirmed_by": "third_party",
+     "pop_year": 2021,
+     "lat": 41.19,
+     "lon": 69.22,
+     "coord_src": "page_read",
+     "coord_url": "https://en.wikipedia.org/wiki/Yangihayot",
+     "adm1": "UZB-4828",
+     "note_ja": "Southernmost district created 2020"
+    }
+   ],
+   "districts_note_ja": "Populations are the 2021 figures of the Tashkent City statistics department as tabulated on Wikipedia (third_party; sum 2,694,400). The city total was 3,164,030 on 1 October 2025 (Wikipedia infobox, third_party) after registration and boundary changes, so current district figures are about 15-20% higher. District coordinates are the Wikipedia article coordinates (page_read). toshstat.uz and citypopulation.de are blocked in this session.",
+   "flood_trigger_ja": "Flood is a low, warning-led hazard here: when Uzhydromet issues a heavy-rain or mudflow warning for Tashkent and the Chirchik basin, or the Bozsu-Anhor-Salar canals run full after Charvak releases (March-June), staff living within 150 m of the Anhor or Salar canals avoid basements and underpasses and park cars on high ground; the Nest One office itself (600 m from the Anhor, on a raised podium) is not expected to flood and switches to remote work only if roads are impassable. Procedure is an assumption for the demo.",
+   "alerts": {
+    "uzhydromet_warnings": false,
+    "mchs_press_telegram": true,
+    "sirens_mosque_loudspeakers": false,
+    "unified_112": true,
+    "cell_broadcast_sms": true,
+    "embassy_reg": false,
+    "consular_mail": true,
+    "embassy_app": true
+   },
+   "prep": {
+    "info": [
+     {
+      "id": "i1",
+      "label": "Mass alerts (SMS / cell broadcast / 112 app) enabled on every staff phone",
+      "s": 0,
+      "pri": 1,
+      "ref": "cb_alert"
+     },
+     {
+      "id": "i2",
+      "label": "Duty roster monitoring Ministry of Emergency Situations of the Republic of Uzbekistan (O'zbekiston Respublikasi Favqulodda vaziyatlar vazirligi, FVV; Russian abbreviation MChS) and hydromet warnings (two people, 24 h during warnings)",
+      "s": 0.5,
+      "pri": 2,
+      "note": "Single point of failure today"
+     },
+     {
+      "id": "i3",
+      "label": "Embassy emergency mail received at a shared mailbox and forwarded to all expatriate staff",
+      "s": 1,
+      "pri": 2,
+      "ref": "consular_mail"
+     }
+    ],
+    "evac": [
+     {
+      "id": "e1",
+      "label": "Scenario-specific evacuation plan documented (earthquake, fire)",
+      "s": 1,
+      "pri": 1,
+      "ref": "evac_drill"
+     },
+     {
+      "id": "e2",
+      "label": "Assembly point and secondary shelter agreed with the building manager; signage in English and local language",
+      "s": 0.5,
+      "pri": 1
+     },
+     {
+      "id": "e3",
+      "label": "Annual drill including families and remote staff",
+      "s": 0,
+      "pri": 2,
+      "ref": "evac_drill"
+     }
+    ],
+    "safety": [
+     {
+      "id": "s1",
+      "label": "Safety-confirmation system with all staff and accompanying family members registered",
+      "s": 1,
+      "pri": 1,
+      "ref": "safety_check_system"
+     },
+     {
+      "id": "s2",
+      "label": "Contact tree with two channels (SMS and messenger) plus one out-of-country contact",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "ifrc_family_plan"
+     },
+     {
+      "id": "s3",
+      "label": "Embassy registration checked for every expatriate once a year",
+      "s": 0,
+      "pri": 1,
+      "ref": "embassy_reg"
+     }
+    ],
+    "stock": [
+     {
+      "id": "k1",
+      "label": "Drinking water 3 L per person per day for 3 days at the office",
+      "s": 1,
+      "pri": 1,
+      "ref": "sphere_water"
+     },
+     {
+      "id": "k2",
+      "label": "Food, first-aid kit, chronic medicines list and blankets for an overnight stay",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "readygov_kit"
+     },
+     {
+      "id": "k3",
+      "label": "N95 masks for smog and dust",
+      "s": 1,
+      "pri": 3,
+      "ref": "air_quality_n95"
+     }
+    ],
+    "power": [
+     {
+      "id": "p1",
+      "label": "Backup power for the server room and one cool/warm room (generator or battery, 48 h fuel)",
+      "s": 0,
+      "pri": 1,
+      "ref": "heating_backup"
+     },
+     {
+      "id": "p2",
+      "label": "Satellite phone or messenger with roaming SIM tested quarterly",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "satellite_comm"
+     },
+     {
+      "id": "p3",
+      "label": "Power banks and car chargers for duty staff",
+      "s": 1,
+      "pri": 3
+     }
+    ],
+    "bcp": [
+     {
+      "id": "b1",
+      "label": "Critical processes with recovery targets (RTO) and an alternate site in another city",
+      "s": 1,
+      "pri": 1,
+      "ref": "iso22301_bcp"
+     },
+     {
+      "id": "b2",
+      "label": "Supplier and logistics alternatives agreed for the main routes (see Supply chain)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "undrr_sme_bcp"
+     },
+     {
+      "id": "b3",
+      "label": "Data backed up outside the country; remote-work setup for all staff",
+      "s": 0,
+      "pri": 2
+     }
+    ],
+    "people": [
+     {
+      "id": "h1",
+      "label": "List of staff and family members needing support (pregnancy, chronic conditions, mobility, small children)",
+      "s": 1,
+      "pri": 1
+     },
+     {
+      "id": "h2",
+      "label": "Heat and cold protocols (shifted hours, cool/warm rooms, check calls)",
+      "s": 0.5,
+      "pri": 2,
+      "ref": "who_heat"
+     },
+     {
+      "id": "h3",
+      "label": "School and nursery pickup rules agreed with families",
+      "s": 0,
+      "pri": 2
+     }
+    ],
+    "facility": [
+     {
+      "id": "f1",
+      "label": "Non-structural seismic fixing: shelves, servers, glass film, suspended ceilings",
+      "s": 1,
+      "pri": 1,
+      "ref": "readygov_quake"
+     },
+     {
+      "id": "f2",
+      "label": "Roof, drainage and glazing checked before the storm season",
+      "s": 0.5,
+      "pri": 3
+     },
+     {
+      "id": "f3",
+      "label": "Gas shut-off valve and extinguishers checked; hazardous materials inventory",
+      "s": 1,
+      "pri": 2
+     }
+    ]
+   }
+  }
+ ]
+}

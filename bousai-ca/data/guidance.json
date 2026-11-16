@@ -1,0 +1,279 @@
+{
+ "_note": "Public guidance underpinning the preparedness checklists of Disaster Compass Central Asia. key is referenced by site checklists; audience: company|individual|both; confirmed_by records how each statement was verified in this research session (page_read = fetched and read; third_party = secondary source fetched; search_snippet = WebSearch result summary only; unverified = from memory). CHECKPOINT - being refined.",
+ "items": [
+  {
+   "key": "sphere_water",
+   "audience": "company",
+   "category_ja": "Relief standard (water)",
+   "recommendation_ja": "Plan relief water at Sphere minimums: 2.5-3 L per person per day for drinking plus 2-6 L for hygiene and 3-6 L for cooking, i.e. 7.5-15 L per person per day in total (15 L is the usual planning figure).",
+   "quantitative": "2.5-3 L/person/day drinking; 7.5-15 L/person/day total",
+   "source_name": "Sphere Handbook 2018, WASH water supply standard 2.1",
+   "source_url": "https://handbook.spherestandards.org/en/sphere/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "readygov_kit",
+   "audience": "both",
+   "category_ja": "Stockpile",
+   "recommendation_ja": "Store at least 1 gallon (about 3.8 L) of water per person per day for drinking and sanitation, for a minimum of 3 days and ideally 2 weeks, with the same duration of non-perishable food.",
+   "quantitative": "1 gal (3.8 L)/person/day; min 3 days, better 2 weeks",
+   "source_name": "Ready.gov (FEMA) - Water / Build a Kit",
+   "source_url": "https://www.ready.gov/water",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "readygov_quake",
+   "audience": "both",
+   "category_ja": "Earthquake response",
+   "recommendation_ja": "When shaking starts: Drop, Cover and Hold On until it stops. Beforehand, secure heavy furniture, shelves, water heaters and TVs to walls so they cannot fall on people or block exits.",
+   "quantitative": "",
+   "source_name": "Ready.gov (FEMA) - Earthquakes",
+   "source_url": "https://www.ready.gov/earthquakes",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "usgs_aftershocks",
+   "audience": "both",
+   "category_ja": "Earthquake response",
+   "recommendation_ja": "Expect aftershocks: most large earthquakes are followed by smaller quakes that can still damage weakened buildings, with the rate decreasing over days to months. Do not re-enter damaged buildings and keep exits clear.",
+   "quantitative": "USGS forecasts aftershocks over 1 day, 1 week, 1 month and 1 year",
+   "source_name": "USGS Aftershock Forecast Overview",
+   "source_url": "https://earthquake.usgs.gov/data/oaf/overview.php",
+   "confirmed_by": "page_read"
+  },
+  {
+   "key": "fema_flood_car",
+   "audience": "both",
+   "category_ja": "Flood response",
+   "recommendation_ja": "Turn Around, Don't Drown: never walk or drive into flood water. About 15 cm (6 in) of moving water can knock an adult down and about 30 cm (1 ft) can float a car.",
+   "quantitative": "15 cm knocks down an adult; 30 cm floats a car",
+   "source_name": "NWS / FEMA - Turn Around Don't Drown",
+   "source_url": "https://www.weather.gov/safety/flood-turn-around-dont-drown",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "who_heat",
+   "audience": "both",
+   "category_ja": "Extreme heat",
+   "recommendation_ja": "Adopt a heat-health action plan: act on heat warnings, shift outdoor work to cooler hours, provide water and cool rooms, and check on elderly, chronically ill and outdoor workers daily during heat waves.",
+   "quantitative": "",
+   "source_name": "WHO - Heat and health",
+   "source_url": "https://www.who.int/news-room/fact-sheets/detail/climate-change-heat-and-health",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "who_cold",
+   "audience": "both",
+   "category_ja": "Extreme cold",
+   "recommendation_ja": "During cold waves keep indoor temperatures adequate, layer clothing and watch for hypothermia and frostbite. Never run generators, charcoal or gas heaters indoors or in garages: carbon monoxide poisoning kills quickly.",
+   "quantitative": "",
+   "source_name": "WHO - Cold weather and health",
+   "source_url": "https://www.who.int/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "who_water_boil",
+   "audience": "both",
+   "category_ja": "Drinking water",
+   "recommendation_ja": "If tap water may be contaminated, bring it to a rolling boil for 1 minute (3 minutes above about 2,000 m) or use bottled water; if boiling is impossible, use household chlorine and wait 30 minutes.",
+   "quantitative": "Boil 1 min (3 min at high altitude)",
+   "source_name": "CDC - Making Water Safe in an Emergency",
+   "source_url": "https://www.cdc.gov/water-emergency/about/how-to-make-your-water-safe-to-drink-in-an-emergency.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "cdc_lepto",
+   "audience": "both",
+   "category_ja": "Flood health",
+   "recommendation_ja": "Avoid wading in flood water with bare feet or open cuts; wear waterproof boots and gloves and cover wounds. Fever, headache and muscle pain 2-30 days after contact need medical review for leptospirosis.",
+   "quantitative": "Incubation 2-30 days",
+   "source_name": "CDC - Leptospirosis",
+   "source_url": "https://www.cdc.gov/leptospirosis/about/index.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "ifrc_family_plan",
+   "audience": "individual",
+   "category_ja": "Family plan",
+   "recommendation_ja": "Agree a written family plan: two meeting points (near home and outside the neighborhood), an out-of-area contact everyone reports to, and how to reach children's schools; practice it twice a year.",
+   "quantitative": "2 meeting points; 1 out-of-area contact",
+   "source_name": "IFRC / Red Cross Red Crescent - family emergency plan",
+   "source_url": "https://www.ifrc.org/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "iso22301_bcp",
+   "audience": "company",
+   "category_ja": "BCP",
+   "recommendation_ja": "Run business continuity as a management system per ISO 22301:2019: business impact analysis and risk assessment, continuity strategies, documented response plans, exercises at planned intervals, and management review.",
+   "quantitative": "",
+   "source_name": "ISO 22301:2019 Security and resilience - BCMS - Requirements",
+   "source_url": "https://www.iso.org/standard/75106.html",
+   "confirmed_by": "third_party"
+  },
+  {
+   "key": "undrr_sme_bcp",
+   "audience": "company",
+   "category_ja": "BCP (SMEs)",
+   "recommendation_ja": "Small and medium enterprises should keep a simple BCP: identify critical functions and suppliers, set recovery time objectives, back up data off-site, and rehearse the plan with staff.",
+   "quantitative": "",
+   "source_name": "UNDRR / PreventionWeb - business continuity for SMEs",
+   "source_url": "https://www.preventionweb.net/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "cb_alert",
+   "audience": "both",
+   "category_ja": "Alerts",
+   "recommendation_ja": "Keep emergency alerts (cell broadcast) switched on in phone settings so government warnings reach the handset within seconds without a subscription; Kazakhstan's MES is rolling out such a Mass Alert system alongside 112 SMS.",
+   "quantitative": "",
+   "source_name": "Wikipedia - Cell Broadcast (public warning implementations)",
+   "source_url": "https://en.wikipedia.org/wiki/Cell_Broadcast",
+   "confirmed_by": "third_party"
+  },
+  {
+   "key": "kz_112",
+   "audience": "both",
+   "category_ja": "Alerts (Kazakhstan)",
+   "recommendation_ja": "In Kazakhstan dial 112 for all emergencies (101 fire, 102 police, 103 ambulance also work); warnings arrive as SMS from '112' and, in Almaty and other regions, as Mass Alert cell-broadcast messages. Verify the MES app before relying on it.",
+   "quantitative": "112 free from any phone",
+   "source_name": "Kazakhstan MES (via libphonenumber short-number data and press reports)",
+   "source_url": "https://www.gov.kz/memleket/entities/emer?lang=en",
+   "confirmed_by": "search_snippet"
+  },
+  {
+   "key": "embassy_reg",
+   "audience": "both",
+   "category_ja": "Embassy registration",
+   "recommendation_ja": "Register with your embassy so it can reach you in a crisis: Japanese nationals file the Overseas Residential Registration (ORRnet) for stays of 3 months or more or Tabireg for shorter trips; US citizens enrol in STEP; UK nationals subscribe to FCDO travel-advice email alerts.",
+   "quantitative": "Japan: 3 months threshold",
+   "source_name": "MOFA Japan ORRnet / US State Dept STEP / UK FCDO",
+   "source_url": "https://www.ezairyu.mofa.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "consular_mail",
+   "audience": "both",
+   "category_ja": "Embassy information",
+   "recommendation_ja": "Make sure every registered family member receives the embassy's emergency e-mails (Japan: consular e-mails sent to ORRnet/Tabireg registrants) and store the embassy's emergency phone number in each phone.",
+   "quantitative": "",
+   "source_name": "MOFA Japan - Overseas Safety",
+   "source_url": "https://www.anzen.mofa.go.jp/",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "emergency_card",
+   "audience": "individual",
+   "category_ja": "Family plan",
+   "recommendation_ja": "Give every family member a wallet card with emergency numbers, the out-of-area contact, meeting points, school and workplace numbers and medical notes, and keep a copy in each child's bag.",
+   "quantitative": "1 card per person",
+   "source_name": "Ready.gov (FEMA) - Make a Plan / family communication card",
+   "source_url": "https://www.ready.gov/plan",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "stock_meds",
+   "audience": "individual",
+   "category_ja": "Health",
+   "recommendation_ja": "Keep a reserve of prescription medicines for chronic conditions (7-14 days) together with a list of generic drug names and doses, and rotate it before expiry.",
+   "quantitative": "7-14 days of prescription medicines",
+   "source_name": "CDC / Ready.gov - emergency supply of medicines",
+   "source_url": "https://www.ready.gov/kit",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "pets_plan",
+   "audience": "individual",
+   "category_ja": "Pets",
+   "recommendation_ja": "Include pets in the plan: carrier, leash, 2 weeks of food and water, vaccination records and photos, and identify pet-friendly shelters or boarding in advance since public shelters may refuse animals.",
+   "quantitative": "2 weeks of pet food and water",
+   "source_name": "Ready.gov (FEMA) - Pets and Animals",
+   "source_url": "https://www.ready.gov/pets",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "mudflow_kz",
+   "audience": "both",
+   "category_ja": "Mudflow (Kazakhstan)",
+   "recommendation_ja": "In the Almaty foothills avoid river valleys and gorges during and after heavy rain or rapid snowmelt (mudflow season May-September), heed Kazselezashchita/MES sirens and SMS, and move sideways uphill away from the channel.",
+   "quantitative": "Mudflow season May-September",
+   "source_name": "Kazselezashchita / Kazhydromet mudflow hazard bulletins",
+   "source_url": "https://www.kazhydromet.kz/en/selevedenie-str/ezhednevnyy-byulleten-selevoy-opasnosti-dozhdevogo-genezisa",
+   "confirmed_by": "search_snippet"
+  },
+  {
+   "key": "avalanche_tj",
+   "audience": "both",
+   "category_ja": "Avalanche (Tajikistan)",
+   "recommendation_ja": "In winter follow CoES avalanche warnings: avoid unnecessary travel on mountain roads (Dushanbe-Khujand, Dushanbe-Khorog, Khorog-Ishkashim), keep extra distance between vehicles, and carry warm clothing, food and a charged phone when driving passes.",
+   "quantitative": "",
+   "source_name": "Tajikistan Committee of Emergency Situations and Civil Defence (CoES) warnings via Asia-Plus",
+   "source_url": "https://asiaplus.news/en/2025/01/21/the-emergencies-committee-warns-of-avalanche-and-rockfall-threats-in-mountainous-areas/",
+   "confirmed_by": "search_snippet"
+  },
+  {
+   "key": "air_quality_n95",
+   "audience": "both",
+   "category_ja": "Air quality",
+   "recommendation_ja": "On smoky or heavily polluted days (PM2.5 above the WHO 24-hour guideline of 15 µg/m3 by several times) limit outdoor exertion, keep windows closed and use a well-fitted N95/FFP2 respirator outdoors; cloth and surgical masks do not filter fine particles.",
+   "quantitative": "WHO AQG 2021: PM2.5 15 µg/m3 (24 h), 5 µg/m3 (annual)",
+   "source_name": "WHO global air quality guidelines 2021 / CDC respirator advice",
+   "source_url": "https://www.who.int/publications/i/item/9789240034228",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "evac_drill",
+   "audience": "company",
+   "category_ja": "Training",
+   "recommendation_ja": "Hold evacuation and shelter drills at least once a year (more often where local fire rules require), and include expatriate families and new hires in at least one drill.",
+   "quantitative": "At least 1 drill/year",
+   "source_name": "ISO 22301 exercising requirement / local fire-safety rules",
+   "source_url": "https://www.iso.org/standard/75106.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "vertical_evac",
+   "audience": "both",
+   "category_ja": "Flood response",
+   "recommendation_ja": "If flood water is rising and roads are already cut, move to the highest floor of a solid building (vertical evacuation) rather than driving; avoid closed attics without an exit and switch off electricity before water reaches outlets.",
+   "quantitative": "",
+   "source_name": "Ready.gov (FEMA) - Floods",
+   "source_url": "https://www.ready.gov/floods",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "heating_backup",
+   "audience": "both",
+   "category_ja": "Winter",
+   "recommendation_ja": "Prepare for winter outages: a safe backup heat source and fuel, insulation for one room, warm layers and blankets, and a battery or generator kept outdoors away from windows with a CO alarm indoors.",
+   "quantitative": "Generator at least 6 m (20 ft) from windows",
+   "source_name": "Ready.gov (FEMA) - Winter Weather / CDC",
+   "source_url": "https://www.ready.gov/winter-weather",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "safety_check_system",
+   "audience": "company",
+   "category_ja": "Safety confirmation",
+   "recommendation_ja": "Operate a safety-confirmation (roll-call) system that pushes a 'are you safe?' message over several channels and collects replies for all staff, expatriate families and travellers; test it twice a year and track response rate and time.",
+   "quantitative": "Test 2x/year",
+   "source_name": "ISO 22301 warning and communication requirements",
+   "source_url": "https://www.iso.org/standard/75106.html",
+   "confirmed_by": "unverified"
+  },
+  {
+   "key": "satellite_comm",
+   "audience": "company",
+   "category_ja": "Communications",
+   "recommendation_ja": "Keep at least one communication path that does not depend on local mobile networks (satellite phone or satellite messenger) at each site, check local licensing rules, and test it monthly.",
+   "quantitative": "1 satellite device per site",
+   "source_name": "UN Emergency Telecommunications Cluster / FEMA Ready Business",
+   "source_url": "https://www.etcluster.org/",
+   "confirmed_by": "unverified"
+  }
+ ],
+ "health_after_disaster": [],
+ "_guidance_gaps": [
+  "checkpoint: searches in progress"
+ ]
+}
