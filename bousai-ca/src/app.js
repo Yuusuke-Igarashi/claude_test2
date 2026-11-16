@@ -26,6 +26,8 @@
     const g = e.target.closest('[data-golive]'); if (g) { e.preventDefault(); Live.st.scen = g.dataset.golive; Store.set('liveScen', Live.st.scen); if (App.current === 'live') App.views.live.update($('#v-live')); else location.hash = 'live'; return; }
     const t = e.target.closest('.map-box .legend .t'); if (t) t.parentElement.classList.toggle('open');
   });
+  /* Scenario forcing series: anchor the diurnal temperature cycle to the scenario's local start hour */
+  M.scenarios().forEach((sc) => { const mm = /T(\d{2}):(\d{2})/.exec(sc.t0_iso || ''); const h0 = mm ? (+mm[1] + (+mm[2]) / 60) : 0; (sc.forcing || []).forEach((f) => { f.t0_hour = h0; }); });
   route();
   /* First-run hint */
   if (!Store.get('seen2')) { Store.set('seen2', 1); setTimeout(() => toast('All values are demo data. Use the switches at the top right to change Company/Government and Manager/Staff views'), 600); }

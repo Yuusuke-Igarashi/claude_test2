@@ -29,7 +29,7 @@ function forcingAt(f, t) {
   if (f.kind === 'river' || f.kind === 'level' || f.kind === 'flow') { const ph = f.peak_h || 1, hold = f.hold_h || 0; if (t <= ph) return f.start + (f.peak - f.start) * sstep(t / ph); if (t <= ph + hold) return f.peak; return f.peak - (f.peak - f.start) * sstep((t - ph - hold) / (f.fall_h || 100)); }
   if (f.kind === 'tide') return (f.base || 0) + (f.amp || 0) * Math.sin(2 * Math.PI * t / (f.period || 12.4)) + (f.surge || 0) * gaussB(t - (f.surge_h || 0), 48);
   if (f.kind === 'wind') return (f.base || 0) + ((f.peak || 0) - (f.base || 0)) * gaussB(t - (f.peak_h || 0), f.width || 24);
-  if (f.kind === 'temp') return (f.base || 0) + (f.amp || 0) * Math.sin(2 * Math.PI * (t - 14) / 24) + ((f.peak || 0) - (f.base || 0)) * gaussB(t - (f.peak_h || 0), f.width || 48);
+  if (f.kind === 'temp') { const hod = (((f.t0_hour || 0) + t) % 24 + 24) % 24; return (f.base || 0) + (f.amp || 0) * Math.cos(2 * Math.PI * (hod - 15) / 24) + ((f.peak || 0) - (f.base || 0)) * gaussB(t - (f.peak_h || 0), f.width || 48); }
   if (f.kind === 'quake') { const ev = (f.events || []).filter((e) => e[0] <= t); return ev.length ? ev[ev.length - 1][1] : 0; }
   return 0;
 }
@@ -54,7 +54,7 @@ function gaugeCard(f, t) {
 }
 
 /* ---------- Incident feed: registered incidents + threshold crossings, shelter openings, site status changes and the response log merged into one stream ---------- */
-const INC = { flood: ['Flooding', 'wave'], road: ['Roads', 'car'], rail: ['Rail', 'train'], airport: ['Airport', 'plane'], power: ['Power outage', 'bolt'], water: ['Water outage', 'drop'], health: ['Health and sanitation', 'heart'], supply: ['Supplies', 'box'], evac: ['Evacuation', 'route'], collapse: ['Building collapse', 'building'], fire: ['Fire', 'fire'], forcing: ['Hazard threshold', 'gauge'], quake: ['Earthquake', 'quake'], ops: ['Response', 'shield'], req: ['Support request', 'alert'], site: ['Site', 'building'], logi: ['Logistics', 'truck'], shelter: ['Shelter', 'home'] };
+const INC = { flood: ['Flooding', 'wave'], road: ['Roads', 'car'], rail: ['Rail', 'train'], airport: ['Airport', 'plane'], power: ['Power outage', 'bolt'], water: ['Water outage', 'drop'], health: ['Health and sanitation', 'heart'], supply: ['Supplies', 'box'], evac: ['Evacuation', 'route'], collapse: ['Building collapse', 'building'], fire: ['Fire', 'fire'], forcing: ['Hazard threshold', 'gauge'], quake: ['Earthquake', 'quake'], ops: ['Response', 'shield'], req: ['Support request', 'alert'], site: ['Site', 'building'], logi: ['Logistics', 'truck'], shelter: ['Shelter', 'home'], landslide: ['Landslide / mudflow', 'mountain'], cold: ['Cold exposure', 'cloud'], heat: ['Heat', 'sun'], dust: ['Dust storm', 'wind'], gas: ['Gas leak', 'fire'], };
 const INC_CATS = [['all', 'All'], ['damage', 'Impacts'], ['forcing', 'Drivers'], ['ops', 'Response & sites']];
 function liveFeed(sc) {
   if (sc._feed) return sc._feed;
