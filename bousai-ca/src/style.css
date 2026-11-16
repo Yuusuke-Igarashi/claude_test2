@@ -774,6 +774,19 @@ html[data-persona="staff"] .admin-only{display:none!important}
 .sim-active .ic{color:var(--accent)}
 .sim-active .btn{margin-left:6px;vertical-align:middle}
 /* Header fit: labels only on wide screens; compact switches below 1400px */
-@media (max-width:1520px){.ctx-l{display:none}}
 @media (max-width:1400px){.seg.ctx button{padding:5px 9px;font-size:12.5px}.nav a{padding:7px 9px;font-size:13px}.top-in{gap:12px}}
 @media (max-width:1180px){.seg.ctx button{padding:5px 8px;font-size:12px}}
+/* Header overlap guard: the nav never overflows into the switches; JS adds html.nav-compact when the measured layout would overlap */
+.nav{flex:1 1 auto;min-width:0;overflow:hidden}
+.top-r{flex:none;margin-left:auto}
+html.nav-compact .nav{display:none}
+html.nav-compact .logo .name small{display:none}
+html.nav-compact .nav-m{display:flex;gap:4px;flex-wrap:wrap;padding:0 max(12px,env(safe-area-inset-left,0px)) 8px max(12px,env(safe-area-inset-right,0px))}
+html.nav-compact .nav-m a{flex:none;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12.5px;text-decoration:none;color:var(--fg2);white-space:nowrap}
+html.nav-compact .nav-m a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+html.nav-compact .nav-m a.live{border-color:var(--rose-soft)}
+html.nav-compact .nav-m a .n{font-family:var(--f-mono);font-size:10px}
+/* Switch labels stacked above the segments (no extra width); hidden on phones */
+.ctx-grp{flex-direction:column;align-items:flex-start;gap:1px}
+.ctx-l{display:block;font-size:9px;line-height:1;margin-left:3px}
+@media (max-width:900px){.ctx-l{display:none}}

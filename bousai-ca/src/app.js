@@ -20,6 +20,10 @@
   const navM = $('#navM');
   navM.innerHTML = $$('#nav a').map((a) => `<a href="${a.getAttribute('href')}" data-view="${a.dataset.view}" class="${a.classList.contains('live') ? 'live' : ''}"><span class="n">${a.querySelector('.n').textContent}</span>${a.textContent.replace(/^\d/, '').trim()}</a>`).join('');
   window.addEventListener('hashchange', route);
+  /* Header fit: measure the real layout; if the menu would touch the switches, use the compact menu row instead */
+  const fitHeader = () => { const nav = $('#nav'), tr = $('.top-r'); if (!nav || !tr) return; document.documentElement.classList.remove('nav-compact'); const t = tr.getBoundingClientRect(); const items = Array.from(nav.children); const need = items.length ? items[items.length - 1].getBoundingClientRect().right : 0; const clipped = nav.scrollWidth > nav.clientWidth + 1; if (need > t.left - 10 || clipped || getComputedStyle(nav).display === 'none') { if (getComputedStyle(nav).display !== 'none') document.documentElement.classList.add('nav-compact'); } };
+  let fhT; const scheduleFit = () => { clearTimeout(fhT); fhT = setTimeout(fitHeader, 30); };
+  window.addEventListener('resize', scheduleFit); fitHeader(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeader); setTimeout(fitHeader, 600);
   /* From other views: jump to a tree node in view 1 (data-node) or to a specific event in view 2 (data-golive); toggle the map legend */
   document.addEventListener('click', (e) => {
     const n = e.target.closest('[data-node]'); if (n && !n.closest('#v-risk')) { e.preventDefault(); const node = JSON.parse(n.dataset.node); App.views.risk.st.node = node; Store.set('riskNode', node); if (node.region) Store.set('region', node.region); if (node.site) Store.set('site', node.site); if (App.current === 'risk') App.views.risk.update($('#v-risk')); else location.hash = 'risk'; window.scrollTo({ top: 0 }); return; }

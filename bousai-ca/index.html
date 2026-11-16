@@ -786,9 +786,22 @@ html[data-persona="staff"] .admin-only{display:none!important}
 .sim-active .ic{color:var(--accent)}
 .sim-active .btn{margin-left:6px;vertical-align:middle}
 /* Header fit: labels only on wide screens; compact switches below 1400px */
-@media (max-width:1520px){.ctx-l{display:none}}
 @media (max-width:1400px){.seg.ctx button{padding:5px 9px;font-size:12.5px}.nav a{padding:7px 9px;font-size:13px}.top-in{gap:12px}}
 @media (max-width:1180px){.seg.ctx button{padding:5px 8px;font-size:12px}}
+/* Header overlap guard: the nav never overflows into the switches; JS adds html.nav-compact when the measured layout would overlap */
+.nav{flex:1 1 auto;min-width:0;overflow:hidden}
+.top-r{flex:none;margin-left:auto}
+html.nav-compact .nav{display:none}
+html.nav-compact .logo .name small{display:none}
+html.nav-compact .nav-m{display:flex;gap:4px;flex-wrap:wrap;padding:0 max(12px,env(safe-area-inset-left,0px)) 8px max(12px,env(safe-area-inset-right,0px))}
+html.nav-compact .nav-m a{flex:none;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12.5px;text-decoration:none;color:var(--fg2);white-space:nowrap}
+html.nav-compact .nav-m a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+html.nav-compact .nav-m a.live{border-color:var(--rose-soft)}
+html.nav-compact .nav-m a .n{font-family:var(--f-mono);font-size:10px}
+/* Switch labels stacked above the segments (no extra width); hidden on phones */
+.ctx-grp{flex-direction:column;align-items:flex-start;gap:1px}
+.ctx-l{display:block;font-size:9px;line-height:1;margin-left:3px}
+@media (max-width:900px){.ctx-l{display:none}}
 
 </style>
 </head>
@@ -845,7 +858,7 @@ html[data-persona="staff"] .admin-only{display:none!important}
 
 <header class="top" id="top">
   <div class="top-in">
-    <a class="logo" href="#risk"><span class="mark"><svg class="ic"><use href="#i-shield"/></svg></span><span class="name"><b>Disaster Compass</b><small>CENTRAL ASIA · for risk managers and staff</small></span></a>
+    <a class="logo" href="#risk"><span class="mark"><svg class="ic"><use href="#i-shield"/></svg></span><span class="name"><b>Disaster Compass</b><small>CENTRAL ASIA · risk managers &amp; staff</small></span></a>
     <nav class="nav" aria-label="Main navigation" id="nav">
       <a href="#risk" data-view="risk"><span class="n">1</span>Risk by region &amp; site</a>
       <a href="#live" data-view="live" class="live"><span class="n">2</span>Live reporting</a>
@@ -2810,6 +2823,10 @@ App.views.risk = {
   const navM = $('#navM');
   navM.innerHTML = $$('#nav a').map((a) => `<a href="${a.getAttribute('href')}" data-view="${a.dataset.view}" class="${a.classList.contains('live') ? 'live' : ''}"><span class="n">${a.querySelector('.n').textContent}</span>${a.textContent.replace(/^\d/, '').trim()}</a>`).join('');
   window.addEventListener('hashchange', route);
+  /* Header fit: measure the real layout; if the menu would touch the switches, use the compact menu row instead */
+  const fitHeader = () => { const nav = $('#nav'), tr = $('.top-r'); if (!nav || !tr) return; document.documentElement.classList.remove('nav-compact'); const t = tr.getBoundingClientRect(); const items = Array.from(nav.children); const need = items.length ? items[items.length - 1].getBoundingClientRect().right : 0; const clipped = nav.scrollWidth > nav.clientWidth + 1; if (need > t.left - 10 || clipped || getComputedStyle(nav).display === 'none') { if (getComputedStyle(nav).display !== 'none') document.documentElement.classList.add('nav-compact'); } };
+  let fhT; const scheduleFit = () => { clearTimeout(fhT); fhT = setTimeout(fitHeader, 30); };
+  window.addEventListener('resize', scheduleFit); fitHeader(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeader); setTimeout(fitHeader, 600);
   /* From other views: jump to a tree node in view 1 (data-node) or to a specific event in view 2 (data-golive); toggle the map legend */
   document.addEventListener('click', (e) => {
     const n = e.target.closest('[data-node]'); if (n && !n.closest('#v-risk')) { e.preventDefault(); const node = JSON.parse(n.dataset.node); App.views.risk.st.node = node; Store.set('riskNode', node); if (node.region) Store.set('region', node.region); if (node.site) Store.set('site', node.site); if (App.current === 'risk') App.views.risk.update($('#v-risk')); else location.hash = 'risk'; window.scrollTo({ top: 0 }); return; }
