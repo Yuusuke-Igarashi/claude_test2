@@ -1,4 +1,4 @@
-/* Layout: 固定ヘッダ＋5画面のハッシュ切替。参照プロトタイプ（RWAI）の白系デザイン体系（IBM Plex Sans JP／Instrument Serif／JetBrains Mono・青緑アクセント）を継承し、発災時画面向けにダークテーマを追加。 */
+/* Layout: fixed header + 5 views switched by URL hash. Inherits the light design system of the reference prototype (RWAI: IBM Plex Sans / Instrument Serif / JetBrains Mono, teal accent) and adds a dark theme for the incident-time views. */
 :root{
   --bg:#f9f9f8; --surface:#fdfdfc; --deep:#f4f4f2; --raised:#f7f7f5; --side:#f3f3f1;
   --fg:#1f2328; --fg2:#5d6166; --muted:#6b6f74;
@@ -8,16 +8,16 @@
   --ok:#1a7f37; --ok-soft:#dafbe1; --warn:#7d5200; --warn-soft:#fff1cc; --on-status:#ffffff; --on-h3:#2b1a05; --serious:#c2410c; --serious-soft:#ffe8dc; --crit:#cf222e; --crit-soft:#ffebe9;
   --poi:#8250df; --sel:#0e7490;
   --shadow:0 1px 2px rgba(31,35,40,.05),0 10px 30px rgba(31,35,40,.07);
-  /* 地図 */
+  /* Map */
   --m-sea:#dbe8ef; --m-land:#f2f2ee; --m-other:#e9e9e4; --m-border:#c9c9c2; --m-water:#9cc3d8; --m-label:#3d4145; --m-halo:#fdfdfc; --m-road:#fdfdfc; --m-casing:#d2d2cb; --m-block:#e8e8e3; --m-rail:#6b6f74; --m-park:#d7e8c8; --m-flood:#4f8fd6;
-  /* ハザード水準（単色の逐次ランプ：薄→濃） */
+  /* Hazard levels (single-hue sequential ramp: light → dark) */
   --h0:#e3e3dc; --h1:#fbeed6; --h2:#f6d39e; --h3:#efae5e; --h4:#d9822b; --h5:#a4531a;
-  /* 青系逐次（浸水深など） */
+  /* Blue sequential (flood depth etc.) */
   --b1:#d3e4f4; --b2:#bcd6ec; --b3:#86b4dc; --b4:#4f8fd6; --b5:#2b5fa8;
-  /* カテゴリ色（固定順） */
+  /* Category colors (fixed order) */
   --c1:#0e7490; --c2:#b07800; --c3:#8250df; --c4:#1a7f37; --c5:#cf222e; --c6:#5d6166;
   --f-display:"Instrument Serif","Times New Roman",serif;
-  --f-body:"IBM Plex Sans JP","Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
   color-scheme:light;
 }
@@ -71,7 +71,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,[t
 .skip a:focus{left:8px;top:8px;background:var(--surface);padding:6px 10px;z-index:100}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* ---------- ヘッダ ---------- */
+/* ---------- Header ---------- */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--surface);border-bottom:1px solid var(--line)}
 .top-in{display:flex;align-items:center;gap:18px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1360px;margin:0 auto;min-width:0}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0;flex:none}
@@ -104,7 +104,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,[t
   .nav-m a .n{font-family:var(--f-mono);font-size:10px}
 }
 
-/* ---------- 画面共通 ---------- */
+/* ---------- Shared by all views ---------- */
 main{max-width:1360px;margin:0 auto;padding-block:18px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .view{display:flex;flex-direction:column;gap:18px;min-width:0}
 .vh{display:grid;grid-template-columns:1fr auto;gap:12px 24px;align-items:end;padding-bottom:14px;border-bottom:1px solid var(--line)}
@@ -241,7 +241,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .cite:hover{background:var(--hover);color:var(--fg)}
 .cite.asm{background:var(--amber-soft);color:var(--amber);border-color:transparent}
 
-/* チェックリスト */
+/* Checklist */
 .chk-list{display:flex;flex-direction:column;gap:6px}
 .chk{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:13px}
 .chk .box{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line-strong);display:grid;place-items:center;color:transparent;margin-top:2px;background:var(--surface)}
@@ -253,7 +253,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .chk .pri.p1{background:var(--crit-soft);color:var(--crit)}.chk .pri.p2{background:var(--warn-soft);color:var(--warn)}.chk .pri.p3{background:var(--deep);color:var(--fg2)}
 .chk button.box{cursor:pointer}
 
-/* スコア行 */
+/* Score row */
 .score-rows{display:flex;flex-direction:column;gap:8px}
 .score-row{display:grid;grid-template-columns:150px 1fr 44px;gap:10px;align-items:center;font-size:13px}
 .score-row .k{font-weight:500}
@@ -263,7 +263,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .score-row .v{font-family:var(--f-mono);text-align:right;font-weight:600}
 @media (max-width:480px){.score-row{grid-template-columns:110px 1fr 40px}}
 
-/* 月ストリップ */
+/* Month strip */
 .months{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
 .months span{font-family:var(--f-mono);font-size:10px;text-align:center;padding:4px 0;border-radius:4px;background:var(--deep);color:var(--muted)}
 .months span.on{background:var(--h3);color:var(--on-h3);font-weight:600}
@@ -271,7 +271,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .mrow{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;font-size:12.5px;margin:4px 0}
 @media (max-width:480px){.mrow{grid-template-columns:1fr}}
 
-/* ---------- 地図 ---------- */
+/* ---------- Map ---------- */
 .map-box{position:relative;background:var(--m-sea);border-radius:10px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/10;max-width:100%}
 .map-box.tall{aspect-ratio:4/3}
 .map-box>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -312,7 +312,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .m-site.ok circle.dot,.m-site.ok circle.halo{fill:var(--ok)}
 .m-site text{font-family:var(--f-mono);font-size:calc(9px / var(--ms,1));font-weight:700;fill:var(--on-status);text-anchor:middle;pointer-events:none}
 .m-site.hl circle.halo{opacity:.4}
-/* 街区図 */
+/* Street-block map */
 .sm-bg{fill:var(--m-land)}
 .sm-block{fill:var(--m-block);stroke:none}
 .sm-park{fill:var(--m-park);stroke:none}
@@ -361,7 +361,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .sm-shelter.full rect{stroke:var(--crit)}
 .sm-shelter text{font-family:var(--f-mono);font-size:calc(8.5px / var(--ms,1));font-weight:700;fill:var(--fg)}
 
-/* ---------- 図表 ---------- */
+/* ---------- Charts ---------- */
 .chart{position:relative;width:100%;min-width:0}
 .chart svg{width:100%;height:auto;display:block;overflow:hidden}
 .chart .ax{font-family:var(--f-mono);font-size:calc(11px / var(--ms,1));fill:var(--muted)}
@@ -400,7 +400,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .sup-row .v.okv{color:var(--ok)}
 @media (max-width:560px){.sup-row{grid-template-columns:1fr auto;grid-template-areas:"k v" "t t";gap:4px 10px}.sup-row .k{grid-area:k}.sup-row .track{grid-area:t}.sup-row .v{grid-area:v;white-space:nowrap}.mini-bars .row{grid-template-columns:90px 1fr 60px}}
 
-/* ---------- 発災時 ---------- */
+/* ---------- Incident mode ---------- */
 .livebar{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,1fr) auto;gap:14px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
 .livebar>*{min-width:0}
 .livebar .ctr select{max-width:220px}
@@ -458,7 +458,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .weather ul{margin:0;padding-left:18px;font-size:13px;color:var(--fg2)}
 .weather li b{color:var(--fg)}
 
-/* 家族カード */
+/* Family card */
 .fam-card{border:1.5px solid var(--fg);border-radius:12px;padding:16px 18px;background:var(--surface);position:relative}
 .fam-card .eb{color:var(--accent)}
 .fam-card h3{font-family:var(--f-display);font-weight:400;font-size:22px;margin:4px 0 10px}
@@ -527,7 +527,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .feed b{display:block}
 .feed span{color:var(--fg2);font-size:11.5px;display:block}
 
-/* ---------- スマホ：地図の凡例・ヒント・出典は地図の下に、表は先頭列固定＋スクロール影 ---------- */
+/* ---------- Mobile: map legend, hints and sources move below the map; tables keep the first column fixed + scroll shadow ---------- */
 @media (max-width:700px){
   .map-box{aspect-ratio:auto;display:flex;flex-direction:column}
   .map-box>svg{position:static;width:100%;height:auto;aspect-ratio:16/10}
@@ -543,7 +543,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
   .tbl-wrap{background:linear-gradient(90deg,var(--surface) 30%,transparent),linear-gradient(90deg,transparent,var(--surface) 70%) 100% 0,radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.18),transparent),radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.18),transparent) 100% 0;background-repeat:no-repeat;background-size:40px 100%,40px 100%,14px 100%,14px 100%;background-attachment:local,local,scroll,scroll}
 }
 
-/* ---------- v2：階層ナビ（ツリー）、コンテキスト切替、リアルタイム演出 ---------- */
+/* ---------- v2: hierarchical nav (tree), context switch, live-reporting effects ---------- */
 .seg.ctx{padding:2px;gap:0}
 .seg.ctx button{padding:4px 9px;font-size:12px}
 .nav a.live[aria-current="page"]{background:var(--crit-soft);color:var(--crit)}
@@ -588,7 +588,7 @@ details.more .body ul{margin:6px 0;padding-left:18px}
 .gcard span{font-size:12px;color:var(--fg2);display:block}
 .gcard .num{font-family:var(--f-mono);font-size:18px;font-weight:600;color:var(--fg);display:block;margin-top:2px}
 
-/* リアルタイム */
+/* Live reporting */
 .live-head{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(240px,1fr) auto;gap:14px;align-items:center;padding:12px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);position:relative;overflow:hidden}
 .live-head::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--crit)}
 .live-head.watch::before{background:var(--warn)}
@@ -665,7 +665,7 @@ html[data-persona="staff"] .admin-only{display:none!important}
 .stack{display:flex;flex-direction:column;gap:14px}
 .mini-stat{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--fg2)}
 .mini-stat b{font-family:var(--f-mono);color:var(--fg);font-size:14px}
-/* ---------- v2b：リアルタイム画面・パーソナライズ画面の追加 ---------- */
+/* ---------- v2b: live-reporting and personal-dashboard views added ---------- */
 .live-head{grid-template-columns:minmax(0,1.3fr) auto minmax(260px,1.1fr)}
 .live-head.compact{padding:10px 14px}
 .live-head.compact .ttl b{font-size:14px}

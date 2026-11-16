@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>防災コンパス SEA</title>
+<title>Disaster Compass Central Asia</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="東南アジアに拠点を持つ企業・自治体のリスク管理責任者と従業員のための防災モック：地域→拠点→対象グループのリスク、リアルタイムレポーティング、住所に応じたパーソナライズ（デモデータ）">
+<meta name="description" content="Disaster-preparedness mock for risk managers and staff of companies and local governments with sites in Central Asia: risk by region, site and target group, live reporting, and a dashboard personalized to your address (demo data)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 /*__CSS__*/
 </style>
@@ -62,24 +62,24 @@
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
 </svg>
 
-<div class="skip"><a href="#main" onclick="event.preventDefault();document.getElementById('main').focus()">本文へ</a></div>
+<div class="skip"><a href="#main" onclick="event.preventDefault();document.getElementById('main').focus()">Skip to content</a></div>
 
 <header class="top" id="top">
   <div class="top-in">
-    <a class="logo" href="#risk"><span class="mark"><svg class="ic"><use href="#i-shield"/></svg></span><span class="name"><b>防災コンパス</b><small>SOUTHEAST ASIA · リスク管理責任者と従業員のために</small></span></a>
-    <nav class="nav" aria-label="主要ナビゲーション" id="nav">
-      <a href="#risk" data-view="risk"><span class="n">1</span>地域・拠点のリスク</a>
-      <a href="#live" data-view="live" class="live"><span class="n">2</span>リアルタイムレポーティング</a>
-      <a href="#me" data-view="me"><span class="n">3</span>パーソナライズ</a>
+    <a class="logo" href="#risk"><span class="mark"><svg class="ic"><use href="#i-shield"/></svg></span><span class="name"><b>Disaster Compass</b><small>CENTRAL ASIA · for risk managers and staff</small></span></a>
+    <nav class="nav" aria-label="Main navigation" id="nav">
+      <a href="#risk" data-view="risk"><span class="n">1</span>Risk by region &amp; site</a>
+      <a href="#live" data-view="live" class="live"><span class="n">2</span>Live reporting</a>
+      <a href="#me" data-view="me"><span class="n">3</span>My dashboard</a>
     </nav>
     <div class="top-r">
-      <div class="seg ctx" role="group" aria-label="組織の種類" id="orgSeg"><button data-org="corp" aria-pressed="true">企業</button><button data-org="gov" aria-pressed="false">自治体</button></div>
-      <div class="seg ctx" role="group" aria-label="閲覧者" id="personaSeg"><button data-persona="admin" aria-pressed="true">管理者</button><button data-persona="staff" aria-pressed="false">従業員</button></div>
-      <span class="demo" title="すべての数値はデモデータまたは出典付きの公開情報です">DEMO</span>
-      <button class="icon-btn" id="themeBtn" aria-label="表示テーマを切り替え" title="テーマ"><svg class="ic"><use href="#i-sun"/></svg></button>
+      <div class="seg ctx" role="group" aria-label="Organization type" id="orgSeg"><button data-org="corp" aria-pressed="true">Company</button><button data-org="gov" aria-pressed="false">Government</button></div>
+      <div class="seg ctx" role="group" aria-label="Viewer" id="personaSeg"><button data-persona="admin" aria-pressed="true">Manager</button><button data-persona="staff" aria-pressed="false">Staff</button></div>
+      <span class="demo" title="All figures are demo data or public information with sources">DEMO</span>
+      <button class="icon-btn" id="themeBtn" aria-label="Switch display theme" title="Theme"><svg class="ic"><use href="#i-sun"/></svg></button>
     </div>
   </div>
-  <nav class="nav-m" aria-label="画面切替（モバイル）" id="navM"></nav>
+  <nav class="nav-m" aria-label="View switcher (mobile)" id="navM"></nav>
 </header>
 
 <main id="main" tabindex="-1" style="outline:none">
@@ -91,13 +91,14 @@
 <footer class="foot">
   <div class="foot-in">
     <div>
-      <b>防災コンパス SEA（モック）</b>
-      <p>東南アジアに拠点を持つ企業・自治体のリスク管理責任者と従業員のための防災アプリの試作です。画面上の数値は、出典を明記した公開情報と、前提を明記した仮定値（デモ）の2種類からなります。実際の避難判断には現地当局・在外公館の情報を優先してください。</p>
+      <b>Disaster Compass Central Asia (mock)</b>
+      <p>A prototype disaster-preparedness app for risk managers and staff of companies and local governments with sites in Central Asia. Figures on screen are of two kinds: public information with its source stated, and assumed values (demo) with their basis stated. For real evacuation decisions, follow local authorities and your embassy.</p>
     </div>
     <div class="foot-meta">
-      <span>ビルド __BUILT_AT__</span>
-      <span>地図：Natural Earth（パブリックドメイン）</span>
-      <span>地震損失：GEM Foundation 国別地震リスクプロファイル（CC BY-NC-SA 4.0・非商用）</span>
+      <span>Build __BUILT_AT__</span>
+      <span>Map: Natural Earth (public domain)</span>
+      <span>Seismic loss: GEM Foundation Country Seismic Risk Profiles v2026 (CC BY-NC-SA 4.0, non-commercial)</span>
+      <span>Hazard levels: ThinkHazard! (GFDRR)</span>
     </div>
   </div>
 </footer>

@@ -14,7 +14,7 @@ App.views.region = {
       </div>
       <div class="ctl">
         <div class="f"><label for="rgSel">Region (metro area)</label><select id="rgSel">${M.regions().map((r) => `<option value="${r.id}">${esc(r.name_ja)} (${esc(COUNTRY_JA[r.country] || r.country)})</option>`).join('')}</select></div>
-        <div class="f"><label>Hazard shown on the map</label><div class="seg" id="hzSeg" role="group" aria-label="Hazard shown on the map">${['flood', 'urban_flood', 'coastal', 'quake', 'tsunami', 'cyclone', 'landslide', 'volcano', 'heat', 'haze'].map((k) => `<button data-hz="${k}" aria-pressed="${k === st.hz}">${esc(HAZ[k].short)}</button>`).join('')}</div></div>
+        <div class="f"><label>Hazard shown on the map</label><div class="seg" id="hzSeg" role="group" aria-label="Hazard shown on the map">${['flood', 'urban_flood', 'coastal', 'quake', 'cyclone', 'landslide', 'heat', 'cold', 'haze'].map((k) => `<button data-hz="${k}" aria-pressed="${k === st.hz}">${esc(HAZ[k].short)}</button>`).join('')}</div></div>
         <div class="f"><label>Map extent</label><div class="seg" id="focusSeg" role="group" aria-label="Map extent"><button data-focus="sea" aria-pressed="true">All Central Asia</button><button data-focus="country" aria-pressed="false">Selected country</button></div></div>
       </div>
       <div class="answer" id="rgAnswer"></div>
@@ -62,7 +62,7 @@ App.views.region = {
     const cr = (D.regions && D.regions.countries && D.regions.countries[reg.country]) || {};
     this.drawMap(root);
     /* Right column: hazard list and KPIs */
-    const order = ['flood', 'urban_flood', 'coastal', 'quake', 'tsunami', 'cyclone', 'landslide', 'volcano', 'heat', 'haze', 'water'];
+    const order = ['flood', 'urban_flood', 'coastal', 'quake', 'cyclone', 'landslide', 'heat', 'cold', 'haze', 'water'];
     const hzCards = order.map((k) => { const th = HAZ[k].th; const v = (reg.hazards && reg.hazards[th]) || (cr.hazards && cr.hazards[th] ? Object.assign({ country_level: true }, cr.hazards[th]) : null); const lv = lvInfo(v ? v.level : 'unknown'); return `<button class="hz" data-hz-card="${k}" aria-pressed="${k === st.hz}" style="${v && v.country_level ? 'opacity:.72;border-style:dashed' : ''}" title="${esc(v && v.country_level ? 'Region value not retrieved; national level (max of regions) used instead' : v && v.note ? v.note : '')}"><span class="h">${ic(HAZ[k].icon)}${esc(HAZ[k].short)}</span>${lvTag(v ? v.level : 'unknown')}<span class="lvbar">${[1, 2, 3, 4].map((i) => `<i style="${i <= lv.k ? `background:var(--${lv.cls.replace('k', 'h')})` : ''}"></i>`).join('')}</span><span class="s">${v && v.country_level ? 'Max of regions' : v && v.level ? 'Region' : 'Not retrieved'}${v && v.confirmed_by === 'search_snippet' ? ' · Search summary' : ''}</span></button>`; }).join('');
     const nReg = order.filter((k) => reg.hazards && reg.hazards[HAZ[k].th] && reg.hazards[HAZ[k].th].level).length;
     const NA = '<span style="font-size:15px;font-family:var(--f-body);color:var(--muted)">Not retrieved</span>';
@@ -83,7 +83,7 @@ App.views.region = {
     this.drawRp(root);
     /* Answer (summary) */
     const lvOf = (k) => { const th = HAZ[k].th; const v = (reg.hazards && reg.hazards[th]) || (cr.hazards && cr.hazards[th]); return v ? v.level : null; };
-    const main = ['flood', 'urban_flood', 'coastal', 'quake', 'tsunami', 'cyclone', 'landslide', 'volcano', 'heat', 'haze'];
+    const main = ['flood', 'urban_flood', 'coastal', 'quake', 'cyclone', 'landslide', 'heat', 'cold', 'haze'];
     const highs = main.filter((k) => lvOf(k) === 'High').map((k) => HAZ[k].short), meds = main.filter((k) => lvOf(k) === 'Medium').map((k) => HAZ[k].short);
     const primary = rpHzs[0]; const prow = primary ? rpRows(reg, primary).find((r) => r.rp === 100) : null;
     const nowM = new Date().getMonth() + 1; const inSeason = Object.entries(reg.season || {}).filter(([k, v]) => v.months.includes(nowM)).map(([k]) => HAZ[k] ? HAZ[k].short : k);
