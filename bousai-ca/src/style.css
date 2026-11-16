@@ -773,3 +773,7 @@ html[data-persona="staff"] .admin-only{display:none!important}
 .sim-active.muted-note{background:var(--deep);border-color:var(--line)}
 .sim-active .ic{color:var(--accent)}
 .sim-active .btn{margin-left:6px;vertical-align:middle}
+/* Header fit: labels only on wide screens; compact switches below 1400px */
+@media (max-width:1520px){.ctx-l{display:none}}
+@media (max-width:1400px){.seg.ctx button{padding:5px 9px;font-size:12.5px}.nav a{padding:7px 9px;font-size:13px}.top-in{gap:12px}}
+@media (max-width:1180px){.seg.ctx button{padding:5px 8px;font-size:12px}}
