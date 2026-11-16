@@ -29,6 +29,8 @@
   });
   /* Scenario forcing series: anchor the diurnal temperature cycle to the scenario's local start hour */
   M.scenarios().forEach((sc) => { const mm = /T(\d{2}):(\d{2})/.exec(sc.t0_iso || ''); const h0 = mm ? (+mm[1] + (+mm[2]) / 60) : 0; (sc.forcing || []).forEach((f) => { f.t0_hour = h0; }); });
+  /* Context banner: dismissible, remembered on this device */
+  const banner = $('#ctxBanner'); if (banner) { if (Store.get('ctxBannerSeen')) banner.hidden = true; $('#ctxBannerClose').onclick = () => { banner.hidden = true; Store.set('ctxBannerSeen', 1); }; }
   route();
   /* First-run hint */
   if (!Store.get('seen2')) { Store.set('seen2', 1); setTimeout(() => toast('All values are demo data. Use the switches at the top right to change Company/Government and Manager/Staff views'), 600); }

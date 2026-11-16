@@ -74,13 +74,14 @@
       <a href="#me" data-view="me"><span class="n">4</span>My dashboard</a>
     </nav>
     <div class="top-r">
-      <div class="seg ctx" role="group" aria-label="Organization type" id="orgSeg"><button data-org="corp" aria-pressed="true">Company</button><button data-org="gov" aria-pressed="false">Government</button></div>
-      <div class="seg ctx" role="group" aria-label="Viewer" id="personaSeg"><button data-persona="admin" aria-pressed="true">Manager</button><button data-persona="staff" aria-pressed="false">Staff</button></div>
-      <span class="demo" title="All figures are demo data or public information with sources">DEMO</span>
+      <div class="ctx-grp"><span class="ctx-l">Organization</span><div class="seg ctx" role="group" aria-label="Organization type" id="orgSeg"><button data-org="corp" aria-pressed="true">Company</button><button data-org="gov" aria-pressed="false">Government</button></div>
+      </div><div class="ctx-grp"><span class="ctx-l">Role</span><div class="seg ctx" role="group" aria-label="Viewer" id="personaSeg"><button data-persona="admin" aria-pressed="true">Manager</button><button data-persona="staff" aria-pressed="false">Staff</button></div>
+      </div><span class="demo" title="All figures are demo data or public information with sources">DEMO</span>
       <button class="icon-btn" id="themeBtn" aria-label="Switch display theme" title="Theme"><svg class="ic"><use href="#i-sun"/></svg></button>
     </div>
   </div>
   <nav class="nav-m" aria-label="View switcher (mobile)" id="navM"></nav>
+  <div class="ctx-banner" id="ctxBanner" role="note"><svg class="ic"><use href="#i-info"/></svg><span><b>Demo switches.</b> The Organization (Company / Government) and Role (Manager / Staff) switches simulate who is signed in. In production the screens and panels are selected automatically from the user's profile (organization type, role, site and district from single sign-on); users do not choose them by hand.</span><button class="btn sm" id="ctxBannerClose" aria-label="Dismiss">Got it</button></div>
 </header>
 
 <main id="main" tabindex="-1" style="outline:none">
@@ -101,6 +102,7 @@
       <span>Map: Natural Earth (public domain)</span>
       <span>Seismic loss: GEM Foundation Country Seismic Risk Profiles v2026 (CC BY-NC-SA 4.0, non-commercial)</span>
       <span>Hazard levels: ThinkHazard! (GFDRR)</span>
+      <span>Access: in production, screens and panels are selected automatically from the signed-in user's organization, role, site and district; the Organization / Role switches are a demo substitute.</span>
     </div>
   </div>
 </footer>
